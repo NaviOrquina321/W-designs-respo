@@ -3,79 +3,381 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>COUPLE - Bespoke Engagement Rings</title>
+  <title>Branch - Modern Office Furniture & Design Services</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Main Container -->
-  <div class="page-wrapper">
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <span class="brand-logo-text">Branch</span>
+    </div>
+    <nav class="nav-links">
+      <a href="#" class="nav-link">OFFICE FURNITURE</a>
+      <a href="#" class="nav-link">DESIGN SERVICES</a>
+      <a href="#" class="nav-link">FREE INSTALLATION</a>
+    </nav>
+    <div class="nav-cta-wrapper">
+      <a href="#" class="btn btn-dark">Build My Office</a>
+    </div>
+  </header>
 
-    <!-- Navigation Header -->
-    <header class="navbar">
-      <nav class="nav-left">
-        <a href="#" class="nav-link">ENGAGEMENT</a>
-        <a href="#" class="nav-link">BANDS</a>
-        <a href="#" class="nav-link">LEARN</a>
-      </nav>
-
-      <div class="nav-brand">
-        <div class="sunburst-logo">
-          <svg width="28" height="18" viewBox="0 0 28 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="14" y1="0" x2="14" y2="5" stroke="#101835" stroke-width="1.3" stroke-linecap="round"/>
-            <line x1="8" y1="2.5" x2="10.5" y2="6" stroke="#101835" stroke-width="1.3" stroke-linecap="round"/>
-            <line x1="20" y1="2.5" x2="17.5" y2="6" stroke="#101835" stroke-width="1.3" stroke-linecap="round"/>
-            <line x1="3" y1="7.5" x2="7" y2="9" stroke="#101835" stroke-width="1.3" stroke-linecap="round"/>
-            <line x1="25" y1="7.5" x2="21" y2="9" stroke="#101835" stroke-width="1.3" stroke-linecap="round"/>
+  <main>
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-container">
+        <div class="hero-left">
+          <h1 class="hero-title">Office Furniture<br>Made Easy</h1>
+          <ul class="hero-checklist">
+            <li>
+              <span class="check-icon">✓</span>
+              <span>Exceptional desks, chairs, tables and more</span>
+            </li>
+            <li>
+              <span class="check-icon">✓</span>
+              <span>Get furnished in 5-15 business days</span>
+            </li>
+            <li>
+              <span class="check-icon">✓</span>
+              <span>Free shipping and installation</span>
+            </li>
+          </ul>
+          <a href="#" class="btn btn-dark btn-hero">Build My Office</a>
+        </div>
+        <div class="hero-right">
+          <img src="assets/hero-desk.png" alt="Branch Office Desks and Furniture" class="hero-image">
+        </div>
+      </div>
+      <div class="scroll-arrow-container">
+        <div class="scroll-arrow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
           </svg>
         </div>
-        <span class="brand-title">COUPLE</span>
+      </div>
+    </section>
+
+    <!-- The Branch Difference Section -->
+    <section class="difference-section">
+      <h2 class="section-title text-center">The Branch Difference</h2>
+      <div class="difference-grid">
+        <div class="difference-card">
+          <div class="icon-wrapper">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+              <!-- Desk with Chair icon -->
+              <rect x="2" y="10" width="20" height="2" rx="1" />
+              <path d="M4 12v8M20 12v8M8 12v-4a4 4 0 0 1 8 0v4" />
+              <line x1="6" y1="18" x2="18" y2="18" />
+            </svg>
+          </div>
+          <h3>Contract-Grade<br>Office Furniture</h3>
+          <p>Branch makes desks, chairs, tables and more that inspire and support your team.</p>
+        </div>
+
+        <div class="difference-card">
+          <div class="icon-wrapper">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+              <!-- Design floorplan icon -->
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M3 9h18M9 21V9M15 21V15" />
+            </svg>
+          </div>
+          <h3>Fast Design And<br>Furnishing</h3>
+          <p>Visualize your office with a free plan in 72 hours. Get furnished in 5-15 days.</p>
+        </div>
+
+        <div class="difference-card">
+          <div class="icon-wrapper">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+              <!-- Delivery truck icon -->
+              <rect x="1" y="5" width="15" height="10" rx="1" />
+              <path d="M16 8h4l3 3v4h-7V8z" />
+              <circle cx="5.5" cy="17.5" r="2.5" />
+              <circle cx="18.5" cy="17.5" r="2.5" />
+            </svg>
+          </div>
+          <h3>Free Shipping And<br>Installation</h3>
+          <p>Build your business, not furniture. Design, delivery, and installation are free.</p>
+        </div>
+
+        <div class="difference-card">
+          <div class="icon-wrapper">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+              <!-- Savings money bag icon -->
+              <path d="M12 2v4M8 6h8M6 9h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z" />
+              <path d="M12 12v4M10 14h4" />
+            </svg>
+          </div>
+          <h3>Buy Direct And Save<br>40%+</h3>
+          <p>We sell direct to save you 40% vs. comparable contract lines. No hidden fees.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured In Press Bar -->
+    <section class="press-section">
+      <span class="press-label">FEATURED IN</span>
+      <div class="press-logos">
+        <span class="press-logo logo-fortune">FORTUNE</span>
+        <span class="press-logo logo-axios">AXIOS</span>
+        <span class="press-logo logo-ftoday">FurnitureToday</span>
+        <span class="press-logo logo-forbes">Forbes</span>
+        <span class="press-logo logo-ph">
+          <span class="ph-circle">P</span> Product Hunt
+        </span>
+        <span class="press-logo logo-aw"><span class="aw-bold">AN</span> AlleyWatch</span>
+      </div>
+    </section>
+
+    <!-- Elevate Your Office Header -->
+    <section class="elevate-header-section">
+      <h2 class="section-title text-center">Elevate Your Office</h2>
+      <p class="section-subtitle text-center">Whether you're a team of three or three hundred, invest in productivity and wellness with premium office furniture at a not-so-premium price.</p>
+    </section>
+
+    <!-- Category Showcase Cards -->
+    <section class="categories-section">
+      <!-- 1. Workstation -->
+      <div class="category-card category-workstation">
+        <div class="category-image-col">
+          <img src="assets/workstation.png" alt="Branch Workstation" class="category-img">
+        </div>
+        <div class="category-text-col">
+          <h3 class="category-title">Workstation</h3>
+          <p class="category-price">from $269</p>
+          <p class="category-desc">From ergonomic chairs to beautiful desks, Branch workstations keep your team working healthy and happy.</p>
+          <a href="#" class="btn btn-dark">Explore Workstation</a>
+        </div>
       </div>
 
-      <nav class="nav-right">
-        <a href="#" class="nav-link">SUPPORT</a>
-        <a href="#" class="nav-link">SIGN IN</a>
-        <a href="#" class="cart-icon" aria-label="Shopping Cart">
-          <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 6V4.5C4 2.567 5.567 1 7.5 1H10.5C12.433 1 14 2.567 14 4.5V6" stroke="#101835" stroke-width="1.5"/>
-            <path d="M1.5 6H16.5L15.5 18.5H2.5L1.5 6Z" stroke="#101835" stroke-width="1.5" stroke-linejoin="round"/>
-          </svg>
-        </a>
-      </nav>
-    </header>
-
-    <!-- Hero Content Area -->
-    <main class="hero-section">
-      <div class="hero-left">
-        <h1 class="hero-headline">The Joy of a<br>Shared Life</h1>
-        <p class="hero-subtext">Introducing a collection of bespoke<br>rings that live up to the moment.</p>
-        <a href="#" class="cta-button">SHOP ENGAGEMENT</a>
+      <!-- 2. Conference -->
+      <div class="category-card category-conference">
+        <div class="category-text-col">
+          <h3 class="category-title text-white">Conference</h3>
+          <p class="category-price text-cream">from $795</p>
+          <p class="category-desc text-cream">Collaborate in style with Branch conference tables and chairs. Trusted by startups, co-working spaces, and major enterprises.</p>
+          <a href="#" class="btn btn-light-cream">Explore Conference</a>
+        </div>
+        <div class="category-image-col">
+          <img src="assets/conference.png" alt="Branch Conference Room" class="category-img">
+        </div>
       </div>
 
-      <div class="hero-right">
-        <img src="assets/woman-clean.png" alt="Joyful woman holding yellow bouquet" class="hero-image">
+      <!-- 3. Lounge -->
+      <div class="category-card category-lounge">
+        <div class="category-image-col">
+          <img src="assets/lounge.png" alt="Branch Lounge Area" class="category-img">
+        </div>
+        <div class="category-text-col">
+          <h3 class="category-title">Lounge</h3>
+          <p class="category-price">from $189</p>
+          <p class="category-desc">From bistro tables to casual seating, furnish inspiring collaboration and breakout spaces with our line of lounge furniture.</p>
+          <a href="#" class="btn btn-dark">Design My Office</a>
+        </div>
       </div>
-    </main>
+    </section>
 
-    <!-- Angled White Table Bottom Bar -->
-    <div class="bottom-shelf">
-      <div class="arrow-container">
-        <svg width="12" height="36" viewBox="0 0 12 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <line x1="6" y1="0" x2="6" y2="32" stroke="#101835" stroke-width="1"/>
-          <path d="M2 28L6 32L10 28" stroke="#101835" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- How We Compare Section -->
+    <section class="compare-section">
+      <h2 class="section-title text-center">How We Compare</h2>
+      <p class="section-subtitle text-center">Most premium office furniture is sold through dealers. Branch sells our furniture direct to save you money without sacrificing quality or service.</p>
+
+      <div class="compare-table-wrapper">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th class="feature-col"></th>
+              <th class="brand-col branch-header">Branch</th>
+              <th class="competitor-col">High-End Dealer</th>
+              <th class="competitor-col">Fast Furniture</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="feature-name">Modern, contract-grade furniture</td>
+              <td class="branch-cell">✓</td>
+              <td>✓</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="feature-name">Transparent prices, browse online</td>
+              <td class="branch-cell">✓</td>
+              <td></td>
+              <td>✓</td>
+            </tr>
+            <tr>
+              <td class="feature-name">Sell direct to deliver savings and speed</td>
+              <td class="branch-cell">✓</td>
+              <td></td>
+              <td>✓</td>
+            </tr>
+            <tr>
+              <td class="feature-name">Design, delivery and installation included</td>
+              <td class="branch-cell">✓</td>
+              <td>✓</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="feature-name">Trade in used furniture for credit</td>
+              <td class="branch-cell">✓</td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Customer Reviews Section -->
+    <section class="reviews-section">
+      <h2 class="section-title text-center">Join 200+ Teams That Love Branch</h2>
+      <p class="section-subtitle text-center">Top reasons why clients love us: amazing furniture, all-in-one service, and unbeatable prices.</p>
+
+      <div class="reviews-grid">
+        <div class="review-card">
+          <div class="star-rating">★★★★★</div>
+          <p class="review-text">"My brokers love seeing Branch so much we used it for our own office."</p>
+          <p class="reviewer-name">Jonathan Wasserstrum</p>
+          <p class="reviewer-title">CEO, Squarefoot</p>
+        </div>
+
+        <div class="review-card">
+          <div class="star-rating">★★★★★</div>
+          <p class="review-text">"The team loves our ergonomic chairs. Genuinely so comfortable."</p>
+          <p class="reviewer-name">Jason Rappaport</p>
+          <p class="reviewer-title">Chief of Staff, Universal Standard</p>
+        </div>
+
+        <div class="review-card">
+          <div class="star-rating">★★★★★</div>
+          <p class="review-text">"Furnishing a 17K square foot office is complicated. Branch did it all."</p>
+          <p class="reviewer-name">Jeff Cripe</p>
+          <p class="reviewer-title">CEO, Cargo</p>
+        </div>
+
+        <div class="review-card">
+          <div class="star-rating">★★★★★</div>
+          <p class="review-text">"Branch crushed a tricky installation in the Freedom Tower. Didn't lift a finger."</p>
+          <p class="reviewer-name">Jovanna Feliz</p>
+          <p class="reviewer-title">Operations, Hive</p>
+        </div>
+
+        <div class="review-card">
+          <div class="star-rating">★★★★★</div>
+          <p class="review-text">"Ordered Branch workstations 4x: twice for our NYC HQ, and twice for LA office."</p>
+          <p class="reviewer-name">Ali Nicolas</p>
+          <p class="reviewer-title">COO, Overtime</p>
+        </div>
+
+        <div class="review-card">
+          <div class="star-rating">★★★★★</div>
+          <p class="review-text">"Amazed you can get quality and service like Branch for such a low price."</p>
+          <p class="reviewer-name">Jenny Hahn</p>
+          <p class="reviewer-title">Director of Real Estate, Breather</p>
+        </div>
+      </div>
+
+      <div class="reviews-cta-wrapper">
+        <a href="#" class="btn btn-outline">Build My Office</a>
+      </div>
+    </section>
+
+    <!-- Meet Your Branch Expert Section -->
+    <section class="expert-section">
+      <div class="expert-card">
+        <div class="expert-image-container">
+          <img src="assets/expert-lisa.png" alt="Lisa R. - Branch Expert" class="expert-img">
+          <div class="expert-label-tag">
+            <strong>Lisa R.</strong><br>
+            <span>Branch Expert</span>
+          </div>
+        </div>
+        <div class="expert-content">
+          <h2 class="expert-title">Meet Your Branch<br>Expert</h2>
+          <p class="expert-desc">Book a free consultation with a Branch Expert, who can design your space, plan for common issues, and qualify you for bulk discounts.</p>
+          <a href="#" class="btn btn-dark">Get Started</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trusted By Teams Logo Bar -->
+    <section class="teams-bar-section">
+      <span class="teams-bar-title">TRUSTED BY TEAMS OF ALL SIZES</span>
+      <div class="teams-logos">
+        <span class="team-logo">tumblr.</span>
+        <span class="team-logo logo-cargo font-caps">CARGO</span>
+        <span class="team-logo logo-breather">breather</span>
+        <span class="team-logo logo-overtime font-caps">OVERTIME</span>
+        <span class="team-logo logo-eventures">eventures</span>
+        <span class="team-logo logo-squarefoot font-caps">SQUAREFOOT</span>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+      <h2 class="section-title text-center">Your Top 5 Questions, Answered</h2>
+
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-question">1. What's the story behind Branch?</div>
+          <div class="faq-answer">Branch is an office furniture startup based in New York City. Founded in 2018, we've helped hundreds of teams in the United States and Canada furnish offices they love.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">2. Where does Branch operate?</div>
+          <div class="faq-answer">We deliver and install our office furniture across the continental United States and Ontario, Canada.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">3. When should I start furnishing my office?</div>
+          <div class="faq-answer">We recommend creating a furniture plan at least a month before you're moving into a new space. But if you're in a hurry, Branch can help you furnish in as little as a week.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">4. What services does Branch include?</div>
+          <div class="faq-answer">When you work with Branch, we handle it all, from figuring out your furniture layout to negotiating with your landlord about fun stuff like freight elevators and insurance. For orders above $1,000, delivery and installation always free.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">5. What's your return policy?</div>
+          <div class="faq-answer">So long as it's undamaged, return your furniture any time within 30 days of your delivery.</div>
+        </div>
+      </div>
+
+      <div class="faq-cta-wrapper text-center">
+        <a href="#" class="btn btn-dark">Build My Office</a>
+      </div>
+    </section>
+
+    <!-- Footer Banner Section -->
+    <footer class="footer-banner">
+      <div class="footer-icon-wrapper">
+        <svg width="60" height="48" viewBox="0 0 64 48" fill="none" stroke="#2b4236" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Desk line -->
+          <line x1="8" y1="32" x2="56" y2="32" />
+          <line x1="12" y1="32" x2="12" y2="44" />
+          <line x1="52" y1="32" x2="52" y2="44" />
+          <!-- Computer/Monitor -->
+          <rect x="22" y="14" width="20" height="14" rx="2" />
+          <line x1="32" y1="28" x2="32" y2="32" />
+          <line x1="26" y1="32" x2="38" y2="32" />
+          <!-- Chair back & seat -->
+          <path d="M16 12v12a2 2 0 0 0 2 2h4" />
+          <!-- Plant on desk -->
+          <path d="M46 26a4 4 0 0 0 4-4" />
+          <path d="M46 26a4 4 0 0 1-4-4" />
+          <line x1="46" y1="26" x2="46" y2="32" />
         </svg>
       </div>
-    </div>
+      <h2 class="footer-title">Ready to furnish your office?</h2>
+      <a href="#" class="btn btn-outline footer-btn">Get Started</a>
+    </footer>
 
-    <!-- Floating Chat Widget -->
-    <div class="chat-widget">
-      <span>Chat with us.</span>
-    </div>
-
-  </div>
+  </main>
 
 </body>
 </html>
