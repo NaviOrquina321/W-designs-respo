@@ -266,13 +266,6 @@ section .wrap { padding-top: 88px; padding-bottom: 88px; }
 .section-head h2 { font-size: 2rem; margin-bottom: 14px; }
 .section-head p { color: var(--ink-soft); font-size: 1.05rem; }
 
-/* Landing AI Matching Widget */
-.landing-ai-widget-card {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  padding: 28px;
-  border-radius: 4px;
-}
 
 /* Hero */
 .hero .wrap { padding-top: 96px; padding-bottom: 96px; }

@@ -189,7 +189,6 @@ const state = {
 // DOM Content Loaded Handler
 document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
-  initLandingAiForm();
   initAuthModalTabs();
   initModals();
   initAIMatching();
@@ -259,21 +258,6 @@ function initNavigation() {
   });
 }
 
-// Landing Page AI Form
-function initLandingAiForm() {
-  const form = document.getElementById('landing-ai-form');
-  form?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (state.currentRole !== 'student') {
-      openModal('modal-auth');
-      switchAuthTab('login');
-      document.getElementById('auth-role').value = 'student';
-      showToast('Please sign in as a Student to run AI Tutor Matching.');
-    } else {
-      openModal('modal-ai-matching');
-    }
-  });
-}
 
 // Role Switcher Logic
 function switchRole(role, customUser = null) {
