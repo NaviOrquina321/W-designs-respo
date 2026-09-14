@@ -3,79 +3,838 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>COUPLE - Bespoke Engagement Rings</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>TutorLink — An Intelligent Tutor-Student Matching System</title>
+  <meta name="description" content="TutorLink matches students with tutors suited to their learning needs, and handles scheduling, notifications, and payment in one place.">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Main Container -->
-  <div class="page-wrapper">
+  <!-- Top Navigation Header -->
+  <header>
+    <nav class="wrap">
+      <div class="logo" id="nav-logo" style="cursor: pointer;">TutorLink</div>
 
-    <!-- Navigation Header -->
-    <header class="navbar">
-      <nav class="nav-left">
-        <a href="#" class="nav-link">ENGAGEMENT</a>
-        <a href="#" class="nav-link">BANDS</a>
-        <a href="#" class="nav-link">LEARN</a>
-      </nav>
+      <div class="nav-links" id="public-nav-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#who-its-for">Who It's For</a>
+        <a href="#why">Why TutorLink</a>
+      </div>
 
-      <div class="nav-brand">
-        <div class="sunburst-logo">
-          <svg width="28" height="18" viewBox="0 0 28 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="14" y1="0" x2="14" y2="5" stroke="#101835" stroke-width="1.3" stroke-linecap="round"/>
-            <line x1="8" y1="2.5" x2="10.5" y2="6" stroke="#101835" stroke-width="1.3" stroke-linecap="round"/>
-            <line x1="20" y1="2.5" x2="17.5" y2="6" stroke="#101835" stroke-width="1.3" stroke-linecap="round"/>
-            <line x1="3" y1="7.5" x2="7" y2="9" stroke="#101835" stroke-width="1.3" stroke-linecap="round"/>
-            <line x1="25" y1="7.5" x2="21" y2="9" stroke="#101835" stroke-width="1.3" stroke-linecap="round"/>
-          </svg>
+      <div class="role-switcher-container" id="role-switcher-container" style="display: flex; align-items: center; gap: 8px;">
+        <span class="role-label">Mode:</span>
+        <select id="role-select" class="role-select">
+          <option value="guest">Guest / Visitor</option>
+          <option value="student">Student (Maria Santos)</option>
+          <option value="tutor">Tutor (Prof. Alex Rivera)</option>
+          <option value="admin">Admin (System Admin)</option>
+        </select>
+      </div>
+
+      <div class="nav-actions">
+        <!-- Notification Bell -->
+        <button class="icon-btn" id="notif-bell-btn" title="Notifications" aria-label="Notifications">
+          🔔
+          <span class="notif-badge" id="notif-badge-count">2</span>
+        </button>
+
+        <a class="link" href="#" id="login-link-btn">Log In</a>
+        <button class="btn btn-primary btn-small" id="signup-btn">Sign Up</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Notification Drawer Sidebar -->
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+  <aside class="drawer" id="notif-drawer">
+    <div class="drawer-header">
+      <h3>Notifications</h3>
+      <button class="close-btn" id="close-notif-drawer">&times;</button>
+    </div>
+    <div class="drawer-body" id="notif-list">
+      <!-- Notification items generated dynamically -->
+    </div>
+    <div class="drawer-footer">
+      <button class="btn btn-secondary btn-small" id="mark-all-read-btn">Mark all as read</button>
+    </div>
+  </aside>
+
+  <!-- MAIN APP CONTAINER FOR VIEWS -->
+  <main id="app-main">
+
+    <!-- 1. LANDING PAGE VIEW -->
+    <div id="view-landing" class="app-view active">
+      <section class="hero">
+        <div class="wrap">
+          <h1>Find a tutor who actually fits how you learn</h1>
+          <p class="lead">TutorLink matches you with a tutor suited to your needs, handles scheduling and payment, and keeps you updated at every step — all in one place.</p>
+          <div class="actions">
+            <button class="btn btn-primary" id="hero-find-tutor-btn">Find a Tutor</button>
+            <button class="btn btn-secondary" id="hero-become-tutor-btn">Become a Tutor</button>
+          </div>
         </div>
-        <span class="brand-title">COUPLE</span>
-      </div>
+      </section>
 
-      <nav class="nav-right">
-        <a href="#" class="nav-link">SUPPORT</a>
-        <a href="#" class="nav-link">SIGN IN</a>
-        <a href="#" class="cart-icon" aria-label="Shopping Cart">
-          <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 6V4.5C4 2.567 5.567 1 7.5 1H10.5C12.433 1 14 2.567 14 4.5V6" stroke="#101835" stroke-width="1.5"/>
-            <path d="M1.5 6H16.5L15.5 18.5H2.5L1.5 6Z" stroke="#101835" stroke-width="1.5" stroke-linejoin="round"/>
-          </svg>
-        </a>
-      </nav>
-    </header>
+      <section class="problems">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Tutoring shouldn't be this hard</h2>
+            <p>Between searching, scheduling, and paying, finding the right help can take longer than the tutoring itself.</p>
+          </div>
 
-    <!-- Hero Content Area -->
-    <main class="hero-section">
-      <div class="hero-left">
-        <h1 class="hero-headline">The Joy of a<br>Shared Life</h1>
-        <p class="hero-subtext">Introducing a collection of bespoke<br>rings that live up to the moment.</p>
-        <a href="#" class="cta-button">SHOP ENGAGEMENT</a>
-      </div>
+          <div class="problem-item">
+            <h3>Finding the right tutor takes forever</h3>
+            <p>Scrolling through profiles with no real way to know who's actually a good fit.</p>
+          </div>
+          <div class="problem-item">
+            <h3>Sessions fall through</h3>
+            <p>Schedules don't line up, and conflicts aren't caught until it's too late.</p>
+          </div>
+          <div class="problem-item">
+            <h3>Payments are slow to confirm</h3>
+            <p>A simple transaction ends up feeling uncertain while you wait.</p>
+          </div>
+          <div class="problem-item">
+            <h3>Updates arrive late, if at all</h3>
+            <p>A missed message about a session can mean a missed session.</p>
+          </div>
+          <div class="problem-item">
+            <h3>Tracking activity is a mess</h3>
+            <p>Without one system, keeping a clear record of who's tutoring whom falls entirely on the admin.</p>
+          </div>
+        </div>
+      </section>
 
-      <div class="hero-right">
-        <img src="assets/woman-clean.png" alt="Joyful woman holding yellow bouquet" class="hero-image">
-      </div>
-    </main>
+      <section class="features" id="features">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Everything handled in one place</h2>
+            <p>Five features cover the full process, from finding a tutor to finishing a session.</p>
+          </div>
+          <div class="feature-grid">
+            <div class="feature-card">
+              <h3>AI Tutor Matching</h3>
+              <p>Tell us your subject and how you learn best. We match you with tutors suited to your needs, not just a list to scroll through.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Calendar Scheduling</h3>
+              <p>See real tutor availability and book a time that works, without the back-and-forth messages.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Real-Time Notifications</h3>
+              <p>Know the moment a session is confirmed, rescheduled, or about to start.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Online Payment</h3>
+              <p>Pay securely through GCash as soon as a session is booked. No chasing receipts.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Matching Session</h3>
+              <p>Once you're matched, connect with your tutor directly and get started.</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-    <!-- Angled White Table Bottom Bar -->
-    <div class="bottom-shelf">
-      <div class="arrow-container">
-        <svg width="12" height="36" viewBox="0 0 12 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <line x1="6" y1="0" x2="6" y2="32" stroke="#101835" stroke-width="1"/>
-          <path d="M2 28L6 32L10 28" stroke="#101835" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+      <section class="how-it-works" id="how-it-works">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Getting started takes five steps</h2>
+            <p>From sign-up to your first session.</p>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <span class="num">1</span>
+              <div><h3>Tell us what you need help with</h3><p>Sign up and share your subject and learning needs.</p></div>
+            </div>
+            <div class="step">
+              <span class="num">2</span>
+              <div><h3>Get matched</h3><p>We pair you with a tutor suited to your learning style.</p></div>
+            </div>
+            <div class="step">
+              <span class="num">3</span>
+              <div><h3>Book a session</h3><p>Pick a time from your tutor's real availability.</p></div>
+            </div>
+            <div class="step">
+              <span class="num">4</span>
+              <div><h3>Pay securely</h3><p>Confirm your session with GCash payment.</p></div>
+            </div>
+            <div class="step">
+              <span class="num">5</span>
+              <div><h3>Start learning</h3><p>Meet your tutor and begin your session.</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="who-its-for" id="who-its-for">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Built for everyone in the process</h2>
+            <p>Students, tutors, and administrators each get what they need from the same system.</p>
+          </div>
+          <div class="audience-grid">
+            <div class="audience-card">
+              <h3>Students</h3>
+              <p>Find a tutor who matches how you learn, book sessions, and pay — all from one dashboard.</p>
+            </div>
+            <div class="audience-card">
+              <h3>Tutors</h3>
+              <p>Set your availability, get matched with students, and get paid on time for every session.</p>
+            </div>
+            <div class="audience-card">
+              <h3>Admins</h3>
+              <p>Monitor tutoring activity, keep records organized, and generate reports when you need them.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="why" id="why">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Why TutorLink</h2>
+            <p>What sets it apart from arranging tutoring manually.</p>
+          </div>
+          <ul class="why-list">
+            <li>Easier tutor matching, powered by AI</li>
+            <li>Organized scheduling with no conflicts</li>
+            <li>Secure online payment through GCash</li>
+            <li>Real-time updates on every session</li>
+            <li>Centralized records for students, tutors, and admins</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="cta-final">
+        <div class="wrap">
+          <h2>Ready to find your tutor?</h2>
+          <p>Sign up and get matched in minutes.</p>
+          <div class="actions">
+            <button class="btn btn-primary" id="cta-find-tutor-btn">Find a Tutor</button>
+            <button class="btn btn-secondary" id="cta-become-tutor-btn">Become a Tutor</button>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div class="wrap">
+          <div class="footer-row">
+            <div>
+              <div class="logo">TutorLink</div>
+              <p class="tagline">An Intelligent Tutor-Student Matching System</p>
+            </div>
+            <div class="foot-links">
+              <a href="#features">Features</a>
+              <a href="#how-it-works">How It Works</a>
+              <a href="#who-its-for">Who It's For</a>
+              <a href="#">Contact</a>
+            </div>
+          </div>
+          <p class="copyright">© 2026 TutorLink</p>
+        </div>
+      </footer>
+    </div>
+
+
+    <!-- 2. STUDENT DASHBOARD VIEW -->
+    <div id="view-student" class="app-view">
+      <div class="dashboard-container wrap">
+        <div class="dashboard-header">
+          <div>
+            <h2>Welcome back, Maria! 👋</h2>
+            <p class="sub-text">Find your AI-matched tutor, manage bookings, and join active sessions.</p>
+          </div>
+          <button class="btn btn-primary" id="start-ai-match-btn">⚡ Start AI Tutor Matching</button>
+        </div>
+
+        <!-- Quick Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-num" id="student-stat-upcoming">1</span>
+            <span class="stat-label">Upcoming Sessions</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="student-stat-completed">3</span>
+            <span class="stat-label">Completed Sessions</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">₱1,400</span>
+            <span class="stat-label">Total Spent (GCash)</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">4.9 ★</span>
+            <span class="stat-label">Learning Progress Rating</span>
+          </div>
+        </div>
+
+        <!-- Section: Active & Upcoming Sessions -->
+        <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>📅 Upcoming & Active Sessions</h3>
+          </div>
+          <div id="student-upcoming-sessions-list" class="cards-list">
+            <!-- Dynamic session items -->
+          </div>
+        </div>
+
+        <!-- Section: Available Tutors Directory -->
+        <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>🎓 Browse & Book Featured Tutors</h3>
+            <div class="filter-group">
+              <input type="text" id="tutor-search-input" placeholder="Search subject or tutor name..." class="input-search">
+            </div>
+          </div>
+          <div id="tutors-directory-grid" class="tutor-grid">
+            <!-- Dynamic tutor cards -->
+          </div>
+        </div>
+
+        <!-- Section: Past Session History & Receipts -->
+        <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>📜 Session History & Payment Receipts</h3>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Tutor</th>
+                <th>Subject</th>
+                <th>Fee</th>
+                <th>GCash Ref #</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="student-history-table-body">
+              <!-- Dynamic rows -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- Floating Chat Widget -->
-    <div class="chat-widget">
-      <span>Chat with us.</span>
+
+    <!-- 3. TUTOR DASHBOARD VIEW -->
+    <div id="view-tutor" class="app-view">
+      <div class="dashboard-container wrap">
+        <div class="dashboard-header">
+          <div>
+            <h2>Tutor Portal — Prof. Alex Rivera 👨‍🏫</h2>
+            <p class="sub-text">Manage your teaching schedule, accept matched students, and launch live sessions.</p>
+          </div>
+          <div class="status-toggle-card">
+            <span>Availability:</span>
+            <label class="switch">
+              <input type="checkbox" id="tutor-availability-toggle" checked>
+              <span class="slider round"></span>
+            </label>
+            <span id="availability-status-label" class="badge badge-success">Accepting New Students</span>
+          </div>
+        </div>
+
+        <!-- Quick Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-num" id="tutor-stat-earnings">₱4,500</span>
+            <span class="stat-label">Net Earnings</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="tutor-stat-students">12</span>
+            <span class="stat-label">Matched Students</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="tutor-stat-sessions">9</span>
+            <span class="stat-label">Sessions Completed</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">4.9 ★</span>
+            <span class="stat-label">Student Feedback Score</span>
+          </div>
+        </div>
+
+        <!-- Tutor Schedule & Upcoming Sessions -->
+        <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>📆 Scheduled Tutoring Sessions</h3>
+          </div>
+          <div id="tutor-upcoming-sessions-list" class="cards-list">
+            <!-- Dynamic sessions for tutor -->
+          </div>
+        </div>
+
+        <!-- Matching Profile Settings -->
+        <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>⚙️ AI Matching Profile & Subjects</h3>
+          </div>
+          <div class="profile-card-edit">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Primary Subjects</label>
+                <input type="text" id="tutor-subjects-input" value="Mathematics, Calculus, Physics" class="form-input">
+              </div>
+              <div class="form-group">
+                <label>Teaching Style Specialty</label>
+                <select id="tutor-style-select" class="form-select">
+                  <option value="Visual & Step-by-Step">Visual & Step-by-Step</option>
+                  <option value="Hands-on & Interactive">Hands-on & Interactive</option>
+                  <option value="Auditory & Conceptual">Auditory & Conceptual</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Hourly Rate (₱)</label>
+                <input type="number" id="tutor-rate-input" value="350" class="form-input">
+              </div>
+            </div>
+            <button class="btn btn-primary btn-small" id="save-tutor-profile-btn">Update Profile</button>
+          </div>
+        </div>
+      </div>
     </div>
 
+
+    <!-- 4. ADMIN DASHBOARD VIEW -->
+    <div id="view-admin" class="app-view">
+      <div class="dashboard-container wrap">
+        <div class="dashboard-header">
+          <div>
+            <h2>Admin Monitoring & System Dashboard 🛡️</h2>
+            <p class="sub-text">Monitor overall platform activities, track GCash payments, and generate compliance reports.</p>
+          </div>
+          <button class="btn btn-primary" id="generate-admin-report-btn">📄 Export System Activity Report</button>
+        </div>
+
+        <!-- Admin KPI Metrics -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-num" id="admin-stat-total-students">24</span>
+            <span class="stat-label">Total Registered Students</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="admin-stat-total-tutors">10</span>
+            <span class="stat-label">Verified Tutors</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="admin-stat-total-volume">₱12,850</span>
+            <span class="stat-label">Total Tutoring Volume</span>
+          </div>
+          <div class="stat-card highlight">
+            <span class="stat-num" id="admin-stat-platform-commission">₱1,285</span>
+            <span class="stat-label">Platform Commission (10%)</span>
+          </div>
+        </div>
+
+        <!-- Admin Central Activity Log & Monitoring Table -->
+        <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>📊 Live Tutoring Activity & Transaction Audit Log</h3>
+            <div class="filter-group">
+              <select id="admin-filter-status" class="form-select">
+                <option value="all">All Statuses</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Completed">Completed</option>
+                <option value="Pending">Pending</option>
+              </select>
+            </div>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Session ID</th>
+                <th>Student</th>
+                <th>Tutor</th>
+                <th>Subject</th>
+                <th>Date & Time</th>
+                <th>Amount (₱)</th>
+                <th>GCash Ref #</th>
+                <th>Status</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="admin-activity-table-body">
+              <!-- Dynamic activity rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Validation & Metrics Summary -->
+        <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>🎯 Startup Validation Board Progress</h3>
+          </div>
+          <div class="audience-grid">
+            <div class="audience-card">
+              <h3>Stage 1: Problem Validation</h3>
+              <p><strong>Admin Problem:</strong> Difficulty in monitoring tutoring activities (70% Validated)</p>
+              <p><strong>Student Problem:</strong> Difficulty finding the right tutor (70% Validated)</p>
+            </div>
+            <div class="audience-card">
+              <h3>Stage 2: Solution Pitch</h3>
+              <p><strong>Admin Solution:</strong> Monitoring Reports & Central Audit Log</p>
+              <p><strong>Student Solution:</strong> AI Tutor Matching Engine & GCash Integration</p>
+            </div>
+            <div class="audience-card">
+              <h3>Seed Investment Capital</h3>
+              <p><strong>Allocated:</strong> ₱50,000</p>
+              <p>Product Dev (35%), Integrations (15%), Hosting (10%), Reserve (10%)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- Modal 1: Auth Modal (Log In / Sign Up) -->
+  <div class="modal-backdrop" id="modal-auth">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="auth-modal-title">Sign In to TutorLink</h3>
+        <button class="close-btn" id="close-auth-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="auth-form">
+          <div class="form-group">
+            <label>Select Your Role</label>
+            <select id="auth-role" class="form-select">
+              <option value="student">Student</option>
+              <option value="tutor">Tutor</option>
+              <option value="admin">Administrator</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="auth-email" required placeholder="name@domain.com" class="form-input" value="student@tutorlink.ph">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="auth-password" required placeholder="••••••••" class="form-input" value="password123">
+          </div>
+          <button type="submit" class="btn btn-primary full-width">Continue</button>
+        </form>
+      </div>
+    </div>
   </div>
 
+
+  <!-- Modal 2: AI Tutor Matching Wizard -->
+  <div class="modal-backdrop" id="modal-ai-matching">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h3>🤖 AI Tutor Matching Wizard</h3>
+        <button class="close-btn" id="close-ai-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="sub-text margin-bottom">Tell us your subject and learning preferences, and our algorithm will pair you with the most compatible tutor.</p>
+
+        <form id="ai-matching-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>What subject do you need help with?</label>
+              <select id="match-subject" class="form-select" required>
+                <option value="Mathematics">Mathematics & Algebra</option>
+                <option value="Calculus">Calculus & Higher Math</option>
+                <option value="Physics">Physics & Mechanics</option>
+                <option value="English">English Literature & Essay Writing</option>
+                <option value="Programming">Computer Programming & Web Dev</option>
+                <option value="Chemistry">General Chemistry</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Academic Grade Level</label>
+              <select id="match-level" class="form-select" required>
+                <option value="High School">High School</option>
+                <option value="Senior High">Senior High School</option>
+                <option value="College">College / University</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>How do you learn best? (Learning Style)</label>
+              <select id="match-style" class="form-select" required>
+                <option value="Visual & Diagrams">Visual & Diagrams (Charts, Mind maps, Visuals)</option>
+                <option value="Hands-on Practice">Hands-on Practice (Solving exercises step-by-step)</option>
+                <option value="Step-by-Step Explanation">Step-by-Step Detailed Explanations</option>
+                <option value="Auditory & Discussion">Auditory & Interactive Discussion</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Preferred Time Slot</label>
+              <select id="match-time" class="form-select" required>
+                <option value="Morning (9:00 AM - 12:00 PM)">Morning (9:00 AM - 12:00 PM)</option>
+                <option value="Afternoon (2:00 PM - 5:00 PM)">Afternoon (2:00 PM - 5:00 PM)</option>
+                <option value="Evening (6:00 PM - 9:00 PM)">Evening (6:00 PM - 9:00 PM)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" id="cancel-ai-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="run-match-btn">✨ Generate AI Matches</button>
+          </div>
+        </form>
+
+        <!-- Container for Match Results -->
+        <div id="ai-match-results" class="match-results-container hidden">
+          <hr class="divider">
+          <h4 class="results-title">🎯 Top AI Matched Tutors for You:</h4>
+          <div id="ai-match-cards-list" class="cards-list">
+            <!-- Dynamic match cards inserted here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal 3: Calendar Scheduling Modal -->
+  <div class="modal-backdrop" id="modal-calendar">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="calendar-modal-title">📅 Book Session with Tutor</h3>
+        <button class="close-btn" id="close-calendar-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="selected-tutor-preview" class="tutor-preview-card">
+          <!-- Dynamic tutor info -->
+        </div>
+
+        <div class="form-group margin-top">
+          <label>Select Date:</label>
+          <input type="date" id="booking-date-picker" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label>Select Available Time Slot:</label>
+          <div id="time-slots-container" class="slots-grid">
+            <!-- Dynamic time slot chips -->
+          </div>
+        </div>
+
+        <div class="booking-summary-box">
+          <div class="summary-line">
+            <span>Hourly Tutoring Fee:</span>
+            <strong id="summary-hourly-fee">₱350</strong>
+          </div>
+          <div class="summary-line">
+            <span>Platform Service Fee (10%):</span>
+            <strong id="summary-service-fee">₱35</strong>
+          </div>
+          <hr class="divider">
+          <div class="summary-line total">
+            <span>Total Payable:</span>
+            <strong id="summary-total-fee">₱385</strong>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="cancel-booking-btn">Cancel</button>
+          <button class="btn btn-primary" id="proceed-to-payment-btn">💳 Proceed to GCash Payment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal 4: GCash Online Payment Modal -->
+  <div class="modal-backdrop" id="modal-gcash">
+    <div class="modal-card gcash-theme">
+      <div class="gcash-banner">
+        <div class="gcash-logo">GCash</div>
+        <div class="gcash-subtext">Secure Online Payment</div>
+        <button class="close-btn white" id="close-gcash-modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Step 1: Input Mobile Number -->
+        <div id="gcash-step-1">
+          <div class="gcash-merchant-info">
+            <span>Merchant: <strong>TutorLink Inc.</strong></span>
+            <span>Amount: <strong id="gcash-modal-amount" class="highlight-text">₱385.00</strong></span>
+          </div>
+
+          <div class="form-group margin-top">
+            <label>Registered GCash Mobile Number</label>
+            <div class="phone-input-group">
+              <span class="prefix">+63</span>
+              <input type="tel" id="gcash-mobile" class="form-input" placeholder="9171234567" maxlength="10" value="9175550192">
+            </div>
+          </div>
+
+          <button class="btn btn-gcash full-width" id="gcash-step1-next-btn">Next</button>
+        </div>
+
+        <!-- Step 2: 4-Digit MPIN Verification -->
+        <div id="gcash-step-2" class="hidden">
+          <p class="center-text">Enter your 4-Digit GCash MPIN</p>
+          <div class="pin-input-group">
+            <input type="password" maxlength="1" class="pin-digit" value="1">
+            <input type="password" maxlength="1" class="pin-digit" value="2">
+            <input type="password" maxlength="1" class="pin-digit" value="3">
+            <input type="password" maxlength="1" class="pin-digit" value="4">
+          </div>
+
+          <button class="btn btn-gcash full-width margin-top" id="gcash-confirm-pay-btn">Pay ₱385.00</button>
+        </div>
+
+        <!-- Step 3: Payment Success Confirmation -->
+        <div id="gcash-step-3" class="hidden center-text">
+          <div class="success-icon">✓</div>
+          <h3>Payment Successful!</h3>
+          <p class="sub-text">Your session has been successfully booked and confirmed.</p>
+
+          <div class="receipt-box">
+            <div class="summary-line">
+              <span>GCash Ref No.:</span>
+              <strong id="gcash-receipt-ref">109283748291</strong>
+            </div>
+            <div class="summary-line">
+              <span>Date & Time:</span>
+              <span id="gcash-receipt-date">Today, 2:30 PM</span>
+            </div>
+            <div class="summary-line">
+              <span>Amount Paid:</span>
+              <strong id="gcash-receipt-amount">₱385.00</strong>
+            </div>
+          </div>
+
+          <button class="btn btn-primary full-width margin-top" id="gcash-done-btn">Back to Dashboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal 5: Matching Session Virtual Workspace -->
+  <div class="modal-backdrop" id="modal-session-workspace">
+    <div class="modal-card modal-xlarge">
+      <div class="modal-header workspace-header">
+        <div>
+          <h3 id="workspace-session-title">Live Matching Session: Mathematics</h3>
+          <p id="workspace-participants" class="sub-text">Maria Santos (Student) & Prof. Alex Rivera (Tutor)</p>
+        </div>
+        <div class="header-right-group">
+          <div class="timer-badge" id="session-timer">00:45:00</div>
+          <button class="btn btn-danger btn-small" id="end-session-btn">End Session</button>
+          <button class="close-btn" id="close-workspace-btn">&times;</button>
+        </div>
+      </div>
+
+      <div class="modal-body workspace-body">
+        <div class="workspace-grid">
+          <!-- Left Panel: Interactive Notes & Whiteboard -->
+          <div class="workspace-notes-panel">
+            <h4>📝 Shared Workspace & Notes</h4>
+            <textarea id="session-shared-notes" placeholder="Collaborative notes, formulas, or homework problems go here..."></textarea>
+            <div class="workspace-actions">
+              <button class="btn btn-secondary btn-small" id="clear-notes-btn">Clear Notes</button>
+              <button class="btn btn-secondary btn-small" id="save-notes-btn">Save Snapshot</button>
+            </div>
+          </div>
+
+          <!-- Right Panel: Live Chat Room -->
+          <div class="workspace-chat-panel">
+            <h4>💬 Session Chat</h4>
+            <div id="chat-messages-container" class="chat-messages">
+              <div class="chat-msg system">Session started. Real-time updates active.</div>
+              <div class="chat-msg tutor"><strong>Prof. Alex:</strong> Welcome Maria! Let's review problem 3 from Calculus Chapter 2.</div>
+            </div>
+            <form id="chat-form" class="chat-input-form">
+              <input type="text" id="chat-input" placeholder="Type a message..." class="form-input" autocomplete="off">
+              <button type="submit" class="btn btn-primary btn-small">Send</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal 6: Post-Session Rating & Feedback Modal -->
+  <div class="modal-backdrop" id="modal-rating">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Rate Your Tutoring Session</h3>
+        <button class="close-btn" id="close-rating-modal">&times;</button>
+      </div>
+      <div class="modal-body center-text">
+        <p>How was your session with <strong id="rating-tutor-name">Prof. Alex Rivera</strong>?</p>
+
+        <div class="star-rating" id="star-rating-group">
+          <span class="star" data-value="1">★</span>
+          <span class="star" data-value="2">★</span>
+          <span class="star" data-value="3">★</span>
+          <span class="star" data-value="4">★</span>
+          <span class="star active" data-value="5">★</span>
+        </div>
+
+        <div class="form-group margin-top">
+          <textarea id="rating-comment" placeholder="Leave a review or feedback..." class="form-input"></textarea>
+        </div>
+
+        <button class="btn btn-primary full-width" id="submit-rating-btn">Submit Feedback</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal 7: Admin Printable Report View Modal -->
+  <div class="modal-backdrop" id="modal-admin-report">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h3>📄 TutorLink System Activity & Monitoring Report</h3>
+        <button class="close-btn" id="close-report-modal">&times;</button>
+      </div>
+      <div class="modal-body" id="printable-report-content">
+        <div class="report-header">
+          <h2>TutorLink Performance Summary</h2>
+          <p>Generated on: <span id="report-generated-date">March 14, 2026</span></p>
+        </div>
+        <hr class="divider">
+
+        <div class="report-summary-boxes">
+          <div><strong>Total Sessions Handled:</strong> <span id="report-total-sessions">15</span></div>
+          <div><strong>Total Transaction Volume:</strong> <span id="report-total-volume">₱12,850</span></div>
+          <div><strong>Platform Net Revenue:</strong> <span id="report-net-revenue">₱1,285</span></div>
+        </div>
+
+        <h4>Session Audit Details</h4>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Session ID</th>
+              <th>Student</th>
+              <th>Tutor</th>
+              <th>Subject</th>
+              <th>Status</th>
+              <th>Fee</th>
+            </tr>
+          </thead>
+          <tbody id="report-table-body">
+            <!-- Dynamic report rows -->
+          </tbody>
+        </table>
+
+        <div class="modal-actions no-print margin-top">
+          <button class="btn btn-secondary" onclick="window.print()">🖨️ Print Report</button>
+          <button class="btn btn-primary" id="done-report-btn">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
