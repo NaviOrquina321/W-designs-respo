@@ -1,12 +1,19 @@
 /**
  * TutorLink — An Intelligent Tutor-Student Matching System
- * Application Logic & State Management
+ * Application Logic & State Management aligned with Functional Decomposition Diagram (FDD)
  */
 
 // Application Initial State & Mock Database
 const state = {
   currentRole: 'guest', // 'guest', 'student', 'tutor', 'admin'
   currentUser: null,
+
+  // Seed Students Database (FDD: Manage Students)
+  students: [
+    { id: 'STU-101', name: 'Maria Santos', email: 'maria@tutorlink.ph', grade: 'Senior High', validated: true },
+    { id: 'STU-102', name: 'Juan Dela Cruz', email: 'juan@tutorlink.ph', grade: 'College', validated: true },
+    { id: 'STU-103', name: 'Angela Torres', email: 'angela@tutorlink.ph', grade: 'High School', validated: false }
+  ],
 
   // Seed Tutors Database
   tutors: [
@@ -64,6 +71,27 @@ const state = {
     }
   ],
 
+  // Seed Matching Results (FDD: Manage Tutor Matching)
+  matches: [
+    { id: 'MATCH-201', studentName: 'Maria Santos', tutorName: 'Prof. Alex Rivera', subject: 'Calculus II', score: 98, status: 'Approved' },
+    { id: 'MATCH-202', studentName: 'Angela Torres', tutorName: 'Dr. Carlos Mendoza', subject: 'Physics', score: 92, status: 'Pending Review' }
+  ],
+
+  // Seed Calendar Schedules (FDD: Manage Schedule)
+  schedules: [
+    { id: 'SCH-301', tutorName: 'Prof. Alex Rivera', dateSlot: '2026-03-16 (02:00 PM)', subject: 'Calculus II', status: 'Available' },
+    { id: 'SCH-302', tutorName: 'Engr. Bea Soriano', dateSlot: '2026-03-17 (10:00 AM)', subject: 'Programming', status: 'Booked' },
+    { id: 'SCH-303', tutorName: 'Dr. Carlos Mendoza', dateSlot: '2026-03-18 (09:00 AM)', subject: 'Physics', status: 'Available' }
+  ],
+
+  // Seed Payments Database (FDD: Manage Payments)
+  payments: [
+    { id: 'PAY-401', studentName: 'Maria Santos', method: 'GCash', refNo: 'GC-9920182341', amount: 385, status: 'Confirmed' },
+    { id: 'PAY-402', studentName: 'Maria Santos', method: 'GCash', refNo: 'GC-8812039481', amount: 440, status: 'Confirmed' },
+    { id: 'PAY-403', studentName: 'Juan Dela Cruz', method: 'GCash', refNo: 'GC-7712938471', amount: 495, status: 'Confirmed' },
+    { id: 'PAY-404', studentName: 'Angela Torres', method: 'PayMaya', refNo: 'PM-5510293841', amount: 330, status: 'Pending Confirmation' }
+  ],
+
   // Seed Sessions & Bookings
   sessions: [
     {
@@ -113,10 +141,11 @@ const state = {
     }
   ],
 
-  // System Notifications
+  // System Notifications (FDD: Manage Notifications)
   notifications: [
     {
       id: 'notif-1',
+      target: 'Maria Santos',
       title: 'Session Confirmed!',
       message: 'Your Calculus II session with Prof. Alex Rivera is confirmed for March 15 at 2:00 PM.',
       time: '10 mins ago',
@@ -124,6 +153,7 @@ const state = {
     },
     {
       id: 'notif-2',
+      target: 'Maria Santos',
       title: 'GCash Payment Received',
       message: 'Payment of ₱385.00 confirmed (Ref: GC-9920182341). Receipt available in dashboard.',
       time: '12 mins ago',
@@ -131,6 +161,7 @@ const state = {
     },
     {
       id: 'notif-3',
+      target: 'All Users',
       title: 'Welcome to TutorLink',
       message: 'Explore AI Tutor Matching or browse available tutors to start your personalized learning.',
       time: '1 day ago',
@@ -147,15 +178,18 @@ const state = {
     timeSlot: null,
     hourlyRate: 0,
     serviceFee: 0,
-    total: 0
+    total: 0,
+    paymentMethod: 'GCash'
   },
 
-  activeWorkspaceSession: null
+  activeWorkspaceSession: null,
+  activeReportFilter: 'all' // 'all', 'weekly', 'monthly'
 };
 
 // DOM Content Loaded Handler
 document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
+  initAuthModalTabs();
   initModals();
   initAIMatching();
   initCalendarBooking();
@@ -163,6 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initNotifications();
   initWorkspaceSession();
   initAdminView();
+  initTutorScheduleManager();
   renderAllViews();
 });
 
@@ -180,10 +215,12 @@ function initNavigation() {
   loginBtn.addEventListener('click', (e) => {
     e.preventDefault();
     openModal('modal-auth');
+    switchAuthTab('login');
   });
 
   signupBtn.addEventListener('click', () => {
     openModal('modal-auth');
+    switchAuthTab('register');
   });
 
   logoutBtn?.addEventListener('click', () => {
@@ -193,18 +230,22 @@ function initNavigation() {
 
   document.getElementById('hero-find-tutor-btn')?.addEventListener('click', () => {
     openModal('modal-auth');
+    switchAuthTab('register');
   });
 
   document.getElementById('hero-become-tutor-btn')?.addEventListener('click', () => {
     openModal('modal-auth');
+    switchAuthTab('register');
   });
 
   document.getElementById('cta-find-tutor-btn')?.addEventListener('click', () => {
     openModal('modal-auth');
+    switchAuthTab('register');
   });
 
   document.getElementById('cta-become-tutor-btn')?.addEventListener('click', () => {
     openModal('modal-auth');
+    switchAuthTab('register');
   });
 
   document.getElementById('start-ai-match-btn')?.addEventListener('click', () => {
@@ -216,7 +257,8 @@ function initNavigation() {
   });
 }
 
-function switchRole(role) {
+// Role Switcher Logic
+function switchRole(role, customUser = null) {
   state.currentRole = role;
 
   // Hide all views
@@ -242,18 +284,88 @@ function switchRole(role) {
     if (logoutBtn) logoutBtn.classList.remove('hidden');
 
     if (role === 'student') {
-      state.currentUser = { name: 'Maria Santos', role: 'student' };
+      state.currentUser = customUser || { name: 'Maria Santos', role: 'student' };
+      document.getElementById('student-welcome-heading').textContent = `Welcome back, ${state.currentUser.name}!`;
       document.getElementById('view-student').classList.add('active');
     } else if (role === 'tutor') {
-      state.currentUser = { name: 'Prof. Alex Rivera', role: 'tutor' };
+      state.currentUser = customUser || { name: 'Prof. Alex Rivera', role: 'tutor' };
+      document.getElementById('tutor-welcome-heading').textContent = `Tutor Portal — ${state.currentUser.name}`;
       document.getElementById('view-tutor').classList.add('active');
     } else if (role === 'admin') {
-      state.currentUser = { name: 'System Admin', role: 'admin' };
+      state.currentUser = customUser || { name: 'System Admin', role: 'admin' };
       document.getElementById('view-admin').classList.add('active');
     }
   }
 
   renderAllViews();
+}
+
+// Modal Auth Tabs (Log In vs Register - FDD Branch: Register)
+function initAuthModalTabs() {
+  const tabLogin = document.getElementById('tab-btn-login');
+  const tabRegister = document.getElementById('tab-btn-register');
+
+  tabLogin?.addEventListener('click', () => switchAuthTab('login'));
+  tabRegister?.addEventListener('click', () => switchAuthTab('register'));
+
+  const registerForm = document.getElementById('register-form');
+  registerForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const role = document.getElementById('reg-role').value;
+    const fullname = document.getElementById('reg-fullname').value;
+    const email = document.getElementById('reg-email').value;
+    const specialty = document.getElementById('reg-specialty').value;
+
+    if (role === 'student') {
+      const newStudent = {
+        id: 'STU-' + Math.floor(100 + Math.random() * 900),
+        name: fullname,
+        email: email,
+        grade: specialty,
+        validated: true
+      };
+      state.students.unshift(newStudent);
+      switchRole('student', { name: fullname, role: 'student' });
+    } else {
+      const newTutor = {
+        id: 'tut-' + (state.tutors.length + 1),
+        name: fullname,
+        initials: fullname.split(' ').map(n => n[0]).join(''),
+        rating: 5.0,
+        reviewsCount: 0,
+        hourlyRate: 350,
+        subjects: [specialty],
+        learningStyles: ['Step-by-Step Explanation'],
+        bio: `${specialty} Specialist tutor. Dedicated to student growth.`,
+        availabilitySlots: ['09:00 AM', '02:00 PM', '04:00 PM'],
+        available: true
+      };
+      state.tutors.unshift(newTutor);
+      switchRole('tutor', { name: fullname, role: 'tutor' });
+    }
+
+    closeModal('modal-auth');
+    showToast(`Registration complete! Welcome to TutorLink, ${fullname}.`);
+  });
+}
+
+function switchAuthTab(type) {
+  const tabLogin = document.getElementById('tab-btn-login');
+  const tabRegister = document.getElementById('tab-btn-register');
+  const formLogin = document.getElementById('auth-form');
+  const formRegister = document.getElementById('register-form');
+
+  if (type === 'login') {
+    tabLogin?.classList.add('active');
+    tabRegister?.classList.remove('active');
+    formLogin?.classList.remove('hidden');
+    formRegister?.classList.add('hidden');
+  } else {
+    tabRegister?.classList.add('active');
+    tabLogin?.classList.remove('active');
+    formRegister?.classList.remove('hidden');
+    formLogin?.classList.add('hidden');
+  }
 }
 
 // Modal Helpers
@@ -304,7 +416,12 @@ function renderAllViews() {
   renderStudentUpcoming();
   renderStudentHistory();
   renderTutorUpcoming();
-  renderAdminActivity();
+  renderAdminStudents();
+  renderAdminMatching();
+  renderAdminSchedule();
+  renderAdminPayments();
+  renderAdminNotifications();
+  renderAdminReports();
   updateNotificationBadge();
 }
 
@@ -392,14 +509,19 @@ function renderStudentHistory() {
       </td>
     </tr>
   `).join('');
+
+  // Update total spent in student KPI
+  const totalSpent = state.sessions.reduce((sum, s) => sum + s.totalPaid, 0);
+  const spentEl = document.getElementById('student-stat-spent');
+  if (spentEl) spentEl.textContent = `₱${totalSpent}`;
 }
 
-// Render Tutor Dashboard Sessions
+// Render Tutor Dashboard Sessions & Schedule
 function renderTutorUpcoming() {
   const container = document.getElementById('tutor-upcoming-sessions-list');
   if (!container) return;
 
-  const tutorSessions = state.sessions.filter(s => s.tutorName.includes('Alex'));
+  const tutorSessions = state.sessions.filter(s => s.tutorName.includes('Alex') || (state.currentUser && s.tutorName === state.currentUser.name));
 
   container.innerHTML = tutorSessions.map(s => `
     <div class="session-card">
@@ -417,32 +539,42 @@ function renderTutorUpcoming() {
   `).join('');
 }
 
-// Render Admin Central Audit Log Table
-function renderAdminActivity() {
-  const tbody = document.getElementById('admin-activity-table-body');
-  if (!tbody) return;
+function initTutorScheduleManager() {
+  const addBtn = document.getElementById('tutor-add-schedule-btn');
+  const saveBtn = document.getElementById('tutor-save-slot-btn');
+  const cancelBtn = document.getElementById('tutor-cancel-slot-btn');
+  const formBox = document.getElementById('tutor-new-schedule-form');
 
-  const filter = document.getElementById('admin-filter-status')?.value || 'all';
+  addBtn?.addEventListener('click', () => formBox?.classList.remove('hidden'));
+  cancelBtn?.addEventListener('click', () => formBox?.classList.add('hidden'));
 
-  const list = state.sessions.filter(s => filter === 'all' || s.status === filter);
+  saveBtn?.addEventListener('click', () => {
+    const dateVal = document.getElementById('tutor-slot-date').value;
+    const timeVal = document.getElementById('tutor-slot-time').value;
+    const subjectVal = document.getElementById('tutor-slot-subject').value;
 
-  tbody.innerHTML = list.map(s => `
-    <tr>
-      <td><code>${s.id}</code></td>
-      <td>${s.studentName}</td>
-      <td>${s.tutorName}</td>
-      <td>${s.subject}</td>
-      <td>${s.date} ${s.timeSlot}</td>
-      <td>₱${s.totalPaid}</td>
-      <td><code>${s.gcashRef}</code></td>
-      <td><span class="badge ${s.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${s.status}</span></td>
-      <td><button class="btn btn-secondary btn-small" onclick="showToast('Audit Session Details for ${s.id}')">Audit</button></td>
-    </tr>
-  `).join('');
+    if (!dateVal || !timeVal || !subjectVal) {
+      alert('Please fill out all calendar slot details.');
+      return;
+    }
+
+    const newSch = {
+      id: 'SCH-' + Math.floor(100 + Math.random() * 900),
+      tutorName: state.currentUser ? state.currentUser.name : 'Prof. Alex Rivera',
+      dateSlot: `${dateVal} (${timeVal})`,
+      subject: subjectVal,
+      status: 'Available'
+    };
+
+    state.schedules.unshift(newSch);
+    formBox?.classList.add('hidden');
+    renderAdminSchedule();
+    showToast('New calendar availability slot saved!');
+  });
 }
 
 
-// AI TUTOR MATCHING FEATURE MODULE
+// AI TUTOR MATCHING FEATURE MODULE (FDD: Tutor Matching)
 function initAIMatching() {
   const form = document.getElementById('ai-matching-form');
   const resultsBox = document.getElementById('ai-match-results');
@@ -475,6 +607,17 @@ function initAIMatching() {
       return { ...tutor, matchScore: compatibility };
     }).sort((a, b) => b.matchScore - a.matchScore);
 
+    // Save Top Match to Admin Review Queue
+    const topMatch = matches[0];
+    state.matches.unshift({
+      id: 'MATCH-' + Math.floor(100 + Math.random() * 900),
+      studentName: state.currentUser ? state.currentUser.name : 'Maria Santos',
+      tutorName: topMatch.name,
+      subject: subject,
+      score: topMatch.matchScore,
+      status: 'Pending Review'
+    });
+
     // Render AI Match Cards
     resultsList.innerHTML = matches.map(t => `
       <div class="session-card" style="background: white; border: 1px solid var(--line);">
@@ -491,13 +634,14 @@ function initAIMatching() {
           </p>
         </div>
         <button class="btn btn-primary btn-small" onclick="selectMatchedTutor('${t.id}', '${subject}')">
-          Book This Tutor
+          Choose Tutor
         </button>
       </div>
     `).join('');
 
     resultsBox.classList.remove('hidden');
-    showToast('AI Tutor Matching completed!');
+    renderAdminMatching();
+    showToast('AI Tutor Matching recommendation generated!');
   });
 }
 
@@ -508,7 +652,7 @@ window.selectMatchedTutor = function(tutorId, subject) {
 };
 
 
-// CALENDAR SCHEDULING FEATURE MODULE
+// CALENDAR SCHEDULING FEATURE MODULE (FDD: Calendar Scheduling)
 function initCalendarBooking() {
   const cancelBtn = document.getElementById('cancel-booking-btn');
   const proceedBtn = document.getElementById('proceed-to-payment-btn');
@@ -555,7 +699,8 @@ window.openCalendarBooking = function(tutorId, preferredSubject = null) {
     timeSlot: null,
     hourlyRate: hourlyRate,
     serviceFee: serviceFee,
-    total: total
+    total: total,
+    paymentMethod: 'GCash'
   };
 
   // Render Tutor Preview Card in modal
@@ -591,12 +736,20 @@ window.selectTimeSlot = function(element, slot) {
 };
 
 
-// GCASH ONLINE PAYMENT INTEGRATION MODULE
+// ONLINE PAYMENT INTEGRATION MODULE (FDD: Online Payment -> Select Payment Method & View Payment Status)
 function initGCashPayment() {
   const step1Next = document.getElementById('gcash-step1-next-btn');
   const step2Pay = document.getElementById('gcash-confirm-pay-btn');
   const step3Done = document.getElementById('gcash-done-btn');
   const closeBtn = document.getElementById('close-gcash-modal');
+  const paymentMethodSelect = document.getElementById('payment-method-select');
+
+  paymentMethodSelect?.addEventListener('change', (e) => {
+    const selectedMethod = e.target.value;
+    state.activeBooking.paymentMethod = selectedMethod;
+    const headerTitle = document.getElementById('payment-method-header-title');
+    if (headerTitle) headerTitle.textContent = `${selectedMethod} Payment`;
+  });
 
   closeBtn?.addEventListener('click', () => {
     closeModal('modal-gcash');
@@ -605,7 +758,7 @@ function initGCashPayment() {
   step1Next?.addEventListener('click', () => {
     const phone = document.getElementById('gcash-mobile').value;
     if (phone.length < 10) {
-      alert('Please enter a valid 10-digit GCash mobile number.');
+      alert('Please enter a valid mobile / account number.');
       return;
     }
     document.getElementById('gcash-step-1').classList.add('hidden');
@@ -613,8 +766,9 @@ function initGCashPayment() {
   });
 
   step2Pay?.addEventListener('click', () => {
-    // Generate Random GCash Reference Number
-    const randomRef = 'GC-' + Math.floor(1000000000 + Math.random() * 9000000000);
+    // Generate Reference Number & Payment Record
+    const refPrefix = state.activeBooking.paymentMethod === 'GCash' ? 'GC-' : 'PM-';
+    const randomRef = refPrefix + Math.floor(1000000000 + Math.random() * 9000000000);
     const newSessionId = 'SESS-' + Math.floor(100 + Math.random() * 900);
 
     const b = state.activeBooking;
@@ -634,23 +788,35 @@ function initGCashPayment() {
       totalPaid: b.total,
       gcashRef: randomRef,
       status: 'Confirmed',
-      notes: 'Initial session booked via GCash.'
+      notes: `Booked via ${b.paymentMethod}.`
     };
 
     // Save to State Database
     state.sessions.unshift(newSession);
 
+    // Save to Payments Database (FDD: Manage Payments -> New Payment Records)
+    state.payments.unshift({
+      id: 'PAY-' + Math.floor(100 + Math.random() * 900),
+      studentName: studentName,
+      method: b.paymentMethod,
+      refNo: randomRef,
+      amount: b.total,
+      status: 'Confirmed'
+    });
+
     // Push System Notification
     state.notifications.unshift({
       id: 'notif-' + Date.now(),
+      target: studentName,
       title: 'Session Booked & Paid!',
-      message: `Your ${b.subject} session with ${b.tutorName} is confirmed for ${b.date} at ${b.timeSlot}. GCash Ref: ${randomRef}`,
+      message: `Your ${b.subject} session with ${b.tutorName} is confirmed for ${b.date} at ${b.timeSlot}. Ref: ${randomRef}`,
       time: 'Just now',
       read: false
     });
 
-    // Populate Receipt View
+    // Populate Receipt View (FDD: Online Payment -> View Payment Status)
     document.getElementById('gcash-receipt-ref').textContent = randomRef;
+    document.getElementById('gcash-receipt-method').textContent = b.paymentMethod;
     document.getElementById('gcash-receipt-date').textContent = `${b.date}, ${b.timeSlot}`;
     document.getElementById('gcash-receipt-amount').textContent = `₱${b.total}.00`;
 
@@ -658,7 +824,7 @@ function initGCashPayment() {
     document.getElementById('gcash-step-3').classList.remove('hidden');
 
     renderAllViews();
-    showToast('GCash payment confirmed!');
+    showToast(`${b.paymentMethod} payment confirmed! Status: Confirmed.`);
   });
 
   step3Done?.addEventListener('click', () => {
@@ -671,13 +837,15 @@ function initGCashPayment() {
 }
 
 function openGCashPayment() {
+  const method = state.activeBooking.paymentMethod || 'GCash';
+  document.getElementById('payment-method-header-title').textContent = `${method} Payment`;
   document.getElementById('gcash-modal-amount').textContent = `₱${state.activeBooking.total}.00`;
-  document.getElementById('gcash-confirm-pay-btn').textContent = `Pay ₱${state.activeBooking.total}.00`;
+  document.getElementById('gcash-confirm-pay-btn').textContent = `Confirm & Pay ₱${state.activeBooking.total}.00`;
   openModal('modal-gcash');
 }
 
 
-// REAL-TIME NOTIFICATIONS MODULE
+// REAL-TIME NOTIFICATIONS MODULE (FDD: Notifications -> View Notifications)
 function initNotifications() {
   const bellBtn = document.getElementById('notif-bell-btn');
   const closeDrawer = document.getElementById('close-notif-drawer');
@@ -813,17 +981,64 @@ function openRatingModal(tutorName) {
 }
 
 
-// ADMIN MONITORING & REPORT MODULE
+// ADMIN MONITORING & SYSTEM MANAGEMENT MODULE (ALIGNED WITH ALL FDD ADMIN BRANCHES)
 function initAdminView() {
   const reportBtn = document.getElementById('generate-admin-report-btn');
-  const filterSelect = document.getElementById('admin-filter-status');
   const closeReport = document.getElementById('close-report-modal');
   const doneReport = document.getElementById('done-report-btn');
 
-  filterSelect?.addEventListener('change', renderAdminActivity);
+  // Admin Tab Bar Navigation
+  document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
 
+      e.target.classList.add('active');
+      const targetTabId = e.target.getAttribute('data-tab');
+      document.getElementById(targetTabId)?.classList.add('active');
+    });
+  });
+
+  // Admin Send Notification (FDD: Manage Notifications -> Send Notifications)
+  document.getElementById('admin-send-notif-btn')?.addEventListener('click', () => {
+    const target = document.getElementById('admin-notif-target').value;
+    const msg = document.getElementById('admin-notif-message').value;
+    if (!msg) {
+      alert('Please enter a message to send.');
+      return;
+    }
+
+    state.notifications.unshift({
+      id: 'notif-' + Date.now(),
+      target: target,
+      title: 'System Broadcast',
+      message: msg,
+      time: 'Just now',
+      read: false
+    });
+
+    document.getElementById('admin-notif-message').value = '';
+    renderAdminNotifications();
+    updateNotificationBadge();
+    showToast('Notification broadcast sent to ' + target + '!');
+  });
+
+  // Admin Reports Filters (FDD: View Completed, Weekly, Monthly Sessions)
+  document.getElementById('report-filter-all')?.addEventListener('click', (e) => {
+    state.activeReportFilter = 'all';
+    updateReportFilterUI(e.target);
+  });
+  document.getElementById('report-filter-weekly')?.addEventListener('click', (e) => {
+    state.activeReportFilter = 'weekly';
+    updateReportFilterUI(e.target);
+  });
+  document.getElementById('report-filter-monthly')?.addEventListener('click', (e) => {
+    state.activeReportFilter = 'monthly';
+    updateReportFilterUI(e.target);
+  });
+
+  // Admin Export Activity Report Modal
   reportBtn?.addEventListener('click', () => {
-    // Generate Printable Report Summary
     document.getElementById('report-generated-date').textContent = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     document.getElementById('report-total-sessions').textContent = state.sessions.length;
 
@@ -850,4 +1065,190 @@ function initAdminView() {
 
   closeReport?.addEventListener('click', () => closeModal('modal-admin-report'));
   doneReport?.addEventListener('click', () => closeModal('modal-admin-report'));
+}
+
+function updateReportFilterUI(activeBtn) {
+  document.querySelectorAll('#tab-reports .filter-group button').forEach(b => b.classList.remove('active-filter'));
+  activeBtn.classList.add('active-filter');
+  renderAdminReports();
+}
+
+// 1. Manage Students Rendering (FDD: View Student List & Validate Student List)
+function renderAdminStudents() {
+  const tbody = document.getElementById('admin-students-table-body');
+  if (!tbody) return;
+
+  tbody.innerHTML = state.students.map(s => `
+    <tr>
+      <td><code>${s.id}</code></td>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.email}</td>
+      <td>${s.grade}</td>
+      <td><span class="badge ${s.validated ? 'badge-success' : 'badge-info'}">${s.validated ? 'Validated' : 'Pending Validation'}</span></td>
+      <td>
+        <button class="btn btn-secondary btn-small" onclick="toggleValidateStudent('${s.id}')">
+          ${s.validated ? 'Revoke Validation' : 'Validate Student'}
+        </button>
+      </td>
+    </tr>
+  `).join('');
+
+  document.getElementById('admin-stat-total-students').textContent = state.students.length;
+}
+
+window.toggleValidateStudent = function(studentId) {
+  const student = state.students.find(s => s.id === studentId);
+  if (student) {
+    student.validated = !student.validated;
+    renderAdminStudents();
+    showToast(`Validation updated for ${student.name}.`);
+  }
+};
+
+// 2. Manage Tutor Matching Rendering (FDD: Review, Approve & Cancel Matching)
+function renderAdminMatching() {
+  const tbody = document.getElementById('admin-matching-table-body');
+  if (!tbody) return;
+
+  tbody.innerHTML = state.matches.map(m => `
+    <tr>
+      <td><code>${m.id}</code></td>
+      <td>${m.studentName}</td>
+      <td><strong>${m.tutorName}</strong></td>
+      <td>${m.subject}</td>
+      <td><span class="badge badge-match">${m.score}% Match</span></td>
+      <td><span class="badge ${m.status === 'Approved' ? 'badge-success' : m.status === 'Cancelled' ? 'badge-danger' : 'badge-info'}">${m.status}</span></td>
+      <td>
+        ${m.status === 'Pending Review' ? `
+          <button class="btn btn-primary btn-small" onclick="approveMatch('${m.id}')">Approve</button>
+          <button class="btn btn-secondary btn-small" onclick="cancelMatch('${m.id}')">Cancel</button>
+        ` : `<span class="sub-text">No action needed</span>`}
+      </td>
+    </tr>
+  `).join('');
+}
+
+window.approveMatch = function(matchId) {
+  const m = state.matches.find(x => x.id === matchId);
+  if (m) {
+    m.status = 'Approved';
+    renderAdminMatching();
+    showToast(`Matching session ${matchId} approved!`);
+  }
+};
+
+window.cancelMatch = function(matchId) {
+  const m = state.matches.find(x => x.id === matchId);
+  if (m) {
+    m.status = 'Cancelled';
+    renderAdminMatching();
+    showToast(`Matching session ${matchId} cancelled.`);
+  }
+};
+
+// 3. Manage Schedule Rendering (FDD: New Calendar Schedule & Modify Sessions)
+function renderAdminSchedule() {
+  const tbody = document.getElementById('admin-schedule-table-body');
+  if (!tbody) return;
+
+  tbody.innerHTML = state.schedules.map(sch => `
+    <tr>
+      <td><code>${sch.id}</code></td>
+      <td><strong>${sch.tutorName}</strong></td>
+      <td>${sch.dateSlot}</td>
+      <td>${sch.subject}</td>
+      <td><span class="badge ${sch.status === 'Available' ? 'badge-success' : 'badge-info'}">${sch.status}</span></td>
+      <td>
+        <button class="btn btn-secondary btn-small" onclick="deleteScheduleSlot('${sch.id}')">Modify / Remove</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+window.deleteScheduleSlot = function(schId) {
+  const idx = state.schedules.findIndex(s => s.id === schId);
+  if (idx !== -1) {
+    state.schedules.splice(idx, 1);
+    renderAdminSchedule();
+    showToast('Schedule slot removed.');
+  }
+};
+
+// 4. Manage Payments Rendering (FDD: New Payment Records & Confirm Payment Status)
+function renderAdminPayments() {
+  const tbody = document.getElementById('admin-payments-table-body');
+  if (!tbody) return;
+
+  tbody.innerHTML = state.payments.map(p => `
+    <tr>
+      <td><code>${p.id}</code></td>
+      <td>${p.studentName}</td>
+      <td>${p.method}</td>
+      <td><code>${p.refNo}</code></td>
+      <td>₱${p.amount}</td>
+      <td><span class="badge ${p.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${p.status}</span></td>
+      <td>
+        ${p.status === 'Pending Confirmation' ? `
+          <button class="btn btn-primary btn-small" onclick="confirmPayment('${p.id}')">Confirm Payment</button>
+        ` : `<span class="badge badge-success">✓ Confirmed</span>`}
+      </td>
+    </tr>
+  `).join('');
+
+  const totalVol = state.payments.reduce((sum, p) => sum + p.amount, 0);
+  const totalComm = Math.round(totalVol * 0.10);
+
+  document.getElementById('admin-stat-total-volume').textContent = `₱${totalVol.toLocaleString()}`;
+  document.getElementById('admin-stat-platform-commission').textContent = `₱${totalComm.toLocaleString()}`;
+}
+
+window.confirmPayment = function(payId) {
+  const p = state.payments.find(x => x.id === payId);
+  if (p) {
+    p.status = 'Confirmed';
+    renderAdminPayments();
+    showToast(`Payment ${payId} confirmed.`);
+  }
+};
+
+// 5. Manage Notifications Rendering (FDD: Send Notifications & View Notifications)
+function renderAdminNotifications() {
+  const logContainer = document.getElementById('admin-notifications-log');
+  if (!logContainer) return;
+
+  logContainer.innerHTML = state.notifications.map(n => `
+    <div class="session-card" style="background: white; border: 1px solid var(--line);">
+      <div class="session-card-info">
+        <h4>${n.title} <span class="sub-text">(To: ${n.target || 'All Users'})</span></h4>
+        <p>${n.message}</p>
+        <span class="sub-text">${n.time}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// 6. Manage Reports Rendering (FDD: View Completed Tutoring, View Weekly Sessions, View Monthly Sessions)
+function renderAdminReports() {
+  const tbody = document.getElementById('admin-reports-table-body');
+  if (!tbody) return;
+
+  const filter = state.activeReportFilter;
+
+  const list = state.sessions.filter(s => {
+    if (filter === 'weekly') return s.date >= '2026-03-10';
+    if (filter === 'monthly') return s.date >= '2026-03-01';
+    return s.status === 'Completed' || s.status === 'Confirmed';
+  });
+
+  tbody.innerHTML = list.map(s => `
+    <tr>
+      <td><code>${s.id}</code></td>
+      <td>${s.studentName}</td>
+      <td>${s.tutorName}</td>
+      <td>${s.subject}</td>
+      <td>${s.date} ${s.timeSlot}</td>
+      <td>₱${s.totalPaid}</td>
+      <td><span class="badge ${s.status === 'Completed' ? 'badge-info' : 'badge-success'}">${s.status}</span></td>
+    </tr>
+  `).join('');
 }
