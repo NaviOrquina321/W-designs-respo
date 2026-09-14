@@ -199,6 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAdminView();
   initTutorScheduleManager();
   initProfileModals();
+  initTutorProfileSettings();
   renderAllViews();
 });
 
@@ -208,6 +209,7 @@ function initNavigation() {
   const loginBtn = document.getElementById('login-link-btn');
   const signupBtn = document.getElementById('signup-btn');
   const logoutBtn = document.getElementById('logout-btn');
+  const userProfileBtn = document.getElementById('user-profile-btn');
 
   navLogo.addEventListener('click', () => {
     switchRole('guest');
@@ -227,6 +229,17 @@ function initNavigation() {
   logoutBtn?.addEventListener('click', () => {
     switchRole('guest');
     showToast('Logged out successfully.');
+  });
+
+  userProfileBtn?.addEventListener('click', () => {
+    if (state.currentRole === 'tutor') {
+      const section = document.getElementById('tutor-profile-settings-section');
+      if (section) section.scrollIntoView({ behavior: 'smooth' });
+    } else if (state.currentRole === 'student') {
+      openModal('modal-edit-student-profile');
+    } else {
+      showToast('Profile settings are available for logged-in students and tutors.');
+    }
   });
 
   document.getElementById('hero-find-tutor-btn')?.addEventListener('click', () => {
@@ -272,6 +285,7 @@ function switchRole(role, customUser = null) {
   const signupBtn = document.getElementById('signup-btn');
   const logoutBtn = document.getElementById('logout-btn');
   const notifBell = document.getElementById('notif-bell-btn');
+  const userProfileBtn = document.getElementById('user-profile-btn');
 
   if (role === 'guest') {
     state.currentUser = null;
@@ -281,12 +295,19 @@ function switchRole(role, customUser = null) {
     if (signupBtn) signupBtn.classList.remove('hidden');
     if (logoutBtn) logoutBtn.classList.add('hidden');
     if (notifBell) notifBell.classList.add('hidden');
+    if (userProfileBtn) userProfileBtn.classList.add('hidden');
   } else {
     if (publicNavLinks) publicNavLinks.style.display = 'none';
     if (loginBtn) loginBtn.classList.add('hidden');
     if (signupBtn) signupBtn.classList.add('hidden');
     if (logoutBtn) logoutBtn.classList.remove('hidden');
     if (notifBell) notifBell.classList.remove('hidden');
+
+    if (role === 'student' || role === 'tutor') {
+      if (userProfileBtn) userProfileBtn.classList.remove('hidden');
+    } else {
+      if (userProfileBtn) userProfileBtn.classList.add('hidden');
+    }
 
     if (role === 'student') {
       state.currentUser = customUser || { name: 'Maria Santos', role: 'student' };
@@ -404,10 +425,89 @@ function closeModal(id) {
   if (modal) modal.classList.remove('active');
 }
 
-// Profile Modals Functionality
+// Profile Modals & Settings Functionality
 function initProfileModals() {
   document.getElementById('close-student-profile-modal')?.addEventListener('click', () => closeModal('modal-student-profile'));
   document.getElementById('close-tutor-profile-modal')?.addEventListener('click', () => closeModal('modal-tutor-profile'));
+  document.getElementById('close-edit-student-modal')?.addEventListener('click', () => closeModal('modal-edit-student-profile'));
+
+  const editStudentForm = document.getElementById('edit-student-profile-form');
+  editStudentForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const newName = document.getElementById('edit-student-name').value;
+    const newGrade = document.getElementById('edit-student-grade').value;
+    const newSubjects = document.getElementById('edit-student-subjects').value;
+    const newBio = document.getElementById('edit-student-bio').value;
+
+    const currentStudent = state.students.find(s => s.name === (state.currentUser ? state.currentUser.name : 'Maria Santos')) || state.students[0];
+    if (currentStudent) {
+      currentStudent.name = newName;
+      currentStudent.grade = newGrade;
+      currentStudent.subjectsNeeded = newSubjects.split(',').map(s => s.trim());
+      currentStudent.bio = newBio;
+    }
+
+    if (state.currentUser) state.currentUser.name = newName;
+    document.getElementById('student-welcome-heading').textContent = `Welcome back, ${newName}!`;
+
+    closeModal('modal-edit-student-profile');
+    renderAllViews();
+    showToast('Student profile settings updated successfully!');
+  });
+}
+
+function initTutorProfileSettings() {
+  const settingsToggle = document.getElementById('tutor-availability-settings-toggle');
+  const headerToggle = document.getElementById('tutor-availability-toggle');
+  const badge = document.getElementById('availability-settings-badge');
+  const headerBadge = document.getElementById('availability-status-label');
+  const saveBtn = document.getElementById('save-tutor-profile-btn');
+
+  function updateAvailabilityUI(isAvailable) {
+    if (settingsToggle) settingsToggle.checked = isAvailable;
+    if (headerToggle) headerToggle.checked = isAvailable;
+
+    const labelText = isAvailable ? 'Accepting New Students' : 'Unavailable';
+    const badgeClass = isAvailable ? 'badge badge-success' : 'badge badge-danger';
+
+    if (badge) {
+      badge.textContent = labelText;
+      badge.className = badgeClass;
+    }
+    if (headerBadge) {
+      headerBadge.textContent = labelText;
+      headerBadge.className = badgeClass;
+    }
+
+    const currentTutor = state.tutors.find(t => t.id === 'tut-1');
+    if (currentTutor) currentTutor.available = isAvailable;
+  }
+
+  settingsToggle?.addEventListener('change', (e) => {
+    updateAvailabilityUI(e.target.checked);
+  });
+
+  headerToggle?.addEventListener('change', (e) => {
+    updateAvailabilityUI(e.target.checked);
+  });
+
+  saveBtn?.addEventListener('click', () => {
+    const subjects = document.getElementById('tutor-subjects-input').value;
+    const style = document.getElementById('tutor-style-select').value;
+    const rate = document.getElementById('tutor-rate-input').value;
+    const isAvailable = settingsToggle ? settingsToggle.checked : true;
+
+    const currentTutor = state.tutors.find(t => t.id === 'tut-1');
+    if (currentTutor) {
+      currentTutor.subjects = subjects.split(',').map(s => s.trim());
+      currentTutor.learningStyles = [style];
+      currentTutor.hourlyRate = parseInt(rate) || 350;
+      currentTutor.available = isAvailable;
+    }
+
+    renderAllViews();
+    showToast('Tutor profile & availability updated successfully!');
+  });
 }
 
 window.viewStudentProfile = function(studentId) {
@@ -454,6 +554,7 @@ window.viewTutorProfile = function(tutorId) {
         <div class="tutor-rating">★ ${tutor.rating} (${tutor.reviewsCount} reviews)</div>
       </div>
       <div class="tutor-details-list">
+        <div><strong>Availability Status:</strong> <span class="badge ${tutor.available ? 'badge-success' : 'badge-danger'}">${tutor.available ? 'Accepting New Students' : 'Unavailable'}</span></div>
         <div><strong>Hourly Rate:</strong> ₱${tutor.hourlyRate}/hr</div>
         <div><strong>Subjects Taught:</strong> ${tutor.subjects.join(', ')}</div>
         <div><strong>Teaching Styles:</strong> ${tutor.learningStyles.join(', ')}</div>
@@ -520,6 +621,7 @@ function renderTutorDirectory(searchTerm = '') {
         </div>
         <p class="sub-text margin-bottom">${t.bio}</p>
         <div class="tutor-details-list">
+          <div><strong>Availability:</strong> <span class="badge ${t.available ? 'badge-success' : 'badge-danger'}">${t.available ? 'Accepting New Students' : 'Unavailable'}</span></div>
           <div><strong>Subjects:</strong> ${t.subjects.join(', ')}</div>
           <div><strong>Style:</strong> ${t.learningStyles[0]}</div>
           <div><strong>Rate:</strong> ₱${t.hourlyRate}/hr</div>
