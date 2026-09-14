@@ -6,11 +6,7 @@
 // Application Initial State & Mock Database
 const state = {
   currentRole: 'guest', // 'guest', 'student', 'tutor', 'admin'
-  currentUser: {
-    name: 'Maria Santos',
-    email: 'maria.santos@student.edu.ph',
-    role: 'student'
-  },
+  currentUser: null,
 
   // Seed Tutors Database
   tutors: [
@@ -160,7 +156,6 @@ const state = {
 // DOM Content Loaded Handler
 document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
-  initRoleSwitcher();
   initModals();
   initAIMatching();
   initCalendarBooking();
@@ -173,14 +168,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Navigation Engine
 function initNavigation() {
-  const roleSelect = document.getElementById('role-select');
   const navLogo = document.getElementById('nav-logo');
   const loginBtn = document.getElementById('login-link-btn');
   const signupBtn = document.getElementById('signup-btn');
+  const logoutBtn = document.getElementById('logout-btn');
 
   navLogo.addEventListener('click', () => {
     switchRole('guest');
-    roleSelect.value = 'guest';
   });
 
   loginBtn.addEventListener('click', (e) => {
@@ -192,27 +186,25 @@ function initNavigation() {
     openModal('modal-auth');
   });
 
+  logoutBtn?.addEventListener('click', () => {
+    switchRole('guest');
+    showToast('Logged out successfully.');
+  });
+
   document.getElementById('hero-find-tutor-btn')?.addEventListener('click', () => {
-    switchRole('student');
-    roleSelect.value = 'student';
-    openModal('modal-ai-matching');
+    openModal('modal-auth');
   });
 
   document.getElementById('hero-become-tutor-btn')?.addEventListener('click', () => {
-    switchRole('tutor');
-    roleSelect.value = 'tutor';
-    showToast('Switched to Tutor View! Set your teaching profile.');
+    openModal('modal-auth');
   });
 
   document.getElementById('cta-find-tutor-btn')?.addEventListener('click', () => {
-    switchRole('student');
-    roleSelect.value = 'student';
-    openModal('modal-ai-matching');
+    openModal('modal-auth');
   });
 
   document.getElementById('cta-become-tutor-btn')?.addEventListener('click', () => {
-    switchRole('tutor');
-    roleSelect.value = 'tutor';
+    openModal('modal-auth');
   });
 
   document.getElementById('start-ai-match-btn')?.addEventListener('click', () => {
@@ -224,14 +216,6 @@ function initNavigation() {
   });
 }
 
-// Role Switcher Handler
-function initRoleSwitcher() {
-  const roleSelect = document.getElementById('role-select');
-  roleSelect.addEventListener('change', (e) => {
-    switchRole(e.target.value);
-  });
-}
-
 function switchRole(role) {
   state.currentRole = role;
 
@@ -240,17 +224,31 @@ function switchRole(role) {
 
   // Update Nav items visibility
   const publicNavLinks = document.getElementById('public-nav-links');
+  const loginBtn = document.getElementById('login-link-btn');
+  const signupBtn = document.getElementById('signup-btn');
+  const logoutBtn = document.getElementById('logout-btn');
 
   if (role === 'guest') {
+    state.currentUser = null;
     document.getElementById('view-landing').classList.add('active');
     if (publicNavLinks) publicNavLinks.style.display = 'flex';
+    if (loginBtn) loginBtn.classList.remove('hidden');
+    if (signupBtn) signupBtn.classList.remove('hidden');
+    if (logoutBtn) logoutBtn.classList.add('hidden');
   } else {
     if (publicNavLinks) publicNavLinks.style.display = 'none';
+    if (loginBtn) loginBtn.classList.add('hidden');
+    if (signupBtn) signupBtn.classList.add('hidden');
+    if (logoutBtn) logoutBtn.classList.remove('hidden');
+
     if (role === 'student') {
+      state.currentUser = { name: 'Maria Santos', role: 'student' };
       document.getElementById('view-student').classList.add('active');
     } else if (role === 'tutor') {
+      state.currentUser = { name: 'Prof. Alex Rivera', role: 'tutor' };
       document.getElementById('view-tutor').classList.add('active');
     } else if (role === 'admin') {
+      state.currentUser = { name: 'System Admin', role: 'admin' };
       document.getElementById('view-admin').classList.add('active');
     }
   }
@@ -271,7 +269,6 @@ function initModals() {
     e.preventDefault();
     const role = document.getElementById('auth-role').value;
     switchRole(role);
-    document.getElementById('role-select').value = role;
     closeModal('modal-auth');
     showToast(`Logged in successfully as ${role.toUpperCase()}!`);
   });
@@ -621,11 +618,12 @@ function initGCashPayment() {
     const newSessionId = 'SESS-' + Math.floor(100 + Math.random() * 900);
 
     const b = state.activeBooking;
+    const studentName = state.currentUser ? state.currentUser.name : 'Maria Santos';
 
     // Create New Session Object
     const newSession = {
       id: newSessionId,
-      studentName: state.currentUser.name,
+      studentName: studentName,
       tutorId: b.tutorId,
       tutorName: b.tutorName,
       subject: b.subject,

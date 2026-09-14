@@ -21,16 +21,6 @@
         <a href="#why">Why TutorLink</a>
       </div>
 
-      <div class="role-switcher-container" id="role-switcher-container" style="display: flex; align-items: center; gap: 8px;">
-        <span class="role-label">Mode:</span>
-        <select id="role-select" class="role-select">
-          <option value="guest">Guest / Visitor</option>
-          <option value="student">Student (Maria Santos)</option>
-          <option value="tutor">Tutor (Prof. Alex Rivera)</option>
-          <option value="admin">Admin (System Admin)</option>
-        </select>
-      </div>
-
       <div class="nav-actions">
         <!-- Notification Bell -->
         <button class="icon-btn" id="notif-bell-btn" title="Notifications" aria-label="Notifications">
@@ -40,6 +30,7 @@
 
         <a class="link" href="#" id="login-link-btn">Log In</a>
         <button class="btn btn-primary btn-small" id="signup-btn">Sign Up</button>
+        <button class="btn btn-secondary btn-small hidden" id="logout-btn">Log Out</button>
       </div>
     </nav>
   </header>
@@ -507,9 +498,9 @@
           <div class="form-group">
             <label>Select Your Role</label>
             <select id="auth-role" class="form-select">
-              <option value="student">Student</option>
-              <option value="tutor">Tutor</option>
-              <option value="admin">Administrator</option>
+              <option value="student">Student (Maria Santos)</option>
+              <option value="tutor">Tutor (Prof. Alex Rivera)</option>
+              <option value="admin">Administrator (System Admin)</option>
             </select>
           </div>
           <div class="form-group">
@@ -520,7 +511,7 @@
             <label>Password</label>
             <input type="password" id="auth-password" required placeholder="••••••••" class="form-input" value="password123">
           </div>
-          <button type="submit" class="btn btn-primary full-width">Continue</button>
+          <button type="submit" class="btn btn-primary full-width">Log In to Dashboard</button>
         </form>
       </div>
     </div>
