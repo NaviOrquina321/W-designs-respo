@@ -7,6 +7,7 @@
 const state = {
   currentRole: 'guest', // 'guest', 'student', 'tutor', 'admin'
   currentUser: null,
+  currentFddStep: 1, // 1 to 11
 
   // Seed Students Database (FDD: Manage Students)
   students: [
@@ -171,14 +172,14 @@ const state = {
 
   // Active Pending Booking Flow
   activeBooking: {
-    tutorId: null,
-    tutorName: null,
-    subject: null,
-    date: null,
-    timeSlot: null,
-    hourlyRate: 0,
-    serviceFee: 0,
-    total: 0,
+    tutorId: 'tut-1',
+    tutorName: 'Prof. Alex Rivera',
+    subject: 'Calculus II',
+    date: '2026-03-16',
+    timeSlot: '02:00 PM',
+    hourlyRate: 350,
+    serviceFee: 35,
+    total: 385,
     paymentMethod: 'GCash'
   },
 
@@ -189,6 +190,7 @@ const state = {
 // DOM Content Loaded Handler
 document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
+  initFddNavigator();
   initAuthModalTabs();
   initModals();
   initAIMatching();
@@ -255,6 +257,110 @@ function initNavigation() {
   document.getElementById('tutor-search-input')?.addEventListener('input', (e) => {
     renderTutorDirectory(e.target.value.toLowerCase());
   });
+}
+
+// FDD STEP-BY-STEP WORKFLOW NAVIGATOR MODULE
+function initFddNavigator() {
+  const chips = document.querySelectorAll('.fdd-step-chip');
+  const nextBtn = document.getElementById('fdd-next-step-btn');
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      const stepNum = parseInt(e.target.getAttribute('data-fdd-step'));
+      goToFddStep(stepNum);
+    });
+  });
+
+  nextBtn?.addEventListener('click', () => {
+    let nextStep = state.currentFddStep + 1;
+    if (nextStep > 11) nextStep = 1;
+    goToFddStep(nextStep);
+  });
+}
+
+function goToFddStep(stepNum) {
+  state.currentFddStep = stepNum;
+
+  // Update Chips UI
+  document.querySelectorAll('.fdd-step-chip').forEach(c => {
+    const cStep = parseInt(c.getAttribute('data-fdd-step'));
+    if (cStep === stepNum) {
+      c.classList.add('active');
+    } else {
+      c.classList.remove('active');
+    }
+  });
+
+  // Close open modals & drawers first
+  document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
+  closeNotifDrawer();
+
+  // Execute UI Action for FDD Step
+  switch (stepNum) {
+    case 1: // 1. Manage Students
+      switchRole('admin');
+      openAdminTab('tab-students');
+      showToast('FDD Step 1: Manage Students (View & Validate Student List)');
+      break;
+    case 2: // 2. Manage Tutor Matching
+      switchRole('admin');
+      openAdminTab('tab-matching');
+      showToast('FDD Step 2: Manage Tutor Matching (Review, Approve, Cancel)');
+      break;
+    case 3: // 3. Manage Schedule
+      switchRole('admin');
+      openAdminTab('tab-schedule');
+      showToast('FDD Step 3: Manage Schedule (Calendar Slots & Session Times)');
+      break;
+    case 4: // 4. Manage Payments
+      switchRole('admin');
+      openAdminTab('tab-payments');
+      showToast('FDD Step 4: Manage Payments (Payment Records & Status)');
+      break;
+    case 5: // 5. Manage Notifications
+      switchRole('admin');
+      openAdminTab('tab-notifications');
+      showToast('FDD Step 5: Manage Notifications (Broadcast & Logs)');
+      break;
+    case 6: // 6. Manage Reports
+      switchRole('admin');
+      openAdminTab('tab-reports');
+      showToast('FDD Step 6: Manage Reports (Completed, Weekly, Monthly)');
+      break;
+    case 7: // 7. Register
+      openModal('modal-auth');
+      switchAuthTab('register');
+      showToast('FDD Step 7: Register (Fillup Personal Details & Submit)');
+      break;
+    case 8: // 8. Tutor Matching
+      openModal('modal-ai-matching');
+      showToast('FDD Step 8: Tutor Matching (Preferences, Subjects, AI Match)');
+      break;
+    case 9: // 9. Calendar Scheduling
+      openCalendarBooking('tut-1', 'Calculus II');
+      showToast('FDD Step 9: Calendar Scheduling (Available Schedule, Date & Slot)');
+      break;
+    case 10: // 10. Online Payment
+      openGCashPayment();
+      showToast('FDD Step 10: Online Payment (Method Selection & Status)');
+      break;
+    case 11: // 11. Notifications
+      renderNotifDrawer();
+      document.getElementById('notif-drawer').classList.add('active');
+      document.getElementById('drawer-overlay').classList.add('active');
+      showToast('FDD Step 11: Notifications (View Notifications Drawer)');
+      break;
+  }
+}
+
+function openAdminTab(tabId) {
+  document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+
+  const btn = document.querySelector(`.admin-tab-btn[data-tab='${tabId}']`);
+  const content = document.getElementById(tabId);
+  if (btn) btn.classList.add('active');
+  if (content) content.classList.add('active');
 }
 
 // Role Switcher Logic

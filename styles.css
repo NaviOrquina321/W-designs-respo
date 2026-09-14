@@ -66,6 +66,65 @@ nav.wrap {
 .nav-actions a.link { font-size: 0.95rem; color: var(--ink-soft); font-weight: 600; }
 .nav-actions a.link:hover { color: var(--ink); }
 
+/* FDD Navigator Bar */
+.fdd-navigator-bar {
+  background: #091e42;
+  color: white;
+  padding: 8px 0;
+  font-size: 0.85rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.fdd-nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+
+.fdd-nav-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-weight: 700;
+  color: #4c9aff;
+}
+
+.fdd-steps-scroll {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0;
+  scrollbar-width: thin;
+}
+
+.fdd-step-chip {
+  background: rgba(255, 255, 255, 0.1);
+  color: #deebff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.fdd-step-chip:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+.fdd-step-chip.active {
+  background: var(--primary-blue);
+  color: white;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 8px rgba(0, 82, 204, 0.6);
+}
+
 /* SVG Helper Classes */
 .icon-svg {
   width: 20px;
