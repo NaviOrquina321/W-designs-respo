@@ -62,32 +62,31 @@ nav.wrap {
 .nav-links a { font-size: 0.95rem; color: var(--ink-soft); font-weight: 500; }
 .nav-links a:hover { color: var(--ink); }
 
-.role-switcher-container {
-  background: var(--panel);
-  padding: 4px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--line);
-}
-
-.role-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--muted);
-}
-
-.role-select {
-  border: none;
-  background: transparent;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--ink);
-  cursor: pointer;
-  outline: none;
-}
-
 .nav-actions { display: flex; align-items: center; gap: 14px; }
 .nav-actions a.link { font-size: 0.95rem; color: var(--ink-soft); font-weight: 600; }
 .nav-actions a.link:hover { color: var(--ink); }
+
+/* SVG Helper Classes */
+.icon-svg {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.icon-svg-btn {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: text-bottom;
+}
+
+.btn-icon-flex {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
 .icon-btn {
   background: transparent;
@@ -100,6 +99,7 @@ nav.wrap {
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--ink);
 }
 
 .icon-btn:hover {
@@ -242,7 +242,7 @@ footer .wrap { padding-top: 40px; padding-bottom: 40px; }
 .tutor-card:hover { border-color: var(--ink-soft); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
 .tutor-card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
-.tutor-avatar { width: 50px; height: 50px; border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; color: var(--ink-soft); }
+.tutor-avatar { width: 48px; height: 48px; border-radius: 50%; background: #f0f4ff; border: 1px solid #c7d2fe; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 700; color: var(--primary-blue); }
 .tutor-info h4 { font-size: 1.05rem; }
 .tutor-rating { font-size: 0.85rem; color: #d97706; font-weight: 600; }
 

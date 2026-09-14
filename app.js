@@ -13,7 +13,7 @@ const state = {
     {
       id: 'tut-1',
       name: 'Prof. Alex Rivera',
-      avatar: '👨‍🏫',
+      initials: 'AR',
       rating: 4.9,
       reviewsCount: 38,
       hourlyRate: 350,
@@ -26,7 +26,7 @@ const state = {
     {
       id: 'tut-2',
       name: 'Engr. Bea Soriano',
-      avatar: '👩‍💻',
+      initials: 'BS',
       rating: 4.8,
       reviewsCount: 29,
       hourlyRate: 400,
@@ -39,7 +39,7 @@ const state = {
     {
       id: 'tut-3',
       name: 'Dr. Carlos Mendoza',
-      avatar: '👨‍🔬',
+      initials: 'CM',
       rating: 5.0,
       reviewsCount: 45,
       hourlyRate: 450,
@@ -52,7 +52,7 @@ const state = {
     {
       id: 'tut-4',
       name: 'Ms. Diana Reyes',
-      avatar: '👩‍🏫',
+      initials: 'DR',
       rating: 4.7,
       reviewsCount: 22,
       hourlyRate: 300,
@@ -323,7 +323,7 @@ function renderTutorDirectory(searchTerm = '') {
     <div class="tutor-card">
       <div>
         <div class="tutor-card-head">
-          <div class="tutor-avatar">${t.avatar}</div>
+          <div class="tutor-avatar">${t.initials}</div>
           <div class="tutor-info">
             <h4>${t.name}</h4>
             <div class="tutor-rating">★ ${t.rating} (${t.reviewsCount} reviews)</div>
@@ -331,13 +331,13 @@ function renderTutorDirectory(searchTerm = '') {
         </div>
         <p class="sub-text margin-bottom">${t.bio}</p>
         <div class="tutor-details-list">
-          <div>📚 <strong>Subjects:</strong> ${t.subjects.join(', ')}</div>
-          <div>🧠 <strong>Style:</strong> ${t.learningStyles[0]}</div>
-          <div>💵 <strong>Rate:</strong> ₱${t.hourlyRate}/hr</div>
+          <div><strong>Subjects:</strong> ${t.subjects.join(', ')}</div>
+          <div><strong>Style:</strong> ${t.learningStyles[0]}</div>
+          <div><strong>Rate:</strong> ₱${t.hourlyRate}/hr</div>
         </div>
       </div>
       <button class="btn btn-primary btn-small full-width margin-top" onclick="openCalendarBooking('${t.id}')">
-        📅 Book Session (₱${t.hourlyRate})
+        Book Session (₱${t.hourlyRate})
       </button>
     </div>
   `).join('');
@@ -359,12 +359,12 @@ function renderStudentUpcoming() {
     <div class="session-card">
       <div class="session-card-info">
         <h4>${s.subject} — with ${s.tutorName}</h4>
-        <p>🗓️ ${s.date} at ${s.timeSlot} | 💳 GCash Ref: <strong>${s.gcashRef}</strong></p>
+        <p>${s.date} at ${s.timeSlot} | GCash Ref: <strong>${s.gcashRef}</strong></p>
       </div>
       <div>
         <span class="badge badge-success margin-bottom">Confirmed</span>
         <button class="btn btn-primary btn-small" onclick="launchWorkspace('${s.id}')">
-          🚀 Join Live Workspace Session
+          Join Live Workspace Session
         </button>
       </div>
     </div>
@@ -386,7 +386,7 @@ function renderStudentHistory() {
       <td><span class="badge ${s.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${s.status}</span></td>
       <td>
         ${s.status === 'Completed' ?
-          `<button class="btn btn-secondary btn-small" onclick="openRatingModal('${s.tutorName}')">★ Rate Tutor</button>` :
+          `<button class="btn btn-secondary btn-small" onclick="openRatingModal('${s.tutorName}')">Rate Tutor</button>` :
           `<button class="btn btn-secondary btn-small" onclick="launchWorkspace('${s.id}')">View Room</button>`
         }
       </td>
@@ -405,12 +405,12 @@ function renderTutorUpcoming() {
     <div class="session-card">
       <div class="session-card-info">
         <h4>${s.subject} with Student <strong>${s.studentName}</strong></h4>
-        <p>🗓️ Date: ${s.date} | Time: ${s.timeSlot} | Earnings: <strong>₱${s.hourlyRate}</strong></p>
+        <p>Date: ${s.date} | Time: ${s.timeSlot} | Earnings: <strong>₱${s.hourlyRate}</strong></p>
       </div>
       <div>
         <span class="badge ${s.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${s.status}</span>
         <button class="btn btn-primary btn-small margin-top" onclick="launchWorkspace('${s.id}')">
-          💻 Launch Session
+          Launch Session
         </button>
       </div>
     </div>
@@ -480,14 +480,14 @@ function initAIMatching() {
       <div class="session-card" style="background: white; border: 1px solid var(--line);">
         <div class="session-card-info">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 1.5rem;">${t.avatar}</span>
+            <div class="tutor-avatar">${t.initials}</div>
             <div>
               <h4 style="font-size: 1.1rem; margin: 0;">${t.name}</h4>
-              <span class="badge badge-match">${t.matchScore}% Match Score ⚡</span>
+              <span class="badge badge-match">${t.matchScore}% Match Score</span>
             </div>
           </div>
           <p class="sub-text margin-top" style="margin-top: 8px;">
-            📚 Subjects: ${t.subjects.join(', ')} | Rate: <strong>₱${t.hourlyRate}/hr</strong>
+            Subjects: ${t.subjects.join(', ')} | Rate: <strong>₱${t.hourlyRate}/hr</strong>
           </p>
         </div>
         <button class="btn btn-primary btn-small" onclick="selectMatchedTutor('${t.id}', '${subject}')">
@@ -562,7 +562,7 @@ window.openCalendarBooking = function(tutorId, preferredSubject = null) {
   const preview = document.getElementById('selected-tutor-preview');
   preview.innerHTML = `
     <div style="display: flex; align-items: center; gap: 12px; background: var(--panel); padding: 12px; border-radius: 8px;">
-      <span style="font-size: 2rem;">${tutor.avatar}</span>
+      <div class="tutor-avatar">${tutor.initials}</div>
       <div>
         <h4 style="margin: 0;">${tutor.name}</h4>
         <span class="sub-text">Subject: <strong>${subject}</strong></span>
