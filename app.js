@@ -1,19 +1,18 @@
 /**
- * TutorLink — An Intelligent Tutor-Student Matching System
- * Application Logic & State Management aligned with Functional Decomposition Diagram (FDD)
+ * TutorLink - An Intelligent Tutor-Student Matching System
+ * Application Logic & State Management
  */
 
 // Application Initial State & Mock Database
 const state = {
   currentRole: 'guest', // 'guest', 'student', 'tutor', 'admin'
   currentUser: null,
-  currentFddStep: 1, // 1 to 11
 
-  // Seed Students Database (FDD: Manage Students)
+  // Seed Students Database
   students: [
-    { id: 'STU-101', name: 'Maria Santos', email: 'maria@tutorlink.ph', grade: 'Senior High', validated: true },
-    { id: 'STU-102', name: 'Juan Dela Cruz', email: 'juan@tutorlink.ph', grade: 'College', validated: true },
-    { id: 'STU-103', name: 'Angela Torres', email: 'angela@tutorlink.ph', grade: 'High School', validated: false }
+    { id: 'STU-101', name: 'Maria Santos', email: 'maria@tutorlink.ph', grade: 'Senior High', validated: true, bio: 'Grade 12 STEM Student focusing on Advanced Calculus and College Entrance Exam preparation.', subjectsNeeded: ['Calculus', 'Physics'], sessionsCompleted: 4 },
+    { id: 'STU-102', name: 'Juan Dela Cruz', email: 'juan@tutorlink.ph', grade: 'College', validated: true, bio: '2nd Year Computer Science student looking for web development and algorithms mentoring.', subjectsNeeded: ['Programming', 'Mathematics'], sessionsCompleted: 2 },
+    { id: 'STU-103', name: 'Angela Torres', email: 'angela@tutorlink.ph', grade: 'High School', validated: false, bio: 'Grade 10 student striving to build strong foundations in High School Algebra and Chemistry.', subjectsNeeded: ['Mathematics', 'Chemistry'], sessionsCompleted: 1 }
   ],
 
   // Seed Tutors Database
@@ -72,20 +71,20 @@ const state = {
     }
   ],
 
-  // Seed Matching Results (FDD: Manage Tutor Matching)
+  // Seed Matching Results
   matches: [
     { id: 'MATCH-201', studentName: 'Maria Santos', tutorName: 'Prof. Alex Rivera', subject: 'Calculus II', score: 98, status: 'Approved' },
     { id: 'MATCH-202', studentName: 'Angela Torres', tutorName: 'Dr. Carlos Mendoza', subject: 'Physics', score: 92, status: 'Pending Review' }
   ],
 
-  // Seed Calendar Schedules (FDD: Manage Schedule)
+  // Seed Calendar Schedules
   schedules: [
     { id: 'SCH-301', tutorName: 'Prof. Alex Rivera', dateSlot: '2026-03-16 (02:00 PM)', subject: 'Calculus II', status: 'Available' },
     { id: 'SCH-302', tutorName: 'Engr. Bea Soriano', dateSlot: '2026-03-17 (10:00 AM)', subject: 'Programming', status: 'Booked' },
     { id: 'SCH-303', tutorName: 'Dr. Carlos Mendoza', dateSlot: '2026-03-18 (09:00 AM)', subject: 'Physics', status: 'Available' }
   ],
 
-  // Seed Payments Database (FDD: Manage Payments)
+  // Seed Payments Database
   payments: [
     { id: 'PAY-401', studentName: 'Maria Santos', method: 'GCash', refNo: 'GC-9920182341', amount: 385, status: 'Confirmed' },
     { id: 'PAY-402', studentName: 'Maria Santos', method: 'GCash', refNo: 'GC-8812039481', amount: 440, status: 'Confirmed' },
@@ -107,7 +106,7 @@ const state = {
       commissionFee: 35,
       totalPaid: 385,
       gcashRef: 'GC-9920182341',
-      status: 'Confirmed', // 'Confirmed', 'Completed', 'Pending'
+      status: 'Confirmed',
       notes: 'Review derivatives and integration techniques for upcoming midterm.'
     },
     {
@@ -142,7 +141,7 @@ const state = {
     }
   ],
 
-  // System Notifications (FDD: Manage Notifications)
+  // System Notifications
   notifications: [
     {
       id: 'notif-1',
@@ -184,13 +183,13 @@ const state = {
   },
 
   activeWorkspaceSession: null,
-  activeReportFilter: 'all' // 'all', 'weekly', 'monthly'
+  activeReportFilter: 'all'
 };
 
 // DOM Content Loaded Handler
 document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
-  initFddNavigator();
+  initLandingAiForm();
   initAuthModalTabs();
   initModals();
   initAIMatching();
@@ -200,6 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initWorkspaceSession();
   initAdminView();
   initTutorScheduleManager();
+  initProfileModals();
   renderAllViews();
 });
 
@@ -259,108 +259,20 @@ function initNavigation() {
   });
 }
 
-// FDD STEP-BY-STEP WORKFLOW NAVIGATOR MODULE
-function initFddNavigator() {
-  const chips = document.querySelectorAll('.fdd-step-chip');
-  const nextBtn = document.getElementById('fdd-next-step-btn');
-
-  chips.forEach(chip => {
-    chip.addEventListener('click', (e) => {
-      const stepNum = parseInt(e.target.getAttribute('data-fdd-step'));
-      goToFddStep(stepNum);
-    });
-  });
-
-  nextBtn?.addEventListener('click', () => {
-    let nextStep = state.currentFddStep + 1;
-    if (nextStep > 11) nextStep = 1;
-    goToFddStep(nextStep);
-  });
-}
-
-function goToFddStep(stepNum) {
-  state.currentFddStep = stepNum;
-
-  // Update Chips UI
-  document.querySelectorAll('.fdd-step-chip').forEach(c => {
-    const cStep = parseInt(c.getAttribute('data-fdd-step'));
-    if (cStep === stepNum) {
-      c.classList.add('active');
+// Landing Page AI Form
+function initLandingAiForm() {
+  const form = document.getElementById('landing-ai-form');
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (state.currentRole !== 'student') {
+      openModal('modal-auth');
+      switchAuthTab('login');
+      document.getElementById('auth-role').value = 'student';
+      showToast('Please sign in as a Student to run AI Tutor Matching.');
     } else {
-      c.classList.remove('active');
+      openModal('modal-ai-matching');
     }
   });
-
-  // Close open modals & drawers first
-  document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
-  closeNotifDrawer();
-
-  // Execute UI Action for FDD Step
-  switch (stepNum) {
-    case 1: // 1. Manage Students
-      switchRole('admin');
-      openAdminTab('tab-students');
-      showToast('FDD Step 1: Manage Students (View & Validate Student List)');
-      break;
-    case 2: // 2. Manage Tutor Matching
-      switchRole('admin');
-      openAdminTab('tab-matching');
-      showToast('FDD Step 2: Manage Tutor Matching (Review, Approve, Cancel)');
-      break;
-    case 3: // 3. Manage Schedule
-      switchRole('admin');
-      openAdminTab('tab-schedule');
-      showToast('FDD Step 3: Manage Schedule (Calendar Slots & Session Times)');
-      break;
-    case 4: // 4. Manage Payments
-      switchRole('admin');
-      openAdminTab('tab-payments');
-      showToast('FDD Step 4: Manage Payments (Payment Records & Status)');
-      break;
-    case 5: // 5. Manage Notifications
-      switchRole('admin');
-      openAdminTab('tab-notifications');
-      showToast('FDD Step 5: Manage Notifications (Broadcast & Logs)');
-      break;
-    case 6: // 6. Manage Reports
-      switchRole('admin');
-      openAdminTab('tab-reports');
-      showToast('FDD Step 6: Manage Reports (Completed, Weekly, Monthly)');
-      break;
-    case 7: // 7. Register
-      openModal('modal-auth');
-      switchAuthTab('register');
-      showToast('FDD Step 7: Register (Fillup Personal Details & Submit)');
-      break;
-    case 8: // 8. Tutor Matching
-      openModal('modal-ai-matching');
-      showToast('FDD Step 8: Tutor Matching (Preferences, Subjects, AI Match)');
-      break;
-    case 9: // 9. Calendar Scheduling
-      openCalendarBooking('tut-1', 'Calculus II');
-      showToast('FDD Step 9: Calendar Scheduling (Available Schedule, Date & Slot)');
-      break;
-    case 10: // 10. Online Payment
-      openGCashPayment();
-      showToast('FDD Step 10: Online Payment (Method Selection & Status)');
-      break;
-    case 11: // 11. Notifications
-      renderNotifDrawer();
-      document.getElementById('notif-drawer').classList.add('active');
-      document.getElementById('drawer-overlay').classList.add('active');
-      showToast('FDD Step 11: Notifications (View Notifications Drawer)');
-      break;
-  }
-}
-
-function openAdminTab(tabId) {
-  document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
-
-  const btn = document.querySelector(`.admin-tab-btn[data-tab='${tabId}']`);
-  const content = document.getElementById(tabId);
-  if (btn) btn.classList.add('active');
-  if (content) content.classList.add('active');
 }
 
 // Role Switcher Logic
@@ -375,6 +287,7 @@ function switchRole(role, customUser = null) {
   const loginBtn = document.getElementById('login-link-btn');
   const signupBtn = document.getElementById('signup-btn');
   const logoutBtn = document.getElementById('logout-btn');
+  const notifBell = document.getElementById('notif-bell-btn');
 
   if (role === 'guest') {
     state.currentUser = null;
@@ -383,11 +296,13 @@ function switchRole(role, customUser = null) {
     if (loginBtn) loginBtn.classList.remove('hidden');
     if (signupBtn) signupBtn.classList.remove('hidden');
     if (logoutBtn) logoutBtn.classList.add('hidden');
+    if (notifBell) notifBell.classList.add('hidden');
   } else {
     if (publicNavLinks) publicNavLinks.style.display = 'none';
     if (loginBtn) loginBtn.classList.add('hidden');
     if (signupBtn) signupBtn.classList.add('hidden');
     if (logoutBtn) logoutBtn.classList.remove('hidden');
+    if (notifBell) notifBell.classList.remove('hidden');
 
     if (role === 'student') {
       state.currentUser = customUser || { name: 'Maria Santos', role: 'student' };
@@ -395,7 +310,7 @@ function switchRole(role, customUser = null) {
       document.getElementById('view-student').classList.add('active');
     } else if (role === 'tutor') {
       state.currentUser = customUser || { name: 'Prof. Alex Rivera', role: 'tutor' };
-      document.getElementById('tutor-welcome-heading').textContent = `Tutor Portal — ${state.currentUser.name}`;
+      document.getElementById('tutor-welcome-heading').textContent = `Tutor Portal - ${state.currentUser.name}`;
       document.getElementById('view-tutor').classList.add('active');
     } else if (role === 'admin') {
       state.currentUser = customUser || { name: 'System Admin', role: 'admin' };
@@ -406,7 +321,7 @@ function switchRole(role, customUser = null) {
   renderAllViews();
 }
 
-// Modal Auth Tabs (Log In vs Register - FDD Branch: Register)
+// Modal Auth Tabs
 function initAuthModalTabs() {
   const tabLogin = document.getElementById('tab-btn-login');
   const tabRegister = document.getElementById('tab-btn-register');
@@ -428,7 +343,10 @@ function initAuthModalTabs() {
         name: fullname,
         email: email,
         grade: specialty,
-        validated: true
+        validated: true,
+        bio: `${specialty} Student eager to connect with expert tutors on TutorLink.`,
+        subjectsNeeded: [specialty],
+        sessionsCompleted: 0
       };
       state.students.unshift(newStudent);
       switchRole('student', { name: fullname, role: 'student' });
@@ -502,6 +420,70 @@ function closeModal(id) {
   if (modal) modal.classList.remove('active');
 }
 
+// Profile Modals Functionality
+function initProfileModals() {
+  document.getElementById('close-student-profile-modal')?.addEventListener('click', () => closeModal('modal-student-profile'));
+  document.getElementById('close-tutor-profile-modal')?.addEventListener('click', () => closeModal('modal-tutor-profile'));
+}
+
+window.viewStudentProfile = function(studentId) {
+  const student = state.students.find(s => s.id === studentId) || {
+    id: studentId,
+    name: 'Student User',
+    email: 'student@tutorlink.ph',
+    grade: 'Senior High',
+    validated: true,
+    bio: 'Dedicated learner preparing for higher education.',
+    subjectsNeeded: ['Mathematics'],
+    sessionsCompleted: 2
+  };
+
+  const body = document.getElementById('student-profile-body');
+  if (body) {
+    body.innerHTML = `
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div class="tutor-avatar" style="margin: 0 auto 12px; width: 64px; height: 64px; font-size: 1.5rem;">${student.name.split(' ').map(n=>n[0]).join('')}</div>
+        <h4 style="font-size: 1.3rem;">${student.name}</h4>
+        <span class="badge ${student.validated ? 'badge-success' : 'badge-info'}">${student.validated ? 'Validated Student' : 'Pending Validation'}</span>
+      </div>
+      <div class="tutor-details-list">
+        <div><strong>Student ID:</strong> <code>${student.id}</code></div>
+        <div><strong>Email:</strong> ${student.email}</div>
+        <div><strong>Grade Level:</strong> ${student.grade}</div>
+        <div><strong>Sessions Completed:</strong> ${student.sessionsCompleted || 3}</div>
+        <div><strong>Subjects Needing Help:</strong> ${student.subjectsNeeded ? student.subjectsNeeded.join(', ') : 'Mathematics, Calculus'}</div>
+      </div>
+      <p class="sub-text margin-top"><strong>Bio:</strong> ${student.bio || 'Active student member on TutorLink.'}</p>
+    `;
+  }
+  openModal('modal-student-profile');
+};
+
+window.viewTutorProfile = function(tutorId) {
+  const tutor = state.tutors.find(t => t.id === tutorId) || state.tutors[0];
+  const body = document.getElementById('tutor-profile-body');
+  if (body) {
+    body.innerHTML = `
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div class="tutor-avatar" style="margin: 0 auto 12px; width: 64px; height: 64px; font-size: 1.5rem;">${tutor.initials}</div>
+        <h4 style="font-size: 1.3rem;">${tutor.name}</h4>
+        <div class="tutor-rating">★ ${tutor.rating} (${tutor.reviewsCount} reviews)</div>
+      </div>
+      <div class="tutor-details-list">
+        <div><strong>Hourly Rate:</strong> ₱${tutor.hourlyRate}/hr</div>
+        <div><strong>Subjects Taught:</strong> ${tutor.subjects.join(', ')}</div>
+        <div><strong>Teaching Styles:</strong> ${tutor.learningStyles.join(', ')}</div>
+        <div><strong>Availability Slots:</strong> ${tutor.availabilitySlots.join(', ')}</div>
+      </div>
+      <p class="sub-text margin-top"><strong>Bio:</strong> ${tutor.bio}</p>
+      <button class="btn btn-primary full-width margin-top" onclick="closeModal('modal-tutor-profile'); openCalendarBooking('${tutor.id}')">
+        Book Session with ${tutor.name}
+      </button>
+    `;
+  }
+  openModal('modal-tutor-profile');
+};
+
 // Toast Notifications
 function showToast(msg) {
   const container = document.getElementById('toast-container');
@@ -545,10 +527,10 @@ function renderTutorDirectory(searchTerm = '') {
   grid.innerHTML = filtered.map(t => `
     <div class="tutor-card">
       <div>
-        <div class="tutor-card-head">
+        <div class="tutor-card-head" style="cursor: pointer;" onclick="viewTutorProfile('${t.id}')">
           <div class="tutor-avatar">${t.initials}</div>
           <div class="tutor-info">
-            <h4>${t.name}</h4>
+            <h4 style="text-decoration: underline;">${t.name}</h4>
             <div class="tutor-rating">★ ${t.rating} (${t.reviewsCount} reviews)</div>
           </div>
         </div>
@@ -559,9 +541,10 @@ function renderTutorDirectory(searchTerm = '') {
           <div><strong>Rate:</strong> ₱${t.hourlyRate}/hr</div>
         </div>
       </div>
-      <button class="btn btn-primary btn-small full-width margin-top" onclick="openCalendarBooking('${t.id}')">
-        Book Session (₱${t.hourlyRate})
-      </button>
+      <div style="display: flex; gap: 8px;" class="margin-top">
+        <button class="btn btn-secondary btn-small full-width" onclick="viewTutorProfile('${t.id}')">View Profile</button>
+        <button class="btn btn-primary btn-small full-width" onclick="openCalendarBooking('${t.id}')">Book Session</button>
+      </div>
     </div>
   `).join('');
 }
@@ -581,7 +564,7 @@ function renderStudentUpcoming() {
   container.innerHTML = upcoming.map(s => `
     <div class="session-card">
       <div class="session-card-info">
-        <h4>${s.subject} — with ${s.tutorName}</h4>
+        <h4>${s.subject} - with <span style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</span></h4>
         <p>${s.date} at ${s.timeSlot} | GCash Ref: <strong>${s.gcashRef}</strong></p>
       </div>
       <div>
@@ -602,7 +585,7 @@ function renderStudentHistory() {
   tbody.innerHTML = state.sessions.map(s => `
     <tr>
       <td>${s.date} (${s.timeSlot})</td>
-      <td><strong>${s.tutorName}</strong></td>
+      <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</strong></td>
       <td>${s.subject}</td>
       <td>₱${s.totalPaid}</td>
       <td><code>${s.gcashRef}</code></td>
@@ -616,7 +599,6 @@ function renderStudentHistory() {
     </tr>
   `).join('');
 
-  // Update total spent in student KPI
   const totalSpent = state.sessions.reduce((sum, s) => sum + s.totalPaid, 0);
   const spentEl = document.getElementById('student-stat-spent');
   if (spentEl) spentEl.textContent = `₱${totalSpent}`;
@@ -632,7 +614,7 @@ function renderTutorUpcoming() {
   container.innerHTML = tutorSessions.map(s => `
     <div class="session-card">
       <div class="session-card-info">
-        <h4>${s.subject} with Student <strong>${s.studentName}</strong></h4>
+        <h4>${s.subject} with Student <strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${s.studentName}</strong></h4>
         <p>Date: ${s.date} | Time: ${s.timeSlot} | Earnings: <strong>₱${s.hourlyRate}</strong></p>
       </div>
       <div>
@@ -679,8 +661,7 @@ function initTutorScheduleManager() {
   });
 }
 
-
-// AI TUTOR MATCHING FEATURE MODULE (FDD: Tutor Matching)
+// AI TUTOR MATCHING FEATURE MODULE
 function initAIMatching() {
   const form = document.getElementById('ai-matching-form');
   const resultsBox = document.getElementById('ai-match-results');
@@ -701,13 +682,12 @@ function initAIMatching() {
 
     // AI Matching Calculation Algorithm
     const matches = state.tutors.map(tutor => {
-      let score = 60; // baseline
+      let score = 60;
 
       if (tutor.subjects.includes(subject)) score += 25;
       if (tutor.learningStyles.some(s => style.includes(s) || s.includes(style))) score += 10;
       if (tutor.rating >= 4.8) score += 5;
 
-      // cap at 98% max
       const compatibility = Math.min(score, 98);
 
       return { ...tutor, matchScore: compatibility };
@@ -724,14 +704,13 @@ function initAIMatching() {
       status: 'Pending Review'
     });
 
-    // Render AI Match Cards
     resultsList.innerHTML = matches.map(t => `
       <div class="session-card" style="background: white; border: 1px solid var(--line);">
         <div class="session-card-info">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="tutor-avatar">${t.initials}</div>
+            <div class="tutor-avatar" style="cursor: pointer;" onclick="viewTutorProfile('${t.id}')">${t.initials}</div>
             <div>
-              <h4 style="font-size: 1.1rem; margin: 0;">${t.name}</h4>
+              <h4 style="font-size: 1.1rem; margin: 0; cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${t.id}')">${t.name}</h4>
               <span class="badge badge-match">${t.matchScore}% Match Score</span>
             </div>
           </div>
@@ -751,14 +730,12 @@ function initAIMatching() {
   });
 }
 
-// Global hook for selecting a matched tutor from AI wizard
 window.selectMatchedTutor = function(tutorId, subject) {
   closeModal('modal-ai-matching');
   openCalendarBooking(tutorId, subject);
 };
 
-
-// CALENDAR SCHEDULING FEATURE MODULE (FDD: Calendar Scheduling)
+// CALENDAR SCHEDULING FEATURE MODULE
 function initCalendarBooking() {
   const cancelBtn = document.getElementById('cancel-booking-btn');
   const proceedBtn = document.getElementById('proceed-to-payment-btn');
@@ -776,7 +753,6 @@ function initCalendarBooking() {
     openGCashPayment();
   });
 
-  // Date picker default today
   const picker = document.getElementById('booking-date-picker');
   if (picker) {
     const today = new Date().toISOString().split('T')[0];
@@ -809,25 +785,22 @@ window.openCalendarBooking = function(tutorId, preferredSubject = null) {
     paymentMethod: 'GCash'
   };
 
-  // Render Tutor Preview Card in modal
   const preview = document.getElementById('selected-tutor-preview');
   preview.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 12px; background: var(--panel); padding: 12px; border-radius: 8px;">
-      <div class="tutor-avatar">${tutor.initials}</div>
+    <div style="display: flex; align-items: center; gap: 12px; background: var(--panel); padding: 12px; border-radius: 4px;">
+      <div class="tutor-avatar" style="cursor: pointer;" onclick="viewTutorProfile('${tutor.id}')">${tutor.initials}</div>
       <div>
-        <h4 style="margin: 0;">${tutor.name}</h4>
+        <h4 style="margin: 0; cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${tutor.id}')">${tutor.name}</h4>
         <span class="sub-text">Subject: <strong>${subject}</strong></span>
       </div>
     </div>
   `;
 
-  // Render Time Slot Chips
   const slotsContainer = document.getElementById('time-slots-container');
   slotsContainer.innerHTML = tutor.availabilitySlots.map(slot => `
     <div class="slot-chip" onclick="selectTimeSlot(this, '${slot}')">${slot}</div>
   `).join('');
 
-  // Update Pricing Breakdown Summary
   document.getElementById('summary-hourly-fee').textContent = `₱${hourlyRate}`;
   document.getElementById('summary-service-fee').textContent = `₱${serviceFee}`;
   document.getElementById('summary-total-fee').textContent = `₱${total}`;
@@ -841,8 +814,7 @@ window.selectTimeSlot = function(element, slot) {
   state.activeBooking.timeSlot = slot;
 };
 
-
-// ONLINE PAYMENT INTEGRATION MODULE (FDD: Online Payment -> Select Payment Method & View Payment Status)
+// ONLINE PAYMENT INTEGRATION MODULE
 function initGCashPayment() {
   const step1Next = document.getElementById('gcash-step1-next-btn');
   const step2Pay = document.getElementById('gcash-confirm-pay-btn');
@@ -872,7 +844,6 @@ function initGCashPayment() {
   });
 
   step2Pay?.addEventListener('click', () => {
-    // Generate Reference Number & Payment Record
     const refPrefix = state.activeBooking.paymentMethod === 'GCash' ? 'GC-' : 'PM-';
     const randomRef = refPrefix + Math.floor(1000000000 + Math.random() * 9000000000);
     const newSessionId = 'SESS-' + Math.floor(100 + Math.random() * 900);
@@ -880,7 +851,6 @@ function initGCashPayment() {
     const b = state.activeBooking;
     const studentName = state.currentUser ? state.currentUser.name : 'Maria Santos';
 
-    // Create New Session Object
     const newSession = {
       id: newSessionId,
       studentName: studentName,
@@ -897,10 +867,8 @@ function initGCashPayment() {
       notes: `Booked via ${b.paymentMethod}.`
     };
 
-    // Save to State Database
     state.sessions.unshift(newSession);
 
-    // Save to Payments Database (FDD: Manage Payments -> New Payment Records)
     state.payments.unshift({
       id: 'PAY-' + Math.floor(100 + Math.random() * 900),
       studentName: studentName,
@@ -910,7 +878,6 @@ function initGCashPayment() {
       status: 'Confirmed'
     });
 
-    // Push System Notification
     state.notifications.unshift({
       id: 'notif-' + Date.now(),
       target: studentName,
@@ -920,7 +887,6 @@ function initGCashPayment() {
       read: false
     });
 
-    // Populate Receipt View (FDD: Online Payment -> View Payment Status)
     document.getElementById('gcash-receipt-ref').textContent = randomRef;
     document.getElementById('gcash-receipt-method').textContent = b.paymentMethod;
     document.getElementById('gcash-receipt-date').textContent = `${b.date}, ${b.timeSlot}`;
@@ -935,7 +901,6 @@ function initGCashPayment() {
 
   step3Done?.addEventListener('click', () => {
     closeModal('modal-gcash');
-    // Reset steps
     document.getElementById('gcash-step-1').classList.remove('hidden');
     document.getElementById('gcash-step-2').classList.add('hidden');
     document.getElementById('gcash-step-3').classList.add('hidden');
@@ -950,8 +915,7 @@ function openGCashPayment() {
   openModal('modal-gcash');
 }
 
-
-// REAL-TIME NOTIFICATIONS MODULE (FDD: Notifications -> View Notifications)
+// REAL-TIME NOTIFICATIONS MODULE
 function initNotifications() {
   const bellBtn = document.getElementById('notif-bell-btn');
   const closeDrawer = document.getElementById('close-notif-drawer');
@@ -1000,7 +964,6 @@ function updateNotificationBadge() {
   badge.textContent = unreadCount;
   badge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
 }
-
 
 // MATCHING SESSION VIRTUAL WORKSPACE MODULE
 function initWorkspaceSession() {
@@ -1086,14 +1049,12 @@ function openRatingModal(tutorName) {
   };
 }
 
-
-// ADMIN MONITORING & SYSTEM MANAGEMENT MODULE (ALIGNED WITH ALL FDD ADMIN BRANCHES)
+// ADMIN MONITORING MODULE
 function initAdminView() {
   const reportBtn = document.getElementById('generate-admin-report-btn');
   const closeReport = document.getElementById('close-report-modal');
   const doneReport = document.getElementById('done-report-btn');
 
-  // Admin Tab Bar Navigation
   document.querySelectorAll('.admin-tab-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
@@ -1105,7 +1066,6 @@ function initAdminView() {
     });
   });
 
-  // Admin Send Notification (FDD: Manage Notifications -> Send Notifications)
   document.getElementById('admin-send-notif-btn')?.addEventListener('click', () => {
     const target = document.getElementById('admin-notif-target').value;
     const msg = document.getElementById('admin-notif-message').value;
@@ -1129,7 +1089,6 @@ function initAdminView() {
     showToast('Notification broadcast sent to ' + target + '!');
   });
 
-  // Admin Reports Filters (FDD: View Completed, Weekly, Monthly Sessions)
   document.getElementById('report-filter-all')?.addEventListener('click', (e) => {
     state.activeReportFilter = 'all';
     updateReportFilterUI(e.target);
@@ -1143,7 +1102,6 @@ function initAdminView() {
     updateReportFilterUI(e.target);
   });
 
-  // Admin Export Activity Report Modal
   reportBtn?.addEventListener('click', () => {
     document.getElementById('report-generated-date').textContent = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     document.getElementById('report-total-sessions').textContent = state.sessions.length;
@@ -1158,8 +1116,8 @@ function initAdminView() {
     tbody.innerHTML = state.sessions.map(s => `
       <tr>
         <td><code>${s.id}</code></td>
-        <td>${s.studentName}</td>
-        <td>${s.tutorName}</td>
+        <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${s.studentName}</span></td>
+        <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</span></td>
         <td>${s.subject}</td>
         <td>${s.status}</td>
         <td>₱${s.totalPaid}</td>
@@ -1179,7 +1137,6 @@ function updateReportFilterUI(activeBtn) {
   renderAdminReports();
 }
 
-// 1. Manage Students Rendering (FDD: View Student List & Validate Student List)
 function renderAdminStudents() {
   const tbody = document.getElementById('admin-students-table-body');
   if (!tbody) return;
@@ -1187,11 +1144,12 @@ function renderAdminStudents() {
   tbody.innerHTML = state.students.map(s => `
     <tr>
       <td><code>${s.id}</code></td>
-      <td><strong>${s.name}</strong></td>
+      <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${s.id}')">${s.name}</strong></td>
       <td>${s.email}</td>
       <td>${s.grade}</td>
       <td><span class="badge ${s.validated ? 'badge-success' : 'badge-info'}">${s.validated ? 'Validated' : 'Pending Validation'}</span></td>
       <td>
+        <button class="btn btn-secondary btn-small" onclick="viewStudentProfile('${s.id}')">View Profile</button>
         <button class="btn btn-secondary btn-small" onclick="toggleValidateStudent('${s.id}')">
           ${s.validated ? 'Revoke Validation' : 'Validate Student'}
         </button>
@@ -1211,7 +1169,6 @@ window.toggleValidateStudent = function(studentId) {
   }
 };
 
-// 2. Manage Tutor Matching Rendering (FDD: Review, Approve & Cancel Matching)
 function renderAdminMatching() {
   const tbody = document.getElementById('admin-matching-table-body');
   if (!tbody) return;
@@ -1219,8 +1176,8 @@ function renderAdminMatching() {
   tbody.innerHTML = state.matches.map(m => `
     <tr>
       <td><code>${m.id}</code></td>
-      <td>${m.studentName}</td>
-      <td><strong>${m.tutorName}</strong></td>
+      <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${m.studentName}</span></td>
+      <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('tut-1')">${m.tutorName}</strong></td>
       <td>${m.subject}</td>
       <td><span class="badge badge-match">${m.score}% Match</span></td>
       <td><span class="badge ${m.status === 'Approved' ? 'badge-success' : m.status === 'Cancelled' ? 'badge-danger' : 'badge-info'}">${m.status}</span></td>
@@ -1252,7 +1209,6 @@ window.cancelMatch = function(matchId) {
   }
 };
 
-// 3. Manage Schedule Rendering (FDD: New Calendar Schedule & Modify Sessions)
 function renderAdminSchedule() {
   const tbody = document.getElementById('admin-schedule-table-body');
   if (!tbody) return;
@@ -1260,7 +1216,7 @@ function renderAdminSchedule() {
   tbody.innerHTML = state.schedules.map(sch => `
     <tr>
       <td><code>${sch.id}</code></td>
-      <td><strong>${sch.tutorName}</strong></td>
+      <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('tut-1')">${sch.tutorName}</strong></td>
       <td>${sch.dateSlot}</td>
       <td>${sch.subject}</td>
       <td><span class="badge ${sch.status === 'Available' ? 'badge-success' : 'badge-info'}">${sch.status}</span></td>
@@ -1280,7 +1236,6 @@ window.deleteScheduleSlot = function(schId) {
   }
 };
 
-// 4. Manage Payments Rendering (FDD: New Payment Records & Confirm Payment Status)
 function renderAdminPayments() {
   const tbody = document.getElementById('admin-payments-table-body');
   if (!tbody) return;
@@ -1288,7 +1243,7 @@ function renderAdminPayments() {
   tbody.innerHTML = state.payments.map(p => `
     <tr>
       <td><code>${p.id}</code></td>
-      <td>${p.studentName}</td>
+      <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${p.studentName}</span></td>
       <td>${p.method}</td>
       <td><code>${p.refNo}</code></td>
       <td>₱${p.amount}</td>
@@ -1317,7 +1272,6 @@ window.confirmPayment = function(payId) {
   }
 };
 
-// 5. Manage Notifications Rendering (FDD: Send Notifications & View Notifications)
 function renderAdminNotifications() {
   const logContainer = document.getElementById('admin-notifications-log');
   if (!logContainer) return;
@@ -1333,7 +1287,6 @@ function renderAdminNotifications() {
   `).join('');
 }
 
-// 6. Manage Reports Rendering (FDD: View Completed Tutoring, View Weekly Sessions, View Monthly Sessions)
 function renderAdminReports() {
   const tbody = document.getElementById('admin-reports-table-body');
   if (!tbody) return;
@@ -1349,8 +1302,8 @@ function renderAdminReports() {
   tbody.innerHTML = list.map(s => `
     <tr>
       <td><code>${s.id}</code></td>
-      <td>${s.studentName}</td>
-      <td>${s.tutorName}</td>
+      <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${s.studentName}</span></td>
+      <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</span></td>
       <td>${s.subject}</td>
       <td>${s.date} ${s.timeSlot}</td>
       <td>₱${s.totalPaid}</td>

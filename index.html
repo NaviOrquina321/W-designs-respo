@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TutorLink — An Intelligent Tutor-Student Matching System</title>
+  <title>TutorLink - An Intelligent Tutor-Student Matching System</title>
   <meta name="description" content="TutorLink matches students with tutors suited to their learning needs, and handles scheduling, notifications, and payment in one place.">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -22,8 +22,8 @@
       </div>
 
       <div class="nav-actions">
-        <!-- Notification Bell SVG Icon -->
-        <button class="icon-btn" id="notif-bell-btn" title="Notifications" aria-label="Notifications">
+        <!-- Notification Bell SVG Icon (hidden on landing page view) -->
+        <button class="icon-btn hidden" id="notif-bell-btn" title="Notifications" aria-label="Notifications">
           <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -65,7 +65,7 @@
       <section class="hero">
         <div class="wrap">
           <h1>Find a tutor who actually fits how you learn</h1>
-          <p class="lead">TutorLink matches you with a tutor suited to your needs, handles scheduling and payment, and keeps you updated at every step — all in one place.</p>
+          <p class="lead">TutorLink matches you with a tutor suited to your needs, handles scheduling and payment, and keeps you updated at every step - all in one place.</p>
           <div class="actions">
             <button class="btn btn-primary" id="hero-find-tutor-btn">Find a Tutor</button>
             <button class="btn btn-secondary" id="hero-become-tutor-btn">Become a Tutor</button>
@@ -99,6 +99,40 @@
           <div class="problem-item">
             <h3>Tracking activity is a mess</h3>
             <p>Without one system, keeping a clear record of who's tutoring whom falls entirely on the admin.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="ai-landing-matching" id="ai-matching-landing-section">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Experience Intelligent AI Tutor Matching</h2>
+            <p>Select your subject and preferred learning style to find your top matched tutor instantly.</p>
+          </div>
+          <div class="landing-ai-widget-card">
+            <form id="landing-ai-form" class="form-grid">
+              <div class="form-group">
+                <label>Subject</label>
+                <select id="landing-subject" class="form-select">
+                  <option value="Mathematics">Mathematics & Algebra</option>
+                  <option value="Calculus">Calculus & Higher Math</option>
+                  <option value="Physics">Physics & Mechanics</option>
+                  <option value="English">English & Literature</option>
+                  <option value="Programming">Computer Programming</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Learning Style</label>
+                <select id="landing-style" class="form-select">
+                  <option value="Visual & Diagrams">Visual & Diagrams</option>
+                  <option value="Hands-on Practice">Hands-on Practice</option>
+                  <option value="Step-by-Step Explanation">Step-by-Step Explanations</option>
+                </select>
+              </div>
+              <div class="form-group" style="display: flex; align-items: flex-end;">
+                <button type="submit" class="btn btn-primary full-width" id="landing-ai-match-btn">Find Matched Tutor with AI</button>
+              </div>
+            </form>
           </div>
         </div>
       </section>
@@ -174,7 +208,7 @@
           <div class="audience-grid">
             <div class="audience-card">
               <h3>Students</h3>
-              <p>Find a tutor who matches how you learn, book sessions, and pay — all from one dashboard.</p>
+              <p>Find a tutor who matches how you learn, book sessions, and pay - all from one dashboard.</p>
             </div>
             <div class="audience-card">
               <h3>Tutors</h3>
@@ -323,7 +357,7 @@
       <div class="dashboard-container wrap">
         <div class="dashboard-header">
           <div>
-            <h2 id="tutor-welcome-heading">Tutor Portal — Prof. Alex Rivera</h2>
+            <h2 id="tutor-welcome-heading">Tutor Portal - Prof. Alex Rivera</h2>
             <p class="sub-text">Manage your teaching schedule, accept matched students, and launch live sessions.</p>
           </div>
           <div class="status-toggle-card">
@@ -769,7 +803,7 @@
   <div class="modal-backdrop" id="modal-calendar">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="calendar-modal-title">Calendar Scheduling — View Available Schedule</h3>
+        <h3 id="calendar-modal-title">Calendar Scheduling - View Available Schedule</h3>
         <button class="close-btn" id="close-calendar-modal">&times;</button>
       </div>
       <div class="modal-body">
@@ -968,6 +1002,32 @@
     </div>
   </div>
 
+
+  <!-- Modal 8: Student Profile Detail View Modal -->
+  <div class="modal-backdrop" id="modal-student-profile">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="student-profile-title">Student Profile</h3>
+        <button class="close-btn" id="close-student-profile-modal">&times;</button>
+      </div>
+      <div class="modal-body" id="student-profile-body">
+        <!-- Dynamic student profile contents -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 9: Tutor Profile Detail View Modal -->
+  <div class="modal-backdrop" id="modal-tutor-profile">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="tutor-profile-title">Tutor Profile</h3>
+        <button class="close-btn" id="close-tutor-profile-modal">&times;</button>
+      </div>
+      <div class="modal-body" id="tutor-profile-body">
+        <!-- Dynamic tutor profile contents -->
+      </div>
+    </div>
+  </div>
 
   <!-- Modal 7: Admin Printable Report View Modal -->
   <div class="modal-backdrop" id="modal-admin-report">
