@@ -360,6 +360,14 @@ function initNavigation() {
     openModal('modal-ai-matching');
   });
 
+  document.getElementById('landing-ai-card')?.addEventListener('click', () => {
+    openModal('modal-auth');
+    switchAuthTab('login');
+    const authRoleSelect = document.getElementById('auth-role');
+    if (authRoleSelect) authRoleSelect.value = 'student';
+    showToast('Please sign in as a Student to access AI Tutor Matching.');
+  });
+
   document.getElementById('tutor-search-input')?.addEventListener('input', (e) => {
     renderTutorDirectory(e.target.value.toLowerCase());
   });

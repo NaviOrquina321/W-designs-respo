@@ -207,20 +207,21 @@ nav.wrap {
 /* Admin Management Tab Bar & Auth Tabs */
 .admin-tab-bar, .auth-tab-bar {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 28px;
   overflow-x: auto;
   padding-bottom: 0;
+  scrollbar-width: thin;
 }
 
 .admin-tab-btn, .auth-tab-btn {
   background: transparent;
   border: none;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--ink-soft);
-  padding: 12px 18px;
+  padding: 10px 14px;
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease;
@@ -374,8 +375,8 @@ footer .wrap { padding-top: 48px; padding-bottom: 48px; }
 .session-card-info p { font-size: 0.92rem; color: var(--ink-soft); }
 
 /* Data Tables */
-.data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; }
-.data-table th, .data-table td { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+.data-table th, .data-table td { padding: 12px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .data-table th { background: var(--panel); font-weight: 700; color: var(--ink); border-top: 1px solid var(--line); }
 .data-table tr:hover { background: var(--panel); }
 
