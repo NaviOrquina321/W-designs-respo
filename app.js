@@ -187,7 +187,7 @@ const state = {
 };
 
 // DOM Content Loaded Handler
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initNavigation();
   initAuthModalTabs();
   initModals();
@@ -200,8 +200,102 @@ document.addEventListener('DOMContentLoaded', () => {
   initTutorScheduleManager();
   initProfileModals();
   initTutorProfileSettings();
+  await syncWithDatabase();
   renderAllViews();
 });
+
+// XAMPP / Database Synchronization Engine (With Offline Fallback)
+async function syncWithDatabase() {
+  try {
+    const resS = await fetch('api/students.php');
+    if (resS.ok) {
+      const jsonS = await resS.json();
+      if (jsonS.data && jsonS.data.length > 0) {
+        state.students = jsonS.data.map(s => ({
+          id: s.id,
+          name: s.name,
+          email: s.email,
+          grade: s.grade,
+          validated: Boolean(parseInt(s.validated)),
+          bio: s.bio,
+          subjectsNeeded: s.subjects_needed ? s.subjects_needed.split(',') : []
+        }));
+      }
+    }
+  } catch (e) {
+    console.log('XAMPP Backend offline, running on memory state.');
+  }
+
+  try {
+    const resT = await fetch('api/tutors.php');
+    if (resT.ok) {
+      const jsonT = await resT.json();
+      if (jsonT.data && jsonT.data.length > 0) {
+        state.tutors = jsonT.data.map(t => ({
+          id: t.id,
+          name: t.name,
+          initials: t.initials,
+          rating: parseFloat(t.rating),
+          reviewsCount: parseInt(t.reviews_count),
+          hourlyRate: parseInt(t.hourly_rate),
+          subjects: t.subjects.split(',').map(x => x.trim()),
+          learningStyles: t.learning_styles.split(',').map(x => x.trim()),
+          bio: t.bio,
+          available: Boolean(parseInt(t.available)),
+          availabilitySlots: ['09:00 AM', '11:00 AM', '02:00 PM', '04:00 PM']
+        }));
+      }
+    }
+  } catch (e) {
+    console.log('Tutors API fallback active.');
+  }
+}
+
+async function apiSaveStudent(studentObj) {
+  try {
+    await fetch('api/students.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: studentObj.id,
+        name: studentObj.name,
+        email: studentObj.email,
+        grade: studentObj.grade,
+        validated: studentObj.validated ? 1 : 0,
+        bio: studentObj.bio || '',
+        subjects_needed: Array.isArray(studentObj.subjectsNeeded) ? studentObj.subjectsNeeded.join(', ') : studentObj.subjectsNeeded
+      })
+    });
+  } catch (e) {
+    console.log('Saved to memory state (API offline).');
+  }
+}
+
+async function apiSaveSession(sessionObj) {
+  try {
+    await fetch('api/sessions.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: sessionObj.id,
+        student_name: sessionObj.studentName,
+        tutor_id: sessionObj.tutorId,
+        tutor_name: sessionObj.tutorName,
+        subject: sessionObj.subject,
+        session_date: sessionObj.date,
+        time_slot: sessionObj.timeSlot,
+        hourly_rate: sessionObj.hourlyRate,
+        commission_fee: sessionObj.commissionFee,
+        total_paid: sessionObj.totalPaid,
+        gcash_ref: sessionObj.gcashRef,
+        status: sessionObj.status,
+        notes: sessionObj.notes
+      })
+    });
+  } catch (e) {
+    console.log('Saved session to memory state (API offline).');
+  }
+}
 
 // Navigation Engine
 function initNavigation() {
