@@ -249,6 +249,22 @@ async function syncWithDatabase() {
   } catch (e) {
     console.log('Tutors API fallback active.');
   }
+
+  try {
+    const resA = await fetch('api/admin.php');
+    if (resA.ok) {
+      const jsonA = await resA.json();
+      if (jsonA.data) {
+        const d = jsonA.data;
+        document.getElementById('admin-stat-total-students').textContent = d.total_students;
+        document.getElementById('admin-stat-total-tutors').textContent = d.total_tutors;
+        document.getElementById('admin-stat-total-volume').textContent = `₱${d.total_volume.toLocaleString()}`;
+        document.getElementById('admin-stat-platform-commission').textContent = `₱${d.platform_commission.toLocaleString()}`;
+      }
+    }
+  } catch (e) {
+    console.log('Admin SQL stats API offline, computing from state.');
+  }
 }
 
 async function apiSaveStudent(studentObj) {
@@ -691,6 +707,7 @@ function renderAllViews() {
   renderStudentUpcoming();
   renderStudentHistory();
   renderTutorUpcoming();
+  renderAdminKPIs();
   renderAdminStudents();
   renderAdminMatching();
   renderAdminSchedule();
@@ -698,6 +715,23 @@ function renderAllViews() {
   renderAdminNotifications();
   renderAdminReports();
   updateNotificationBadge();
+}
+
+function renderAdminKPIs() {
+  const totalStudents = state.students.length;
+  const totalTutors = state.tutors.length;
+  const totalVolume = state.sessions.reduce((acc, s) => acc + (s.totalPaid || 0), 0);
+  const platformCommission = state.sessions.reduce((acc, s) => acc + (s.commissionFee || Math.round(s.totalPaid * 0.10)), 0);
+
+  const elStudents = document.getElementById('admin-stat-total-students');
+  const elTutors = document.getElementById('admin-stat-total-tutors');
+  const elVolume = document.getElementById('admin-stat-total-volume');
+  const elCommission = document.getElementById('admin-stat-platform-commission');
+
+  if (elStudents) elStudents.textContent = totalStudents;
+  if (elTutors) elTutors.textContent = totalTutors;
+  if (elVolume) elVolume.textContent = `₱${totalVolume.toLocaleString()}`;
+  if (elCommission) elCommission.textContent = `₱${platformCommission.toLocaleString()}`;
 }
 
 // Render Featured Tutor Directory
