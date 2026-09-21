@@ -357,7 +357,7 @@
           </div>
         </div>
 
-        <!-- Tutor Sub-Navigation Tabs (Streamlined to 4 Tabs) -->
+        <!-- Tutor Sub-Navigation Tabs (Uniform Design & Sizing) -->
         <div class="admin-tab-bar margin-bottom">
           <button class="tutor-tab-btn active" data-tab="tutor-tab-availability">Availability & Schedule</button>
           <button class="tutor-tab-btn" data-tab="tutor-tab-requests">Match Requests</button>
@@ -370,6 +370,7 @@
           <div class="dashboard-section">
             <div class="section-title-bar">
               <h3>Weekly Availability & Schedule Window</h3>
+              <button class="btn btn-secondary btn-small" id="tutor-add-slot-modal-btn">+ Add Custom Slot</button>
             </div>
             <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 20px; border-radius: 6px; margin-bottom: 20px;">
               <form id="tutor-availability-settings-form">
@@ -395,7 +396,10 @@
                     <input type="text" id="tutor-blocked-dates-input" class="form-input" placeholder="e.g. 2026-03-25">
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary btn-small margin-top">Save Availability</button>
+                <div style="display: flex; gap: 10px;" class="margin-top">
+                  <button type="submit" class="btn btn-primary btn-small">Save Availability</button>
+                  <button type="button" class="btn btn-secondary btn-small" id="tutor-reset-availability-btn">Reset Defaults</button>
+                </div>
               </form>
             </div>
           </div>

@@ -605,6 +605,26 @@ function initTutorSubTabs() {
     });
   });
 
+  document.getElementById('tutor-add-slot-modal-btn')?.addEventListener('click', () => {
+    const slot = prompt('Enter custom availability time slot (e.g. 08:00 AM - 10:00 AM):', '08:00 AM - 10:00 AM');
+    if (slot) {
+      const currentTutor = state.tutors.find(t => t.id === 'tut-1') || state.tutors[0];
+      if (currentTutor) {
+        currentTutor.availabilitySlots.push(slot);
+      }
+      showToast(`Custom slot "${slot}" added to availability!`);
+    }
+  });
+
+  document.getElementById('tutor-reset-availability-btn')?.addEventListener('click', () => {
+    document.getElementById('tutor-time-window-input').value = '09:00 AM - 05:00 PM';
+    document.getElementById('tutor-blocked-dates-input').value = '';
+    document.querySelectorAll('input[name="avail_day"]').forEach(cb => {
+      cb.checked = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].includes(cb.value);
+    });
+    showToast('Reset availability settings to default weekdays!');
+  });
+
   document.getElementById('tutor-availability-settings-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const checkedDays = Array.from(document.querySelectorAll('input[name="avail_day"]:checked')).map(cb => cb.value);
@@ -931,22 +951,36 @@ function renderTutorUpcoming() {
     <div class="session-card">
       <div class="session-card-info">
         <h4>${s.subject} with Student <strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${s.studentName}</strong></h4>
-        <p>Date: ${s.date} | Time: ${s.timeSlot} | Earnings: <strong>P${s.hourlyRate}</strong></p>
+        <p>Date: ${s.date} | Time: ${s.timeSlot} | Fee: <strong>P${s.hourlyRate}</strong></p>
       </div>
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
         <span class="badge ${s.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${s.status}</span>
         <button class="btn btn-primary btn-small" onclick="launchWorkspace('${s.id}')">
           Launch Session
         </button>
+        <button class="btn btn-secondary btn-small" onclick="requestRescheduleSession('${s.id}')">
+          Reschedule
+        </button>
         ${s.status !== 'Completed' ? `
           <button class="btn btn-secondary btn-small" onclick="markSessionCompleted('${s.id}')">
-            Mark as Completed
+            Complete
           </button>
         ` : ''}
       </div>
     </div>
   `).join('');
 }
+
+window.requestRescheduleSession = function(sessionId) {
+  const newTime = prompt('Enter proposed reschedule time slot (e.g. Tomorrow 03:00 PM):', 'Tomorrow 03:00 PM');
+  if (newTime) {
+    showToast(`Reschedule request sent to student for session ${sessionId}.`);
+  }
+};
+
+window.downloadSessionInvoice = function(sessionId) {
+  showToast(`Downloading Official Receipt & Invoice for Session ${sessionId}...`);
+};
 
 function renderTutorRequests() {
   const tbody = document.getElementById('tutor-requests-table-body');
@@ -961,9 +995,9 @@ function renderTutorRequests() {
       <td><span class="badge ${m.status === 'Approved' ? 'badge-success' : 'badge-info'}">${m.status}</span></td>
       <td>
         ${m.status === 'Pending Review' ? `
-          <button class="btn btn-primary btn-small" onclick="approveMatch('${m.id}')">Accept Match</button>
+          <button class="btn btn-primary btn-small" onclick="approveMatch('${m.id}')">Accept</button>
           <button class="btn btn-secondary btn-small" onclick="cancelMatch('${m.id}')">Decline</button>
-        ` : `<span class="sub-text">Handled</span>`}
+        ` : `<span class="badge badge-success">Accepted</span>`}
       </td>
     </tr>
   `).join('');
@@ -985,7 +1019,10 @@ function renderTutorEarnings() {
         <td>${s.date}</td>
         <td>P${s.totalPaid}</td>
         <td><strong>P${netPayout}</strong></td>
-        <td><span class="badge ${s.payoutStatus === 'Paid Out' ? 'badge-success' : 'badge-info'}">${s.payoutStatus || 'Unpaid'}</span></td>
+        <td>
+          <span class="badge ${s.payoutStatus === 'Paid Out' ? 'badge-success' : 'badge-info'}">${s.payoutStatus || 'Unpaid'}</span>
+          <button class="btn btn-secondary btn-small" style="margin-left: 6px;" onclick="downloadSessionInvoice('${s.id}')">Receipt</button>
+        </td>
       </tr>
     `;
   }).join('');
