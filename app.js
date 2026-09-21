@@ -834,10 +834,12 @@ function renderStudentUpcoming() {
   const upcomingStatEl = document.getElementById('student-stat-upcoming');
   const completedStatEl = document.getElementById('student-stat-completed');
   const spentStatEl = document.getElementById('student-stat-spent');
+  const ratingStatEl = document.getElementById('student-stat-rating');
 
   if (upcomingStatEl) upcomingStatEl.textContent = upcoming.length;
   if (completedStatEl) completedStatEl.textContent = completed.length;
   if (spentStatEl) spentStatEl.textContent = `P${totalSpent}`;
+  if (ratingStatEl) ratingStatEl.textContent = completed.length > 0 ? '5.0 ★' : 'New';
 
   if (upcoming.length === 0) {
     container.innerHTML = `<p class="sub-text">No upcoming scheduled sessions. Use AI Matching or Browse Tutors to book one!</p>`;
@@ -1023,7 +1025,8 @@ function renderTutorUpcoming() {
   const container = document.getElementById('tutor-upcoming-sessions-list');
   if (!container) return;
 
-  const tutorSessions = state.sessions.filter(s => s.tutorName.includes('Alex') || (state.currentUser && s.tutorName === state.currentUser.name));
+  const currentTutorName = state.currentUser ? state.currentUser.name : 'Prof. Alex Rivera';
+  const tutorSessions = state.sessions.filter(s => s.tutorName === currentTutorName);
 
   if (tutorSessions.length === 0) {
     container.innerHTML = `<div style="background: var(--panel); padding: 24px; border-radius: 6px; text-align: center; border: 1px solid var(--line); color: var(--ink-soft);"><p>No active teaching sessions scheduled at the moment. New student bookings will appear here automatically.</p></div>`;
@@ -1106,13 +1109,22 @@ function renderTutorEarnings() {
   const earningsEl = document.getElementById('tutor-stat-earnings');
   const studentsEl = document.getElementById('tutor-stat-students');
   const sessionsEl = document.getElementById('tutor-stat-sessions');
+  const tutorRatingEl = document.getElementById('tutor-stat-rating');
 
   const totalEarnings = tutorSessions.reduce((sum, s) => sum + Math.round((s.totalPaid || 0) * 0.90), 0);
   const uniqueStudents = new Set(tutorSessions.map(s => s.studentName)).size;
+  const currentTutorObj = state.tutors.find(t => t.name === currentTutorName);
 
   if (earningsEl) earningsEl.textContent = `P${totalEarnings}`;
   if (studentsEl) studentsEl.textContent = uniqueStudents;
   if (sessionsEl) sessionsEl.textContent = tutorSessions.length;
+  if (tutorRatingEl) {
+    if (currentTutorObj && currentTutorObj.reviewsCount > 0) {
+      tutorRatingEl.textContent = `${currentTutorObj.rating} ★`;
+    } else {
+      tutorRatingEl.textContent = 'New';
+    }
+  }
 
   if (tutorSessions.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 20px;">No earnings or payout history yet. Completed sessions will generate payout records here.</td></tr>`;
@@ -1196,12 +1208,33 @@ function initAIMatching() {
     const style = document.getElementById('match-style').value;
     const time = document.getElementById('match-time').value;
 
-    const matches = state.tutors.filter(t => !t.deactivated).map(tutor => {
-      let score = 60;
+    // Available active tutors
+    let availableTutors = state.tutors.filter(t => !t.deactivated);
 
-      if (tutor.subjects.includes(subject)) score += 25;
-      if (tutor.learningStyles.some(s => style.includes(s) || s.includes(style))) score += 10;
-      if (tutor.rating >= 4.8) score += 5;
+    // If no tutors exist in state yet, provide an AI recommended tutor candidate
+    if (availableTutors.length === 0) {
+      availableTutors = [{
+        id: 'tut-recommended',
+        name: 'Prof. Alex Rivera',
+        initials: 'AR',
+        rating: 5.0,
+        reviewsCount: 0,
+        hourlyRate: 350,
+        subjects: [subject, 'Mathematics'],
+        learningStyles: [style],
+        bio: `${subject} Specialist Tutor paired via AI Matching.`,
+        availableDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        availabilitySlots: ['09:00 AM', '02:00 PM', '04:00 PM'],
+        available: true,
+        deactivated: false
+      }];
+    }
+
+    const matches = availableTutors.map(tutor => {
+      let score = 75;
+
+      if (tutor.subjects && tutor.subjects.includes(subject)) score += 15;
+      if (tutor.learningStyles && tutor.learningStyles.some(s => style.includes(s) || s.includes(style))) score += 8;
 
       const compatibility = Math.min(score, 98);
 
@@ -1212,9 +1245,9 @@ function initAIMatching() {
     state.matches.unshift({
       id: 'MATCH-' + Math.floor(100 + Math.random() * 900),
       studentName: state.currentUser ? state.currentUser.name : 'Maria Santos',
-      tutorName: topMatch ? topMatch.name : 'Prof. Alex Rivera',
+      tutorName: topMatch.name,
       subject: subject,
-      score: topMatch ? topMatch.matchScore : 95,
+      score: topMatch.matchScore,
       status: 'Pending Review',
       matchReason: `Matched based on ${subject} expertise and ${style} learning preference.`
     });
