@@ -357,26 +357,25 @@
           </div>
         </div>
 
-        <!-- Tutor Sub-Navigation Tabs -->
+        <!-- Tutor Sub-Navigation Tabs (Streamlined to 4 Tabs) -->
         <div class="admin-tab-bar margin-bottom">
-          <button class="tutor-tab-btn active" data-tab="tutor-tab-availability">Manage Availability</button>
-          <button class="tutor-tab-btn" data-tab="tutor-tab-requests">Manage Match Requests</button>
-          <button class="tutor-tab-btn" data-tab="tutor-tab-sessions">Manage Sessions</button>
-          <button class="tutor-tab-btn" data-tab="tutor-tab-earnings">View Earnings</button>
-          <button class="tutor-tab-btn" data-tab="tutor-tab-reports">View Reports</button>
+          <button class="tutor-tab-btn active" data-tab="tutor-tab-availability">Availability & Schedule</button>
+          <button class="tutor-tab-btn" data-tab="tutor-tab-requests">Match Requests</button>
+          <button class="tutor-tab-btn" data-tab="tutor-tab-sessions">Teaching Sessions</button>
+          <button class="tutor-tab-btn" data-tab="tutor-tab-earnings">Earnings & Performance</button>
         </div>
 
-        <!-- Tutor Tab 1: Manage Availability -->
+        <!-- Tutor Tab 1: Availability & Schedule -->
         <div class="tutor-tab-content active" id="tutor-tab-availability">
           <div class="dashboard-section">
             <div class="section-title-bar">
-              <h3>Manage Weekly Availability & Schedule Slots</h3>
+              <h3>Weekly Availability & Schedule Window</h3>
             </div>
-            <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 20px; border-radius: 4px; margin-bottom: 20px;">
+            <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 20px; border-radius: 6px; margin-bottom: 20px;">
               <form id="tutor-availability-settings-form">
                 <div class="form-group">
-                  <label>Available Days of the Week</label>
-                  <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px;">
+                  <label>Available Days</label>
+                  <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px;">
                     <label><input type="checkbox" name="avail_day" value="Mon" checked> Mon</label>
                     <label><input type="checkbox" name="avail_day" value="Tue" checked> Tue</label>
                     <label><input type="checkbox" name="avail_day" value="Wed" checked> Wed</label>
@@ -392,40 +391,17 @@
                     <input type="text" id="tutor-time-window-input" class="form-input" value="09:00 AM - 05:00 PM">
                   </div>
                   <div class="form-group">
-                    <label>Block Unavailable Dates (e.g. 2026-03-25)</label>
-                    <input type="text" id="tutor-blocked-dates-input" class="form-input" placeholder="YYYY-MM-DD">
+                    <label>Block Dates (YYYY-MM-DD)</label>
+                    <input type="text" id="tutor-blocked-dates-input" class="form-input" placeholder="e.g. 2026-03-25">
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary btn-small margin-top">Update Availability Settings</button>
+                <button type="submit" class="btn btn-primary btn-small margin-top">Save Availability</button>
               </form>
-            </div>
-
-            <div class="section-title-bar">
-              <h3>Add Specific Schedule Slot</h3>
-              <button class="btn btn-secondary btn-small" id="tutor-toggle-add-slot-btn">+ Add Slot</button>
-            </div>
-            <div class="schedule-creator-box hidden" id="tutor-new-schedule-form">
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Date</label>
-                  <input type="date" id="tutor-slot-date" class="form-input">
-                </div>
-                <div class="form-group">
-                  <label>Time Slot</label>
-                  <input type="text" id="tutor-slot-time" placeholder="e.g. 02:00 PM - 03:00 PM" class="form-input">
-                </div>
-                <div class="form-group">
-                  <label>Subject</label>
-                  <input type="text" id="tutor-slot-subject" placeholder="e.g. Calculus II" class="form-input">
-                </div>
-              </div>
-              <button class="btn btn-primary btn-small" id="tutor-save-slot-btn">Save Calendar Slot</button>
-              <button class="btn btn-secondary btn-small" id="tutor-cancel-slot-btn">Cancel</button>
             </div>
           </div>
         </div>
 
-        <!-- Tutor Tab 2: Manage Match Requests -->
+        <!-- Tutor Tab 2: Match Requests -->
         <div class="tutor-tab-content" id="tutor-tab-requests">
           <div class="dashboard-section">
             <div class="section-title-bar">
@@ -437,9 +413,9 @@
                   <th>Request ID</th>
                   <th>Student Name</th>
                   <th>Subject</th>
-                  <th>Compatibility Score</th>
+                  <th>Compatibility</th>
                   <th>Status</th>
-                  <th>Actions</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody id="tutor-requests-table-body">
@@ -449,7 +425,7 @@
           </div>
         </div>
 
-        <!-- Tutor Tab 3: Manage Sessions -->
+        <!-- Tutor Tab 3: Teaching Sessions -->
         <div class="tutor-tab-content" id="tutor-tab-sessions">
           <div class="dashboard-section">
             <div class="section-title-bar">
@@ -461,16 +437,16 @@
           </div>
         </div>
 
-        <!-- Tutor Tab 4: View Earnings -->
+        <!-- Tutor Tab 4: Earnings & Performance -->
         <div class="tutor-tab-content" id="tutor-tab-earnings">
           <div class="dashboard-section">
             <div class="section-title-bar">
-              <h3>Earnings Summary & Payout History</h3>
+              <h3>Earnings & Performance Summary</h3>
             </div>
             <div class="stats-grid margin-bottom">
               <div class="stat-card">
                 <span class="stat-num" id="tutor-gross-earnings">₱4,950</span>
-                <span class="stat-label">Gross Tutoring Revenue</span>
+                <span class="stat-label">Gross Revenue</span>
               </div>
               <div class="stat-card">
                 <span class="stat-num" id="tutor-net-earnings">₱4,455</span>
@@ -490,40 +466,11 @@
                   <th>Date</th>
                   <th>Total Paid</th>
                   <th>Net Payout</th>
-                  <th>Payout Status</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody id="tutor-earnings-table-body">
                 <!-- Dynamic earnings rows -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Tutor Tab 5: View Reports -->
-        <div class="tutor-tab-content" id="tutor-tab-reports">
-          <div class="dashboard-section">
-            <div class="section-title-bar">
-              <h3>Tutoring Reports & Performance</h3>
-            </div>
-            <div class="report-summary-boxes margin-bottom">
-              <div><strong>Total Hours Taught:</strong> <span>18 Hours</span></div>
-              <div><strong>Completed Sessions:</strong> <span id="tutor-report-completed-count">9 Sessions</span></div>
-              <div><strong>Average Rating:</strong> <span>4.9 / 5.0 Stars</span></div>
-            </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Session ID</th>
-                  <th>Student</th>
-                  <th>Subject</th>
-                  <th>Date & Time</th>
-                  <th>Earnings</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="tutor-reports-table-body">
-                <!-- Dynamic report rows -->
               </tbody>
             </table>
           </div>

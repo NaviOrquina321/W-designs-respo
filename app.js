@@ -592,7 +592,7 @@ function closeModal(id) {
   if (modal) modal.classList.remove('active');
 }
 
-// Tutor Portal Sub-Tabs Logic
+// Tutor Portal Sub-Tabs Logic (Streamlined 4 Tabs)
 function initTutorSubTabs() {
   document.querySelectorAll('.tutor-tab-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -603,10 +603,6 @@ function initTutorSubTabs() {
       const targetTab = e.target.getAttribute('data-tab');
       document.getElementById(targetTab)?.classList.add('active');
     });
-  });
-
-  document.getElementById('tutor-toggle-add-slot-btn')?.addEventListener('click', () => {
-    document.getElementById('tutor-new-schedule-form')?.classList.toggle('hidden');
   });
 
   document.getElementById('tutor-availability-settings-form')?.addEventListener('submit', (e) => {
@@ -803,7 +799,6 @@ function renderAllViews() {
   renderTutorUpcoming();
   renderTutorRequests();
   renderTutorEarnings();
-  renderTutorReports();
   renderAdminKPIs();
   renderAdminStudents();
   renderAdminTutors();
@@ -994,24 +989,6 @@ function renderTutorEarnings() {
       </tr>
     `;
   }).join('');
-}
-
-function renderTutorReports() {
-  const tbody = document.getElementById('tutor-reports-table-body');
-  if (!tbody) return;
-
-  const tutorSessions = state.sessions.filter(s => s.tutorName.includes('Alex') || (state.currentUser && s.tutorName === state.currentUser.name));
-
-  tbody.innerHTML = tutorSessions.map(s => `
-    <tr>
-      <td><code>${s.id}</code></td>
-      <td>${s.studentName}</td>
-      <td>${s.subject}</td>
-      <td>${s.date} ${s.timeSlot}</td>
-      <td>P${Math.round(s.totalPaid * 0.90)}</td>
-      <td><span class="badge badge-success">${s.status}</span></td>
-    </tr>
-  `).join('');
 }
 
 window.markSessionCompleted = function(sessionId) {
@@ -1552,10 +1529,10 @@ function renderAdminStudents() {
       <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${s.id}')">${s.name}</strong></td>
       <td>${s.email}</td>
       <td>${s.grade}</td>
-      <td><span class="badge ${s.validated ? 'badge-success' : 'badge-info'}">${s.validated ? 'Validated' : 'Pending Validation'}</span></td>
+      <td><span class="badge ${s.validated ? 'badge-success' : 'badge-info'}">${s.validated ? 'Validated' : 'Pending'}</span></td>
       <td><span class="badge ${s.deactivated ? 'badge-danger' : 'badge-success'}">${s.deactivated ? 'Deactivated' : 'Active'}</span></td>
       <td>
-        <button class="btn btn-secondary btn-small" onclick="viewStudentProfile('${s.id}')">View Profile</button>
+        <button class="btn btn-secondary btn-small" onclick="viewStudentProfile('${s.id}')">Profile</button>
         <button class="btn btn-secondary btn-small" onclick="toggleValidateStudent('${s.id}')">
           ${s.validated ? 'Revoke' : 'Validate'}
         </button>
@@ -1597,10 +1574,10 @@ function renderAdminTutors() {
       <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${t.id}')">${t.name}</strong></td>
       <td>${t.subjects.join(', ')}</td>
       <td>
-        <div style="font-size: 0.85rem;">
+        <div style="font-size: 0.82rem;">
           Diploma: <span class="badge ${t.diplomaStatus === 'Verified' ? 'badge-success' : 'badge-info'}" style="cursor: pointer;" onclick="verifyTutorDoc('${t.id}', 'diploma')">${t.diplomaStatus}</span><br>
           TOR: <span class="badge ${t.torStatus === 'Verified' ? 'badge-success' : 'badge-info'}" style="cursor: pointer;" onclick="verifyTutorDoc('${t.id}', 'tor')">${t.torStatus}</span><br>
-          ID Card: <span class="badge ${t.idStatus === 'Verified' ? 'badge-success' : 'badge-info'}" style="cursor: pointer;" onclick="verifyTutorDoc('${t.id}', 'id')">${t.idStatus}</span>
+          ID: <span class="badge ${t.idStatus === 'Verified' ? 'badge-success' : 'badge-info'}" style="cursor: pointer;" onclick="verifyTutorDoc('${t.id}', 'id')">${t.idStatus}</span>
         </div>
       </td>
       <td><span class="badge ${t.approvalStatus === 'Approved' ? 'badge-success' : 'badge-info'}">${t.approvalStatus}</span></td>
@@ -1726,7 +1703,7 @@ function renderAdminSchedule() {
       <td>${sch.subject}</td>
       <td><span class="badge ${sch.status === 'Available' ? 'badge-success' : 'badge-info'}">${sch.status}</span></td>
       <td>
-        <button class="btn btn-secondary btn-small" onclick="deleteScheduleSlot('${sch.id}')">Modify / Remove</button>
+        <button class="btn btn-secondary btn-small" onclick="deleteScheduleSlot('${sch.id}')">Remove Slot</button>
       </td>
     </tr>
   `).join('');
