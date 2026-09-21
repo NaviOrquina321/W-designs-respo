@@ -19,11 +19,18 @@ if ($method === 'GET') {
     $validated = isset($input['validated']) ? ($input['validated'] ? 1 : 0) : 1;
     $bio = $input['bio'] ?? '';
     $subjectsNeeded = $input['subjects_needed'] ?? '';
+    $isNew = isset($input['is_new_registration']) && $input['is_new_registration'];
 
     $stmt = $pdo->prepare("INSERT INTO students (id, name, email, grade, validated, bio, subjects_needed)
                            VALUES (?, ?, ?, ?, ?, ?, ?)
                            ON DUPLICATE KEY UPDATE name=?, grade=?, bio=?, subjects_needed=?");
     $stmt->execute([$id, $name, $email, $grade, $validated, $bio, $subjectsNeeded, $name, $grade, $bio, $subjectsNeeded]);
+
+    if ($isNew) {
+        $notifId = 'notif-' . time() . '-' . rand(100, 999);
+        $notifStmt = $pdo->prepare("INSERT INTO notifications (id, target, title, message) VALUES (?, 'admin', 'New Student Registered', ?)");
+        $notifStmt->execute([$notifId, "New student registered: $name ($email)"]);
+    }
 
     echo json_encode(['status' => 'success', 'message' => 'Student saved successfully', 'id' => $id]);
 }

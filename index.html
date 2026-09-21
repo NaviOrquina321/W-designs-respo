@@ -372,10 +372,10 @@
               <h3>Weekly Availability & Schedule Window</h3>
               <button class="btn btn-secondary btn-small" id="tutor-add-slot-modal-btn">+ Add Custom Slot</button>
             </div>
-            <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+            <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 22px; border-radius: 6px; margin-bottom: 24px;">
               <form id="tutor-availability-settings-form">
                 <div class="form-group">
-                  <label>Available Days</label>
+                  <label>Weekly Working Days</label>
                   <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px;">
                     <label><input type="checkbox" name="avail_day" value="Mon" checked> Mon</label>
                     <label><input type="checkbox" name="avail_day" value="Tue" checked> Tue</label>
@@ -388,11 +388,11 @@
                 </div>
                 <div class="form-row margin-top">
                   <div class="form-group">
-                    <label>Available Time Window</label>
+                    <label>Daily Teaching Window</label>
                     <input type="text" id="tutor-time-window-input" class="form-input" value="09:00 AM - 05:00 PM">
                   </div>
                   <div class="form-group">
-                    <label>Block Dates (YYYY-MM-DD)</label>
+                    <label>Block Unavailable Dates (YYYY-MM-DD)</label>
                     <input type="text" id="tutor-blocked-dates-input" class="form-input" placeholder="e.g. 2026-03-25">
                   </div>
                 </div>
@@ -401,6 +401,13 @@
                   <button type="button" class="btn btn-secondary btn-small" id="tutor-reset-availability-btn">Reset Defaults</button>
                 </div>
               </form>
+            </div>
+
+            <div class="section-title-bar">
+              <h3>Active Availability Slots</h3>
+            </div>
+            <div id="tutor-active-slots-display" class="slots-grid">
+              <!-- Rendered slots -->
             </div>
           </div>
         </div>

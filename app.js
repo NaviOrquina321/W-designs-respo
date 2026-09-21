@@ -548,7 +548,7 @@ function initAuthModalTabs() {
   tabRegister?.addEventListener('click', () => switchAuthTab('register'));
 
   const registerForm = document.getElementById('register-form');
-  registerForm?.addEventListener('submit', (e) => {
+  registerForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const role = document.getElementById('reg-role').value;
     const fullname = document.getElementById('reg-fullname').value;
@@ -556,8 +556,9 @@ function initAuthModalTabs() {
     const specialty = document.getElementById('reg-specialty').value;
 
     if (role === 'student') {
+      const newId = 'STU-' + Math.floor(100 + Math.random() * 900);
       const newStudent = {
-        id: 'STU-' + Math.floor(100 + Math.random() * 900),
+        id: newId,
         name: fullname,
         email: email,
         grade: specialty,
@@ -568,10 +569,35 @@ function initAuthModalTabs() {
         sessionsCompleted: 0
       };
       state.students.unshift(newStudent);
-      switchRole('student', { name: fullname, role: 'student' });
+
+      // Create Admin Notification ONLY
+      state.notifications.unshift({
+        id: 'notif-' + Date.now(),
+        targetRole: 'admin',
+        target: 'System Admin',
+        title: 'New Student Registered',
+        message: `New student registered: ${fullname} (${email})`,
+        time: 'Just now',
+        read: false
+      });
+
+      // API save
+      try {
+        await fetch('api/students.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...newStudent, is_new_registration: true, subjects_needed: specialty })
+        });
+      } catch (err) { console.log('Offline API fallback'); }
+
+      // Clear sessions for fresh isolated user state
+      state.sessions = state.sessions.filter(s => s.studentName !== fullname);
+
+      switchRole('student', { name: fullname, role: 'student', id: newId });
     } else {
+      const newId = 'tut-' + (state.tutors.length + 1);
       const newTutor = {
-        id: 'tut-' + (state.tutors.length + 1),
+        id: newId,
         name: fullname,
         initials: fullname.split(' ').map(n => n[0]).join(''),
         rating: 5.0,
@@ -592,7 +618,28 @@ function initAuthModalTabs() {
         approvalStatus: 'Pending Review'
       };
       state.tutors.unshift(newTutor);
-      switchRole('tutor', { name: fullname, role: 'tutor' });
+
+      // Create Admin Notification ONLY
+      state.notifications.unshift({
+        id: 'notif-' + Date.now(),
+        targetRole: 'admin',
+        target: 'System Admin',
+        title: 'New Tutor Registered',
+        message: `New tutor registered: ${fullname} (${specialty})`,
+        time: 'Just now',
+        read: false
+      });
+
+      // API save
+      try {
+        await fetch('api/tutors.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...newTutor, is_new_registration: true, subjects: specialty, learning_styles: 'Step-by-Step Explanation' })
+        });
+      } catch (err) { console.log('Offline API fallback'); }
+
+      switchRole('tutor', { name: fullname, role: 'tutor', id: newId });
     }
 
     closeModal('modal-auth');
@@ -693,8 +740,10 @@ function initTutorSubTabs() {
       currentTutor.blockedDates = blockedVal;
     }
 
+    renderTutorSlots();
     showToast('Tutor availability schedule updated!');
   });
+  renderTutorSlots();
 }
 
 // Profile Modals & Settings Functionality
@@ -1016,6 +1065,30 @@ window.viewPaymentReceipt = function(sessionId) {
 };
 
 // Render Tutor Dashboard Sessions & Schedule
+function renderTutorSlots() {
+  const container = document.getElementById('tutor-active-slots-display');
+  if (!container) return;
+
+  const currentTutor = state.tutors.find(t => t.id === 'tut-1') || state.tutors[0];
+  if (!currentTutor || !currentTutor.availabilitySlots) return;
+
+  container.innerHTML = currentTutor.availabilitySlots.map((slot, idx) => `
+    <div class="slot-chip selected" style="cursor: default; display: flex; justify-content: space-between; align-items: center;">
+      <span>${slot}</span>
+      <button style="background: none; border: none; color: white; cursor: pointer; font-size: 1rem; margin-left: 6px;" onclick="removeTutorSlot(${idx})">&times;</button>
+    </div>
+  `).join('');
+}
+
+window.removeTutorSlot = function(idx) {
+  const currentTutor = state.tutors.find(t => t.id === 'tut-1') || state.tutors[0];
+  if (currentTutor && currentTutor.availabilitySlots) {
+    currentTutor.availabilitySlots.splice(idx, 1);
+    renderTutorSlots();
+    showToast('Availability slot removed.');
+  }
+};
+
 function renderTutorUpcoming() {
   const container = document.getElementById('tutor-upcoming-sessions-list');
   if (!container) return;

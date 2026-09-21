@@ -16,8 +16,8 @@ if ($method === 'GET') {
 
     if ($action === 'verify_credentials') {
         $id = $input['id'] ?? '';
-        $doc = $input['doc_type'] ?? 'diploma'; // diploma, tor, id
-        $status = $input['status'] ?? 'Verified'; // Verified, Pending, Rejected
+        $doc = $input['doc_type'] ?? 'diploma';
+        $status = $input['status'] ?? 'Verified';
 
         $col = ($doc === 'tor') ? 'tor_status' : (($doc === 'id') ? 'id_status' : 'diploma_status');
         $stmt = $pdo->prepare("UPDATE tutors SET $col = ? WHERE id = ?");
@@ -29,7 +29,7 @@ if ($method === 'GET') {
 
     if ($action === 'update_approval') {
         $id = $input['id'] ?? '';
-        $status = $input['approval_status'] ?? 'Approved'; // Approved, Pending, Rejected
+        $status = $input['approval_status'] ?? 'Approved';
 
         $stmt = $pdo->prepare("UPDATE tutors SET approval_status = ? WHERE id = ?");
         $stmt->execute([$status, $id]);
@@ -49,7 +49,7 @@ if ($method === 'GET') {
         exit();
     }
 
-    $id = $input['id'] ?? ('tut-' . rand(1, 99));
+    $id = $input['id'] ?? ('tut-' . rand(10, 99));
     $name = $input['name'] ?? '';
     $initials = $input['initials'] ?? '';
     $rating = $input['rating'] ?? 5.0;
@@ -63,12 +63,19 @@ if ($method === 'GET') {
     $availableDays = $input['available_days'] ?? 'Mon,Tue,Wed,Thu,Fri';
     $availableTimeSlots = $input['available_time_slots'] ?? '09:00 AM - 05:00 PM';
     $blockedDates = $input['blocked_dates'] ?? '';
+    $isNew = isset($input['is_new_registration']) && $input['is_new_registration'];
 
     $stmt = $pdo->prepare("INSERT INTO tutors (id, name, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, available_days, available_time_slots, blocked_dates)
                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                            ON DUPLICATE KEY UPDATE hourly_rate=?, subjects=?, learning_styles=?, bio=?, available=?, deactivated=?, available_days=?, available_time_slots=?, blocked_dates=?");
     $stmt->execute([$id, $name, $initials, $rating, $reviewsCount, $hourlyRate, $subjects, $learningStyles, $bio, $available, $deactivated, $availableDays, $availableTimeSlots, $blockedDates, $hourlyRate, $subjects, $learningStyles, $bio, $available, $deactivated, $availableDays, $availableTimeSlots, $blockedDates]);
 
-    echo json_encode(['status' => 'success', 'message' => 'Tutor profile updated successfully']);
+    if ($isNew) {
+        $notifId = 'notif-' . time() . '-' . rand(100, 999);
+        $notifStmt = $pdo->prepare("INSERT INTO notifications (id, target, title, message) VALUES (?, 'admin', 'New Tutor Registered', ?)");
+        $notifStmt->execute([$notifId, "New tutor registered: $name ($subjects)"]);
+    }
+
+    echo json_encode(['status' => 'success', 'message' => 'Tutor profile saved successfully', 'id' => $id]);
 }
 ?>
