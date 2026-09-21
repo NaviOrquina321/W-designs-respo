@@ -991,12 +991,13 @@ function renderTutorDirectory(searchTerm = '') {
   `).join('');
 }
 
-// Render Student Upcoming Sessions
+// Render Student Upcoming Sessions - Filtered Strictly by Active Student User
 function renderStudentUpcoming() {
   const container = document.getElementById('student-upcoming-sessions-list');
   if (!container) return;
 
-  const upcoming = state.sessions.filter(s => s.status === 'Confirmed');
+  const currentStudentName = state.currentUser ? state.currentUser.name : 'Maria Santos';
+  const upcoming = state.sessions.filter(s => s.studentName === currentStudentName && s.status === 'Confirmed');
 
   if (upcoming.length === 0) {
     container.innerHTML = `<p class="sub-text">No upcoming scheduled sessions. Use AI Matching or Browse Tutors to book one!</p>`;
@@ -1019,17 +1020,22 @@ function renderStudentUpcoming() {
   `).join('');
 }
 
-// Render Student History Table with View Receipt Action
+// Render Student History Table with View Receipt Action - Isolated by Active Student
 function renderStudentHistory() {
   const tbody = document.getElementById('student-history-table-body');
   if (!tbody) return;
 
-  if (state.sessions.length === 0) {
+  const currentStudentName = state.currentUser ? state.currentUser.name : 'Maria Santos';
+  const userSessions = state.sessions.filter(s => s.studentName === currentStudentName);
+
+  if (userSessions.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 20px;">No session history available yet. Book your first tutor to get started!</td></tr>`;
+    const spentEl = document.getElementById('student-stat-spent');
+    if (spentEl) spentEl.textContent = `P0`;
     return;
   }
 
-  tbody.innerHTML = state.sessions.map(s => `
+  tbody.innerHTML = userSessions.map(s => `
     <tr>
       <td>${s.date} (${s.timeSlot})</td>
       <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</strong></td>
