@@ -571,97 +571,89 @@ function initAuthModalTabs() {
     const role = document.getElementById('reg-role').value;
     const fullname = document.getElementById('reg-fullname').value;
     const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
     const specialty = document.getElementById('reg-specialty').value;
 
-    if (role === 'student') {
-      const newId = 'STU-' + Math.floor(100 + Math.random() * 900);
-      const newStudent = {
-        id: newId,
-        name: fullname,
-        email: email,
-        grade: specialty,
-        validated: true,
-        deactivated: false,
-        bio: `${specialty} Student eager to connect with expert tutors on TutorLink.`,
-        subjectsNeeded: [specialty],
-        sessionsCompleted: 0
-      };
-      state.students.unshift(newStudent);
-
-      // Create Admin Notification ONLY
-      state.notifications.unshift({
-        id: 'notif-' + Date.now(),
-        targetRole: 'admin',
-        target: 'System Admin',
-        title: 'New Student Registered',
-        message: `New student registered: ${fullname} (${email})`,
-        time: 'Just now',
-        read: false
+    try {
+      const res = await fetch('api/auth.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'register',
+          role: role,
+          fullname: fullname,
+          email: email,
+          password: password,
+          specialty: specialty
+        })
       });
 
-      // API save
-      try {
-        await fetch('api/students.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...newStudent, is_new_registration: true, subjects_needed: specialty })
+      const json = await res.json();
+
+      if (res.ok && json.status === 'success') {
+        const u = json.user;
+
+        if (role === 'student') {
+          const newStudent = {
+            id: u.id,
+            name: fullname,
+            email: email,
+            grade: specialty,
+            validated: false,
+            deactivated: false,
+            bio: `${specialty} student eager to learn.`,
+            subjectsNeeded: [specialty],
+            sessionsCompleted: 0
+          };
+          state.students.unshift(newStudent);
+          state.sessions = state.sessions.filter(s => s.studentName !== fullname);
+          switchRole('student', { name: fullname, email: email, role: 'student', id: u.id });
+        } else {
+          const newTutor = {
+            id: u.id,
+            name: fullname,
+            email: email,
+            initials: fullname.split(' ').map(n => n[0]).join(''),
+            rating: 5.0,
+            reviewsCount: 0,
+            hourlyRate: 350,
+            subjects: [specialty],
+            learningStyles: ['Step-by-Step Explanation'],
+            bio: `${specialty} Specialist tutor.`,
+            availableDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+            availableTimeSlots: '09:00 AM - 05:00 PM',
+            blockedDates: '',
+            availabilitySlots: ['09:00 AM', '02:00 PM', '04:00 PM'],
+            available: true,
+            deactivated: false,
+            diplomaStatus: 'Pending',
+            torStatus: 'Pending',
+            idStatus: 'Pending',
+            approvalStatus: 'Pending Review'
+          };
+          state.tutors.unshift(newTutor);
+          switchRole('tutor', { name: fullname, email: email, role: 'tutor', id: u.id });
+        }
+
+        // Add Admin Notification
+        state.notifications.unshift({
+          id: 'notif-' + Date.now(),
+          targetRole: 'admin',
+          target: 'System Admin',
+          title: 'New User Registered',
+          message: `New ${role} registered: ${fullname} (${email})`,
+          time: 'Just now',
+          read: false
         });
-      } catch (err) { console.log('Offline API fallback'); }
 
-      // Clear sessions for fresh isolated user state
-      state.sessions = state.sessions.filter(s => s.studentName !== fullname);
-
-      switchRole('student', { name: fullname, role: 'student', id: newId });
-    } else {
-      const newId = 'tut-' + (state.tutors.length + 1);
-      const newTutor = {
-        id: newId,
-        name: fullname,
-        initials: fullname.split(' ').map(n => n[0]).join(''),
-        rating: 5.0,
-        reviewsCount: 0,
-        hourlyRate: 350,
-        subjects: [specialty],
-        learningStyles: ['Step-by-Step Explanation'],
-        bio: `${specialty} Specialist tutor. Dedicated to student growth.`,
-        availableDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-        availableTimeSlots: '09:00 AM - 05:00 PM',
-        blockedDates: '',
-        availabilitySlots: ['09:00 AM', '02:00 PM', '04:00 PM'],
-        available: true,
-        deactivated: false,
-        diplomaStatus: 'Pending',
-        torStatus: 'Pending',
-        idStatus: 'Pending',
-        approvalStatus: 'Pending Review'
-      };
-      state.tutors.unshift(newTutor);
-
-      // Create Admin Notification ONLY
-      state.notifications.unshift({
-        id: 'notif-' + Date.now(),
-        targetRole: 'admin',
-        target: 'System Admin',
-        title: 'New Tutor Registered',
-        message: `New tutor registered: ${fullname} (${specialty})`,
-        time: 'Just now',
-        read: false
-      });
-
-      // API save
-      try {
-        await fetch('api/tutors.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...newTutor, is_new_registration: true, subjects: specialty, learning_styles: 'Step-by-Step Explanation' })
-        });
-      } catch (err) { console.log('Offline API fallback'); }
-
-      switchRole('tutor', { name: fullname, role: 'tutor', id: newId });
+        closeModal('modal-auth');
+        showToast(`Registration complete! Saved to MySQL. Welcome to TutorLink, ${fullname}.`);
+      } else {
+        alert(json.message || 'Registration failed.');
+      }
+    } catch (err) {
+      alert('Registration server connection error.');
     }
-
-    closeModal('modal-auth');
-    showToast(`Registration complete! Welcome to TutorLink, ${fullname}.`);
   });
 }
 

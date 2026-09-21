@@ -35,6 +35,12 @@ if ($method === 'POST') {
                 $roleData = $tutStmt->fetch();
             }
 
+            // Log login event in user_logs
+            try {
+                $logStmt = $pdo->prepare("INSERT INTO user_logs (user_id, user_name, email, role, action_type) VALUES (?, ?, ?, ?, 'LOGIN')");
+                $logStmt->execute([$user['id'], $user['name'], $user['email'], $user['role']]);
+            } catch (\Exception $e) { /* ignore log error */ }
+
             echo json_encode([
                 'status' => 'success',
                 'user' => [
@@ -95,6 +101,12 @@ if ($method === 'POST') {
         $notifId = 'notif-' . time() . '-' . rand(100, 999);
         $nStmt = $pdo->prepare("INSERT INTO notifications (id, target_role, target, title, message) VALUES (?, 'admin', 'System Admin', 'New User Registration', ?)");
         $nStmt->execute([$notifId, "New $role registered: $fullname ($email)"]);
+
+        // Log registration event in user_logs
+        try {
+            $logStmt = $pdo->prepare("INSERT INTO user_logs (user_id, user_name, email, role, action_type) VALUES (?, ?, ?, ?, 'REGISTER')");
+            $logStmt->execute([$id, $fullname, $email, $role]);
+        } catch (\Exception $e) { /* ignore log error */ }
 
         echo json_encode([
             'status' => 'success',

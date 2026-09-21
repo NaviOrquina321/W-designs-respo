@@ -115,6 +115,17 @@ CREATE TABLE IF NOT EXISTS `notifications` (
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 9. Table: user_logs
+CREATE TABLE IF NOT EXISTS `user_logs` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` VARCHAR(50) NOT NULL,
+  `user_name` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(100) NOT NULL,
+  `role` VARCHAR(20) NOT NULL,
+  `action_type` VARCHAR(50) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 -- ========================================================
 -- SEED INITIAL DATA

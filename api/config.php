@@ -186,6 +186,16 @@ $pdo->exec("
       `comment` TEXT,
       `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS `user_logs` (
+      `id` INTEGER PRIMARY KEY $autoIncrementSyntax,
+      `user_id` VARCHAR(50) NOT NULL,
+      `user_name` VARCHAR(100) NOT NULL,
+      `email` VARCHAR(100) NOT NULL,
+      `role` VARCHAR(20) NOT NULL,
+      `action_type` VARCHAR(50) NOT NULL,
+      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
 ");
 
 // Seed default credentials if empty
