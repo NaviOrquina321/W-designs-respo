@@ -19,232 +19,36 @@ const state = {
     { id: 'SUB-107', name: 'Literature', category: 'Humanities' }
   ],
 
-  // Seed Students Database
-  students: [
-    { id: 'STU-101', name: 'Maria Santos', email: 'maria@tutorlink.ph', grade: 'Senior High', validated: true, deactivated: false, bio: 'Grade 12 STEM Student focusing on Advanced Calculus and College Entrance Exam preparation.', subjectsNeeded: ['Calculus', 'Physics'], sessionsCompleted: 4 },
-    { id: 'STU-102', name: 'Juan Dela Cruz', email: 'juan@tutorlink.ph', grade: 'College', validated: true, deactivated: false, bio: '2nd Year Computer Science student looking for web development and algorithms mentoring.', subjectsNeeded: ['Programming', 'Mathematics'], sessionsCompleted: 2 },
-    { id: 'STU-103', name: 'Angela Torres', email: 'angela@tutorlink.ph', grade: 'High School', validated: false, deactivated: false, bio: 'Grade 10 student striving to build strong foundations in High School Algebra and Chemistry.', subjectsNeeded: ['Mathematics', 'Chemistry'], sessionsCompleted: 1 }
-  ],
+  // Empty Students Database for fresh operational start
+  students: [],
 
-  // Seed Tutors Database
-  tutors: [
-    {
-      id: 'tut-1',
-      name: 'Prof. Alex Rivera',
-      initials: 'AR',
-      rating: 4.9,
-      reviewsCount: 38,
-      hourlyRate: 350,
-      subjects: ['Mathematics', 'Calculus', 'Physics'],
-      learningStyles: ['Visual & Diagrams', 'Step-by-Step Explanation'],
-      bio: 'Licensed Mathematics Professor with 8+ years experience making complex algebra and calculus easy to grasp.',
-      availableDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-      availableTimeSlots: '09:00 AM - 05:00 PM',
-      blockedDates: '',
-      availabilitySlots: ['09:00 AM', '11:00 AM', '02:00 PM', '04:00 PM', '07:00 PM'],
-      available: true,
-      deactivated: false,
-      diplomaStatus: 'Verified',
-      torStatus: 'Verified',
-      idStatus: 'Verified',
-      approvalStatus: 'Approved'
-    },
-    {
-      id: 'tut-2',
-      name: 'Engr. Bea Soriano',
-      initials: 'BS',
-      rating: 4.8,
-      reviewsCount: 29,
-      hourlyRate: 400,
-      subjects: ['Programming', 'Mathematics', 'Calculus'],
-      learningStyles: ['Hands-on Practice', 'Step-by-Step Explanation'],
-      bio: 'Software Engineer & Code Instructor specializing in Python, JavaScript, and data structures.',
-      availableDays: ['Mon', 'Wed', 'Fri', 'Sat'],
-      availableTimeSlots: '10:00 AM - 06:00 PM',
-      blockedDates: '',
-      availabilitySlots: ['10:00 AM', '01:00 PM', '03:00 PM', '06:00 PM'],
-      available: true,
-      deactivated: false,
-      diplomaStatus: 'Verified',
-      torStatus: 'Verified',
-      idStatus: 'Verified',
-      approvalStatus: 'Approved'
-    },
-    {
-      id: 'tut-3',
-      name: 'Dr. Carlos Mendoza',
-      initials: 'CM',
-      rating: 5.0,
-      reviewsCount: 45,
-      hourlyRate: 450,
-      subjects: ['Physics', 'Chemistry'],
-      learningStyles: ['Auditory & Discussion', 'Visual & Diagrams'],
-      bio: 'Physics PhD graduate dedicated to interactive, real-world physics experiments and conceptual learning.',
-      availableDays: ['Tue', 'Thu', 'Sat'],
-      availableTimeSlots: '01:00 PM - 07:00 PM',
-      blockedDates: '',
-      availabilitySlots: ['09:00 AM', '02:00 PM', '05:00 PM'],
-      available: true,
-      deactivated: false,
-      diplomaStatus: 'Verified',
-      torStatus: 'Verified',
-      idStatus: 'Verified',
-      approvalStatus: 'Approved'
-    },
-    {
-      id: 'tut-4',
-      name: 'Ms. Diana Reyes',
-      initials: 'DR',
-      rating: 4.7,
-      reviewsCount: 22,
-      hourlyRate: 300,
-      subjects: ['English', 'Literature'],
-      learningStyles: ['Step-by-Step Explanation', 'Auditory & Discussion'],
-      bio: 'English Literature Specialist assisting students in essay writing, grammar, and oral communications.',
-      availableDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-      availableTimeSlots: '08:00 AM - 04:00 PM',
-      blockedDates: '',
-      availabilitySlots: ['10:00 AM', '11:00 AM', '02:00 PM', '04:00 PM'],
-      available: true,
-      deactivated: false,
-      diplomaStatus: 'Verified',
-      torStatus: 'Pending',
-      idStatus: 'Verified',
-      approvalStatus: 'Approved'
-    }
-  ],
+  // Empty Tutors Database for fresh operational start
+  tutors: [],
 
-  // Seed Matching Results
-  matches: [
-    { id: 'MATCH-201', studentName: 'Maria Santos', tutorName: 'Prof. Alex Rivera', subject: 'Calculus II', score: 98, status: 'Approved', matchReason: '98% compatibility: Strong alignment in Calculus expertise and Step-by-step learning preference.' },
-    { id: 'MATCH-202', studentName: 'Angela Torres', tutorName: 'Dr. Carlos Mendoza', subject: 'Physics', score: 92, status: 'Pending Review', matchReason: '92% compatibility: Strong alignment in Physics concept development.' }
-  ],
+  // Empty Matching Results
+  matches: [],
 
-  // Seed Calendar Schedules
-  schedules: [
-    { id: 'SCH-301', tutorName: 'Prof. Alex Rivera', dateSlot: '2026-03-16 (02:00 PM)', subject: 'Calculus II', status: 'Available' },
-    { id: 'SCH-302', tutorName: 'Engr. Bea Soriano', dateSlot: '2026-03-17 (10:00 AM)', subject: 'Programming', status: 'Booked' },
-    { id: 'SCH-303', tutorName: 'Dr. Carlos Mendoza', dateSlot: '2026-03-18 (09:00 AM)', subject: 'Physics', status: 'Available' }
-  ],
+  // Empty Calendar Schedules
+  schedules: [],
 
-  // Seed Payments Database
-  payments: [
-    { id: 'PAY-401', studentName: 'Maria Santos', method: 'GCash', refNo: 'GC-9920182341', amount: 385, status: 'Confirmed', payoutStatus: 'Paid Out' },
-    { id: 'PAY-402', studentName: 'Maria Santos', method: 'GCash', refNo: 'GC-8812039481', amount: 440, status: 'Confirmed', payoutStatus: 'Paid Out' },
-    { id: 'PAY-403', studentName: 'Juan Dela Cruz', method: 'GCash', refNo: 'GC-7712938471', amount: 495, status: 'Confirmed', payoutStatus: 'Pending' },
-    { id: 'PAY-404', studentName: 'Angela Torres', method: 'PayMaya', refNo: 'PM-5510293841', amount: 330, status: 'Pending Confirmation', payoutStatus: 'Pending' }
-  ],
+  // Empty Payments Database
+  payments: [],
 
-  // Seed Sessions & Bookings
-  sessions: [
-    {
-      id: 'SESS-101',
-      studentName: 'Maria Santos',
-      tutorId: 'tut-1',
-      tutorName: 'Prof. Alex Rivera',
-      subject: 'Calculus II',
-      date: '2026-03-15',
-      timeSlot: '02:00 PM',
-      hourlyRate: 350,
-      commissionFee: 35,
-      totalPaid: 385,
-      gcashRef: 'GC-9920182341',
-      status: 'Confirmed',
-      payoutStatus: 'Unpaid',
-      notes: 'Review derivatives and integration techniques for upcoming midterm.'
-    },
-    {
-      id: 'SESS-100',
-      studentName: 'Maria Santos',
-      tutorId: 'tut-2',
-      tutorName: 'Engr. Bea Soriano',
-      subject: 'Programming',
-      date: '2026-03-10',
-      timeSlot: '10:00 AM',
-      hourlyRate: 400,
-      commissionFee: 40,
-      totalPaid: 440,
-      gcashRef: 'GC-8812039481',
-      status: 'Completed',
-      payoutStatus: 'Paid Out',
-      notes: 'Intro to JavaScript Functions and DOM Manipulation.'
-    },
-    {
-      id: 'SESS-099',
-      studentName: 'Juan Dela Cruz',
-      tutorId: 'tut-3',
-      tutorName: 'Dr. Carlos Mendoza',
-      subject: 'Physics',
-      date: '2026-03-08',
-      timeSlot: '02:00 PM',
-      hourlyRate: 450,
-      commissionFee: 45,
-      totalPaid: 495,
-      gcashRef: 'GC-7712938471',
-      status: 'Completed',
-      payoutStatus: 'Paid Out',
-      notes: 'Newtonian Physics & Equilibrium problems.'
-    }
-  ],
+  // Empty Sessions & Bookings
+  sessions: [],
 
-  // System Notifications - Targeted by Role
+  // System Notifications - Initial System Welcome
   notifications: [
     {
-      id: 'notif-1',
-      targetRole: 'student',
-      target: 'Maria Santos',
-      title: 'Session Confirmed!',
-      message: 'Your Calculus II session with Prof. Alex Rivera is confirmed for March 15 at 2:00 PM.',
-      time: '10 mins ago',
-      read: false
-    },
-    {
-      id: 'notif-2',
-      targetRole: 'student',
-      target: 'Maria Santos',
-      title: 'GCash Payment Received',
-      message: 'Payment of P385.00 confirmed (Ref: GC-9920182341). Receipt available in student dashboard.',
-      time: '12 mins ago',
-      read: false
-    },
-    {
-      id: 'notif-3',
-      targetRole: 'tutor',
-      target: 'Prof. Alex Rivera',
-      title: 'New Session Booking',
-      message: 'Student Maria Santos booked a Calculus II tutoring session for March 15.',
-      time: '15 mins ago',
-      read: false
-    },
-    {
-      id: 'notif-4',
-      targetRole: 'tutor',
-      target: 'Prof. Alex Rivera',
-      title: 'Payout Processed',
-      message: 'Net payout of P315.00 for session SESS-100 has been transferred to your GCash.',
-      time: '1 hour ago',
-      read: false
-    },
-    {
-      id: 'notif-5',
-      targetRole: 'admin',
-      target: 'System Admin',
-      title: 'System Activity Alert',
-      message: 'New tutor registration pending document verification: Ms. Diana Reyes.',
-      time: '2 hours ago',
-      read: false
-    },
-    {
-      id: 'notif-6',
+      id: 'notif-init',
       targetRole: 'all',
       target: 'All Users',
       title: 'Welcome to TutorLink',
-      message: 'Explore AI Tutor Matching or browse available tutors to start your personalized learning.',
-      time: '1 day ago',
-      read: true
+      message: 'System initialization complete. Log in or register to get started.',
+      time: 'Just now',
+      read: false
     }
   ],
-
   // Active Pending Booking Flow
   activeBooking: {
     tutorId: 'tut-1',
