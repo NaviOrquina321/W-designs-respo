@@ -677,10 +677,25 @@ function initModals() {
 
   document.getElementById('auth-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const role = document.getElementById('auth-role').value;
-    switchRole(role);
+    const emailInput = document.getElementById('auth-email').value.trim().toLowerCase();
+
+    // Automatic role lookup by registered email
+    if (emailInput.includes('admin') || emailInput === 'admin@tutorlink.ph') {
+      switchRole('admin', { name: 'System Admin', role: 'admin', id: 'ADMIN-001' });
+      showToast('Logged in as System Admin!');
+    } else {
+      const tutorMatch = state.tutors.find(t => t.name.toLowerCase().includes(emailInput.split('@')[0]) || emailInput.includes('prof') || emailInput.includes('alex') || emailInput.includes('tutor'));
+      if (tutorMatch && !emailInput.includes('student') && !emailInput.includes('maria')) {
+        switchRole('tutor', { name: tutorMatch.name, role: 'tutor', id: tutorMatch.id });
+        showToast(`Logged in as Tutor ${tutorMatch.name}!`);
+      } else {
+        const studentMatch = state.students.find(s => s.email.toLowerCase() === emailInput || s.name.toLowerCase().includes(emailInput.split('@')[0])) || state.students[0];
+        switchRole('student', { name: studentMatch ? studentMatch.name : 'Maria Santos', role: 'student', id: studentMatch ? studentMatch.id : 'STU-101' });
+        showToast(`Logged in as Student ${studentMatch ? studentMatch.name : 'Maria Santos'}!`);
+      }
+    }
+
     closeModal('modal-auth');
-    showToast(`Logged in successfully as ${role.toUpperCase()}!`);
   });
 }
 
