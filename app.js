@@ -187,10 +187,11 @@ const state = {
     }
   ],
 
-  // System Notifications
+  // System Notifications - Targeted by Role
   notifications: [
     {
       id: 'notif-1',
+      targetRole: 'student',
       target: 'Maria Santos',
       title: 'Session Confirmed!',
       message: 'Your Calculus II session with Prof. Alex Rivera is confirmed for March 15 at 2:00 PM.',
@@ -199,14 +200,43 @@ const state = {
     },
     {
       id: 'notif-2',
+      targetRole: 'student',
       target: 'Maria Santos',
       title: 'GCash Payment Received',
-      message: 'Payment of P385.00 confirmed (Ref: GC-9920182341). Receipt available in dashboard.',
+      message: 'Payment of P385.00 confirmed (Ref: GC-9920182341). Receipt available in student dashboard.',
       time: '12 mins ago',
       read: false
     },
     {
       id: 'notif-3',
+      targetRole: 'tutor',
+      target: 'Prof. Alex Rivera',
+      title: 'New Session Booking',
+      message: 'Student Maria Santos booked a Calculus II tutoring session for March 15.',
+      time: '15 mins ago',
+      read: false
+    },
+    {
+      id: 'notif-4',
+      targetRole: 'tutor',
+      target: 'Prof. Alex Rivera',
+      title: 'Payout Processed',
+      message: 'Net payout of P315.00 for session SESS-100 has been transferred to your GCash.',
+      time: '1 hour ago',
+      read: false
+    },
+    {
+      id: 'notif-5',
+      targetRole: 'admin',
+      target: 'System Admin',
+      title: 'System Activity Alert',
+      message: 'New tutor registration pending document verification: Ms. Diana Reyes.',
+      time: '2 hours ago',
+      read: false
+    },
+    {
+      id: 'notif-6',
+      targetRole: 'all',
       target: 'All Users',
       title: 'Welcome to TutorLink',
       message: 'Explore AI Tutor Matching or browse available tutors to start your personalized learning.',
@@ -236,6 +266,7 @@ const state = {
 document.addEventListener('DOMContentLoaded', async () => {
   initNavigation();
   initAuthModalTabs();
+  initDemoAccounts();
   initModals();
   initAIMatching();
   initCalendarBooking();
@@ -251,6 +282,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   await syncWithDatabase();
   renderAllViews();
 });
+
+// Demo Account Quick Login Handlers
+function initDemoAccounts() {
+  document.getElementById('demo-student-login-btn')?.addEventListener('click', () => {
+    switchRole('student', { name: 'Maria Santos', role: 'student' });
+    closeModal('modal-auth');
+    showToast('Signed in as Maria Santos (Student)');
+  });
+
+  document.getElementById('demo-tutor-login-btn')?.addEventListener('click', () => {
+    switchRole('tutor', { name: 'Prof. Alex Rivera', role: 'tutor' });
+    closeModal('modal-auth');
+    showToast('Signed in as Prof. Alex Rivera (Tutor)');
+  });
+
+  document.getElementById('demo-admin-login-btn')?.addEventListener('click', () => {
+    switchRole('admin', { name: 'System Admin', role: 'admin' });
+    closeModal('modal-auth');
+    showToast('Signed in as System Admin (Administrator)');
+  });
+}
 
 // XAMPP / Database Synchronization Engine (With Offline Fallback)
 async function syncWithDatabase() {
@@ -428,6 +480,9 @@ function initNavigation() {
       creds?.classList.add('hidden');
     }
   });
+
+  document.getElementById('close-receipt-view-modal')?.addEventListener('click', () => closeModal('modal-view-receipt'));
+  document.getElementById('done-receipt-view-btn')?.addEventListener('click', () => closeModal('modal-view-receipt'));
 }
 
 // Role Switcher Logic
@@ -592,7 +647,7 @@ function closeModal(id) {
   if (modal) modal.classList.remove('active');
 }
 
-// Tutor Portal Sub-Tabs Logic (Streamlined 4 Tabs)
+// Tutor Portal Sub-Tabs Logic
 function initTutorSubTabs() {
   document.querySelectorAll('.tutor-tab-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -913,7 +968,7 @@ function renderStudentUpcoming() {
   `).join('');
 }
 
-// Render Student History Table
+// Render Student History Table with View Receipt Action
 function renderStudentHistory() {
   const tbody = document.getElementById('student-history-table-body');
   if (!tbody) return;
@@ -932,9 +987,10 @@ function renderStudentHistory() {
       <td><code>${s.gcashRef}</code></td>
       <td><span class="badge ${s.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${s.status}</span></td>
       <td>
+        <button class="btn btn-secondary btn-small" onclick="viewPaymentReceipt('${s.id}')">View Receipt</button>
         ${s.status === 'Completed' ?
-          `<button class="btn btn-secondary btn-small" onclick="openRatingModal('${s.tutorName}')">Rate Tutor</button>` :
-          `<button class="btn btn-secondary btn-small" onclick="launchWorkspace('${s.id}')">View Room</button>`
+          `<button class="btn btn-secondary btn-small" style="margin-left: 4px;" onclick="openRatingModal('${s.tutorName}')">Rate Tutor</button>` :
+          `<button class="btn btn-secondary btn-small" style="margin-left: 4px;" onclick="launchWorkspace('${s.id}')">View Room</button>`
         }
       </td>
     </tr>
@@ -944,6 +1000,20 @@ function renderStudentHistory() {
   const spentEl = document.getElementById('student-stat-spent');
   if (spentEl) spentEl.textContent = `P${totalSpent}`;
 }
+
+window.viewPaymentReceipt = function(sessionId) {
+  const session = state.sessions.find(s => s.id === sessionId);
+  if (!session) return;
+
+  document.getElementById('view-receipt-ref').textContent = session.gcashRef || 'GC-9920182341';
+  document.getElementById('view-receipt-student').textContent = session.studentName || 'Maria Santos';
+  document.getElementById('view-receipt-tutor').textContent = session.tutorName;
+  document.getElementById('view-receipt-subject').textContent = session.subject;
+  document.getElementById('view-receipt-date').textContent = `${session.date} (${session.timeSlot})`;
+  document.getElementById('view-receipt-amount').textContent = `P${session.totalPaid}.00`;
+
+  openModal('modal-view-receipt');
+};
 
 // Render Tutor Dashboard Sessions & Schedule
 function renderTutorUpcoming() {
@@ -1303,9 +1373,20 @@ function initGCashPayment() {
 
     state.notifications.unshift({
       id: 'notif-' + Date.now(),
+      targetRole: 'student',
       target: studentName,
       title: 'Session Booked & Paid!',
       message: `Your ${b.subject} session with ${b.tutorName} is confirmed for ${b.date} at ${b.timeSlot}. Ref: ${randomRef}`,
+      time: 'Just now',
+      read: false
+    });
+
+    state.notifications.unshift({
+      id: 'notif-tutor-' + Date.now(),
+      targetRole: 'tutor',
+      target: b.tutorName,
+      title: 'New Student Session Booked',
+      message: `${studentName} booked a ${b.subject} tutoring session for ${b.date} at ${b.timeSlot}.`,
       time: 'Just now',
       read: false
     });
@@ -1338,7 +1419,7 @@ function openGCashPayment() {
   openModal('modal-gcash');
 }
 
-// REAL-TIME NOTIFICATIONS MODULE
+// REAL-TIME ROLE-FILTERED NOTIFICATIONS MODULE
 function initNotifications() {
   const bellBtn = document.getElementById('notif-bell-btn');
   const closeDrawer = document.getElementById('close-notif-drawer');
@@ -1355,10 +1436,15 @@ function initNotifications() {
   overlay?.addEventListener('click', closeNotifDrawer);
 
   markReadBtn?.addEventListener('click', () => {
-    state.notifications.forEach(n => n.read = true);
+    const role = state.currentRole;
+    state.notifications.forEach(n => {
+      if (n.targetRole === role || n.targetRole === 'all') {
+        n.read = true;
+      }
+    });
     renderNotifDrawer();
     updateNotificationBadge();
-    showToast('All notifications marked as read.');
+    showToast('Role notifications marked as read.');
   });
 }
 
@@ -1371,7 +1457,15 @@ function renderNotifDrawer() {
   const list = document.getElementById('notif-list');
   if (!list) return;
 
-  list.innerHTML = state.notifications.map(n => `
+  const role = state.currentRole;
+  const filtered = state.notifications.filter(n => n.targetRole === role || n.targetRole === 'all');
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<p class="sub-text center-text" style="padding: 20px;">No notifications for your account.</p>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(n => `
     <div class="notif-item ${n.read ? '' : 'unread'}">
       <strong>${n.title}</strong>
       <p>${n.message}</p>
@@ -1383,7 +1477,10 @@ function renderNotifDrawer() {
 function updateNotificationBadge() {
   const badge = document.getElementById('notif-badge-count');
   if (!badge) return;
-  const unreadCount = state.notifications.filter(n => !n.read).length;
+
+  const role = state.currentRole;
+  const unreadCount = state.notifications.filter(n => (!n.read) && (n.targetRole === role || n.targetRole === 'all')).length;
+
   badge.textContent = unreadCount;
   badge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
 }
@@ -1499,7 +1596,8 @@ function initAdminView() {
 
     state.notifications.unshift({
       id: 'notif-' + Date.now(),
-      target: target,
+      targetRole: target,
+      target: target === 'all' ? 'All Users' : target,
       title: 'System Broadcast',
       message: msg,
       time: 'Just now',

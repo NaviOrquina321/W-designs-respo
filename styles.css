@@ -212,12 +212,13 @@ nav.wrap {
 /* Tab Bar Navigation (Admin, Tutor & Auth Tabs) */
 .admin-tab-bar, .auth-tab-bar {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 28px;
   overflow-x: auto;
   padding-bottom: 0;
   scrollbar-width: thin;
+  white-space: nowrap;
 }
 
 .tutor-tab-btn, .admin-tab-btn, .auth-tab-btn {
@@ -226,11 +227,12 @@ nav.wrap {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--ink-soft);
-  padding: 10px 14px;
+  padding: 10px 16px;
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tutor-tab-btn:hover, .admin-tab-btn:hover, .auth-tab-btn:hover {
@@ -380,10 +382,10 @@ footer .wrap { padding-top: 48px; padding-bottom: 48px; }
 .session-card-info h4 { font-size: 1.1rem; margin-bottom: 4px; }
 .session-card-info p { font-size: 0.92rem; color: var(--ink-soft); }
 
-/* Data Tables */
-.data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
-.data-table th, .data-table td { padding: 12px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
-.data-table th { background: var(--panel); font-weight: 700; color: var(--ink); border-top: 1px solid var(--line); }
+/* Data Tables - Standardized Spacing & Padding */
+.data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+.data-table th, .data-table td { padding: 12px 16px; border-bottom: 1px solid var(--line); white-space: nowrap; vertical-align: middle; }
+.data-table th { background: var(--panel); font-weight: 700; color: var(--ink); border-top: 1px solid var(--line); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.02em; }
 .data-table tr:hover { background: var(--panel); }
 
 /* Modals */

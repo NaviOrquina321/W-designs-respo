@@ -578,16 +578,16 @@
           </div>
         </div>
 
-        <!-- Admin FDD Management Tabs -->
+        <!-- Admin FDD Management Tabs (Clean Labels & No Word Wrapping) -->
         <div class="admin-tab-bar">
-          <button class="admin-tab-btn active" data-tab="tab-students">Manage Students</button>
-          <button class="admin-tab-btn" data-tab="tab-tutors">Manage Tutors</button>
-          <button class="admin-tab-btn" data-tab="tab-subjects">Manage Subjects</button>
-          <button class="admin-tab-btn" data-tab="tab-matching">Manage Tutor Matching</button>
-          <button class="admin-tab-btn" data-tab="tab-schedule">Manage Schedule</button>
-          <button class="admin-tab-btn" data-tab="tab-payments">Manage Payments</button>
-          <button class="admin-tab-btn" data-tab="tab-notifications">Manage Notifications</button>
-          <button class="admin-tab-btn" data-tab="tab-reports">Manage Reports</button>
+          <button class="admin-tab-btn active" data-tab="tab-students">Students</button>
+          <button class="admin-tab-btn" data-tab="tab-tutors">Tutors</button>
+          <button class="admin-tab-btn" data-tab="tab-subjects">Subjects</button>
+          <button class="admin-tab-btn" data-tab="tab-matching">Tutor Matching</button>
+          <button class="admin-tab-btn" data-tab="tab-schedule">Schedules</button>
+          <button class="admin-tab-btn" data-tab="tab-payments">Payments</button>
+          <button class="admin-tab-btn" data-tab="tab-notifications">Notifications</button>
+          <button class="admin-tab-btn" data-tab="tab-reports">Reports</button>
         </div>
 
         <!-- Admin Tab 1: Manage Students -->
@@ -818,23 +818,33 @@
       </div>
 
       <div class="modal-body">
+        <!-- Quick Automated Demo Login Accounts -->
+        <div class="demo-accounts-box margin-bottom" style="background: var(--panel); border: 1px solid var(--line); padding: 14px 16px; border-radius: 6px;">
+          <label style="font-size: 0.85rem; font-weight: 700; color: var(--ink-soft); display: block; margin-bottom: 8px;">QUICK AUTOMATED DEMO ACCOUNTS</label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary btn-small" id="demo-student-login-btn">Maria Santos (Student)</button>
+            <button type="button" class="btn btn-secondary btn-small" id="demo-tutor-login-btn">Prof. Alex Rivera (Tutor)</button>
+            <button type="button" class="btn btn-secondary btn-small" id="demo-admin-login-btn">System Admin</button>
+          </div>
+        </div>
+
         <!-- Form 1A: Log In Form -->
         <form id="auth-form">
           <div class="form-group">
-            <label>Select Your Role</label>
+            <label>Select Role</label>
             <select id="auth-role" class="form-select">
-              <option value="student">Student (Maria Santos)</option>
-              <option value="tutor">Tutor (Prof. Alex Rivera)</option>
-              <option value="admin">Administrator (System Admin)</option>
+              <option value="student">Student</option>
+              <option value="tutor">Tutor</option>
+              <option value="admin">Administrator</option>
             </select>
           </div>
           <div class="form-group">
             <label>Email Address</label>
-            <input type="email" id="auth-email" required placeholder="name@domain.com" class="form-input" value="student@tutorlink.ph">
+            <input type="email" id="auth-email" required placeholder="name@domain.com" class="form-input">
           </div>
           <div class="form-group">
             <label>Password</label>
-            <input type="password" id="auth-password" required placeholder="••••••••" class="form-input" value="password123">
+            <input type="password" id="auth-password" required placeholder="••••••••" class="form-input">
           </div>
           <button type="submit" class="btn btn-primary full-width">Log In to Dashboard</button>
         </form>
@@ -1316,6 +1326,64 @@
           </div>
           <button type="submit" class="btn btn-primary full-width margin-top">Confirm Tutor Reassignment</button>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 13: View Payment Receipt Modal -->
+  <div class="modal-backdrop" id="modal-view-receipt">
+    <div class="modal-card gcash-theme">
+      <div class="gcash-banner">
+        <div class="gcash-logo">TutorLink Official Receipt</div>
+        <div class="gcash-subtext">Online Payment Confirmation</div>
+        <button class="close-btn white" id="close-receipt-view-modal">&times;</button>
+      </div>
+
+      <div class="modal-body center-text">
+        <div class="success-icon" style="margin-top: 10px;">✓</div>
+        <h3 style="margin-bottom: 4px;">Payment Confirmed</h3>
+        <p class="sub-text">Paid via GCash e-Wallet</p>
+
+        <div class="receipt-box">
+          <div class="summary-line">
+            <span>Payment Ref No.:</span>
+            <strong id="view-receipt-ref">GC-9920182341</strong>
+          </div>
+          <div class="summary-line">
+            <span>Student Name:</span>
+            <strong id="view-receipt-student">Maria Santos</strong>
+          </div>
+          <div class="summary-line">
+            <span>Tutor / Instructor:</span>
+            <strong id="view-receipt-tutor">Prof. Alex Rivera</strong>
+          </div>
+          <div class="summary-line">
+            <span>Tutoring Subject:</span>
+            <strong id="view-receipt-subject">Calculus II</strong>
+          </div>
+          <div class="summary-line">
+            <span>Session Date & Time:</span>
+            <span id="view-receipt-date">2026-03-15 (02:00 PM)</span>
+          </div>
+          <hr class="divider">
+          <div class="summary-line">
+            <span>Hourly Fee:</span>
+            <span>₱350.00</span>
+          </div>
+          <div class="summary-line">
+            <span>Platform Fee (10%):</span>
+            <span>₱35.00</span>
+          </div>
+          <div class="summary-line total">
+            <span>Total Paid:</span>
+            <strong id="view-receipt-amount">₱385.00</strong>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;" class="margin-top">
+          <button class="btn btn-secondary full-width" onclick="window.print()">Print Receipt</button>
+          <button class="btn btn-primary full-width" id="done-receipt-view-btn">Close</button>
+        </div>
       </div>
     </div>
   </div>
