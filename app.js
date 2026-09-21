@@ -1228,21 +1228,25 @@ function renderTutorRequests() {
     return;
   }
 
-  tbody.innerHTML = state.matches.map(m => `
-    <tr>
-      <td><code>${m.id}</code></td>
-      <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${m.studentName}</span></td>
-      <td>${m.subject}</td>
-      <td><span class="badge badge-match">${m.score}% Match</span></td>
-      <td><span class="badge ${m.status === 'Approved' ? 'badge-success' : 'badge-info'}">${m.status}</span></td>
-      <td>
-        ${m.status === 'Pending Review' ? `
-          <button class="btn btn-primary btn-small" onclick="approveMatch('${m.id}')">Accept</button>
-          <button class="btn btn-secondary btn-small" onclick="cancelMatch('${m.id}')">Decline</button>
-        ` : `<span class="badge badge-success">Accepted</span>`}
-      </td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = state.matches.map(m => {
+    const studentObj = state.students.find(s => s.name === m.studentName) || state.students[0];
+    const studentId = studentObj ? studentObj.id : 'STU-101';
+    return `
+      <tr>
+        <td><code>${m.id}</code></td>
+        <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${studentId}')">${m.studentName}</strong></td>
+        <td>${m.subject}</td>
+        <td><span class="badge badge-match">${m.score}% Match</span></td>
+        <td><span class="badge ${m.status === 'Approved' ? 'badge-success' : 'badge-info'}">${m.status}</span></td>
+        <td>
+          ${m.status === 'Pending Review' ? `
+            <button class="btn btn-primary btn-small" onclick="approveMatch('${m.id}')">Accept Match</button>
+            <button class="btn btn-secondary btn-small" onclick="cancelMatch('${m.id}')">Decline</button>
+          ` : `<span class="badge badge-success">Accepted</span>`}
+        </td>
+      </tr>
+    `;
+  }).join('');
 }
 
 function renderTutorEarnings() {

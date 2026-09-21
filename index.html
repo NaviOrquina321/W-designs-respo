@@ -461,7 +461,7 @@
         <div class="tutor-tab-content" id="tutor-tab-earnings">
           <div class="dashboard-section">
             <div class="section-title-bar">
-              <h3>Earnings & Performance Summary</h3>
+              <h3>Earnings & Payout Summary</h3>
             </div>
             <div class="stats-grid margin-bottom">
               <div class="stat-card">
@@ -477,7 +477,7 @@
                 <span class="stat-label">Pending Payout</span>
               </div>
             </div>
-            <table class="data-table">
+            <table class="data-table margin-bottom">
               <thead>
                 <tr>
                   <th>Session ID</th>
@@ -493,6 +493,34 @@
                 <!-- Dynamic earnings rows -->
               </tbody>
             </table>
+
+            <div class="section-title-bar margin-top">
+              <h3>Performance & Student Reviews</h3>
+            </div>
+            <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 22px; border-radius: 6px;">
+              <div style="display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 16px; border-bottom: 1px solid var(--line); padding-bottom: 16px;">
+                <div><strong>Overall Rating:</strong> <span style="font-size: 1.1rem; color: var(--ink); font-weight: bold;">4.9 / 5.0 ★</span></div>
+                <div><strong>Total Reviews:</strong> <span>38 Verified Reviews</span></div>
+                <div><strong>Completion Rate:</strong> <span>98% On-Time Completion</span></div>
+              </div>
+              <h4>Recent Student Feedback</h4>
+              <div id="tutor-reviews-list" class="cards-list margin-top">
+                <div class="session-card" style="background: white;">
+                  <div>
+                    <strong>Maria Santos</strong> <span class="sub-text">(Calculus II)</span>
+                    <div style="color: var(--ink); font-weight: bold;">★★★★★ 5.0</div>
+                    <p class="sub-text" style="margin-top: 4px;">Prof. Rivera made integration techniques so much easier to understand! Excellent step-by-step explanations.</p>
+                  </div>
+                </div>
+                <div class="session-card" style="background: white;">
+                  <div>
+                    <strong>Juan Dela Cruz</strong> <span class="sub-text">(Physics)</span>
+                    <div style="color: var(--ink); font-weight: bold;">★★★★★ 5.0</div>
+                    <p class="sub-text" style="margin-top: 4px;">Punctual and very encouraging. Solved complex mechanics problems together.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
