@@ -385,38 +385,64 @@
           </div>
         </div>
 
-        <!-- Matching Profile Settings -->
-        <div class="dashboard-section" id="tutor-profile-settings-section">
-          <div class="section-title-bar">
-            <h3>AI Matching Profile & Settings</h3>
+      </div>
+    </div>
+
+
+    <!-- 3B. DEDICATED TUTOR PROFILE PAGE VIEW -->
+    <div id="view-tutor-profile" class="app-view">
+      <div class="dashboard-container wrap">
+        <div class="dashboard-header">
+          <div>
+            <h2>Tutor Profile & Account Settings</h2>
+            <p class="sub-text">Update your professional tutoring bio, teaching specialties, and availability.</p>
           </div>
-          <div class="profile-card-edit">
-            <div class="form-row">
-              <div class="form-group">
-                <label>Primary Subjects</label>
-                <input type="text" id="tutor-subjects-input" value="Mathematics, Calculus, Physics" class="form-input">
-              </div>
-              <div class="form-group">
-                <label>Teaching Style Specialty</label>
-                <select id="tutor-style-select" class="form-select">
-                  <option value="Visual & Step-by-Step">Visual & Step-by-Step</option>
-                  <option value="Hands-on & Interactive">Hands-on & Interactive</option>
-                  <option value="Auditory & Conceptual">Auditory & Conceptual</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Hourly Rate (₱)</label>
-                <input type="number" id="tutor-rate-input" value="350" class="form-input">
-              </div>
-            </div>
+          <button class="btn btn-secondary btn-small" id="back-to-tutor-portal-btn">&larr; Back to Tutor Portal</button>
+        </div>
 
-            <!-- Availability Toggle in Tutor Update Profile section -->
-            <div class="form-group margin-top" style="display: flex; align-items: center; gap: 10px;">
-              <label style="margin: 0;">Availability:</label>
-              <input type="checkbox" id="tutor-availability-settings-toggle" checked style="width: 18px; height: 18px; cursor: pointer;">
-            </div>
+        <div class="dashboard-section">
+          <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 28px; border-radius: 4px;">
+            <form id="tutor-profile-page-form">
+              <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="page-tutor-name-input" value="Prof. Alex Rivera" class="form-input" required>
+              </div>
 
-            <button class="btn btn-primary btn-small margin-top" id="save-tutor-profile-btn">Update Profile</button>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Primary Subjects (comma separated)</label>
+                  <input type="text" id="page-tutor-subjects-input" value="Mathematics, Calculus, Physics" class="form-input" required>
+                </div>
+                <div class="form-group">
+                  <label>Teaching Style Specialty</label>
+                  <select id="page-tutor-style-select" class="form-select">
+                    <option value="Visual & Step-by-Step">Visual & Step-by-Step</option>
+                    <option value="Hands-on & Interactive">Hands-on & Interactive</option>
+                    <option value="Auditory & Conceptual">Auditory & Conceptual</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Hourly Rate (₱)</label>
+                  <input type="number" id="page-tutor-rate-input" value="350" class="form-input" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Professional Bio</label>
+                <textarea id="page-tutor-bio-input" class="form-input" rows="3">Licensed Mathematics Professor with 8+ years experience making complex algebra and calculus easy to grasp.</textarea>
+              </div>
+
+              <div class="form-group margin-top" style="display: flex; align-items: center; gap: 10px;">
+                <label style="margin: 0;">Availability:</label>
+                <input type="checkbox" id="page-tutor-availability-toggle" checked style="width: 18px; height: 18px; cursor: pointer;">
+                <span class="sub-text">Accepting new students on TutorLink</span>
+              </div>
+
+              <div class="margin-top" style="display: flex; gap: 12px;">
+                <button type="submit" class="btn btn-primary" id="page-save-tutor-profile-btn">Save Profile Changes</button>
+                <button type="button" class="btn btn-secondary" id="page-cancel-tutor-profile-btn">Cancel</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>

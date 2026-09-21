@@ -343,13 +343,47 @@ function initNavigation() {
 
   userProfileBtn?.addEventListener('click', () => {
     if (state.currentRole === 'tutor') {
-      const section = document.getElementById('tutor-profile-settings-section');
-      if (section) section.scrollIntoView({ behavior: 'smooth' });
+      switchRole('tutor-profile');
     } else if (state.currentRole === 'student') {
       openModal('modal-edit-student-profile');
     } else {
       showToast('Profile settings are available for logged-in students and tutors.');
     }
+  });
+
+  document.getElementById('back-to-tutor-portal-btn')?.addEventListener('click', () => {
+    switchRole('tutor');
+  });
+
+  document.getElementById('page-cancel-tutor-profile-btn')?.addEventListener('click', () => {
+    switchRole('tutor');
+  });
+
+  document.getElementById('tutor-profile-page-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('page-tutor-name-input').value;
+    const subjects = document.getElementById('page-tutor-subjects-input').value;
+    const style = document.getElementById('page-tutor-style-select').value;
+    const rate = document.getElementById('page-tutor-rate-input').value;
+    const bio = document.getElementById('page-tutor-bio-input').value;
+    const available = document.getElementById('page-tutor-availability-toggle').checked;
+
+    const currentTutor = state.tutors.find(t => t.id === 'tut-1') || state.tutors[0];
+    if (currentTutor) {
+      currentTutor.name = name;
+      currentTutor.initials = name.split(' ').map(n=>n[0]).join('');
+      currentTutor.subjects = subjects.split(',').map(s => s.trim());
+      currentTutor.learningStyles = [style];
+      currentTutor.hourlyRate = parseInt(rate) || 350;
+      currentTutor.bio = bio;
+      currentTutor.available = available;
+    }
+
+    if (state.currentUser) state.currentUser.name = name;
+    document.getElementById('tutor-welcome-heading').textContent = `Tutor Portal - ${name}`;
+
+    switchRole('tutor');
+    showToast('Tutor profile updated successfully!');
   });
 
   document.getElementById('hero-find-tutor-btn')?.addEventListener('click', () => {
@@ -421,7 +455,7 @@ function switchRole(role, customUser = null) {
     if (logoutBtn) logoutBtn.classList.remove('hidden');
     if (notifBell) notifBell.classList.remove('hidden');
 
-    if (role === 'student' || role === 'tutor') {
+    if (role === 'student' || role === 'tutor' || role === 'tutor-profile') {
       if (userProfileBtn) userProfileBtn.classList.remove('hidden');
     } else {
       if (userProfileBtn) userProfileBtn.classList.add('hidden');
@@ -435,6 +469,8 @@ function switchRole(role, customUser = null) {
       state.currentUser = customUser || { name: 'Prof. Alex Rivera', role: 'tutor' };
       document.getElementById('tutor-welcome-heading').textContent = `Tutor Portal - ${state.currentUser.name}`;
       document.getElementById('view-tutor').classList.add('active');
+    } else if (role === 'tutor-profile') {
+      document.getElementById('view-tutor-profile').classList.add('active');
     } else if (role === 'admin') {
       state.currentUser = customUser || { name: 'System Admin', role: 'admin' };
       document.getElementById('view-admin').classList.add('active');
@@ -820,15 +856,29 @@ function renderTutorUpcoming() {
         <h4>${s.subject} with Student <strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${s.studentName}</strong></h4>
         <p>Date: ${s.date} | Time: ${s.timeSlot} | Earnings: <strong>₱${s.hourlyRate}</strong></p>
       </div>
-      <div>
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
         <span class="badge ${s.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${s.status}</span>
-        <button class="btn btn-primary btn-small margin-top" onclick="launchWorkspace('${s.id}')">
+        <button class="btn btn-primary btn-small" onclick="launchWorkspace('${s.id}')">
           Launch Session
         </button>
+        ${s.status !== 'Completed' ? `
+          <button class="btn btn-secondary btn-small" onclick="markSessionCompleted('${s.id}')">
+            Mark as Completed
+          </button>
+        ` : ''}
       </div>
     </div>
   `).join('');
 }
+
+window.markSessionCompleted = function(sessionId) {
+  const session = state.sessions.find(s => s.id === sessionId);
+  if (session) {
+    session.status = 'Completed';
+    renderAllViews();
+    showToast(`Session ${sessionId} marked as Completed!`);
+  }
+};
 
 function initTutorScheduleManager() {
   const addBtn = document.getElementById('tutor-add-schedule-btn');
