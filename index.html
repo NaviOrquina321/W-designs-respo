@@ -119,7 +119,7 @@
             <p>Five features cover the full process, from finding a tutor to finishing a session.</p>
           </div>
           <div class="feature-grid">
-            <div class="feature-card">
+            <div class="feature-card" id="landing-ai-card" style="cursor: pointer;">
               <h3>AI Tutor Matching</h3>
               <p>Tell us your subject and how you learn best. We match you with tutors suited to your needs, not just a list to scroll through.</p>
             </div>
@@ -335,14 +335,6 @@
             <h2 id="tutor-welcome-heading">Tutor Portal - Prof. Alex Rivera</h2>
             <p class="sub-text">Manage your teaching schedule, accept matched students, and launch live sessions.</p>
           </div>
-          <div class="status-toggle-card">
-            <span>Availability:</span>
-            <label class="switch">
-              <input type="checkbox" id="tutor-availability-toggle" checked>
-              <span class="slider round"></span>
-            </label>
-            <span id="availability-status-label" class="badge badge-success">Accepting New Students</span>
-          </div>
         </div>
 
         <!-- Quick Stats Grid -->
@@ -422,7 +414,6 @@
             <div class="form-group margin-top" style="display: flex; align-items: center; gap: 10px;">
               <label style="margin: 0;">Availability:</label>
               <input type="checkbox" id="tutor-availability-settings-toggle" checked style="width: 18px; height: 18px; cursor: pointer;">
-              <span id="availability-settings-badge" class="badge badge-success">Accepting New Students</span>
             </div>
 
             <button class="btn btn-primary btn-small margin-top" id="save-tutor-profile-btn">Update Profile</button>

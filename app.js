@@ -583,29 +583,12 @@ function initTutorProfileSettings() {
 
   function updateAvailabilityUI(isAvailable) {
     if (settingsToggle) settingsToggle.checked = isAvailable;
-    if (headerToggle) headerToggle.checked = isAvailable;
-
-    const labelText = isAvailable ? 'Accepting New Students' : 'Unavailable';
-    const badgeClass = isAvailable ? 'badge badge-success' : 'badge badge-danger';
-
-    if (badge) {
-      badge.textContent = labelText;
-      badge.className = badgeClass;
-    }
-    if (headerBadge) {
-      headerBadge.textContent = labelText;
-      headerBadge.className = badgeClass;
-    }
 
     const currentTutor = state.tutors.find(t => t.id === 'tut-1');
     if (currentTutor) currentTutor.available = isAvailable;
   }
 
   settingsToggle?.addEventListener('change', (e) => {
-    updateAvailabilityUI(e.target.checked);
-  });
-
-  headerToggle?.addEventListener('change', (e) => {
     updateAvailabilityUI(e.target.checked);
   });
 
@@ -672,7 +655,6 @@ window.viewTutorProfile = function(tutorId) {
         <div class="tutor-rating">★ ${tutor.rating} (${tutor.reviewsCount} reviews)</div>
       </div>
       <div class="tutor-details-list">
-        <div><strong>Availability Status:</strong> <span class="badge ${tutor.available ? 'badge-success' : 'badge-danger'}">${tutor.available ? 'Accepting New Students' : 'Unavailable'}</span></div>
         <div><strong>Hourly Rate:</strong> ₱${tutor.hourlyRate}/hr</div>
         <div><strong>Subjects Taught:</strong> ${tutor.subjects.join(', ')}</div>
         <div><strong>Teaching Styles:</strong> ${tutor.learningStyles.join(', ')}</div>
@@ -757,7 +739,6 @@ function renderTutorDirectory(searchTerm = '') {
         </div>
         <p class="sub-text margin-bottom">${t.bio}</p>
         <div class="tutor-details-list">
-          <div><strong>Availability:</strong> <span class="badge ${t.available ? 'badge-success' : 'badge-danger'}">${t.available ? 'Accepting New Students' : 'Unavailable'}</span></div>
           <div><strong>Subjects:</strong> ${t.subjects.join(', ')}</div>
           <div><strong>Style:</strong> ${t.learningStyles[0]}</div>
           <div><strong>Rate:</strong> ₱${t.hourlyRate}/hr</div>
