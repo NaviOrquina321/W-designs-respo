@@ -920,6 +920,8 @@ function renderAllViews() {
   renderTutorDirectory();
   renderStudentUpcoming();
   renderStudentHistory();
+  renderStudentCalendar();
+  renderTutorCalendar();
   renderTutorUpcoming();
   renderTutorRequests();
   renderTutorEarnings();
@@ -1064,28 +1066,110 @@ window.viewPaymentReceipt = function(sessionId) {
   openModal('modal-view-receipt');
 };
 
-// Render Tutor Dashboard Sessions & Schedule
-function renderTutorSlots() {
-  const container = document.getElementById('tutor-active-slots-display');
-  if (!container) return;
-
-  const currentTutor = state.tutors.find(t => t.id === 'tut-1') || state.tutors[0];
-  if (!currentTutor || !currentTutor.availabilitySlots) return;
-
-  container.innerHTML = currentTutor.availabilitySlots.map((slot, idx) => `
-    <div class="slot-chip selected" style="cursor: default; display: flex; justify-content: space-between; align-items: center;">
-      <span>${slot}</span>
-      <button style="background: none; border: none; color: white; cursor: pointer; font-size: 1rem; margin-left: 6px;" onclick="removeTutorSlot(${idx})">&times;</button>
-    </div>
-  `).join('');
+// Interactive Session Calendar Engine
+function renderStudentCalendar() {
+  const studentSessions = state.sessions.filter(s => s.studentName === (state.currentUser ? state.currentUser.name : 'Maria Santos'));
+  renderSessionCalendar('student-calendar-container', studentSessions, 'Student');
 }
 
-window.removeTutorSlot = function(idx) {
-  const currentTutor = state.tutors.find(t => t.id === 'tut-1') || state.tutors[0];
-  if (currentTutor && currentTutor.availabilitySlots) {
-    currentTutor.availabilitySlots.splice(idx, 1);
-    renderTutorSlots();
-    showToast('Availability slot removed.');
+function renderTutorCalendar() {
+  const tutorSessions = state.sessions.filter(s => s.tutorName.includes('Alex') || (state.currentUser && s.tutorName === state.currentUser.name));
+  renderSessionCalendar('tutor-calendar-container', tutorSessions, 'Tutor');
+}
+
+function renderSessionCalendar(containerId, sessionsList, userType) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  // Render for March 2026
+  const year = 2026;
+  const month = 2; // March (0-indexed)
+  const monthName = 'March 2026';
+  const daysInMonth = 31;
+  const startDayOfWeek = 0; // March 1, 2026 is Sunday (0)
+
+  const sessionDatesMap = {};
+  sessionsList.forEach(s => {
+    sessionDatesMap[s.date] = s;
+  });
+
+  let calendarHTML = `
+    <div class="calendar-header-bar">
+      <h4>${monthName} Session Calendar</h4>
+      <span class="sub-text">Highlighted dates indicate active sessions</span>
+    </div>
+    <div class="calendar-grid">
+      <div class="calendar-day-header">Sun</div>
+      <div class="calendar-day-header">Mon</div>
+      <div class="calendar-day-header">Tue</div>
+      <div class="calendar-day-header">Wed</div>
+      <div class="calendar-day-header">Thu</div>
+      <div class="calendar-day-header">Fri</div>
+      <div class="calendar-day-header">Sat</div>
+  `;
+
+  // Empty leading cells
+  for (let i = 0; i < startDayOfWeek; i++) {
+    calendarHTML += `<div class="calendar-day-cell empty"></div>`;
+  }
+
+  // Days of March 2026
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayFormatted = day < 10 ? '0' + day : day;
+    const dateStr = `2026-03-${dayFormatted}`;
+    const sessionOnDay = sessionDatesMap[dateStr];
+
+    if (sessionOnDay) {
+      calendarHTML += `
+        <div class="calendar-day-cell has-session" onclick="selectCalendarDate('${containerId}', '${dateStr}')" title="${sessionOnDay.subject} - ${sessionOnDay.timeSlot}">
+          <span>${day}</span>
+          <div class="session-badge-dot"></div>
+        </div>
+      `;
+    } else {
+      calendarHTML += `
+        <div class="calendar-day-cell" onclick="selectCalendarDate('${containerId}', '${dateStr}')">
+          <span>${day}</span>
+        </div>
+      `;
+    }
+  }
+
+  calendarHTML += `</div>`;
+  calendarHTML += `<div id="${containerId}-details" class="calendar-selected-details hidden"></div>`;
+
+  container.innerHTML = calendarHTML;
+}
+
+window.selectCalendarDate = function(containerId, dateStr) {
+  const detailsBox = document.getElementById(`${containerId}-details`);
+  if (!detailsBox) return;
+
+  const sessionOnDate = state.sessions.find(s => s.date === dateStr);
+
+  if (sessionOnDate) {
+    detailsBox.innerHTML = `
+      <div>
+        <strong style="font-size: 1rem;">Session on ${dateStr}:</strong>
+        <p class="sub-text" style="margin-top: 2px;">
+          ${sessionOnDate.subject} with ${sessionOnDate.studentName} & ${sessionOnDate.tutorName} (${sessionOnDate.timeSlot})
+        </p>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-primary btn-small" onclick="launchWorkspace('${sessionOnDate.id}')">Join Session Room</button>
+        <button class="btn btn-secondary btn-small" onclick="showToast('Notification sent for session on ${dateStr}!')">Notify Participants</button>
+      </div>
+    `;
+    detailsBox.classList.remove('hidden');
+    showToast(`Session found on ${dateStr}: ${sessionOnDate.subject}!`);
+  } else {
+    detailsBox.innerHTML = `
+      <div>
+        <strong>Date: ${dateStr}</strong>
+        <p class="sub-text" style="margin-top: 2px;">No tutoring session scheduled on this date.</p>
+      </div>
+    `;
+    detailsBox.classList.remove('hidden');
   }
 };
 
