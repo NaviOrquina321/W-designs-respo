@@ -106,6 +106,7 @@ CREATE TABLE IF NOT EXISTS `sessions` (
 -- 8. Table: notifications
 CREATE TABLE IF NOT EXISTS `notifications` (
   `id` VARCHAR(50) PRIMARY KEY,
+  `target_role` VARCHAR(50) DEFAULT 'all',
   `target` VARCHAR(100) NOT NULL,
   `title` VARCHAR(150) NOT NULL,
   `message` TEXT NOT NULL,
@@ -166,8 +167,10 @@ INSERT INTO `sessions` (`id`, `student_name`, `tutor_id`, `tutor_name`, `subject
 ('SESS-099', 'Juan Dela Cruz', 'tut-3', 'Dr. Carlos Mendoza', 'Physics', '2026-03-08', '02:00 PM', 450, 45, 495, 'GC-7712938471', 'Completed', 'Paid Out', 'Newtonian Physics & Equilibrium problems.')
 ON DUPLICATE KEY UPDATE `id`=`id`;
 
-INSERT INTO `notifications` (`id`, `target`, `title`, `message`, `created_time`, `is_read`) VALUES
-('notif-1', 'Maria Santos', 'Session Confirmed!', 'Your Calculus II session with Prof. Alex Rivera is confirmed for March 15 at 2:00 PM.', '10 mins ago', 0),
-('notif-2', 'Maria Santos', 'GCash Payment Received', 'Payment of P385.00 confirmed (Ref: GC-9920182341). Receipt available in dashboard.', '12 mins ago', 0),
-('notif-3', 'All Users', 'Welcome to TutorLink', 'Explore AI Tutor Matching or browse available tutors to start your personalized learning.', '1 day ago', 1)
+INSERT INTO `notifications` (`id`, `target_role`, `target`, `title`, `message`, `created_time`, `is_read`) VALUES
+('notif-1', 'student', 'Maria Santos', 'Session Confirmed!', 'Your Calculus II session with Prof. Alex Rivera is confirmed for March 15 at 2:00 PM.', '10 mins ago', 0),
+('notif-2', 'student', 'Maria Santos', 'GCash Payment Received', 'Payment of P385.00 confirmed (Ref: GC-9920182341). Receipt available in student dashboard.', '12 mins ago', 0),
+('notif-3', 'tutor', 'Prof. Alex Rivera', 'New Session Booking', 'Student Maria Santos booked a Calculus II tutoring session for March 15.', '15 mins ago', 0),
+('notif-4', 'admin', 'System Admin', 'System Activity Alert', 'New tutor registration pending document verification: Ms. Diana Reyes.', '2 hours ago', 0),
+('notif-5', 'all', 'All Users', 'Welcome to TutorLink', 'Explore AI Tutor Matching or browse available tutors to start your personalized learning.', '1 day ago', 1)
 ON DUPLICATE KEY UPDATE `id`=`id`;
