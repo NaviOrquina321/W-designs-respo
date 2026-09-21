@@ -1012,7 +1012,19 @@ function renderStudentUpcoming() {
   if (!container) return;
 
   const currentStudentName = state.currentUser ? state.currentUser.name : 'Maria Santos';
-  const upcoming = state.sessions.filter(s => s.studentName === currentStudentName && s.status === 'Confirmed');
+  const userSessions = state.sessions.filter(s => s.studentName === currentStudentName);
+  const upcoming = userSessions.filter(s => s.status === 'Confirmed');
+  const completed = userSessions.filter(s => s.status === 'Completed');
+  const totalSpent = userSessions.reduce((sum, s) => sum + (s.totalPaid || 0), 0);
+
+  // Update Student Dashboard Quick Stat Cards dynamically
+  const upcomingStatEl = document.getElementById('student-stat-upcoming');
+  const completedStatEl = document.getElementById('student-stat-completed');
+  const spentStatEl = document.getElementById('student-stat-spent');
+
+  if (upcomingStatEl) upcomingStatEl.textContent = upcoming.length;
+  if (completedStatEl) completedStatEl.textContent = completed.length;
+  if (spentStatEl) spentStatEl.textContent = `P${totalSpent}`;
 
   if (upcoming.length === 0) {
     container.innerHTML = `<p class="sub-text">No upcoming scheduled sessions. Use AI Matching or Browse Tutors to book one!</p>`;
@@ -1068,7 +1080,7 @@ function renderStudentHistory() {
     </tr>
   `).join('');
 
-  const totalSpent = state.sessions.reduce((sum, s) => sum + s.totalPaid, 0);
+  const totalSpent = userSessions.reduce((sum, s) => sum + (s.totalPaid || 0), 0);
   const spentEl = document.getElementById('student-stat-spent');
   if (spentEl) spentEl.textContent = `P${totalSpent}`;
 }
@@ -1274,7 +1286,20 @@ function renderTutorEarnings() {
   const tbody = document.getElementById('tutor-earnings-table-body');
   if (!tbody) return;
 
-  const tutorSessions = state.sessions.filter(s => s.tutorName.includes('Alex') || (state.currentUser && s.tutorName === state.currentUser.name));
+  const currentTutorName = state.currentUser ? state.currentUser.name : 'Prof. Alex Rivera';
+  const tutorSessions = state.sessions.filter(s => s.tutorName === currentTutorName);
+
+  // Update Tutor Dashboard Quick Stat Cards dynamically
+  const earningsEl = document.getElementById('tutor-stat-earnings');
+  const studentsEl = document.getElementById('tutor-stat-students');
+  const sessionsEl = document.getElementById('tutor-stat-sessions');
+
+  const totalEarnings = tutorSessions.reduce((sum, s) => sum + Math.round((s.totalPaid || 0) * 0.90), 0);
+  const uniqueStudents = new Set(tutorSessions.map(s => s.studentName)).size;
+
+  if (earningsEl) earningsEl.textContent = `P${totalEarnings}`;
+  if (studentsEl) studentsEl.textContent = uniqueStudents;
+  if (sessionsEl) sessionsEl.textContent = tutorSessions.length;
 
   if (tutorSessions.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 20px;">No earnings or payout history yet. Completed sessions will generate payout records here.</td></tr>`;
