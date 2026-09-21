@@ -1,0 +1,7 @@
+[Mon Sep 21 22:35:00 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Mon Sep 21 22:35:01 2026] [::1]:58594 Accepted
+[Mon Sep 21 22:35:01 2026] [::1]:58594 [200]: GET /api/config.php
+[Mon Sep 21 22:35:01 2026] [::1]:58594 Closing
+[Mon Sep 21 22:35:16 2026] [::1]:40982 Accepted
+[Mon Sep 21 22:35:16 2026] [::1]:40982 [200]: GET /api/config.php
+[Mon Sep 21 22:35:16 2026] [::1]:40982 Closing

@@ -19,10 +19,11 @@ if ($method === 'GET') {
     $createdTime = $input['created_time'] ?? 'Just now';
     $isRead = isset($input['is_read']) ? ($input['is_read'] ? 1 : 0) : 0;
 
-    $stmt = $pdo->prepare("INSERT INTO notifications (id, target, title, message, created_time, is_read)
-                           VALUES (?, ?, ?, ?, ?, ?)
-                           ON DUPLICATE KEY UPDATE is_read=?");
-    $stmt->execute([$id, $target, $title, $message, $createdTime, $isRead, $isRead]);
+    $targetRole = $input['target_role'] ?? 'all';
+    $stmt = $pdo->prepare("INSERT INTO notifications (id, target_role, target, title, message, created_time, is_read)
+                           VALUES (?, ?, ?, ?, ?, ?, ?)
+                           ON CONFLICT(id) DO UPDATE SET is_read=excluded.is_read");
+    $stmt->execute([$id, $targetRole, $target, $title, $message, $createdTime, $isRead]);
 
     echo json_encode(['status' => 'success', 'message' => 'Notification recorded', 'id' => $id]);
 }

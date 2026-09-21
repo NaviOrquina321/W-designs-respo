@@ -21,8 +21,8 @@ if ($method === 'GET') {
 
     $stmt = $pdo->prepare("INSERT INTO payments (id, student_name, method, ref_no, amount, status)
                            VALUES (?, ?, ?, ?, ?, ?)
-                           ON DUPLICATE KEY UPDATE status=?");
-    $stmt->execute([$id, $studentName, $methodType, $refNo, $amount, $status, $status]);
+                           ON CONFLICT(id) DO UPDATE SET status=excluded.status");
+    $stmt->execute([$id, $studentName, $methodType, $refNo, $amount, $status]);
 
     echo json_encode(['status' => 'success', 'message' => 'Payment record saved', 'id' => $id]);
 }

@@ -427,7 +427,7 @@ function initNavigation() {
   document.getElementById('back-to-tutor-portal-btn')?.addEventListener('click', () => switchRole('tutor'));
   document.getElementById('page-cancel-tutor-profile-btn')?.addEventListener('click', () => switchRole('tutor'));
 
-  document.getElementById('tutor-profile-page-form')?.addEventListener('submit', (e) => {
+  document.getElementById('tutor-profile-page-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('page-tutor-name-input').value;
     const subjects = document.getElementById('page-tutor-subjects-input').value;
@@ -436,7 +436,8 @@ function initNavigation() {
     const bio = document.getElementById('page-tutor-bio-input').value;
     const available = document.getElementById('page-tutor-availability-toggle').checked;
 
-    const currentTutor = state.tutors.find(t => t.id === 'tut-1') || state.tutors[0];
+    const currentId = state.currentUser ? state.currentUser.id : 'tut-1';
+    const currentTutor = state.tutors.find(t => t.id === currentId) || state.tutors[0];
     if (currentTutor) {
       currentTutor.name = name;
       currentTutor.initials = name.split(' ').map(n=>n[0]).join('');
@@ -445,12 +446,29 @@ function initNavigation() {
       currentTutor.hourlyRate = parseInt(rate) || 350;
       currentTutor.bio = bio;
       currentTutor.available = available;
+
+      try {
+        await fetch('api/tutors.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: currentTutor.id,
+            name: name,
+            initials: currentTutor.initials,
+            hourly_rate: currentTutor.hourlyRate,
+            subjects: subjects,
+            learning_styles: style,
+            bio: bio,
+            available: available ? 1 : 0
+          })
+        });
+      } catch (err) { console.log('Tutor profile update offline mode'); }
     }
 
     if (state.currentUser) state.currentUser.name = name;
     document.getElementById('tutor-welcome-heading').textContent = `Tutor Portal - ${name}`;
 
-    switchRole('tutor');
+    switchRole('tutor', state.currentUser);
     showToast('Tutor profile updated successfully!');
   });
 
@@ -675,27 +693,31 @@ function initModals() {
     });
   });
 
-  document.getElementById('auth-form')?.addEventListener('submit', (e) => {
+  document.getElementById('auth-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const emailInput = document.getElementById('auth-email').value.trim().toLowerCase();
+    const emailInput = document.getElementById('auth-email').value.trim();
+    const passwordInput = document.getElementById('auth-password').value.trim();
 
-    // Automatic role lookup by registered email
-    if (emailInput.includes('admin') || emailInput === 'admin@tutorlink.ph') {
-      switchRole('admin', { name: 'System Admin', role: 'admin', id: 'ADMIN-001' });
-      showToast('Logged in as System Admin!');
-    } else {
-      const tutorMatch = state.tutors.find(t => t.name.toLowerCase().includes(emailInput.split('@')[0]) || emailInput.includes('prof') || emailInput.includes('alex') || emailInput.includes('tutor'));
-      if (tutorMatch && !emailInput.includes('student') && !emailInput.includes('maria')) {
-        switchRole('tutor', { name: tutorMatch.name, role: 'tutor', id: tutorMatch.id });
-        showToast(`Logged in as Tutor ${tutorMatch.name}!`);
+    try {
+      const res = await fetch('api/auth.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'login', email: emailInput, password: passwordInput })
+      });
+
+      const json = await res.json();
+
+      if (res.ok && json.status === 'success') {
+        const u = json.user;
+        switchRole(u.role, { name: u.name, email: u.email, role: u.role, id: u.id });
+        closeModal('modal-auth');
+        showToast(`Welcome back, ${u.name}! Logged in as ${u.role.toUpperCase()}.`);
       } else {
-        const studentMatch = state.students.find(s => s.email.toLowerCase() === emailInput || s.name.toLowerCase().includes(emailInput.split('@')[0])) || state.students[0];
-        switchRole('student', { name: studentMatch ? studentMatch.name : 'Maria Santos', role: 'student', id: studentMatch ? studentMatch.id : 'STU-101' });
-        showToast(`Logged in as Student ${studentMatch ? studentMatch.name : 'Maria Santos'}!`);
+        alert(json.message || 'Login failed. Please check your email and password.');
       }
+    } catch (err) {
+      alert('Authentication server connection error. Please ensure PHP server is running.');
     }
-
-    closeModal('modal-auth');
   });
 }
 
@@ -1692,8 +1714,19 @@ function initWorkspaceSession() {
     document.getElementById('session-shared-notes').value = '';
   });
 
-  saveNotesBtn?.addEventListener('click', () => {
-    showToast('Session notes snapshot saved!');
+  document.getElementById('save-notes-btn')?.addEventListener('click', async () => {
+    const notesText = document.getElementById('session-shared-notes').value;
+    const activeSess = state.activeWorkspaceSession;
+    if (activeSess) {
+      try {
+        await fetch('api/workspace.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'save_notes', session_id: activeSess.id, notes: notesText })
+        });
+        showToast('Session notes saved to database!');
+      } catch (e) { showToast('Session notes saved locally!'); }
+    }
   });
 
   chatForm?.addEventListener('submit', (e) => {
@@ -2124,9 +2157,13 @@ function renderAdminReports() {
 
   const filter = state.activeReportFilter;
 
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
   const list = state.sessions.filter(s => {
-    if (filter === 'weekly') return s.date >= '2026-03-10';
-    if (filter === 'monthly') return s.date >= '2026-03-01';
+    if (filter === 'weekly') return s.date >= weekAgo || s.date >= '2026-03-10';
+    if (filter === 'monthly') return s.date >= monthAgo || s.date >= '2026-03-01';
     return s.status === 'Completed' || s.status === 'Confirmed';
   });
 

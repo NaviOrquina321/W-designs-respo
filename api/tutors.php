@@ -67,8 +67,8 @@ if ($method === 'GET') {
 
     $stmt = $pdo->prepare("INSERT INTO tutors (id, name, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, available_days, available_time_slots, blocked_dates)
                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                           ON DUPLICATE KEY UPDATE hourly_rate=?, subjects=?, learning_styles=?, bio=?, available=?, deactivated=?, available_days=?, available_time_slots=?, blocked_dates=?");
-    $stmt->execute([$id, $name, $initials, $rating, $reviewsCount, $hourlyRate, $subjects, $learningStyles, $bio, $available, $deactivated, $availableDays, $availableTimeSlots, $blockedDates, $hourlyRate, $subjects, $learningStyles, $bio, $available, $deactivated, $availableDays, $availableTimeSlots, $blockedDates]);
+                           ON CONFLICT(id) DO UPDATE SET hourly_rate=excluded.hourly_rate, subjects=excluded.subjects, learning_styles=excluded.learning_styles, bio=excluded.bio, available=excluded.available, deactivated=excluded.deactivated, available_days=excluded.available_days, available_time_slots=excluded.available_time_slots, blocked_dates=excluded.blocked_dates");
+    $stmt->execute([$id, $name, $initials, $rating, $reviewsCount, $hourlyRate, $subjects, $learningStyles, $bio, $available, $deactivated, $availableDays, $availableTimeSlots, $blockedDates]);
 
     if ($isNew) {
         $notifId = 'notif-' . time() . '-' . rand(100, 999);

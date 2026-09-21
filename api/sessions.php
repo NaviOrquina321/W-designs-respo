@@ -28,8 +28,8 @@ if ($method === 'GET') {
 
     $stmt = $pdo->prepare("INSERT INTO sessions (id, student_name, tutor_id, tutor_name, subject, session_date, time_slot, hourly_rate, commission_fee, total_paid, gcash_ref, status, notes)
                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                           ON DUPLICATE KEY UPDATE status=?, notes=?");
-    $stmt->execute([$id, $studentName, $tutorId, $tutorName, $subject, $sessionDate, $timeSlot, $hourlyRate, $commissionFee, $totalPaid, $gcashRef, $status, $notes, $status, $notes]);
+                           ON CONFLICT(id) DO UPDATE SET status=excluded.status, notes=excluded.notes");
+    $stmt->execute([$id, $studentName, $tutorId, $tutorName, $subject, $sessionDate, $timeSlot, $hourlyRate, $commissionFee, $totalPaid, $gcashRef, $status, $notes]);
 
     echo json_encode(['status' => 'success', 'message' => 'Session created/updated successfully', 'id' => $id]);
 }

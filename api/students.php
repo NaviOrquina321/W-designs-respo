@@ -23,8 +23,8 @@ if ($method === 'GET') {
 
     $stmt = $pdo->prepare("INSERT INTO students (id, name, email, grade, validated, bio, subjects_needed)
                            VALUES (?, ?, ?, ?, ?, ?, ?)
-                           ON DUPLICATE KEY UPDATE name=?, grade=?, bio=?, subjects_needed=?");
-    $stmt->execute([$id, $name, $email, $grade, $validated, $bio, $subjectsNeeded, $name, $grade, $bio, $subjectsNeeded]);
+                           ON CONFLICT(id) DO UPDATE SET name=excluded.name, grade=excluded.grade, bio=excluded.bio, subjects_needed=excluded.subjects_needed");
+    $stmt->execute([$id, $name, $email, $grade, $validated, $bio, $subjectsNeeded]);
 
     if ($isNew) {
         $notifId = 'notif-' . time() . '-' . rand(100, 999);
