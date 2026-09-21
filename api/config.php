@@ -34,6 +34,7 @@ try {
           `email` VARCHAR(100) NOT NULL UNIQUE,
           `grade` VARCHAR(50) NOT NULL,
           `validated` TINYINT(1) DEFAULT 1,
+          `deactivated` TINYINT(1) DEFAULT 0,
           `bio` TEXT,
           `subjects_needed` VARCHAR(255),
           `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -50,6 +51,32 @@ try {
           `learning_styles` VARCHAR(255) NOT NULL,
           `bio` TEXT,
           `available` TINYINT(1) DEFAULT 1,
+          `deactivated` TINYINT(1) DEFAULT 0,
+          `diploma_status` VARCHAR(50) DEFAULT 'Verified',
+          `tor_status` VARCHAR(50) DEFAULT 'Verified',
+          `id_status` VARCHAR(50) DEFAULT 'Verified',
+          `approval_status` VARCHAR(50) DEFAULT 'Approved',
+          `available_days` VARCHAR(255) DEFAULT 'Mon,Tue,Wed,Thu,Fri',
+          `available_time_slots` VARCHAR(255) DEFAULT '09:00 AM - 05:00 PM',
+          `blocked_dates` TEXT,
+          `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+        CREATE TABLE IF NOT EXISTS `subjects` (
+          `id` VARCHAR(20) PRIMARY KEY,
+          `name` VARCHAR(100) NOT NULL,
+          `category` VARCHAR(100) NOT NULL,
+          `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+        CREATE TABLE IF NOT EXISTS `matches` (
+          `id` VARCHAR(20) PRIMARY KEY,
+          `student_name` VARCHAR(100) NOT NULL,
+          `tutor_name` VARCHAR(100) NOT NULL,
+          `subject` VARCHAR(100) NOT NULL,
+          `score` INT NOT NULL,
+          `status` VARCHAR(50) DEFAULT 'Pending Review',
+          `match_reason` TEXT,
           `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -66,6 +93,7 @@ try {
           `total_paid` INT NOT NULL,
           `gcash_ref` VARCHAR(100) NOT NULL,
           `status` VARCHAR(50) DEFAULT 'Confirmed',
+          `payout_status` VARCHAR(50) DEFAULT 'Unpaid',
           `notes` TEXT,
           `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -77,6 +105,7 @@ try {
           `ref_no` VARCHAR(100) NOT NULL,
           `amount` INT NOT NULL,
           `status` VARCHAR(50) DEFAULT 'Confirmed',
+          `payout_status` VARCHAR(50) DEFAULT 'Pending',
           `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

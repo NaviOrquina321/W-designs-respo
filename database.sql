@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS `students` (
   `email` VARCHAR(100) NOT NULL UNIQUE,
   `grade` VARCHAR(50) NOT NULL,
   `validated` TINYINT(1) DEFAULT 1,
+  `deactivated` TINYINT(1) DEFAULT 0,
   `bio` TEXT,
   `subjects_needed` VARCHAR(255),
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -30,10 +31,26 @@ CREATE TABLE IF NOT EXISTS `tutors` (
   `learning_styles` VARCHAR(255) NOT NULL,
   `bio` TEXT,
   `available` TINYINT(1) DEFAULT 1,
+  `deactivated` TINYINT(1) DEFAULT 0,
+  `diploma_status` VARCHAR(50) DEFAULT 'Verified',
+  `tor_status` VARCHAR(50) DEFAULT 'Verified',
+  `id_status` VARCHAR(50) DEFAULT 'Verified',
+  `approval_status` VARCHAR(50) DEFAULT 'Approved',
+  `available_days` VARCHAR(255) DEFAULT 'Mon,Tue,Wed,Thu,Fri',
+  `available_time_slots` VARCHAR(255) DEFAULT '09:00 AM - 05:00 PM',
+  `blocked_dates` TEXT,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 3. Table: matches
+-- 3. Table: subjects
+CREATE TABLE IF NOT EXISTS `subjects` (
+  `id` VARCHAR(20) PRIMARY KEY,
+  `name` VARCHAR(100) NOT NULL,
+  `category` VARCHAR(100) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 4. Table: matches
 CREATE TABLE IF NOT EXISTS `matches` (
   `id` VARCHAR(20) PRIMARY KEY,
   `student_name` VARCHAR(100) NOT NULL,
@@ -41,10 +58,11 @@ CREATE TABLE IF NOT EXISTS `matches` (
   `subject` VARCHAR(100) NOT NULL,
   `score` INT NOT NULL,
   `status` VARCHAR(50) DEFAULT 'Pending Review',
+  `match_reason` TEXT,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 4. Table: schedules
+-- 5. Table: schedules
 CREATE TABLE IF NOT EXISTS `schedules` (
   `id` VARCHAR(20) PRIMARY KEY,
   `tutor_name` VARCHAR(100) NOT NULL,
@@ -54,7 +72,7 @@ CREATE TABLE IF NOT EXISTS `schedules` (
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 5. Table: payments
+-- 6. Table: payments
 CREATE TABLE IF NOT EXISTS `payments` (
   `id` VARCHAR(20) PRIMARY KEY,
   `student_name` VARCHAR(100) NOT NULL,
@@ -62,10 +80,11 @@ CREATE TABLE IF NOT EXISTS `payments` (
   `ref_no` VARCHAR(100) NOT NULL,
   `amount` INT NOT NULL,
   `status` VARCHAR(50) DEFAULT 'Confirmed',
+  `payout_status` VARCHAR(50) DEFAULT 'Pending',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 6. Table: sessions
+-- 7. Table: sessions
 CREATE TABLE IF NOT EXISTS `sessions` (
   `id` VARCHAR(20) PRIMARY KEY,
   `student_name` VARCHAR(100) NOT NULL,
@@ -79,11 +98,12 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   `total_paid` INT NOT NULL,
   `gcash_ref` VARCHAR(100) NOT NULL,
   `status` VARCHAR(50) DEFAULT 'Confirmed',
+  `payout_status` VARCHAR(50) DEFAULT 'Unpaid',
   `notes` TEXT,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 7. Table: notifications
+-- 8. Table: notifications
 CREATE TABLE IF NOT EXISTS `notifications` (
   `id` VARCHAR(50) PRIMARY KEY,
   `target` VARCHAR(100) NOT NULL,
@@ -99,22 +119,32 @@ CREATE TABLE IF NOT EXISTS `notifications` (
 -- SEED INITIAL DATA
 -- ========================================================
 
-INSERT INTO `students` (`id`, `name`, `email`, `grade`, `validated`, `bio`, `subjects_needed`) VALUES
-('STU-101', 'Maria Santos', 'maria@tutorlink.ph', 'Senior High', 1, 'Grade 12 STEM Student focusing on Advanced Calculus and College Entrance Exam preparation.', 'Calculus, Physics'),
-('STU-102', 'Juan Dela Cruz', 'juan@tutorlink.ph', 'College', 1, '2nd Year Computer Science student looking for web development and algorithms mentoring.', 'Programming, Mathematics'),
-('STU-103', 'Angela Torres', 'angela@tutorlink.ph', 'High School', 0, 'Grade 10 student striving to build strong foundations in High School Algebra and Chemistry.', 'Mathematics, Chemistry')
+INSERT INTO `subjects` (`id`, `name`, `category`) VALUES
+('SUB-101', 'Mathematics', 'STEM'),
+('SUB-102', 'Calculus', 'STEM'),
+('SUB-103', 'Physics', 'STEM'),
+('SUB-104', 'Chemistry', 'STEM'),
+('SUB-105', 'Programming', 'Technology'),
+('SUB-106', 'English', 'Humanities'),
+('SUB-107', 'Literature', 'Humanities')
 ON DUPLICATE KEY UPDATE `name`=`name`;
 
-INSERT INTO `tutors` (`id`, `name`, `initials`, `rating`, `reviews_count`, `hourly_rate`, `subjects`, `learning_styles`, `bio`, `available`) VALUES
-('tut-1', 'Prof. Alex Rivera', 'AR', 4.9, 38, 350, 'Mathematics, Calculus, Physics', 'Visual & Diagrams, Step-by-Step Explanation', 'Licensed Mathematics Professor with 8+ years experience making complex algebra and calculus easy to grasp.', 1),
-('tut-2', 'Engr. Bea Soriano', 'BS', 4.8, 29, 400, 'Programming, Mathematics, Calculus', 'Hands-on Practice, Step-by-Step Explanation', 'Software Engineer & Code Instructor specializing in Python, JavaScript, and data structures.', 1),
-('tut-3', 'Dr. Carlos Mendoza', 'CM', 5.0, 45, 450, 'Physics, Chemistry', 'Auditory & Discussion, Visual & Diagrams', 'Physics PhD graduate dedicated to interactive, real-world physics experiments and conceptual learning.', 1),
-('tut-4', 'Ms. Diana Reyes', 'DR', 4.7, 22, 300, 'English, Literature', 'Step-by-Step Explanation, Auditory & Discussion', 'English Literature Specialist assisting students in essay writing, grammar, and oral communications.', 1)
+INSERT INTO `students` (`id`, `name`, `email`, `grade`, `validated`, `deactivated`, `bio`, `subjects_needed`) VALUES
+('STU-101', 'Maria Santos', 'maria@tutorlink.ph', 'Senior High', 1, 0, 'Grade 12 STEM Student focusing on Advanced Calculus and College Entrance Exam preparation.', 'Calculus, Physics'),
+('STU-102', 'Juan Dela Cruz', 'juan@tutorlink.ph', 'College', 1, 0, '2nd Year Computer Science student looking for web development and algorithms mentoring.', 'Programming, Mathematics'),
+('STU-103', 'Angela Torres', 'angela@tutorlink.ph', 'High School', 0, 0, 'Grade 10 student striving to build strong foundations in High School Algebra and Chemistry.', 'Mathematics, Chemistry')
 ON DUPLICATE KEY UPDATE `name`=`name`;
 
-INSERT INTO `matches` (`id`, `student_name`, `tutor_name`, `subject`, `score`, `status`) VALUES
-('MATCH-201', 'Maria Santos', 'Prof. Alex Rivera', 'Calculus II', 98, 'Approved'),
-('MATCH-202', 'Angela Torres', 'Dr. Carlos Mendoza', 'Physics', 92, 'Pending Review')
+INSERT INTO `tutors` (`id`, `name`, `initials`, `rating`, `reviews_count`, `hourly_rate`, `subjects`, `learning_styles`, `bio`, `available`, `deactivated`, `diploma_status`, `tor_status`, `id_status`, `approval_status`, `available_days`, `available_time_slots`) VALUES
+('tut-1', 'Prof. Alex Rivera', 'AR', 4.9, 38, 350, 'Mathematics, Calculus, Physics', 'Visual & Diagrams, Step-by-Step Explanation', 'Licensed Mathematics Professor with 8+ years experience making complex algebra and calculus easy to grasp.', 1, 0, 'Verified', 'Verified', 'Verified', 'Approved', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM'),
+('tut-2', 'Engr. Bea Soriano', 'BS', 4.8, 29, 400, 'Programming, Mathematics, Calculus', 'Hands-on Practice, Step-by-Step Explanation', 'Software Engineer & Code Instructor specializing in Python, JavaScript, and data structures.', 1, 0, 'Verified', 'Verified', 'Verified', 'Approved', 'Mon,Wed,Fri,Sat', '10:00 AM - 06:00 PM'),
+('tut-3', 'Dr. Carlos Mendoza', 'CM', 5.0, 45, 450, 'Physics, Chemistry', 'Auditory & Discussion, Visual & Diagrams', 'Physics PhD graduate dedicated to interactive, real-world physics experiments and conceptual learning.', 1, 0, 'Verified', 'Verified', 'Verified', 'Approved', 'Tue,Thu,Sat', '01:00 PM - 07:00 PM'),
+('tut-4', 'Ms. Diana Reyes', 'DR', 4.7, 22, 300, 'English, Literature', 'Step-by-Step Explanation, Auditory & Discussion', 'English Literature Specialist assisting students in essay writing, grammar, and oral communications.', 1, 0, 'Verified', 'Pending', 'Verified', 'Approved', 'Mon,Tue,Wed,Thu,Fri', '08:00 AM - 04:00 PM')
+ON DUPLICATE KEY UPDATE `name`=`name`;
+
+INSERT INTO `matches` (`id`, `student_name`, `tutor_name`, `subject`, `score`, `status`, `match_reason`) VALUES
+('MATCH-201', 'Maria Santos', 'Prof. Alex Rivera', 'Calculus II', 98, 'Approved', '98% compatibility: Strong alignment in Calculus expertise and Step-by-step learning preference.'),
+('MATCH-202', 'Angela Torres', 'Dr. Carlos Mendoza', 'Physics', 92, 'Pending Review', '92% compatibility: Strong alignment in Physics concept development.')
 ON DUPLICATE KEY UPDATE `id`=`id`;
 
 INSERT INTO `schedules` (`id`, `tutor_name`, `date_slot`, `subject`, `status`) VALUES
@@ -123,17 +153,17 @@ INSERT INTO `schedules` (`id`, `tutor_name`, `date_slot`, `subject`, `status`) V
 ('SCH-303', 'Dr. Carlos Mendoza', '2026-03-18 (09:00 AM)', 'Physics', 'Available')
 ON DUPLICATE KEY UPDATE `id`=`id`;
 
-INSERT INTO `payments` (`id`, `student_name`, `method`, `ref_no`, `amount`, `status`) VALUES
-('PAY-401', 'Maria Santos', 'GCash', 'GC-9920182341', 385, 'Confirmed'),
-('PAY-402', 'Maria Santos', 'GCash', 'GC-8812039481', 440, 'Confirmed'),
-('PAY-403', 'Juan Dela Cruz', 'GCash', 'GC-7712938471', 495, 'Confirmed'),
-('PAY-404', 'Angela Torres', 'PayMaya', 'PM-5510293841', 330, 'Pending Confirmation')
+INSERT INTO `payments` (`id`, `student_name`, `method`, `ref_no`, `amount`, `status`, `payout_status`) VALUES
+('PAY-401', 'Maria Santos', 'GCash', 'GC-9920182341', 385, 'Confirmed', 'Paid Out'),
+('PAY-402', 'Maria Santos', 'GCash', 'GC-8812039481', 440, 'Confirmed', 'Paid Out'),
+('PAY-403', 'Juan Dela Cruz', 'GCash', 'GC-7712938471', 495, 'Confirmed', 'Pending'),
+('PAY-404', 'Angela Torres', 'PayMaya', 'PM-5510293841', 330, 'Pending Confirmation', 'Pending')
 ON DUPLICATE KEY UPDATE `id`=`id`;
 
-INSERT INTO `sessions` (`id`, `student_name`, `tutor_id`, `tutor_name`, `subject`, `session_date`, `time_slot`, `hourly_rate`, `commission_fee`, `total_paid`, `gcash_ref`, `status`, `notes`) VALUES
-('SESS-101', 'Maria Santos', 'tut-1', 'Prof. Alex Rivera', 'Calculus II', '2026-03-15', '02:00 PM', 350, 35, 385, 'GC-9920182341', 'Confirmed', 'Review derivatives and integration techniques for upcoming midterm.'),
-('SESS-100', 'Maria Santos', 'tut-2', 'Engr. Bea Soriano', 'Programming', '2026-03-10', '10:00 AM', 400, 40, 440, 'GC-8812039481', 'Completed', 'Intro to JavaScript Functions and DOM Manipulation.'),
-('SESS-099', 'Juan Dela Cruz', 'tut-3', 'Dr. Carlos Mendoza', 'Physics', '2026-03-08', '02:00 PM', 450, 45, 495, 'GC-7712938471', 'Completed', 'Newtonian Physics & Equilibrium problems.')
+INSERT INTO `sessions` (`id`, `student_name`, `tutor_id`, `tutor_name`, `subject`, `session_date`, `time_slot`, `hourly_rate`, `commission_fee`, `total_paid`, `gcash_ref`, `status`, `payout_status`, `notes`) VALUES
+('SESS-101', 'Maria Santos', 'tut-1', 'Prof. Alex Rivera', 'Calculus II', '2026-03-15', '02:00 PM', 350, 35, 385, 'GC-9920182341', 'Confirmed', 'Unpaid', 'Review derivatives and integration techniques for upcoming midterm.'),
+('SESS-100', 'Maria Santos', 'tut-2', 'Engr. Bea Soriano', 'Programming', '2026-03-10', '10:00 AM', 400, 40, 440, 'GC-8812039481', 'Completed', 'Paid Out', 'Intro to JavaScript Functions and DOM Manipulation.'),
+('SESS-099', 'Juan Dela Cruz', 'tut-3', 'Dr. Carlos Mendoza', 'Physics', '2026-03-08', '02:00 PM', 450, 45, 495, 'GC-7712938471', 'Completed', 'Paid Out', 'Newtonian Physics & Equilibrium problems.')
 ON DUPLICATE KEY UPDATE `id`=`id`;
 
 INSERT INTO `notifications` (`id`, `target`, `title`, `message`, `created_time`, `is_read`) VALUES

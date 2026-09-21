@@ -8,11 +8,22 @@ const state = {
   currentRole: 'guest', // 'guest', 'student', 'tutor', 'admin'
   currentUser: null,
 
+  // Seed Subjects Database
+  subjects: [
+    { id: 'SUB-101', name: 'Mathematics', category: 'STEM' },
+    { id: 'SUB-102', name: 'Calculus', category: 'STEM' },
+    { id: 'SUB-103', name: 'Physics', category: 'STEM' },
+    { id: 'SUB-104', name: 'Chemistry', category: 'STEM' },
+    { id: 'SUB-105', name: 'Programming', category: 'Technology' },
+    { id: 'SUB-106', name: 'English', category: 'Humanities' },
+    { id: 'SUB-107', name: 'Literature', category: 'Humanities' }
+  ],
+
   // Seed Students Database
   students: [
-    { id: 'STU-101', name: 'Maria Santos', email: 'maria@tutorlink.ph', grade: 'Senior High', validated: true, bio: 'Grade 12 STEM Student focusing on Advanced Calculus and College Entrance Exam preparation.', subjectsNeeded: ['Calculus', 'Physics'], sessionsCompleted: 4 },
-    { id: 'STU-102', name: 'Juan Dela Cruz', email: 'juan@tutorlink.ph', grade: 'College', validated: true, bio: '2nd Year Computer Science student looking for web development and algorithms mentoring.', subjectsNeeded: ['Programming', 'Mathematics'], sessionsCompleted: 2 },
-    { id: 'STU-103', name: 'Angela Torres', email: 'angela@tutorlink.ph', grade: 'High School', validated: false, bio: 'Grade 10 student striving to build strong foundations in High School Algebra and Chemistry.', subjectsNeeded: ['Mathematics', 'Chemistry'], sessionsCompleted: 1 }
+    { id: 'STU-101', name: 'Maria Santos', email: 'maria@tutorlink.ph', grade: 'Senior High', validated: true, deactivated: false, bio: 'Grade 12 STEM Student focusing on Advanced Calculus and College Entrance Exam preparation.', subjectsNeeded: ['Calculus', 'Physics'], sessionsCompleted: 4 },
+    { id: 'STU-102', name: 'Juan Dela Cruz', email: 'juan@tutorlink.ph', grade: 'College', validated: true, deactivated: false, bio: '2nd Year Computer Science student looking for web development and algorithms mentoring.', subjectsNeeded: ['Programming', 'Mathematics'], sessionsCompleted: 2 },
+    { id: 'STU-103', name: 'Angela Torres', email: 'angela@tutorlink.ph', grade: 'High School', validated: false, deactivated: false, bio: 'Grade 10 student striving to build strong foundations in High School Algebra and Chemistry.', subjectsNeeded: ['Mathematics', 'Chemistry'], sessionsCompleted: 1 }
   ],
 
   // Seed Tutors Database
@@ -27,8 +38,16 @@ const state = {
       subjects: ['Mathematics', 'Calculus', 'Physics'],
       learningStyles: ['Visual & Diagrams', 'Step-by-Step Explanation'],
       bio: 'Licensed Mathematics Professor with 8+ years experience making complex algebra and calculus easy to grasp.',
+      availableDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+      availableTimeSlots: '09:00 AM - 05:00 PM',
+      blockedDates: '',
       availabilitySlots: ['09:00 AM', '11:00 AM', '02:00 PM', '04:00 PM', '07:00 PM'],
-      available: true
+      available: true,
+      deactivated: false,
+      diplomaStatus: 'Verified',
+      torStatus: 'Verified',
+      idStatus: 'Verified',
+      approvalStatus: 'Approved'
     },
     {
       id: 'tut-2',
@@ -40,8 +59,16 @@ const state = {
       subjects: ['Programming', 'Mathematics', 'Calculus'],
       learningStyles: ['Hands-on Practice', 'Step-by-Step Explanation'],
       bio: 'Software Engineer & Code Instructor specializing in Python, JavaScript, and data structures.',
+      availableDays: ['Mon', 'Wed', 'Fri', 'Sat'],
+      availableTimeSlots: '10:00 AM - 06:00 PM',
+      blockedDates: '',
       availabilitySlots: ['10:00 AM', '01:00 PM', '03:00 PM', '06:00 PM'],
-      available: true
+      available: true,
+      deactivated: false,
+      diplomaStatus: 'Verified',
+      torStatus: 'Verified',
+      idStatus: 'Verified',
+      approvalStatus: 'Approved'
     },
     {
       id: 'tut-3',
@@ -53,8 +80,16 @@ const state = {
       subjects: ['Physics', 'Chemistry'],
       learningStyles: ['Auditory & Discussion', 'Visual & Diagrams'],
       bio: 'Physics PhD graduate dedicated to interactive, real-world physics experiments and conceptual learning.',
+      availableDays: ['Tue', 'Thu', 'Sat'],
+      availableTimeSlots: '01:00 PM - 07:00 PM',
+      blockedDates: '',
       availabilitySlots: ['09:00 AM', '02:00 PM', '05:00 PM'],
-      available: true
+      available: true,
+      deactivated: false,
+      diplomaStatus: 'Verified',
+      torStatus: 'Verified',
+      idStatus: 'Verified',
+      approvalStatus: 'Approved'
     },
     {
       id: 'tut-4',
@@ -66,15 +101,23 @@ const state = {
       subjects: ['English', 'Literature'],
       learningStyles: ['Step-by-Step Explanation', 'Auditory & Discussion'],
       bio: 'English Literature Specialist assisting students in essay writing, grammar, and oral communications.',
+      availableDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+      availableTimeSlots: '08:00 AM - 04:00 PM',
+      blockedDates: '',
       availabilitySlots: ['10:00 AM', '11:00 AM', '02:00 PM', '04:00 PM'],
-      available: true
+      available: true,
+      deactivated: false,
+      diplomaStatus: 'Verified',
+      torStatus: 'Pending',
+      idStatus: 'Verified',
+      approvalStatus: 'Approved'
     }
   ],
 
   // Seed Matching Results
   matches: [
-    { id: 'MATCH-201', studentName: 'Maria Santos', tutorName: 'Prof. Alex Rivera', subject: 'Calculus II', score: 98, status: 'Approved' },
-    { id: 'MATCH-202', studentName: 'Angela Torres', tutorName: 'Dr. Carlos Mendoza', subject: 'Physics', score: 92, status: 'Pending Review' }
+    { id: 'MATCH-201', studentName: 'Maria Santos', tutorName: 'Prof. Alex Rivera', subject: 'Calculus II', score: 98, status: 'Approved', matchReason: '98% compatibility: Strong alignment in Calculus expertise and Step-by-step learning preference.' },
+    { id: 'MATCH-202', studentName: 'Angela Torres', tutorName: 'Dr. Carlos Mendoza', subject: 'Physics', score: 92, status: 'Pending Review', matchReason: '92% compatibility: Strong alignment in Physics concept development.' }
   ],
 
   // Seed Calendar Schedules
@@ -86,10 +129,10 @@ const state = {
 
   // Seed Payments Database
   payments: [
-    { id: 'PAY-401', studentName: 'Maria Santos', method: 'GCash', refNo: 'GC-9920182341', amount: 385, status: 'Confirmed' },
-    { id: 'PAY-402', studentName: 'Maria Santos', method: 'GCash', refNo: 'GC-8812039481', amount: 440, status: 'Confirmed' },
-    { id: 'PAY-403', studentName: 'Juan Dela Cruz', method: 'GCash', refNo: 'GC-7712938471', amount: 495, status: 'Confirmed' },
-    { id: 'PAY-404', studentName: 'Angela Torres', method: 'PayMaya', refNo: 'PM-5510293841', amount: 330, status: 'Pending Confirmation' }
+    { id: 'PAY-401', studentName: 'Maria Santos', method: 'GCash', refNo: 'GC-9920182341', amount: 385, status: 'Confirmed', payoutStatus: 'Paid Out' },
+    { id: 'PAY-402', studentName: 'Maria Santos', method: 'GCash', refNo: 'GC-8812039481', amount: 440, status: 'Confirmed', payoutStatus: 'Paid Out' },
+    { id: 'PAY-403', studentName: 'Juan Dela Cruz', method: 'GCash', refNo: 'GC-7712938471', amount: 495, status: 'Confirmed', payoutStatus: 'Pending' },
+    { id: 'PAY-404', studentName: 'Angela Torres', method: 'PayMaya', refNo: 'PM-5510293841', amount: 330, status: 'Pending Confirmation', payoutStatus: 'Pending' }
   ],
 
   // Seed Sessions & Bookings
@@ -107,6 +150,7 @@ const state = {
       totalPaid: 385,
       gcashRef: 'GC-9920182341',
       status: 'Confirmed',
+      payoutStatus: 'Unpaid',
       notes: 'Review derivatives and integration techniques for upcoming midterm.'
     },
     {
@@ -122,6 +166,7 @@ const state = {
       totalPaid: 440,
       gcashRef: 'GC-8812039481',
       status: 'Completed',
+      payoutStatus: 'Paid Out',
       notes: 'Intro to JavaScript Functions and DOM Manipulation.'
     },
     {
@@ -137,6 +182,7 @@ const state = {
       totalPaid: 495,
       gcashRef: 'GC-7712938471',
       status: 'Completed',
+      payoutStatus: 'Paid Out',
       notes: 'Newtonian Physics & Equilibrium problems.'
     }
   ],
@@ -155,7 +201,7 @@ const state = {
       id: 'notif-2',
       target: 'Maria Santos',
       title: 'GCash Payment Received',
-      message: 'Payment of ₱385.00 confirmed (Ref: GC-9920182341). Receipt available in dashboard.',
+      message: 'Payment of P385.00 confirmed (Ref: GC-9920182341). Receipt available in dashboard.',
       time: '12 mins ago',
       read: false
     },
@@ -200,6 +246,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTutorScheduleManager();
   initProfileModals();
   initTutorProfileSettings();
+  initTutorSubTabs();
+  initSubjectManagement();
   await syncWithDatabase();
   renderAllViews();
 });
@@ -217,6 +265,7 @@ async function syncWithDatabase() {
           email: s.email,
           grade: s.grade,
           validated: Boolean(parseInt(s.validated)),
+          deactivated: Boolean(parseInt(s.deactivated || 0)),
           bio: s.bio,
           subjectsNeeded: s.subjects_needed ? s.subjects_needed.split(',') : []
         }));
@@ -224,6 +273,18 @@ async function syncWithDatabase() {
     }
   } catch (e) {
     console.log('XAMPP Backend offline, running on memory state.');
+  }
+
+  try {
+    const resSub = await fetch('api/subjects.php');
+    if (resSub.ok) {
+      const jsonSub = await resSub.json();
+      if (jsonSub.data && jsonSub.data.length > 0) {
+        state.subjects = jsonSub.data;
+      }
+    }
+  } catch (e) {
+    console.log('Subjects API fallback active.');
   }
 
   try {
@@ -241,7 +302,15 @@ async function syncWithDatabase() {
           subjects: t.subjects.split(',').map(x => x.trim()),
           learningStyles: t.learning_styles.split(',').map(x => x.trim()),
           bio: t.bio,
+          availableDays: t.available_days ? t.available_days.split(',') : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+          availableTimeSlots: t.available_time_slots || '09:00 AM - 05:00 PM',
+          blockedDates: t.blocked_dates || '',
           available: Boolean(parseInt(t.available)),
+          deactivated: Boolean(parseInt(t.deactivated || 0)),
+          diplomaStatus: t.diploma_status || 'Verified',
+          torStatus: t.tor_status || 'Verified',
+          idStatus: t.id_status || 'Verified',
+          approvalStatus: t.approval_status || 'Approved',
           availabilitySlots: ['09:00 AM', '11:00 AM', '02:00 PM', '04:00 PM']
         }));
       }
@@ -258,58 +327,12 @@ async function syncWithDatabase() {
         const d = jsonA.data;
         document.getElementById('admin-stat-total-students').textContent = d.total_students;
         document.getElementById('admin-stat-total-tutors').textContent = d.total_tutors;
-        document.getElementById('admin-stat-total-volume').textContent = `₱${d.total_volume.toLocaleString()}`;
-        document.getElementById('admin-stat-platform-commission').textContent = `₱${d.platform_commission.toLocaleString()}`;
+        document.getElementById('admin-stat-total-volume').textContent = `P${d.total_volume.toLocaleString()}`;
+        document.getElementById('admin-stat-platform-commission').textContent = `P${d.platform_commission.toLocaleString()}`;
       }
     }
   } catch (e) {
     console.log('Admin SQL stats API offline, computing from state.');
-  }
-}
-
-async function apiSaveStudent(studentObj) {
-  try {
-    await fetch('api/students.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: studentObj.id,
-        name: studentObj.name,
-        email: studentObj.email,
-        grade: studentObj.grade,
-        validated: studentObj.validated ? 1 : 0,
-        bio: studentObj.bio || '',
-        subjects_needed: Array.isArray(studentObj.subjectsNeeded) ? studentObj.subjectsNeeded.join(', ') : studentObj.subjectsNeeded
-      })
-    });
-  } catch (e) {
-    console.log('Saved to memory state (API offline).');
-  }
-}
-
-async function apiSaveSession(sessionObj) {
-  try {
-    await fetch('api/sessions.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: sessionObj.id,
-        student_name: sessionObj.studentName,
-        tutor_id: sessionObj.tutorId,
-        tutor_name: sessionObj.tutorName,
-        subject: sessionObj.subject,
-        session_date: sessionObj.date,
-        time_slot: sessionObj.timeSlot,
-        hourly_rate: sessionObj.hourlyRate,
-        commission_fee: sessionObj.commissionFee,
-        total_paid: sessionObj.totalPaid,
-        gcash_ref: sessionObj.gcashRef,
-        status: sessionObj.status,
-        notes: sessionObj.notes
-      })
-    });
-  } catch (e) {
-    console.log('Saved session to memory state (API offline).');
   }
 }
 
@@ -321,9 +344,7 @@ function initNavigation() {
   const logoutBtn = document.getElementById('logout-btn');
   const userProfileBtn = document.getElementById('user-profile-btn');
 
-  navLogo.addEventListener('click', () => {
-    switchRole('guest');
-  });
+  navLogo.addEventListener('click', () => switchRole('guest'));
 
   loginBtn.addEventListener('click', (e) => {
     e.preventDefault();
@@ -351,13 +372,8 @@ function initNavigation() {
     }
   });
 
-  document.getElementById('back-to-tutor-portal-btn')?.addEventListener('click', () => {
-    switchRole('tutor');
-  });
-
-  document.getElementById('page-cancel-tutor-profile-btn')?.addEventListener('click', () => {
-    switchRole('tutor');
-  });
+  document.getElementById('back-to-tutor-portal-btn')?.addEventListener('click', () => switchRole('tutor'));
+  document.getElementById('page-cancel-tutor-profile-btn')?.addEventListener('click', () => switchRole('tutor'));
 
   document.getElementById('tutor-profile-page-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -386,29 +402,11 @@ function initNavigation() {
     showToast('Tutor profile updated successfully!');
   });
 
-  document.getElementById('hero-find-tutor-btn')?.addEventListener('click', () => {
-    openModal('modal-auth');
-    switchAuthTab('register');
-  });
-
-  document.getElementById('hero-become-tutor-btn')?.addEventListener('click', () => {
-    openModal('modal-auth');
-    switchAuthTab('register');
-  });
-
-  document.getElementById('cta-find-tutor-btn')?.addEventListener('click', () => {
-    openModal('modal-auth');
-    switchAuthTab('register');
-  });
-
-  document.getElementById('cta-become-tutor-btn')?.addEventListener('click', () => {
-    openModal('modal-auth');
-    switchAuthTab('register');
-  });
-
-  document.getElementById('start-ai-match-btn')?.addEventListener('click', () => {
-    openModal('modal-ai-matching');
-  });
+  document.getElementById('hero-find-tutor-btn')?.addEventListener('click', () => { openModal('modal-auth'); switchAuthTab('register'); });
+  document.getElementById('hero-become-tutor-btn')?.addEventListener('click', () => { openModal('modal-auth'); switchAuthTab('register'); });
+  document.getElementById('cta-find-tutor-btn')?.addEventListener('click', () => { openModal('modal-auth'); switchAuthTab('register'); });
+  document.getElementById('cta-become-tutor-btn')?.addEventListener('click', () => { openModal('modal-auth'); switchAuthTab('register'); });
+  document.getElementById('start-ai-match-btn')?.addEventListener('click', () => openModal('modal-ai-matching'));
 
   document.getElementById('landing-ai-card')?.addEventListener('click', () => {
     openModal('modal-auth');
@@ -421,17 +419,23 @@ function initNavigation() {
   document.getElementById('tutor-search-input')?.addEventListener('input', (e) => {
     renderTutorDirectory(e.target.value.toLowerCase());
   });
-}
 
+  document.getElementById('reg-role')?.addEventListener('change', (e) => {
+    const creds = document.getElementById('tutor-credentials-upload-fields');
+    if (e.target.value === 'tutor') {
+      creds?.classList.remove('hidden');
+    } else {
+      creds?.classList.add('hidden');
+    }
+  });
+}
 
 // Role Switcher Logic
 function switchRole(role, customUser = null) {
   state.currentRole = role;
 
-  // Hide all views
   document.querySelectorAll('.app-view').forEach(view => view.classList.remove('active'));
 
-  // Update Nav items visibility
   const publicNavLinks = document.getElementById('public-nav-links');
   const loginBtn = document.getElementById('login-link-btn');
   const signupBtn = document.getElementById('signup-btn');
@@ -503,6 +507,7 @@ function initAuthModalTabs() {
         email: email,
         grade: specialty,
         validated: true,
+        deactivated: false,
         bio: `${specialty} Student eager to connect with expert tutors on TutorLink.`,
         subjectsNeeded: [specialty],
         sessionsCompleted: 0
@@ -520,8 +525,16 @@ function initAuthModalTabs() {
         subjects: [specialty],
         learningStyles: ['Step-by-Step Explanation'],
         bio: `${specialty} Specialist tutor. Dedicated to student growth.`,
+        availableDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        availableTimeSlots: '09:00 AM - 05:00 PM',
+        blockedDates: '',
         availabilitySlots: ['09:00 AM', '02:00 PM', '04:00 PM'],
-        available: true
+        available: true,
+        deactivated: false,
+        diplomaStatus: 'Pending',
+        torStatus: 'Pending',
+        idStatus: 'Pending',
+        approvalStatus: 'Pending Review'
       };
       state.tutors.unshift(newTutor);
       switchRole('tutor', { name: fullname, role: 'tutor' });
@@ -579,6 +592,40 @@ function closeModal(id) {
   if (modal) modal.classList.remove('active');
 }
 
+// Tutor Portal Sub-Tabs Logic
+function initTutorSubTabs() {
+  document.querySelectorAll('.tutor-tab-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('.tutor-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tutor-tab-content').forEach(c => c.classList.remove('active'));
+
+      e.target.classList.add('active');
+      const targetTab = e.target.getAttribute('data-tab');
+      document.getElementById(targetTab)?.classList.add('active');
+    });
+  });
+
+  document.getElementById('tutor-toggle-add-slot-btn')?.addEventListener('click', () => {
+    document.getElementById('tutor-new-schedule-form')?.classList.toggle('hidden');
+  });
+
+  document.getElementById('tutor-availability-settings-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const checkedDays = Array.from(document.querySelectorAll('input[name="avail_day"]:checked')).map(cb => cb.value);
+    const windowVal = document.getElementById('tutor-time-window-input').value;
+    const blockedVal = document.getElementById('tutor-blocked-dates-input').value;
+
+    const currentTutor = state.tutors.find(t => t.id === 'tut-1') || state.tutors[0];
+    if (currentTutor) {
+      currentTutor.availableDays = checkedDays;
+      currentTutor.availableTimeSlots = windowVal;
+      currentTutor.blockedDates = blockedVal;
+    }
+
+    showToast('Tutor availability schedule updated!');
+  });
+}
+
 // Profile Modals & Settings Functionality
 function initProfileModals() {
   document.getElementById('close-student-profile-modal')?.addEventListener('click', () => closeModal('modal-student-profile'));
@@ -611,41 +658,69 @@ function initProfileModals() {
 }
 
 function initTutorProfileSettings() {
-  const settingsToggle = document.getElementById('tutor-availability-settings-toggle');
-  const headerToggle = document.getElementById('tutor-availability-toggle');
-  const badge = document.getElementById('availability-settings-badge');
-  const headerBadge = document.getElementById('availability-status-label');
   const saveBtn = document.getElementById('save-tutor-profile-btn');
-
-  function updateAvailabilityUI(isAvailable) {
-    if (settingsToggle) settingsToggle.checked = isAvailable;
-
-    const currentTutor = state.tutors.find(t => t.id === 'tut-1');
-    if (currentTutor) currentTutor.available = isAvailable;
-  }
-
-  settingsToggle?.addEventListener('change', (e) => {
-    updateAvailabilityUI(e.target.checked);
-  });
-
   saveBtn?.addEventListener('click', () => {
-    const subjects = document.getElementById('tutor-subjects-input').value;
-    const style = document.getElementById('tutor-style-select').value;
-    const rate = document.getElementById('tutor-rate-input').value;
-    const isAvailable = settingsToggle ? settingsToggle.checked : true;
-
-    const currentTutor = state.tutors.find(t => t.id === 'tut-1');
-    if (currentTutor) {
-      currentTutor.subjects = subjects.split(',').map(s => s.trim());
-      currentTutor.learningStyles = [style];
-      currentTutor.hourlyRate = parseInt(rate) || 350;
-      currentTutor.available = isAvailable;
-    }
-
-    renderAllViews();
-    showToast('Tutor profile & availability updated successfully!');
+    showToast('Tutor profile updated successfully!');
   });
 }
+
+// Subject Management Modal & Handlers
+function initSubjectManagement() {
+  const addBtn = document.getElementById('admin-add-subject-btn');
+  const closeBtn = document.getElementById('close-subject-modal');
+  const form = document.getElementById('admin-subject-form');
+
+  addBtn?.addEventListener('click', () => {
+    document.getElementById('subject-modal-title').textContent = 'Add New Subject';
+    document.getElementById('admin-subject-id').value = '';
+    document.getElementById('admin-subject-name').value = '';
+    openModal('modal-admin-subject');
+  });
+
+  closeBtn?.addEventListener('click', () => closeModal('modal-admin-subject'));
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('admin-subject-id').value;
+    const name = document.getElementById('admin-subject-name').value;
+    const category = document.getElementById('admin-subject-category').value;
+
+    if (id) {
+      const sub = state.subjects.find(s => s.id === id);
+      if (sub) {
+        sub.name = name;
+        sub.category = category;
+      }
+    } else {
+      const newSub = { id: 'SUB-' + Math.floor(100 + Math.random() * 900), name, category };
+      state.subjects.push(newSub);
+    }
+
+    closeModal('modal-admin-subject');
+    renderAdminSubjects();
+    showToast('Subject catalog updated successfully!');
+  });
+}
+
+window.editSubject = function(subId) {
+  const sub = state.subjects.find(s => s.id === subId);
+  if (sub) {
+    document.getElementById('subject-modal-title').textContent = 'Edit Subject';
+    document.getElementById('admin-subject-id').value = sub.id;
+    document.getElementById('admin-subject-name').value = sub.name;
+    document.getElementById('admin-subject-category').value = sub.category;
+    openModal('modal-admin-subject');
+  }
+};
+
+window.deleteSubject = function(subId) {
+  const idx = state.subjects.findIndex(s => s.id === subId);
+  if (idx !== -1) {
+    state.subjects.splice(idx, 1);
+    renderAdminSubjects();
+    showToast('Subject removed from system catalog.');
+  }
+};
 
 window.viewStudentProfile = function(studentId) {
   const student = state.students.find(s => s.id === studentId) || {
@@ -691,10 +766,11 @@ window.viewTutorProfile = function(tutorId) {
         <div class="tutor-rating">★ ${tutor.rating} (${tutor.reviewsCount} reviews)</div>
       </div>
       <div class="tutor-details-list">
-        <div><strong>Hourly Rate:</strong> ₱${tutor.hourlyRate}/hr</div>
+        <div><strong>Hourly Rate:</strong> P${tutor.hourlyRate}/hr</div>
         <div><strong>Subjects Taught:</strong> ${tutor.subjects.join(', ')}</div>
         <div><strong>Teaching Styles:</strong> ${tutor.learningStyles.join(', ')}</div>
-        <div><strong>Availability Slots:</strong> ${tutor.availabilitySlots.join(', ')}</div>
+        <div><strong>Available Days:</strong> ${tutor.availableDays.join(', ')} (${tutor.availableTimeSlots})</div>
+        <div><strong>Application Status:</strong> <span class="badge badge-success">${tutor.approvalStatus}</span></div>
       </div>
       <p class="sub-text margin-top"><strong>Bio:</strong> ${tutor.bio}</p>
       <button class="btn btn-primary full-width margin-top" onclick="closeModal('modal-tutor-profile'); openCalendarBooking('${tutor.id}')">
@@ -725,8 +801,13 @@ function renderAllViews() {
   renderStudentUpcoming();
   renderStudentHistory();
   renderTutorUpcoming();
+  renderTutorRequests();
+  renderTutorEarnings();
+  renderTutorReports();
   renderAdminKPIs();
   renderAdminStudents();
+  renderAdminTutors();
+  renderAdminSubjects();
   renderAdminMatching();
   renderAdminSchedule();
   renderAdminPayments();
@@ -748,8 +829,8 @@ function renderAdminKPIs() {
 
   if (elStudents) elStudents.textContent = totalStudents;
   if (elTutors) elTutors.textContent = totalTutors;
-  if (elVolume) elVolume.textContent = `₱${totalVolume.toLocaleString()}`;
-  if (elCommission) elCommission.textContent = `₱${platformCommission.toLocaleString()}`;
+  if (elVolume) elVolume.textContent = `P${totalVolume.toLocaleString()}`;
+  if (elCommission) elCommission.textContent = `P${platformCommission.toLocaleString()}`;
 }
 
 // Render Featured Tutor Directory
@@ -758,6 +839,7 @@ function renderTutorDirectory(searchTerm = '') {
   if (!grid) return;
 
   const filtered = state.tutors.filter(t => {
+    if (t.deactivated) return false;
     const matchName = t.name.toLowerCase().includes(searchTerm);
     const matchSubj = t.subjects.some(s => s.toLowerCase().includes(searchTerm));
     return matchName || matchSubj;
@@ -777,7 +859,7 @@ function renderTutorDirectory(searchTerm = '') {
         <div class="tutor-details-list">
           <div><strong>Subjects:</strong> ${t.subjects.join(', ')}</div>
           <div><strong>Style:</strong> ${t.learningStyles[0]}</div>
-          <div><strong>Rate:</strong> ₱${t.hourlyRate}/hr</div>
+          <div><strong>Rate:</strong> P${t.hourlyRate}/hr</div>
         </div>
       </div>
       <div style="display: flex; gap: 8px;" class="margin-top">
@@ -826,7 +908,7 @@ function renderStudentHistory() {
       <td>${s.date} (${s.timeSlot})</td>
       <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</strong></td>
       <td>${s.subject}</td>
-      <td>₱${s.totalPaid}</td>
+      <td>P${s.totalPaid}</td>
       <td><code>${s.gcashRef}</code></td>
       <td><span class="badge ${s.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${s.status}</span></td>
       <td>
@@ -840,7 +922,7 @@ function renderStudentHistory() {
 
   const totalSpent = state.sessions.reduce((sum, s) => sum + s.totalPaid, 0);
   const spentEl = document.getElementById('student-stat-spent');
-  if (spentEl) spentEl.textContent = `₱${totalSpent}`;
+  if (spentEl) spentEl.textContent = `P${totalSpent}`;
 }
 
 // Render Tutor Dashboard Sessions & Schedule
@@ -854,7 +936,7 @@ function renderTutorUpcoming() {
     <div class="session-card">
       <div class="session-card-info">
         <h4>${s.subject} with Student <strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${s.studentName}</strong></h4>
-        <p>Date: ${s.date} | Time: ${s.timeSlot} | Earnings: <strong>₱${s.hourlyRate}</strong></p>
+        <p>Date: ${s.date} | Time: ${s.timeSlot} | Earnings: <strong>P${s.hourlyRate}</strong></p>
       </div>
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
         <span class="badge ${s.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${s.status}</span>
@@ -871,6 +953,67 @@ function renderTutorUpcoming() {
   `).join('');
 }
 
+function renderTutorRequests() {
+  const tbody = document.getElementById('tutor-requests-table-body');
+  if (!tbody) return;
+
+  tbody.innerHTML = state.matches.map(m => `
+    <tr>
+      <td><code>${m.id}</code></td>
+      <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${m.studentName}</span></td>
+      <td>${m.subject}</td>
+      <td><span class="badge badge-match">${m.score}% Match</span></td>
+      <td><span class="badge ${m.status === 'Approved' ? 'badge-success' : 'badge-info'}">${m.status}</span></td>
+      <td>
+        ${m.status === 'Pending Review' ? `
+          <button class="btn btn-primary btn-small" onclick="approveMatch('${m.id}')">Accept Match</button>
+          <button class="btn btn-secondary btn-small" onclick="cancelMatch('${m.id}')">Decline</button>
+        ` : `<span class="sub-text">Handled</span>`}
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderTutorEarnings() {
+  const tbody = document.getElementById('tutor-earnings-table-body');
+  if (!tbody) return;
+
+  const tutorSessions = state.sessions.filter(s => s.tutorName.includes('Alex') || (state.currentUser && s.tutorName === state.currentUser.name));
+
+  tbody.innerHTML = tutorSessions.map(s => {
+    const netPayout = Math.round(s.totalPaid * 0.90);
+    return `
+      <tr>
+        <td><code>${s.id}</code></td>
+        <td>${s.studentName}</td>
+        <td>${s.subject}</td>
+        <td>${s.date}</td>
+        <td>P${s.totalPaid}</td>
+        <td><strong>P${netPayout}</strong></td>
+        <td><span class="badge ${s.payoutStatus === 'Paid Out' ? 'badge-success' : 'badge-info'}">${s.payoutStatus || 'Unpaid'}</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderTutorReports() {
+  const tbody = document.getElementById('tutor-reports-table-body');
+  if (!tbody) return;
+
+  const tutorSessions = state.sessions.filter(s => s.tutorName.includes('Alex') || (state.currentUser && s.tutorName === state.currentUser.name));
+
+  tbody.innerHTML = tutorSessions.map(s => `
+    <tr>
+      <td><code>${s.id}</code></td>
+      <td>${s.studentName}</td>
+      <td>${s.subject}</td>
+      <td>${s.date} ${s.timeSlot}</td>
+      <td>P${Math.round(s.totalPaid * 0.90)}</td>
+      <td><span class="badge badge-success">${s.status}</span></td>
+    </tr>
+  `).join('');
+}
+
 window.markSessionCompleted = function(sessionId) {
   const session = state.sessions.find(s => s.id === sessionId);
   if (session) {
@@ -881,12 +1024,10 @@ window.markSessionCompleted = function(sessionId) {
 };
 
 function initTutorScheduleManager() {
-  const addBtn = document.getElementById('tutor-add-schedule-btn');
   const saveBtn = document.getElementById('tutor-save-slot-btn');
   const cancelBtn = document.getElementById('tutor-cancel-slot-btn');
   const formBox = document.getElementById('tutor-new-schedule-form');
 
-  addBtn?.addEventListener('click', () => formBox?.classList.remove('hidden'));
   cancelBtn?.addEventListener('click', () => formBox?.classList.add('hidden'));
 
   saveBtn?.addEventListener('click', () => {
@@ -921,9 +1062,7 @@ function initAIMatching() {
   const resultsList = document.getElementById('ai-match-cards-list');
   const cancelBtn = document.getElementById('cancel-ai-btn');
 
-  cancelBtn?.addEventListener('click', () => {
-    closeModal('modal-ai-matching');
-  });
+  cancelBtn?.addEventListener('click', () => closeModal('modal-ai-matching'));
 
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -933,8 +1072,7 @@ function initAIMatching() {
     const style = document.getElementById('match-style').value;
     const time = document.getElementById('match-time').value;
 
-    // AI Matching Calculation Algorithm
-    const matches = state.tutors.map(tutor => {
+    const matches = state.tutors.filter(t => !t.deactivated).map(tutor => {
       let score = 60;
 
       if (tutor.subjects.includes(subject)) score += 25;
@@ -946,15 +1084,15 @@ function initAIMatching() {
       return { ...tutor, matchScore: compatibility };
     }).sort((a, b) => b.matchScore - a.matchScore);
 
-    // Save Top Match to Admin Review Queue
     const topMatch = matches[0];
     state.matches.unshift({
       id: 'MATCH-' + Math.floor(100 + Math.random() * 900),
       studentName: state.currentUser ? state.currentUser.name : 'Maria Santos',
-      tutorName: topMatch.name,
+      tutorName: topMatch ? topMatch.name : 'Prof. Alex Rivera',
       subject: subject,
-      score: topMatch.matchScore,
-      status: 'Pending Review'
+      score: topMatch ? topMatch.matchScore : 95,
+      status: 'Pending Review',
+      matchReason: `Matched based on ${subject} expertise and ${style} learning preference.`
     });
 
     resultsList.innerHTML = matches.map(t => `
@@ -968,7 +1106,7 @@ function initAIMatching() {
             </div>
           </div>
           <p class="sub-text margin-top" style="margin-top: 8px;">
-            Subjects: ${t.subjects.join(', ')} | Rate: <strong>₱${t.hourlyRate}/hr</strong>
+            Subjects: ${t.subjects.join(', ')} | Rate: <strong>P${t.hourlyRate}/hr</strong>
           </p>
         </div>
         <button class="btn btn-primary btn-small" onclick="selectMatchedTutor('${t.id}', '${subject}')">
@@ -993,9 +1131,7 @@ function initCalendarBooking() {
   const cancelBtn = document.getElementById('cancel-booking-btn');
   const proceedBtn = document.getElementById('proceed-to-payment-btn');
 
-  cancelBtn?.addEventListener('click', () => {
-    closeModal('modal-calendar');
-  });
+  cancelBtn?.addEventListener('click', () => closeModal('modal-calendar'));
 
   proceedBtn?.addEventListener('click', () => {
     if (!state.activeBooking.timeSlot) {
@@ -1054,9 +1190,9 @@ window.openCalendarBooking = function(tutorId, preferredSubject = null) {
     <div class="slot-chip" onclick="selectTimeSlot(this, '${slot}')">${slot}</div>
   `).join('');
 
-  document.getElementById('summary-hourly-fee').textContent = `₱${hourlyRate}`;
-  document.getElementById('summary-service-fee').textContent = `₱${serviceFee}`;
-  document.getElementById('summary-total-fee').textContent = `₱${total}`;
+  document.getElementById('summary-hourly-fee').textContent = `P${hourlyRate}`;
+  document.getElementById('summary-service-fee').textContent = `P${serviceFee}`;
+  document.getElementById('summary-total-fee').textContent = `P${total}`;
 
   openModal('modal-calendar');
 };
@@ -1082,9 +1218,7 @@ function initGCashPayment() {
     if (headerTitle) headerTitle.textContent = `${selectedMethod} Payment`;
   });
 
-  closeBtn?.addEventListener('click', () => {
-    closeModal('modal-gcash');
-  });
+  closeBtn?.addEventListener('click', () => closeModal('modal-gcash'));
 
   step1Next?.addEventListener('click', () => {
     const phone = document.getElementById('gcash-mobile').value;
@@ -1117,6 +1251,7 @@ function initGCashPayment() {
       totalPaid: b.total,
       gcashRef: randomRef,
       status: 'Confirmed',
+      payoutStatus: 'Unpaid',
       notes: `Booked via ${b.paymentMethod}.`
     };
 
@@ -1128,7 +1263,8 @@ function initGCashPayment() {
       method: b.paymentMethod,
       refNo: randomRef,
       amount: b.total,
-      status: 'Confirmed'
+      status: 'Confirmed',
+      payoutStatus: 'Pending'
     });
 
     state.notifications.unshift({
@@ -1143,7 +1279,7 @@ function initGCashPayment() {
     document.getElementById('gcash-receipt-ref').textContent = randomRef;
     document.getElementById('gcash-receipt-method').textContent = b.paymentMethod;
     document.getElementById('gcash-receipt-date').textContent = `${b.date}, ${b.timeSlot}`;
-    document.getElementById('gcash-receipt-amount').textContent = `₱${b.total}.00`;
+    document.getElementById('gcash-receipt-amount').textContent = `P${b.total}.00`;
 
     document.getElementById('gcash-step-2').classList.add('hidden');
     document.getElementById('gcash-step-3').classList.remove('hidden');
@@ -1163,8 +1299,8 @@ function initGCashPayment() {
 function openGCashPayment() {
   const method = state.activeBooking.paymentMethod || 'GCash';
   document.getElementById('payment-method-header-title').textContent = `${method} Payment`;
-  document.getElementById('gcash-modal-amount').textContent = `₱${state.activeBooking.total}.00`;
-  document.getElementById('gcash-confirm-pay-btn').textContent = `Confirm & Pay ₱${state.activeBooking.total}.00`;
+  document.getElementById('gcash-modal-amount').textContent = `P${state.activeBooking.total}.00`;
+  document.getElementById('gcash-confirm-pay-btn').textContent = `Confirm & Pay P${state.activeBooking.total}.00`;
   openModal('modal-gcash');
 }
 
@@ -1362,8 +1498,8 @@ function initAdminView() {
     const totalVolume = state.sessions.reduce((acc, s) => acc + s.totalPaid, 0);
     const totalNet = state.sessions.reduce((acc, s) => acc + s.commissionFee, 0);
 
-    document.getElementById('report-total-volume').textContent = `₱${totalVolume}`;
-    document.getElementById('report-net-revenue').textContent = `₱${totalNet}`;
+    document.getElementById('report-total-volume').textContent = `P${totalVolume}`;
+    document.getElementById('report-net-revenue').textContent = `P${totalNet}`;
 
     const tbody = document.getElementById('report-table-body');
     tbody.innerHTML = state.sessions.map(s => `
@@ -1373,7 +1509,7 @@ function initAdminView() {
         <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</span></td>
         <td>${s.subject}</td>
         <td>${s.status}</td>
-        <td>₱${s.totalPaid}</td>
+        <td>P${s.totalPaid}</td>
       </tr>
     `).join('');
 
@@ -1382,6 +1518,22 @@ function initAdminView() {
 
   closeReport?.addEventListener('click', () => closeModal('modal-admin-report'));
   doneReport?.addEventListener('click', () => closeModal('modal-admin-report'));
+
+  // Reassign tutor modal listener
+  document.getElementById('close-reassign-modal')?.addEventListener('click', () => closeModal('modal-reassign-tutor'));
+  document.getElementById('reassign-tutor-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const matchId = document.getElementById('reassign-match-id').value;
+    const newTutorName = document.getElementById('reassign-tutor-select').value;
+
+    const match = state.matches.find(m => m.id === matchId);
+    if (match) {
+      match.tutorName = newTutorName;
+      closeModal('modal-reassign-tutor');
+      renderAdminMatching();
+      showToast(`Tutor for match ${matchId} reassigned to ${newTutorName}.`);
+    }
+  });
 }
 
 function updateReportFilterUI(activeBtn) {
@@ -1401,10 +1553,14 @@ function renderAdminStudents() {
       <td>${s.email}</td>
       <td>${s.grade}</td>
       <td><span class="badge ${s.validated ? 'badge-success' : 'badge-info'}">${s.validated ? 'Validated' : 'Pending Validation'}</span></td>
+      <td><span class="badge ${s.deactivated ? 'badge-danger' : 'badge-success'}">${s.deactivated ? 'Deactivated' : 'Active'}</span></td>
       <td>
         <button class="btn btn-secondary btn-small" onclick="viewStudentProfile('${s.id}')">View Profile</button>
         <button class="btn btn-secondary btn-small" onclick="toggleValidateStudent('${s.id}')">
-          ${s.validated ? 'Revoke Validation' : 'Validate Student'}
+          ${s.validated ? 'Revoke' : 'Validate'}
+        </button>
+        <button class="btn btn-secondary btn-small" onclick="toggleDeactivateStudent('${s.id}')">
+          ${s.deactivated ? 'Activate' : 'Deactivate'}
         </button>
       </td>
     </tr>
@@ -1422,6 +1578,92 @@ window.toggleValidateStudent = function(studentId) {
   }
 };
 
+window.toggleDeactivateStudent = function(studentId) {
+  const student = state.students.find(s => s.id === studentId);
+  if (student) {
+    student.deactivated = !student.deactivated;
+    renderAdminStudents();
+    showToast(`Account status updated for ${student.name}.`);
+  }
+};
+
+function renderAdminTutors() {
+  const tbody = document.getElementById('admin-tutors-table-body');
+  if (!tbody) return;
+
+  tbody.innerHTML = state.tutors.map(t => `
+    <tr>
+      <td><code>${t.id}</code></td>
+      <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${t.id}')">${t.name}</strong></td>
+      <td>${t.subjects.join(', ')}</td>
+      <td>
+        <div style="font-size: 0.85rem;">
+          Diploma: <span class="badge ${t.diplomaStatus === 'Verified' ? 'badge-success' : 'badge-info'}" style="cursor: pointer;" onclick="verifyTutorDoc('${t.id}', 'diploma')">${t.diplomaStatus}</span><br>
+          TOR: <span class="badge ${t.torStatus === 'Verified' ? 'badge-success' : 'badge-info'}" style="cursor: pointer;" onclick="verifyTutorDoc('${t.id}', 'tor')">${t.torStatus}</span><br>
+          ID Card: <span class="badge ${t.idStatus === 'Verified' ? 'badge-success' : 'badge-info'}" style="cursor: pointer;" onclick="verifyTutorDoc('${t.id}', 'id')">${t.idStatus}</span>
+        </div>
+      </td>
+      <td><span class="badge ${t.approvalStatus === 'Approved' ? 'badge-success' : 'badge-info'}">${t.approvalStatus}</span></td>
+      <td><span class="badge ${t.deactivated ? 'badge-danger' : 'badge-success'}">${t.deactivated ? 'Deactivated' : 'Active'}</span></td>
+      <td>
+        ${t.approvalStatus !== 'Approved' ? `<button class="btn btn-primary btn-small" onclick="approveTutorApplication('${t.id}')">Approve</button>` : ''}
+        <button class="btn btn-secondary btn-small" onclick="toggleDeactivateTutor('${t.id}')">
+          ${t.deactivated ? 'Activate' : 'Deactivate'}
+        </button>
+      </td>
+    </tr>
+  `).join('');
+
+  document.getElementById('admin-stat-total-tutors').textContent = state.tutors.length;
+}
+
+window.verifyTutorDoc = function(tutorId, docType) {
+  const tutor = state.tutors.find(t => t.id === tutorId);
+  if (tutor) {
+    if (docType === 'diploma') tutor.diplomaStatus = 'Verified';
+    if (docType === 'tor') tutor.torStatus = 'Verified';
+    if (docType === 'id') tutor.idStatus = 'Verified';
+    renderAdminTutors();
+    showToast(`Tutor ${docType.toUpperCase()} credential verified for ${tutor.name}.`);
+  }
+};
+
+window.approveTutorApplication = function(tutorId) {
+  const tutor = state.tutors.find(t => t.id === tutorId);
+  if (tutor) {
+    tutor.approvalStatus = 'Approved';
+    renderAdminTutors();
+    showToast(`Tutor application approved for ${tutor.name}.`);
+  }
+};
+
+window.toggleDeactivateTutor = function(tutorId) {
+  const tutor = state.tutors.find(t => t.id === tutorId);
+  if (tutor) {
+    tutor.deactivated = !tutor.deactivated;
+    renderAdminTutors();
+    renderTutorDirectory();
+    showToast(`Account status updated for ${tutor.name}.`);
+  }
+};
+
+function renderAdminSubjects() {
+  const tbody = document.getElementById('admin-subjects-table-body');
+  if (!tbody) return;
+
+  tbody.innerHTML = state.subjects.map(s => `
+    <tr>
+      <td><code>${s.id}</code></td>
+      <td><strong>${s.name}</strong></td>
+      <td><span class="badge badge-info">${s.category}</span></td>
+      <td>
+        <button class="btn btn-secondary btn-small" onclick="editSubject('${s.id}')">Edit</button>
+        <button class="btn btn-secondary btn-small" onclick="deleteSubject('${s.id}')">Remove</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
 function renderAdminMatching() {
   const tbody = document.getElementById('admin-matching-table-body');
   if (!tbody) return;
@@ -1437,12 +1679,22 @@ function renderAdminMatching() {
       <td>
         ${m.status === 'Pending Review' ? `
           <button class="btn btn-primary btn-small" onclick="approveMatch('${m.id}')">Approve</button>
+          <button class="btn btn-secondary btn-small" onclick="openReassignModal('${m.id}')">Reassign</button>
           <button class="btn btn-secondary btn-small" onclick="cancelMatch('${m.id}')">Cancel</button>
-        ` : `<span class="sub-text">No action needed</span>`}
+        ` : `<span class="sub-text">Completed</span>`}
       </td>
     </tr>
   `).join('');
 }
+
+window.openReassignModal = function(matchId) {
+  document.getElementById('reassign-match-id').value = matchId;
+  const select = document.getElementById('reassign-tutor-select');
+  select.innerHTML = state.tutors.filter(t => !t.deactivated).map(t => `
+    <option value="${t.name}">${t.name} (${t.subjects.join(', ')})</option>
+  `).join('');
+  openModal('modal-reassign-tutor');
+};
 
 window.approveMatch = function(matchId) {
   const m = state.matches.find(x => x.id === matchId);
@@ -1499,12 +1751,14 @@ function renderAdminPayments() {
       <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${p.studentName}</span></td>
       <td>${p.method}</td>
       <td><code>${p.refNo}</code></td>
-      <td>₱${p.amount}</td>
+      <td>P${p.amount}</td>
       <td><span class="badge ${p.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${p.status}</span></td>
       <td>
         ${p.status === 'Pending Confirmation' ? `
           <button class="btn btn-primary btn-small" onclick="confirmPayment('${p.id}')">Confirm Payment</button>
-        ` : `<span class="badge badge-success">✓ Confirmed</span>`}
+        ` : p.payoutStatus !== 'Paid Out' ? `
+          <button class="btn btn-secondary btn-small" onclick="processTutorPayout('${p.id}')">Process Payout</button>
+        ` : `<span class="badge badge-success">Payout Completed</span>`}
       </td>
     </tr>
   `).join('');
@@ -1512,8 +1766,8 @@ function renderAdminPayments() {
   const totalVol = state.payments.reduce((sum, p) => sum + p.amount, 0);
   const totalComm = Math.round(totalVol * 0.10);
 
-  document.getElementById('admin-stat-total-volume').textContent = `₱${totalVol.toLocaleString()}`;
-  document.getElementById('admin-stat-platform-commission').textContent = `₱${totalComm.toLocaleString()}`;
+  document.getElementById('admin-stat-total-volume').textContent = `P${totalVol.toLocaleString()}`;
+  document.getElementById('admin-stat-platform-commission').textContent = `P${totalComm.toLocaleString()}`;
 }
 
 window.confirmPayment = function(payId) {
@@ -1522,6 +1776,16 @@ window.confirmPayment = function(payId) {
     p.status = 'Confirmed';
     renderAdminPayments();
     showToast(`Payment ${payId} confirmed.`);
+  }
+};
+
+window.processTutorPayout = function(payId) {
+  const p = state.payments.find(x => x.id === payId);
+  if (p) {
+    p.payoutStatus = 'Paid Out';
+    renderAdminPayments();
+    renderTutorEarnings();
+    showToast(`Tutor payout processed for transaction ${payId}.`);
   }
 };
 
@@ -1559,7 +1823,7 @@ function renderAdminReports() {
       <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</span></td>
       <td>${s.subject}</td>
       <td>${s.date} ${s.timeSlot}</td>
-      <td>₱${s.totalPaid}</td>
+      <td>P${s.totalPaid}</td>
       <td><span class="badge ${s.status === 'Completed' ? 'badge-info' : 'badge-success'}">${s.status}</span></td>
     </tr>
   `).join('');
