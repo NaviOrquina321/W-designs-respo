@@ -918,6 +918,11 @@ function renderStudentHistory() {
   const tbody = document.getElementById('student-history-table-body');
   if (!tbody) return;
 
+  if (state.sessions.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 20px;">No session history available yet. Book your first tutor to get started!</td></tr>`;
+    return;
+  }
+
   tbody.innerHTML = state.sessions.map(s => `
     <tr>
       <td>${s.date} (${s.timeSlot})</td>
@@ -946,6 +951,11 @@ function renderTutorUpcoming() {
   if (!container) return;
 
   const tutorSessions = state.sessions.filter(s => s.tutorName.includes('Alex') || (state.currentUser && s.tutorName === state.currentUser.name));
+
+  if (tutorSessions.length === 0) {
+    container.innerHTML = `<div style="background: var(--panel); padding: 24px; border-radius: 6px; text-align: center; border: 1px solid var(--line); color: var(--ink-soft);"><p>No active teaching sessions scheduled at the moment. New student bookings will appear here automatically.</p></div>`;
+    return;
+  }
 
   container.innerHTML = tutorSessions.map(s => `
     <div class="session-card">
@@ -986,6 +996,11 @@ function renderTutorRequests() {
   const tbody = document.getElementById('tutor-requests-table-body');
   if (!tbody) return;
 
+  if (state.matches.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--ink-soft); padding: 20px;">No pending student match requests right now. Checked again soon!</td></tr>`;
+    return;
+  }
+
   tbody.innerHTML = state.matches.map(m => `
     <tr>
       <td><code>${m.id}</code></td>
@@ -1008,6 +1023,11 @@ function renderTutorEarnings() {
   if (!tbody) return;
 
   const tutorSessions = state.sessions.filter(s => s.tutorName.includes('Alex') || (state.currentUser && s.tutorName === state.currentUser.name));
+
+  if (tutorSessions.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 20px;">No earnings or payout history yet. Completed sessions will generate payout records here.</td></tr>`;
+    return;
+  }
 
   tbody.innerHTML = tutorSessions.map(s => {
     const netPayout = Math.round(s.totalPaid * 0.90);
