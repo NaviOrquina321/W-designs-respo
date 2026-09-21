@@ -3,79 +3,1427 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>COUPLE - Bespoke Engagement Rings</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>TutorLink - An Intelligent Tutor-Student Matching System</title>
+  <meta name="description" content="TutorLink matches students with tutors suited to their learning needs, and handles scheduling, notifications, and payment in one place.">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Main Container -->
-  <div class="page-wrapper">
+  <!-- Top Navigation Header -->
+  <header>
+    <nav class="wrap">
+      <div class="logo" id="nav-logo" style="cursor: pointer;">TutorLink</div>
 
-    <!-- Navigation Header -->
-    <header class="navbar">
-      <nav class="nav-left">
-        <a href="#" class="nav-link">ENGAGEMENT</a>
-        <a href="#" class="nav-link">BANDS</a>
-        <a href="#" class="nav-link">LEARN</a>
-      </nav>
+      <div class="nav-links" id="public-nav-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#who-its-for">Who It's For</a>
+        <a href="#why">Why TutorLink</a>
+      </div>
 
-      <div class="nav-brand">
-        <div class="sunburst-logo">
-          <svg width="28" height="18" viewBox="0 0 28 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="14" y1="0" x2="14" y2="5" stroke="#101835" stroke-width="1.3" stroke-linecap="round"/>
-            <line x1="8" y1="2.5" x2="10.5" y2="6" stroke="#101835" stroke-width="1.3" stroke-linecap="round"/>
-            <line x1="20" y1="2.5" x2="17.5" y2="6" stroke="#101835" stroke-width="1.3" stroke-linecap="round"/>
-            <line x1="3" y1="7.5" x2="7" y2="9" stroke="#101835" stroke-width="1.3" stroke-linecap="round"/>
-            <line x1="25" y1="7.5" x2="21" y2="9" stroke="#101835" stroke-width="1.3" stroke-linecap="round"/>
+      <div class="nav-actions">
+        <!-- Profile Settings SVG Icon Button (Student & Tutor pages) -->
+        <button class="icon-btn hidden" id="user-profile-btn" title="Profile Settings" aria-label="Profile Settings">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
           </svg>
+        </button>
+
+        <!-- Notification Bell SVG Icon (hidden on landing page view) -->
+        <button class="icon-btn hidden" id="notif-bell-btn" title="Notifications" aria-label="Notifications">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="notif-badge" id="notif-badge-count">2</span>
+        </button>
+
+        <a class="link" href="#" id="login-link-btn">Log In</a>
+        <button class="btn btn-primary btn-small" id="signup-btn">Sign Up</button>
+        <button class="btn btn-secondary btn-small hidden" id="logout-btn">Log Out</button>
+      </div>
+    </nav>
+  </header>
+
+
+  <!-- Notification Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Notification Drawer Sidebar -->
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+  <aside class="drawer" id="notif-drawer">
+    <div class="drawer-header">
+      <h3>Notifications</h3>
+      <button class="close-btn" id="close-notif-drawer">&times;</button>
+    </div>
+    <div class="drawer-body" id="notif-list">
+      <!-- Notification items generated dynamically -->
+    </div>
+    <div class="drawer-footer">
+      <button class="btn btn-secondary btn-small" id="mark-all-read-btn">Mark all as read</button>
+    </div>
+  </aside>
+
+  <!-- MAIN APP CONTAINER FOR VIEWS -->
+  <main id="app-main">
+
+    <!-- 1. LANDING PAGE VIEW -->
+    <div id="view-landing" class="app-view active">
+      <section class="hero">
+        <div class="wrap">
+          <h1>Find a tutor who actually fits how you learn</h1>
+          <p class="lead">TutorLink matches you with a tutor suited to your needs, handles scheduling and payment, and keeps you updated at every step - all in one place.</p>
+          <div class="actions">
+            <button class="btn btn-primary" id="hero-find-tutor-btn">Find a Tutor</button>
+            <button class="btn btn-secondary" id="hero-become-tutor-btn">Become a Tutor</button>
+          </div>
         </div>
-        <span class="brand-title">COUPLE</span>
-      </div>
+      </section>
 
-      <nav class="nav-right">
-        <a href="#" class="nav-link">SUPPORT</a>
-        <a href="#" class="nav-link">SIGN IN</a>
-        <a href="#" class="cart-icon" aria-label="Shopping Cart">
-          <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 6V4.5C4 2.567 5.567 1 7.5 1H10.5C12.433 1 14 2.567 14 4.5V6" stroke="#101835" stroke-width="1.5"/>
-            <path d="M1.5 6H16.5L15.5 18.5H2.5L1.5 6Z" stroke="#101835" stroke-width="1.5" stroke-linejoin="round"/>
-          </svg>
-        </a>
-      </nav>
-    </header>
+      <section class="problems">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Tutoring shouldn't be this hard</h2>
+            <p>Between searching, scheduling, and paying, finding the right help can take longer than the tutoring itself.</p>
+          </div>
 
-    <!-- Hero Content Area -->
-    <main class="hero-section">
-      <div class="hero-left">
-        <h1 class="hero-headline">The Joy of a<br>Shared Life</h1>
-        <p class="hero-subtext">Introducing a collection of bespoke<br>rings that live up to the moment.</p>
-        <a href="#" class="cta-button">SHOP ENGAGEMENT</a>
-      </div>
+          <div class="problem-item">
+            <h3>Finding the right tutor takes forever</h3>
+            <p>Scrolling through profiles with no real way to know who's actually a good fit.</p>
+          </div>
+          <div class="problem-item">
+            <h3>Sessions fall through</h3>
+            <p>Schedules don't line up, and conflicts aren't caught until it's too late.</p>
+          </div>
+          <div class="problem-item">
+            <h3>Payments are slow to confirm</h3>
+            <p>A simple transaction ends up feeling uncertain while you wait.</p>
+          </div>
+          <div class="problem-item">
+            <h3>Updates arrive late, if at all</h3>
+            <p>A missed message about a session can mean a missed session.</p>
+          </div>
+          <div class="problem-item">
+            <h3>Tracking activity is a mess</h3>
+            <p>Without one system, keeping a clear record of who's tutoring whom falls entirely on the admin.</p>
+          </div>
+        </div>
+      </section>
 
-      <div class="hero-right">
-        <img src="assets/woman-clean.png" alt="Joyful woman holding yellow bouquet" class="hero-image">
-      </div>
-    </main>
 
-    <!-- Angled White Table Bottom Bar -->
-    <div class="bottom-shelf">
-      <div class="arrow-container">
-        <svg width="12" height="36" viewBox="0 0 12 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <line x1="6" y1="0" x2="6" y2="32" stroke="#101835" stroke-width="1"/>
-          <path d="M2 28L6 32L10 28" stroke="#101835" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+      <section class="features" id="features">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Everything handled in one place</h2>
+            <p>Five features cover the full process, from finding a tutor to finishing a session.</p>
+          </div>
+          <div class="feature-grid">
+            <div class="feature-card" id="landing-ai-card" style="cursor: pointer;">
+              <h3>AI Tutor Matching</h3>
+              <p>Tell us your subject and how you learn best. We match you with tutors suited to your needs, not just a list to scroll through.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Calendar Scheduling</h3>
+              <p>See real tutor availability and book a time that works, without the back-and-forth messages.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Real-Time Notifications</h3>
+              <p>Know the moment a session is confirmed, rescheduled, or about to start.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Online Payment</h3>
+              <p>Pay securely through GCash as soon as a session is booked. No chasing receipts.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Matching Session</h3>
+              <p>Once you're matched, connect with your tutor directly and get started.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="how-it-works" id="how-it-works">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Getting started takes five steps</h2>
+            <p>From sign-up to your first session.</p>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <span class="num">1</span>
+              <div><h3>Tell us what you need help with</h3><p>Sign up and share your subject and learning needs.</p></div>
+            </div>
+            <div class="step">
+              <span class="num">2</span>
+              <div><h3>Get matched</h3><p>We pair you with a tutor suited to your learning style.</p></div>
+            </div>
+            <div class="step">
+              <span class="num">3</span>
+              <div><h3>Book a session</h3><p>Pick a time from your tutor's real availability.</p></div>
+            </div>
+            <div class="step">
+              <span class="num">4</span>
+              <div><h3>Pay securely</h3><p>Confirm your session with GCash payment.</p></div>
+            </div>
+            <div class="step">
+              <span class="num">5</span>
+              <div><h3>Start learning</h3><p>Meet your tutor and begin your session.</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="who-its-for" id="who-its-for">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Built for everyone in the process</h2>
+            <p>Students, tutors, and administrators each get what they need from the same system.</p>
+          </div>
+          <div class="audience-grid">
+            <div class="audience-card">
+              <h3>Students</h3>
+              <p>Find a tutor who matches how you learn, book sessions, and pay - all from one dashboard.</p>
+            </div>
+            <div class="audience-card">
+              <h3>Tutors</h3>
+              <p>Set your availability, get matched with students, and get paid on time for every session.</p>
+            </div>
+            <div class="audience-card">
+              <h3>Admins</h3>
+              <p>Monitor tutoring activity, keep records organized, and generate reports when you need them.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="why" id="why">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Why TutorLink</h2>
+            <p>What sets it apart from arranging tutoring manually.</p>
+          </div>
+          <ul class="why-list">
+            <li>Easier tutor matching, powered by AI</li>
+            <li>Organized scheduling with no conflicts</li>
+            <li>Secure online payment through GCash</li>
+            <li>Real-time updates on every session</li>
+            <li>Centralized records for students, tutors, and admins</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="cta-final">
+        <div class="wrap">
+          <h2>Ready to find your tutor?</h2>
+          <p>Sign up and get matched in minutes.</p>
+          <div class="actions">
+            <button class="btn btn-primary" id="cta-find-tutor-btn">Find a Tutor</button>
+            <button class="btn btn-secondary" id="cta-become-tutor-btn">Become a Tutor</button>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div class="wrap">
+          <div class="footer-row">
+            <div>
+              <div class="logo">TutorLink</div>
+              <p class="tagline">An Intelligent Tutor-Student Matching System</p>
+            </div>
+            <div class="foot-links">
+              <a href="#features">Features</a>
+              <a href="#how-it-works">How It Works</a>
+              <a href="#who-its-for">Who It's For</a>
+              <a href="#">Contact</a>
+            </div>
+          </div>
+          <p class="copyright">© 2026 TutorLink</p>
+        </div>
+      </footer>
+    </div>
+
+
+    <!-- 2. STUDENT DASHBOARD VIEW -->
+    <div id="view-student" class="app-view">
+      <div class="dashboard-container wrap">
+        <div class="dashboard-header">
+          <div>
+            <h2 id="student-welcome-heading">Welcome back, Maria!</h2>
+            <p class="sub-text">Find your AI-matched tutor, manage bookings, and join active sessions.</p>
+          </div>
+          <button class="btn btn-primary btn-icon-flex" id="start-ai-match-btn">
+            <svg class="icon-svg-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Start AI Tutor Matching
+          </button>
+        </div>
+
+        <!-- Quick Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-num" id="student-stat-upcoming">1</span>
+            <span class="stat-label">Upcoming Sessions</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="student-stat-completed">3</span>
+            <span class="stat-label">Completed Sessions</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="student-stat-spent">₱1,400</span>
+            <span class="stat-label">Total Spent (GCash)</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">4.9 ★</span>
+            <span class="stat-label">Learning Progress Rating</span>
+          </div>
+        </div>
+
+        <!-- Section: Student Session Calendar -->
+        <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>Scheduled Sessions Calendar</h3>
+          </div>
+          <div class="calendar-box" id="student-calendar-container">
+            <!-- Dynamic Calendar Rendered by app.js -->
+          </div>
+        </div>
+
+        <!-- Section: Active & Upcoming Sessions -->
+        <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>Upcoming & Active Sessions</h3>
+          </div>
+          <div id="student-upcoming-sessions-list" class="cards-list">
+            <!-- Dynamic session items -->
+          </div>
+        </div>
+
+        <!-- Section: Available Tutors Directory -->
+        <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>Browse & Book Featured Tutors</h3>
+            <div class="filter-group">
+              <input type="text" id="tutor-search-input" placeholder="Search subject or tutor name..." class="input-search">
+            </div>
+          </div>
+          <div id="tutors-directory-grid" class="tutor-grid">
+            <!-- Dynamic tutor cards -->
+          </div>
+        </div>
+
+        <!-- Section: Past Session History & Receipts -->
+        <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>Session History & Payment Receipts</h3>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Tutor</th>
+                <th>Subject</th>
+                <th>Fee</th>
+                <th>GCash Ref #</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="student-history-table-body">
+              <!-- Dynamic rows -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- Floating Chat Widget -->
-    <div class="chat-widget">
-      <span>Chat with us.</span>
+
+    <!-- 3. TUTOR DASHBOARD VIEW -->
+    <div id="view-tutor" class="app-view">
+      <div class="dashboard-container wrap">
+        <div class="dashboard-header">
+          <div>
+            <h2 id="tutor-welcome-heading">Tutor Portal - Prof. Alex Rivera</h2>
+            <p class="sub-text">Manage your teaching schedule, accept matched students, track earnings, and view reports.</p>
+          </div>
+        </div>
+
+        <!-- Quick Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-num" id="tutor-stat-earnings">₱4,500</span>
+            <span class="stat-label">Net Earnings</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="tutor-stat-students">12</span>
+            <span class="stat-label">Matched Students</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="tutor-stat-sessions">9</span>
+            <span class="stat-label">Sessions Completed</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">4.9 ★</span>
+            <span class="stat-label">Student Feedback Score</span>
+          </div>
+        </div>
+
+        <!-- Tutor Sub-Navigation Tabs (Uniform Design & Sizing) -->
+        <div class="admin-tab-bar margin-bottom">
+          <button class="tutor-tab-btn active" data-tab="tutor-tab-availability">Availability & Schedule</button>
+          <button class="tutor-tab-btn" data-tab="tutor-tab-requests">Match Requests</button>
+          <button class="tutor-tab-btn" data-tab="tutor-tab-sessions">Teaching Sessions</button>
+          <button class="tutor-tab-btn" data-tab="tutor-tab-earnings">Earnings & Performance</button>
+        </div>
+
+        <!-- Tutor Tab 1: Availability & Schedule -->
+        <div class="tutor-tab-content active" id="tutor-tab-availability">
+          <div class="dashboard-section">
+            <div class="section-title-bar">
+              <h3>Weekly Availability & Schedule Window</h3>
+            </div>
+            <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 22px; border-radius: 6px; margin-bottom: 24px;">
+              <form id="tutor-availability-settings-form">
+                <div class="form-group">
+                  <label>Weekly Working Days</label>
+                  <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px;">
+                    <label><input type="checkbox" name="avail_day" value="Mon" checked> Mon</label>
+                    <label><input type="checkbox" name="avail_day" value="Tue" checked> Tue</label>
+                    <label><input type="checkbox" name="avail_day" value="Wed" checked> Wed</label>
+                    <label><input type="checkbox" name="avail_day" value="Thu" checked> Thu</label>
+                    <label><input type="checkbox" name="avail_day" value="Fri" checked> Fri</label>
+                    <label><input type="checkbox" name="avail_day" value="Sat"> Sat</label>
+                    <label><input type="checkbox" name="avail_day" value="Sun"> Sun</label>
+                  </div>
+                </div>
+                <div class="form-row margin-top">
+                  <div class="form-group">
+                    <label>Daily Teaching Window</label>
+                    <input type="text" id="tutor-time-window-input" class="form-input" value="09:00 AM - 05:00 PM">
+                  </div>
+                  <div class="form-group">
+                    <label>Block Unavailable Dates (YYYY-MM-DD)</label>
+                    <input type="text" id="tutor-blocked-dates-input" class="form-input" placeholder="e.g. 2026-03-25">
+                  </div>
+                </div>
+                <div style="display: flex; gap: 10px;" class="margin-top">
+                  <button type="submit" class="btn btn-primary btn-small">Save Availability</button>
+                  <button type="button" class="btn btn-secondary btn-small" id="tutor-reset-availability-btn">Reset Defaults</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="section-title-bar">
+              <h3>Sessions Calendar</h3>
+            </div>
+            <div class="calendar-box" id="tutor-calendar-container">
+              <!-- Dynamic Tutor Calendar Rendered by app.js -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tutor Tab 2: Match Requests -->
+        <div class="tutor-tab-content" id="tutor-tab-requests">
+          <div class="dashboard-section">
+            <div class="section-title-bar">
+              <h3>Incoming Student Match Requests</h3>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Request ID</th>
+                  <th>Student Name</th>
+                  <th>Subject</th>
+                  <th>Compatibility</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="tutor-requests-table-body">
+                <!-- Dynamic requests -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tutor Tab 3: Teaching Sessions -->
+        <div class="tutor-tab-content" id="tutor-tab-sessions">
+          <div class="dashboard-section">
+            <div class="section-title-bar">
+              <h3>Upcoming & Active Teaching Sessions</h3>
+            </div>
+            <div id="tutor-upcoming-sessions-list" class="cards-list">
+              <!-- Dynamic sessions for tutor -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tutor Tab 4: Earnings & Performance -->
+        <div class="tutor-tab-content" id="tutor-tab-earnings">
+          <div class="dashboard-section">
+            <div class="section-title-bar">
+              <h3>Earnings & Payout Summary</h3>
+            </div>
+            <div class="stats-grid margin-bottom">
+              <div class="stat-card">
+                <span class="stat-num" id="tutor-gross-earnings">₱4,950</span>
+                <span class="stat-label">Gross Revenue</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-num" id="tutor-net-earnings">₱4,455</span>
+                <span class="stat-label">Net Earnings (90%)</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-num" id="tutor-payout-pending">₱315</span>
+                <span class="stat-label">Pending Payout</span>
+              </div>
+            </div>
+            <table class="data-table margin-bottom">
+              <thead>
+                <tr>
+                  <th>Session ID</th>
+                  <th>Student</th>
+                  <th>Subject</th>
+                  <th>Date</th>
+                  <th>Total Paid</th>
+                  <th>Net Payout</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="tutor-earnings-table-body">
+                <!-- Dynamic earnings rows -->
+              </tbody>
+            </table>
+
+            <div class="section-title-bar margin-top">
+              <h3>Performance & Student Reviews</h3>
+            </div>
+            <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 22px; border-radius: 6px;">
+              <div style="display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 16px; border-bottom: 1px solid var(--line); padding-bottom: 16px;">
+                <div><strong>Overall Rating:</strong> <span style="font-size: 1.1rem; color: var(--ink); font-weight: bold;">4.9 / 5.0 ★</span></div>
+                <div><strong>Total Reviews:</strong> <span>38 Verified Reviews</span></div>
+                <div><strong>Completion Rate:</strong> <span>98% On-Time Completion</span></div>
+              </div>
+              <h4>Recent Student Feedback</h4>
+              <div id="tutor-reviews-list" class="cards-list margin-top">
+                <div class="session-card" style="background: white;">
+                  <div>
+                    <strong>Maria Santos</strong> <span class="sub-text">(Calculus II)</span>
+                    <div style="color: var(--ink); font-weight: bold;">★★★★★ 5.0</div>
+                    <p class="sub-text" style="margin-top: 4px;">Prof. Rivera made integration techniques so much easier to understand! Excellent step-by-step explanations.</p>
+                  </div>
+                </div>
+                <div class="session-card" style="background: white;">
+                  <div>
+                    <strong>Juan Dela Cruz</strong> <span class="sub-text">(Physics)</span>
+                    <div style="color: var(--ink); font-weight: bold;">★★★★★ 5.0</div>
+                    <p class="sub-text" style="margin-top: 4px;">Punctual and very encouraging. Solved complex mechanics problems together.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
 
+
+    <!-- 3B. DEDICATED TUTOR PROFILE PAGE VIEW -->
+    <div id="view-tutor-profile" class="app-view">
+      <div class="dashboard-container wrap">
+        <div class="dashboard-header">
+          <div>
+            <h2>Tutor Profile & Account Settings</h2>
+            <p class="sub-text">Update your professional tutoring bio, teaching specialties, and availability.</p>
+          </div>
+          <button class="btn btn-secondary btn-small" id="back-to-tutor-portal-btn">&larr; Back to Tutor Portal</button>
+        </div>
+
+        <div class="dashboard-section">
+          <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 28px; border-radius: 4px;">
+            <form id="tutor-profile-page-form">
+              <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="page-tutor-name-input" value="Prof. Alex Rivera" class="form-input" required>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Primary Subjects (comma separated)</label>
+                  <input type="text" id="page-tutor-subjects-input" value="Mathematics, Calculus, Physics" class="form-input" required>
+                </div>
+                <div class="form-group">
+                  <label>Teaching Style Specialty</label>
+                  <select id="page-tutor-style-select" class="form-select">
+                    <option value="Visual & Step-by-Step">Visual & Step-by-Step</option>
+                    <option value="Hands-on & Interactive">Hands-on & Interactive</option>
+                    <option value="Auditory & Conceptual">Auditory & Conceptual</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Hourly Rate (₱)</label>
+                  <input type="number" id="page-tutor-rate-input" value="350" class="form-input" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Professional Bio</label>
+                <textarea id="page-tutor-bio-input" class="form-input" rows="3">Licensed Mathematics Professor with 8+ years experience making complex algebra and calculus easy to grasp.</textarea>
+              </div>
+
+              <div class="form-group margin-top" style="display: flex; align-items: center; gap: 10px;">
+                <label style="margin: 0;">Availability:</label>
+                <input type="checkbox" id="page-tutor-availability-toggle" checked style="width: 18px; height: 18px; cursor: pointer;">
+                <span class="sub-text">Accepting new students on TutorLink</span>
+              </div>
+
+              <div class="margin-top" style="display: flex; gap: 12px;">
+                <button type="submit" class="btn btn-primary" id="page-save-tutor-profile-btn">Save Profile Changes</button>
+                <button type="button" class="btn btn-secondary" id="page-cancel-tutor-profile-btn">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 4. ADMIN DASHBOARD VIEW (FULLY ALIGNED WITH FDD) -->
+    <div id="view-admin" class="app-view">
+      <div class="dashboard-container wrap">
+        <div class="dashboard-header">
+          <div>
+            <h2>Admin Monitoring & System Management</h2>
+            <p class="sub-text">FDD Modules: Manage Students, Tutor Matching, Schedule, Payments, Notifications, & Reports.</p>
+          </div>
+          <button class="btn btn-primary btn-icon-flex" id="generate-admin-report-btn">
+            <svg class="icon-svg-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            Export Activity Report
+          </button>
+        </div>
+
+        <!-- Admin KPI Metrics -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-num" id="admin-stat-total-students">3</span>
+            <span class="stat-label">Total Registered Students</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="admin-stat-total-tutors">4</span>
+            <span class="stat-label">Verified Tutors</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num" id="admin-stat-total-volume">₱1,320</span>
+            <span class="stat-label">Total Tutoring Volume</span>
+          </div>
+          <div class="stat-card highlight">
+            <span class="stat-num" id="admin-stat-platform-commission">₱132</span>
+            <span class="stat-label">Platform Commission (10%)</span>
+          </div>
+        </div>
+
+        <!-- Admin FDD Management Tabs (Clean Labels & No Word Wrapping) -->
+        <div class="admin-tab-bar">
+          <button class="admin-tab-btn active" data-tab="tab-students">Students</button>
+          <button class="admin-tab-btn" data-tab="tab-tutors">Tutors</button>
+          <button class="admin-tab-btn" data-tab="tab-subjects">Subjects</button>
+          <button class="admin-tab-btn" data-tab="tab-matching">Tutor Matching</button>
+          <button class="admin-tab-btn" data-tab="tab-schedule">Schedules</button>
+          <button class="admin-tab-btn" data-tab="tab-payments">Payments</button>
+          <button class="admin-tab-btn" data-tab="tab-notifications">Notifications</button>
+          <button class="admin-tab-btn" data-tab="tab-reports">Reports</button>
+        </div>
+
+        <!-- Admin Tab 1: Manage Students -->
+        <div class="admin-tab-content active" id="tab-students">
+          <div class="dashboard-section">
+            <div class="section-title-bar">
+              <h3>Student Management & Validation</h3>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Full Name</th>
+                  <th>Email</th>
+                  <th>Grade Level</th>
+                  <th>Validation Status</th>
+                  <th>Account Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-students-table-body">
+                <!-- Dynamic student list -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Admin Tab 1B: Manage Tutors -->
+        <div class="admin-tab-content" id="tab-tutors">
+          <div class="dashboard-section">
+            <div class="section-title-bar">
+              <h3>Tutor Verification & Account Management</h3>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Tutor ID</th>
+                  <th>Full Name</th>
+                  <th>Subjects</th>
+                  <th>Credentials</th>
+                  <th>Application Status</th>
+                  <th>Account Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-tutors-table-body">
+                <!-- Dynamic tutors list -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Admin Tab 1C: Manage Subjects -->
+        <div class="admin-tab-content" id="tab-subjects">
+          <div class="dashboard-section">
+            <div class="section-title-bar">
+              <h3>System Subjects & Academic Categories</h3>
+              <button class="btn btn-primary btn-small" id="admin-add-subject-btn">+ Add New Subject</button>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Subject ID</th>
+                  <th>Subject Name</th>
+                  <th>Category</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-subjects-table-body">
+                <!-- Dynamic subjects list -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Admin Tab 2: Manage Tutor Matching -->
+        <div class="admin-tab-content" id="tab-matching">
+          <div class="dashboard-section">
+            <div class="section-title-bar">
+              <h3>Review, Approve & Cancel Matching Sessions</h3>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Match ID</th>
+                  <th>Student</th>
+                  <th>Recommended Tutor</th>
+                  <th>Subject</th>
+                  <th>Matching Score</th>
+                  <th>Approval Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-matching-table-body">
+                <!-- Dynamic matching rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Admin Tab 3: Manage Schedule -->
+        <div class="admin-tab-content" id="tab-schedule">
+          <div class="dashboard-section">
+            <div class="section-title-bar">
+              <h3>Calendar Schedules & Modify Sessions</h3>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Schedule ID</th>
+                  <th>Tutor</th>
+                  <th>Date & Slot</th>
+                  <th>Subject</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-schedule-table-body">
+                <!-- Dynamic schedule rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Admin Tab 4: Manage Payments -->
+        <div class="admin-tab-content" id="tab-payments">
+          <div class="dashboard-section">
+            <div class="section-title-bar">
+              <h3>Payment Records & Confirmation</h3>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Payment ID</th>
+                  <th>Payer (Student)</th>
+                  <th>Method</th>
+                  <th>GCash Ref #</th>
+                  <th>Amount (₱)</th>
+                  <th>Payment Status</th>
+                  <th>Confirm Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-payments-table-body">
+                <!-- Dynamic payment rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Admin Tab 5: Manage Notifications -->
+        <div class="admin-tab-content" id="tab-notifications">
+          <div class="dashboard-section">
+            <div class="section-title-bar">
+              <h3>Send System Broadcast & View Notifications</h3>
+            </div>
+            <div class="profile-card-edit margin-bottom">
+              <div class="form-group">
+                <label>Notification Recipient</label>
+                <select id="admin-notif-target" class="form-select">
+                  <option value="all">All Users (Students & Tutors)</option>
+                  <option value="students">All Students</option>
+                  <option value="tutors">All Tutors</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Message Content</label>
+                <input type="text" id="admin-notif-message" placeholder="Type notification broadcast message..." class="form-input">
+              </div>
+              <button class="btn btn-primary btn-small" id="admin-send-notif-btn">Send Notification</button>
+            </div>
+            <h4>Notification History</h4>
+            <div id="admin-notifications-log" class="cards-list">
+              <!-- Broadcast log -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Tab 6: Manage Reports -->
+        <div class="admin-tab-content" id="tab-reports">
+          <div class="dashboard-section">
+            <div class="section-title-bar">
+              <h3>View Completed, Weekly & Monthly Tutoring Reports</h3>
+              <div class="filter-group">
+                <button class="btn btn-secondary btn-small active-filter" id="report-filter-all">All Completed</button>
+                <button class="btn btn-secondary btn-small" id="report-filter-weekly">View Weekly Sessions</button>
+                <button class="btn btn-secondary btn-small" id="report-filter-monthly">View Monthly Sessions</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Session ID</th>
+                  <th>Student</th>
+                  <th>Tutor</th>
+                  <th>Subject</th>
+                  <th>Date</th>
+                  <th>Fee</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="admin-reports-table-body">
+                <!-- Dynamic report rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- Modal 1: Auth Modal (Log In & Register) -->
+  <div class="modal-backdrop" id="modal-auth">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="auth-modal-title">Sign In or Register</h3>
+        <button class="close-btn" id="close-auth-modal">&times;</button>
+      </div>
+
+      <!-- Auth Modal Mode Tabs (Log In vs Register) -->
+      <div class="auth-tab-bar">
+        <button class="auth-tab-btn active" id="tab-btn-login">Log In</button>
+        <button class="auth-tab-btn" id="tab-btn-register">Register (Sign Up)</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Quick Automated Demo Login Accounts -->
+        <div class="demo-accounts-box margin-bottom" style="background: var(--panel); border: 1px solid var(--line); padding: 14px 16px; border-radius: 6px;">
+          <label style="font-size: 0.85rem; font-weight: 700; color: var(--ink-soft); display: block; margin-bottom: 8px;">QUICK AUTOMATED DEMO ACCOUNTS</label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary btn-small" id="demo-student-login-btn">Maria Santos (Student)</button>
+            <button type="button" class="btn btn-secondary btn-small" id="demo-tutor-login-btn">Prof. Alex Rivera (Tutor)</button>
+            <button type="button" class="btn btn-secondary btn-small" id="demo-admin-login-btn">System Admin</button>
+          </div>
+        </div>
+
+        <!-- Form 1A: Log In Form (Direct Email Login without Role Selection) -->
+        <form id="auth-form">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="auth-email" required placeholder="name@domain.com" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="auth-password" required placeholder="••••••••" class="form-input">
+          </div>
+          <button type="submit" class="btn btn-primary full-width">Log In to Dashboard</button>
+        </form>
+
+        <!-- Form 1B: Registration Form (FDD: Register -> Fillup Personal Details -> Submit Registration) -->
+        <form id="register-form" class="hidden">
+          <div class="form-group">
+            <label>Register As</label>
+            <select id="reg-role" class="form-select">
+              <option value="student">Student</option>
+              <option value="tutor">Tutor</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="reg-fullname" required placeholder="e.g. Juan Dela Cruz" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="reg-email" required placeholder="juan@domain.com" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="reg-password" required placeholder="Create password" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>Grade Level / Academic Specialty</label>
+            <input type="text" id="reg-specialty" required placeholder="e.g. Senior High / Mathematics" class="form-input">
+          </div>
+          <div id="tutor-credentials-upload-fields" class="hidden margin-top" style="border-top: 1px solid var(--line); padding-top: 12px;">
+            <h4 style="margin-bottom: 8px;">Upload Credentials</h4>
+            <div class="form-group">
+              <label>Diploma / Degree Certificate</label>
+              <input type="file" id="reg-tutor-diploma" class="form-input" accept=".pdf,.png,.jpg,.jpeg">
+            </div>
+            <div class="form-group">
+              <label>Transcript of Records (TOR)</label>
+              <input type="file" id="reg-tutor-tor" class="form-input" accept=".pdf,.png,.jpg,.jpeg">
+            </div>
+            <div class="form-group">
+              <label>Government-issued ID Card</label>
+              <input type="file" id="reg-tutor-idcard" class="form-input" accept=".pdf,.png,.jpg,.jpeg">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary full-width margin-top">Submit Registration</button>
+        </form>
+      </div>
+    </div>
   </div>
 
+
+  <!-- Modal 2: AI Tutor Matching Wizard (FDD: Tutor Matching) -->
+  <div class="modal-backdrop" id="modal-ai-matching">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h3>AI Tutor Matching Wizard</h3>
+        <button class="close-btn" id="close-ai-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="sub-text margin-bottom">Tell us your subject and learning preferences, and our algorithm will pair you with the most compatible tutor.</p>
+
+        <form id="ai-matching-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Select Subject</label>
+              <select id="match-subject" class="form-select" required>
+                <option value="Mathematics">Mathematics & Algebra</option>
+                <option value="Calculus">Calculus & Higher Math</option>
+                <option value="Physics">Physics & Mechanics</option>
+                <option value="English">English Literature & Essay Writing</option>
+                <option value="Programming">Computer Programming & Web Dev</option>
+                <option value="Chemistry">General Chemistry</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Academic Grade Level</label>
+              <select id="match-level" class="form-select" required>
+                <option value="High School">High School</option>
+                <option value="Senior High">Senior High School</option>
+                <option value="College">College / University</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Enter Learning Preferences</label>
+              <select id="match-style" class="form-select" required>
+                <option value="Visual & Diagrams">Visual & Diagrams (Charts, Mind maps, Visuals)</option>
+                <option value="Hands-on Practice">Hands-on Practice (Solving exercises step-by-step)</option>
+                <option value="Step-by-Step Explanation">Step-by-Step Detailed Explanations</option>
+                <option value="Auditory & Discussion">Auditory & Interactive Discussion</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Preferred Time Slot</label>
+              <select id="match-time" class="form-select" required>
+                <option value="Morning (9:00 AM - 12:00 PM)">Morning (9:00 AM - 12:00 PM)</option>
+                <option value="Afternoon (2:00 PM - 5:00 PM)">Afternoon (2:00 PM - 5:00 PM)</option>
+                <option value="Evening (6:00 PM - 9:00 PM)">Evening (6:00 PM - 9:00 PM)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" id="cancel-ai-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="run-match-btn">Submit & View AI Recommended Tutor</button>
+          </div>
+        </form>
+
+        <!-- Container for Match Results -->
+        <div id="ai-match-results" class="match-results-container hidden">
+          <hr class="divider">
+          <h4 class="results-title">View AI Recommended Tutors & Choose Tutor:</h4>
+          <div id="ai-match-cards-list" class="cards-list">
+            <!-- Dynamic match cards inserted here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal 3: Calendar Scheduling Modal (FDD: Calendar Scheduling) -->
+  <div class="modal-backdrop" id="modal-calendar">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="calendar-modal-title">Calendar Scheduling - View Available Schedule</h3>
+        <button class="close-btn" id="close-calendar-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="selected-tutor-preview" class="tutor-preview-card">
+          <!-- Dynamic tutor info -->
+        </div>
+
+        <div class="form-group margin-top">
+          <label>Select Date:</label>
+          <input type="date" id="booking-date-picker" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label>Select Available Time Slot:</label>
+          <div id="time-slots-container" class="slots-grid">
+            <!-- Dynamic time slot chips -->
+          </div>
+        </div>
+
+        <div class="booking-summary-box">
+          <div class="summary-line">
+            <span>Hourly Tutoring Fee:</span>
+            <strong id="summary-hourly-fee">₱350</strong>
+          </div>
+          <div class="summary-line">
+            <span>Platform Service Fee (10%):</span>
+            <strong id="summary-service-fee">₱35</strong>
+          </div>
+          <hr class="divider">
+          <div class="summary-line total">
+            <span>Total Payable:</span>
+            <strong id="summary-total-fee">₱385</strong>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="cancel-booking-btn">Cancel</button>
+          <button class="btn btn-primary" id="proceed-to-payment-btn">Proceed to Online Payment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal 4: Online Payment Modal (FDD: Online Payment -> Select Payment Method & View Payment Status) -->
+  <div class="modal-backdrop" id="modal-gcash">
+    <div class="modal-card gcash-theme">
+      <div class="gcash-banner">
+        <div class="gcash-logo" id="payment-method-header-title">GCash Payment</div>
+        <div class="gcash-subtext">Secure Online Payment</div>
+        <button class="close-btn white" id="close-gcash-modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Step 1: Select Payment Method & Mobile Input -->
+        <div id="gcash-step-1">
+          <div class="gcash-merchant-info">
+            <span>Merchant: <strong>TutorLink Inc.</strong></span>
+            <span>Amount: <strong id="gcash-modal-amount" class="highlight-text">₱385.00</strong></span>
+          </div>
+
+          <div class="form-group margin-top">
+            <label>Select Payment Method</label>
+            <select id="payment-method-select" class="form-select">
+              <option value="GCash">GCash e-Wallet</option>
+              <option value="PayMaya">PayMaya e-Wallet</option>
+              <option value="Credit/Debit Card">Credit / Debit Card</option>
+            </select>
+          </div>
+
+          <div class="form-group margin-top">
+            <label>Account / Mobile Number</label>
+            <div class="phone-input-group">
+              <span class="prefix">+63</span>
+              <input type="tel" id="gcash-mobile" class="form-input" placeholder="9171234567" maxlength="10" value="9175550192">
+            </div>
+          </div>
+
+          <button class="btn btn-gcash full-width" id="gcash-step1-next-btn">Next</button>
+        </div>
+
+        <!-- Step 2: 4-Digit MPIN / Security Verification -->
+        <div id="gcash-step-2" class="hidden">
+          <p class="center-text">Enter 4-Digit Security PIN</p>
+          <div class="pin-input-group">
+            <input type="password" maxlength="1" class="pin-digit" value="1">
+            <input type="password" maxlength="1" class="pin-digit" value="2">
+            <input type="password" maxlength="1" class="pin-digit" value="3">
+            <input type="password" maxlength="1" class="pin-digit" value="4">
+          </div>
+
+          <button class="btn btn-gcash full-width margin-top" id="gcash-confirm-pay-btn">Confirm Payment</button>
+        </div>
+
+        <!-- Step 3: View Payment Status & Receipt -->
+        <div id="gcash-step-3" class="hidden center-text">
+          <div class="success-icon">✓</div>
+          <h3>Payment Status: Confirmed</h3>
+          <p class="sub-text">Your session has been successfully booked and confirmed.</p>
+
+          <div class="receipt-box">
+            <div class="summary-line">
+              <span>Payment Ref No.:</span>
+              <strong id="gcash-receipt-ref">109283748291</strong>
+            </div>
+            <div class="summary-line">
+              <span>Payment Method:</span>
+              <strong id="gcash-receipt-method">GCash</strong>
+            </div>
+            <div class="summary-line">
+              <span>Date & Time:</span>
+              <span id="gcash-receipt-date">Today, 2:30 PM</span>
+            </div>
+            <div class="summary-line">
+              <span>Amount Paid:</span>
+              <strong id="gcash-receipt-amount">₱385.00</strong>
+            </div>
+          </div>
+
+          <button class="btn btn-primary full-width margin-top" id="gcash-done-btn">Back to Dashboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal 5: Matching Session Virtual Workspace -->
+  <div class="modal-backdrop" id="modal-session-workspace">
+    <div class="modal-card modal-xlarge">
+      <div class="modal-header workspace-header">
+        <div>
+          <h3 id="workspace-session-title">Live Matching Session: Mathematics</h3>
+          <p id="workspace-participants" class="sub-text">Maria Santos (Student) & Prof. Alex Rivera (Tutor)</p>
+        </div>
+        <div class="header-right-group">
+          <div class="timer-badge" id="session-timer">00:45:00</div>
+          <button class="btn btn-danger btn-small" id="end-session-btn">End Session</button>
+          <button class="close-btn" id="close-workspace-btn">&times;</button>
+        </div>
+      </div>
+
+      <div class="modal-body workspace-body">
+        <div class="workspace-grid">
+          <!-- Left Panel: Interactive Notes & Whiteboard -->
+          <div class="workspace-notes-panel">
+            <h4>Shared Workspace & Notes</h4>
+            <textarea id="session-shared-notes" placeholder="Collaborative notes, formulas, or homework problems go here..."></textarea>
+            <div class="workspace-actions">
+              <button class="btn btn-secondary btn-small" id="clear-notes-btn">Clear Notes</button>
+              <button class="btn btn-secondary btn-small" id="save-notes-btn">Save Snapshot</button>
+            </div>
+          </div>
+
+          <!-- Right Panel: Live Chat Room -->
+          <div class="workspace-chat-panel">
+            <h4>Session Chat</h4>
+            <div id="chat-messages-container" class="chat-messages">
+              <div class="chat-msg system">Session started. Real-time updates active.</div>
+              <div class="chat-msg tutor"><strong>Prof. Alex:</strong> Welcome Maria! Let's review problem 3 from Calculus Chapter 2.</div>
+            </div>
+            <form id="chat-form" class="chat-input-form">
+              <input type="text" id="chat-input" placeholder="Type a message..." class="form-input" autocomplete="off">
+              <button type="submit" class="btn btn-primary btn-small">Send</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal 6: Post-Session Rating & Feedback Modal -->
+  <div class="modal-backdrop" id="modal-rating">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Rate Your Tutoring Session</h3>
+        <button class="close-btn" id="close-rating-modal">&times;</button>
+      </div>
+      <div class="modal-body center-text">
+        <p>How was your session with <strong id="rating-tutor-name">Prof. Alex Rivera</strong>?</p>
+
+        <div class="star-rating" id="star-rating-group">
+          <span class="star" data-value="1">★</span>
+          <span class="star" data-value="2">★</span>
+          <span class="star" data-value="3">★</span>
+          <span class="star" data-value="4">★</span>
+          <span class="star active" data-value="5">★</span>
+        </div>
+
+        <div class="form-group margin-top">
+          <textarea id="rating-comment" placeholder="Leave a review or feedback..." class="form-input"></textarea>
+        </div>
+
+        <button class="btn btn-primary full-width" id="submit-rating-btn">Submit Feedback</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal 10: Student Profile Settings Edit Modal -->
+  <div class="modal-backdrop" id="modal-edit-student-profile">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Edit Student Profile Settings</h3>
+        <button class="close-btn" id="close-edit-student-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-student-profile-form">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="edit-student-name" class="form-input" value="Maria Santos">
+          </div>
+          <div class="form-group">
+            <label>Grade Level</label>
+            <select id="edit-student-grade" class="form-select">
+              <option value="High School">High School</option>
+              <option value="Senior High" selected>Senior High School</option>
+              <option value="College">College / University</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Subjects Needing Help</label>
+            <input type="text" id="edit-student-subjects" class="form-input" value="Calculus, Physics">
+          </div>
+          <div class="form-group">
+            <label>Bio / Learning Goals</label>
+            <textarea id="edit-student-bio" class="form-input">Grade 12 STEM Student focusing on Advanced Calculus and College Entrance Exam preparation.</textarea>
+          </div>
+          <button type="submit" class="btn btn-primary full-width">Save Profile Settings</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 8: Student Profile Detail View Modal -->
+  <div class="modal-backdrop" id="modal-student-profile">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="student-profile-title">Student Profile</h3>
+        <button class="close-btn" id="close-student-profile-modal">&times;</button>
+      </div>
+      <div class="modal-body" id="student-profile-body">
+        <!-- Dynamic student profile contents -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 9: Tutor Profile Detail View Modal -->
+  <div class="modal-backdrop" id="modal-tutor-profile">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="tutor-profile-title">Tutor Profile</h3>
+        <button class="close-btn" id="close-tutor-profile-modal">&times;</button>
+      </div>
+      <div class="modal-body" id="tutor-profile-body">
+        <!-- Dynamic tutor profile contents -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 7: Admin Printable Report View Modal -->
+  <div class="modal-backdrop" id="modal-admin-report">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h3>TutorLink System Activity & Monitoring Report</h3>
+        <button class="close-btn" id="close-report-modal">&times;</button>
+      </div>
+      <div class="modal-body" id="printable-report-content">
+        <div class="report-header">
+          <h2>TutorLink Performance Summary</h2>
+          <p>Generated on: <span id="report-generated-date">March 14, 2026</span></p>
+        </div>
+        <hr class="divider">
+
+        <div class="report-summary-boxes">
+          <div><strong>Total Sessions Handled:</strong> <span id="report-total-sessions">15</span></div>
+          <div><strong>Total Transaction Volume:</strong> <span id="report-total-volume">₱12,850</span></div>
+          <div><strong>Platform Net Revenue:</strong> <span id="report-net-revenue">₱1,285</span></div>
+        </div>
+
+        <h4>Session Audit Details</h4>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Session ID</th>
+              <th>Student</th>
+              <th>Tutor</th>
+              <th>Subject</th>
+              <th>Status</th>
+              <th>Fee</th>
+            </tr>
+          </thead>
+          <tbody id="report-table-body">
+            <!-- Dynamic report rows -->
+          </tbody>
+        </table>
+
+        <div class="modal-actions no-print margin-top">
+          <button class="btn btn-secondary" onclick="window.print()">Print Report</button>
+          <button class="btn btn-primary" id="done-report-btn">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 11: Admin Add / Edit Subject Modal -->
+  <div class="modal-backdrop" id="modal-admin-subject">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="subject-modal-title">Add New Subject</h3>
+        <button class="close-btn" id="close-subject-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="admin-subject-form">
+          <input type="hidden" id="admin-subject-id">
+          <div class="form-group">
+            <label>Subject Name</label>
+            <input type="text" id="admin-subject-name" class="form-input" placeholder="e.g. Linear Algebra" required>
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="admin-subject-category" class="form-select">
+              <option value="STEM">STEM</option>
+              <option value="Technology">Technology</option>
+              <option value="Humanities">Humanities</option>
+              <option value="Business">Business</option>
+              <option value="Languages">Languages</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary full-width margin-top">Save Subject</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 12: Admin Reassign Tutor Modal -->
+  <div class="modal-backdrop" id="modal-reassign-tutor">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Reassign Tutor for Matching Session</h3>
+        <button class="close-btn" id="close-reassign-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="reassign-tutor-form">
+          <input type="hidden" id="reassign-match-id">
+          <div class="form-group">
+            <label>Select Replacement Tutor</label>
+            <select id="reassign-tutor-select" class="form-select">
+              <!-- Dynamic options -->
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary full-width margin-top">Confirm Tutor Reassignment</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 13: View Payment Receipt Modal -->
+  <div class="modal-backdrop" id="modal-view-receipt">
+    <div class="modal-card gcash-theme">
+      <div class="gcash-banner">
+        <div class="gcash-logo">TutorLink Official Receipt</div>
+        <div class="gcash-subtext">Online Payment Confirmation</div>
+        <button class="close-btn white" id="close-receipt-view-modal">&times;</button>
+      </div>
+
+      <div class="modal-body center-text">
+        <div class="success-icon" style="margin-top: 10px;">✓</div>
+        <h3 style="margin-bottom: 4px;">Payment Confirmed</h3>
+        <p class="sub-text">Paid via GCash e-Wallet</p>
+
+        <div class="receipt-box">
+          <div class="summary-line">
+            <span>Payment Ref No.:</span>
+            <strong id="view-receipt-ref">GC-9920182341</strong>
+          </div>
+          <div class="summary-line">
+            <span>Student Name:</span>
+            <strong id="view-receipt-student">Maria Santos</strong>
+          </div>
+          <div class="summary-line">
+            <span>Tutor / Instructor:</span>
+            <strong id="view-receipt-tutor">Prof. Alex Rivera</strong>
+          </div>
+          <div class="summary-line">
+            <span>Tutoring Subject:</span>
+            <strong id="view-receipt-subject">Calculus II</strong>
+          </div>
+          <div class="summary-line">
+            <span>Session Date & Time:</span>
+            <span id="view-receipt-date">2026-03-15 (02:00 PM)</span>
+          </div>
+          <hr class="divider">
+          <div class="summary-line">
+            <span>Hourly Fee:</span>
+            <span>₱350.00</span>
+          </div>
+          <div class="summary-line">
+            <span>Platform Fee (10%):</span>
+            <span>₱35.00</span>
+          </div>
+          <div class="summary-line total">
+            <span>Total Paid:</span>
+            <strong id="view-receipt-amount">₱385.00</strong>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;" class="margin-top">
+          <button class="btn btn-secondary full-width" onclick="window.print()">Print Receipt</button>
+          <button class="btn btn-primary full-width" id="done-receipt-view-btn">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
