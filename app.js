@@ -462,6 +462,25 @@ function initNavigation() {
 
   document.getElementById('close-receipt-view-modal')?.addEventListener('click', () => closeModal('modal-view-receipt'));
   document.getElementById('done-receipt-view-btn')?.addEventListener('click', () => closeModal('modal-view-receipt'));
+
+  document.getElementById('floating-calendar-btn')?.addEventListener('click', () => {
+    openFloatingCalendarModal();
+  });
+  document.getElementById('close-floating-calendar-modal')?.addEventListener('click', () => closeModal('modal-floating-calendar'));
+}
+
+function openFloatingCalendarModal() {
+  const titleEl = document.getElementById('floating-calendar-title');
+  if (state.currentRole === 'tutor' || state.currentRole === 'tutor-profile') {
+    const tutorSessions = state.sessions.filter(s => s.tutorName.includes('Alex') || (state.currentUser && s.tutorName === state.currentUser.name));
+    if (titleEl) titleEl.textContent = `Tutor Schedule Calendar - ${state.currentUser ? state.currentUser.name : 'Prof. Alex Rivera'}`;
+    renderSessionCalendar('floating-calendar-container', tutorSessions, 'Tutor');
+  } else {
+    const studentSessions = state.sessions.filter(s => s.studentName === (state.currentUser ? state.currentUser.name : 'Maria Santos'));
+    if (titleEl) titleEl.textContent = `Student Schedule Calendar - ${state.currentUser ? state.currentUser.name : 'Maria Santos'}`;
+    renderSessionCalendar('floating-calendar-container', studentSessions, 'Student');
+  }
+  openModal('modal-floating-calendar');
 }
 
 // Role Switcher Logic
@@ -476,6 +495,7 @@ function switchRole(role, customUser = null) {
   const logoutBtn = document.getElementById('logout-btn');
   const notifBell = document.getElementById('notif-bell-btn');
   const userProfileBtn = document.getElementById('user-profile-btn');
+  const floatingCalBtn = document.getElementById('floating-calendar-btn');
 
   if (role === 'guest') {
     state.currentUser = null;
@@ -486,6 +506,7 @@ function switchRole(role, customUser = null) {
     if (logoutBtn) logoutBtn.classList.add('hidden');
     if (notifBell) notifBell.classList.add('hidden');
     if (userProfileBtn) userProfileBtn.classList.add('hidden');
+    if (floatingCalBtn) floatingCalBtn.classList.add('hidden');
   } else {
     if (publicNavLinks) publicNavLinks.style.display = 'none';
     if (loginBtn) loginBtn.classList.add('hidden');
@@ -495,8 +516,10 @@ function switchRole(role, customUser = null) {
 
     if (role === 'student' || role === 'tutor' || role === 'tutor-profile') {
       if (userProfileBtn) userProfileBtn.classList.remove('hidden');
+      if (floatingCalBtn) floatingCalBtn.classList.remove('hidden');
     } else {
       if (userProfileBtn) userProfileBtn.classList.add('hidden');
+      if (floatingCalBtn) floatingCalBtn.classList.add('hidden');
     }
 
     if (role === 'student') {
