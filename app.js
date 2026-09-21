@@ -266,7 +266,6 @@ const state = {
 document.addEventListener('DOMContentLoaded', async () => {
   initNavigation();
   initAuthModalTabs();
-  initDemoAccounts();
   initModals();
   initAIMatching();
   initCalendarBooking();
@@ -283,26 +282,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderAllViews();
 });
 
-// Demo Account Quick Login Handlers
-function initDemoAccounts() {
-  document.getElementById('demo-student-login-btn')?.addEventListener('click', () => {
-    switchRole('student', { name: 'Maria Santos', role: 'student' });
-    closeModal('modal-auth');
-    showToast('Signed in as Maria Santos (Student)');
-  });
-
-  document.getElementById('demo-tutor-login-btn')?.addEventListener('click', () => {
-    switchRole('tutor', { name: 'Prof. Alex Rivera', role: 'tutor' });
-    closeModal('modal-auth');
-    showToast('Signed in as Prof. Alex Rivera (Tutor)');
-  });
-
-  document.getElementById('demo-admin-login-btn')?.addEventListener('click', () => {
-    switchRole('admin', { name: 'System Admin', role: 'admin' });
-    closeModal('modal-auth');
-    showToast('Signed in as System Admin (Administrator)');
-  });
-}
 
 // XAMPP / Database Synchronization Engine (With Offline Fallback)
 async function syncWithDatabase() {
@@ -684,14 +663,21 @@ function initModals() {
       switchRole('admin', { name: 'System Admin', role: 'admin', id: 'ADMIN-001' });
       showToast('Logged in as System Admin!');
     } else {
-      const tutorMatch = state.tutors.find(t => t.name.toLowerCase().includes(emailInput.split('@')[0]) || emailInput.includes('prof') || emailInput.includes('alex') || emailInput.includes('tutor'));
-      if (tutorMatch && !emailInput.includes('student') && !emailInput.includes('maria')) {
+      const tutorMatch = state.tutors.find(t => (t.email && t.email.toLowerCase() === emailInput) || t.name.toLowerCase().includes(emailInput.split('@')[0]));
+      if (tutorMatch && !emailInput.includes('student')) {
         switchRole('tutor', { name: tutorMatch.name, role: 'tutor', id: tutorMatch.id });
         showToast(`Logged in as Tutor ${tutorMatch.name}!`);
       } else {
-        const studentMatch = state.students.find(s => s.email.toLowerCase() === emailInput || s.name.toLowerCase().includes(emailInput.split('@')[0])) || state.students[0];
-        switchRole('student', { name: studentMatch ? studentMatch.name : 'Maria Santos', role: 'student', id: studentMatch ? studentMatch.id : 'STU-101' });
-        showToast(`Logged in as Student ${studentMatch ? studentMatch.name : 'Maria Santos'}!`);
+        const studentMatch = state.students.find(s => s.email && s.email.toLowerCase() === emailInput);
+        if (studentMatch) {
+          switchRole('student', { name: studentMatch.name, role: 'student', id: studentMatch.id });
+          showToast(`Logged in as Student ${studentMatch.name}!`);
+        } else {
+          // Default lookup fallback
+          const defaultStudent = state.students.find(s => s.email === 'maria@tutorlink.ph') || state.students[0];
+          switchRole('student', { name: defaultStudent ? defaultStudent.name : 'Maria Santos', role: 'student', id: defaultStudent ? defaultStudent.id : 'STU-101' });
+          showToast(`Logged in as Student ${defaultStudent ? defaultStudent.name : 'Maria Santos'}!`);
+        }
       }
     }
 
