@@ -16,22 +16,48 @@ if ($method === 'GET') {
     $name = $input['name'] ?? '';
     $email = $input['email'] ?? '';
     $grade = $input['grade'] ?? '';
-    $validated = isset($input['validated']) ? ($input['validated'] ? 1 : 0) : 1;
+    $validated = isset($input['validated']) ? ($input['validated'] ? 1 : 0) : 0;
+    $deactivated = isset($input['deactivated']) ? ($input['deactivated'] ? 1 : 0) : 0;
     $bio = $input['bio'] ?? '';
-    $subjectsNeeded = $input['subjects_needed'] ?? '';
-    $isNew = isset($input['is_new_registration']) && $input['is_new_registration'];
+    $subjectsNeeded = $input['subjects_needed'] ?? ($input['subjectsNeeded'] ?? '');
 
-    $stmt = $pdo->prepare("INSERT INTO students (id, name, email, grade, validated, bio, subjects_needed)
-                           VALUES (?, ?, ?, ?, ?, ?, ?)
-                           ON DUPLICATE KEY UPDATE name=?, grade=?, bio=?, subjects_needed=?");
-    $stmt->execute([$id, $name, $email, $grade, $validated, $bio, $subjectsNeeded, $name, $grade, $bio, $subjectsNeeded]);
-
-    if ($isNew) {
-        $notifId = 'notif-' . time() . '-' . rand(100, 999);
-        $notifStmt = $pdo->prepare("INSERT INTO notifications (id, target, title, message) VALUES (?, 'admin', 'New Student Registered', ?)");
-        $notifStmt->execute([$notifId, "New student registered: $name ($email)"]);
-    }
+    $stmt = $pdo->prepare("INSERT INTO students (id, name, email, grade, validated, deactivated, bio, subjects_needed)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                           ON DUPLICATE KEY UPDATE name=?, grade=?, validated=?, deactivated=?, bio=?, subjects_needed=?");
+    $stmt->execute([$id, $name, $email, $grade, $validated, $deactivated, $bio, $subjectsNeeded, $name, $grade, $validated, $deactivated, $bio, $subjectsNeeded]);
 
     echo json_encode(['status' => 'success', 'message' => 'Student saved successfully', 'id' => $id]);
+} elseif ($method === 'PUT') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $id = $input['id'] ?? '';
+
+    if (empty($id)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Student ID is required']);
+        exit();
+    }
+
+    if (isset($input['validated'])) {
+        $stmt = $pdo->prepare("UPDATE students SET validated = ? WHERE id = ?");
+        $stmt->execute([$input['validated'] ? 1 : 0, $id]);
+    }
+
+    if (isset($input['deactivated'])) {
+        $stmt = $pdo->prepare("UPDATE students SET deactivated = ? WHERE id = ?");
+        $stmt->execute([$input['deactivated'] ? 1 : 0, $id]);
+    }
+
+    if (isset($input['name'])) {
+        $stmt = $pdo->prepare("UPDATE students SET name = ?, grade = ?, bio = ?, subjects_needed = ? WHERE id = ?");
+        $stmt->execute([
+            $input['name'],
+            $input['grade'] ?? '',
+            $input['bio'] ?? '',
+            $input['subjects_needed'] ?? '',
+            $id
+        ]);
+    }
+
+    echo json_encode(['status' => 'success', 'message' => 'Student updated successfully']);
 }
 ?>

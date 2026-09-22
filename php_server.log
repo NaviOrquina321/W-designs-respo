@@ -1,0 +1,22 @@
+[Mon Sep 21 23:03:34 2026] PHP 8.3.6 Development Server (http://0.0.0.0:3000) started
+[Mon Sep 21 23:03:56 2026] 127.0.0.1:54142 Accepted
+[Mon Sep 21 23:03:56 2026] 127.0.0.1:54142 [200]: GET /api/students.php
+[Mon Sep 21 23:03:56 2026] 127.0.0.1:54142 Closing
+[Mon Sep 21 23:04:39 2026] 127.0.0.1:41226 Accepted
+[Mon Sep 21 23:04:39 2026] 127.0.0.1:41226 [200]: GET /
+[Mon Sep 21 23:04:39 2026] 127.0.0.1:41226 Closing
+[Mon Sep 21 23:04:39 2026] 127.0.0.1:41230 Accepted
+[Mon Sep 21 23:04:39 2026] 127.0.0.1:41244 Accepted
+[Mon Sep 21 23:04:39 2026] 127.0.0.1:41230 [200]: GET /styles.css
+[Mon Sep 21 23:04:39 2026] 127.0.0.1:41230 Closing
+[Mon Sep 21 23:04:39 2026] 127.0.0.1:41244 [200]: GET /app.js
+[Mon Sep 21 23:04:39 2026] 127.0.0.1:41244 Closing
+[Mon Sep 21 23:04:40 2026] 127.0.0.1:41254 Accepted
+[Mon Sep 21 23:04:40 2026] 127.0.0.1:41254 [200]: POST /api/login.php
+[Mon Sep 21 23:04:40 2026] 127.0.0.1:41254 Closing
+[Mon Sep 21 23:04:43 2026] 127.0.0.1:41270 Accepted
+[Mon Sep 21 23:04:43 2026] 127.0.0.1:41270 [200]: POST /api/login.php
+[Mon Sep 21 23:04:43 2026] 127.0.0.1:41270 Closing
+[Mon Sep 21 23:04:44 2026] 127.0.0.1:51916 Accepted
+[Mon Sep 21 23:04:45 2026] 127.0.0.1:51916 [200]: POST /api/login.php
+[Mon Sep 21 23:04:45 2026] 127.0.0.1:51916 Closing

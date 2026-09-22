@@ -219,7 +219,7 @@ function initNavigation() {
     const bio = document.getElementById('page-tutor-bio-input').value;
     const available = document.getElementById('page-tutor-availability-toggle').checked;
 
-    const currentTutor = state.tutors.find(t => t.id === 'tut-1') || state.tutors[0];
+    const currentTutor = state.tutors.find(t => t.id === (state.currentUser ? state.currentUser.id : '') || t.name === (state.currentUser ? state.currentUser.name : '')) || state.tutors[0];
     if (currentTutor) {
       currentTutor.name = name;
       currentTutor.initials = name.split(' ').map(n=>n[0]).join('');
@@ -328,7 +328,7 @@ function switchRole(role, customUser = null) {
 
     if (role === 'student') {
       state.currentUser = customUser || { name: 'Maria Santos', role: 'student' };
-      document.getElementById('student-welcome-heading').textContent = `Welcome back, ${state.currentUser.name}!`;
+      const prefix = (state.currentUser && state.currentUser.isNew) ? 'Welcome to TutorLink,' : 'Welcome back,'; document.getElementById('student-welcome-heading').textContent = `${prefix} ${state.currentUser ? state.currentUser.name : ''}!`;
       document.getElementById('view-student').classList.add('active');
     } else if (role === 'tutor') {
       state.currentUser = customUser || { name: 'Prof. Alex Rivera', role: 'tutor' };
@@ -359,7 +359,39 @@ function initAuthModalTabs() {
     const role = document.getElementById('reg-role').value;
     const fullname = document.getElementById('reg-fullname').value;
     const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
     const specialty = document.getElementById('reg-specialty').value;
+
+    const diplomaFile = document.getElementById('reg-tutor-diploma')?.files[0];
+    const torFile = document.getElementById('reg-tutor-tor')?.files[0];
+    const idFile = document.getElementById('reg-tutor-id')?.files[0];
+
+    try {
+      const res = await fetch('api/register.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          role,
+          name: fullname,
+          email,
+          password,
+          specialty,
+          diploma_status: diplomaFile ? 'Uploaded' : 'Pending',
+          tor_status: torFile ? 'Uploaded' : 'Pending',
+          id_status: idFile ? 'Uploaded' : 'Pending'
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'success') {
+        const user = data.user;
+        switchRole(user.role, user);
+        closeModal('modal-auth');
+        showToast(`Welcome to TutorLink, ${user.name}!`);
+        return;
+      }
+    } catch (err) {
+      console.log('Offline API register fallback');
+    }
 
     if (role === 'student') {
       const newId = 'STU-' + Math.floor(100 + Math.random() * 900);
@@ -481,34 +513,44 @@ function initModals() {
     });
   });
 
-  document.getElementById('auth-form')?.addEventListener('submit', (e) => {
+  document.getElementById('auth-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const emailInput = document.getElementById('auth-email').value.trim().toLowerCase();
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
 
-    // Automatic role lookup by registered email
-    if (emailInput.includes('admin') || emailInput === 'admin@tutorlink.ph') {
-      switchRole('admin', { name: 'System Admin', role: 'admin', id: 'ADMIN-001' });
-      showToast('Logged in as System Admin!');
-    } else {
-      const tutorMatch = state.tutors.find(t => (t.email && t.email.toLowerCase() === emailInput) || t.name.toLowerCase().includes(emailInput.split('@')[0]));
-      if (tutorMatch && !emailInput.includes('student')) {
-        switchRole('tutor', { name: tutorMatch.name, role: 'tutor', id: tutorMatch.id });
-        showToast(`Logged in as Tutor ${tutorMatch.name}!`);
+    try {
+      const res = await fetch('api/login.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.status === 'success') {
+        const user = data.user;
+        switchRole(user.role, { id: user.id, name: user.name, role: user.role, email: user.email });
+        closeModal('modal-auth');
+        showToast(`Welcome back, ${user.name}!`);
+        return;
       } else {
-        const studentMatch = state.students.find(s => s.email && s.email.toLowerCase() === emailInput);
-        if (studentMatch) {
-          switchRole('student', { name: studentMatch.name, role: 'student', id: studentMatch.id });
-          showToast(`Logged in as Student ${studentMatch.name}!`);
-        } else {
-          // Default lookup fallback
-          const defaultStudent = state.students.find(s => s.email === 'maria@tutorlink.ph') || state.students[0];
-          switchRole('student', { name: defaultStudent ? defaultStudent.name : 'Maria Santos', role: 'student', id: defaultStudent ? defaultStudent.id : 'STU-101' });
-          showToast(`Logged in as Student ${defaultStudent ? defaultStudent.name : 'Maria Santos'}!`);
-        }
+        showToast(data.message || 'Invalid email or password.', 'error');
+        return;
+      }
+    } catch (err) {
+      // Local fallback for offline testing
+      const studentMatch = state.students.find(s => s.email && s.email.toLowerCase() === email.toLowerCase());
+      if (studentMatch) {
+        switchRole('student', { id: studentMatch.id, name: studentMatch.name, role: 'student', email: studentMatch.email });
+        closeModal('modal-auth');
+        showToast(`Welcome back, ${studentMatch.name}!`);
+      } else if (email.includes('admin')) {
+        switchRole('admin', { id: 'ADMIN-001', name: 'System Admin', role: 'admin', email: email });
+        closeModal('modal-auth');
+        showToast('Welcome back, System Admin!');
+      } else {
+        showToast('Invalid email or password.', 'error');
       }
     }
-
-    closeModal('modal-auth');
   });
 }
 
@@ -538,7 +580,7 @@ function initTutorSubTabs() {
   document.getElementById('tutor-add-slot-modal-btn')?.addEventListener('click', () => {
     const slot = prompt('Enter custom availability time slot (e.g. 08:00 AM - 10:00 AM):', '08:00 AM - 10:00 AM');
     if (slot) {
-      const currentTutor = state.tutors.find(t => t.id === 'tut-1') || state.tutors[0];
+      const currentTutor = state.tutors.find(t => t.id === (state.currentUser ? state.currentUser.id : '') || t.name === (state.currentUser ? state.currentUser.name : '')) || state.tutors[0];
       if (currentTutor) {
         currentTutor.availabilitySlots.push(slot);
       }
@@ -561,7 +603,7 @@ function initTutorSubTabs() {
     const windowVal = document.getElementById('tutor-time-window-input').value;
     const blockedVal = document.getElementById('tutor-blocked-dates-input').value;
 
-    const currentTutor = state.tutors.find(t => t.id === 'tut-1') || state.tutors[0];
+    const currentTutor = state.tutors.find(t => t.id === (state.currentUser ? state.currentUser.id : '') || t.name === (state.currentUser ? state.currentUser.name : '')) || state.tutors[0];
     if (currentTutor) {
       currentTutor.availableDays = checkedDays;
       currentTutor.availableTimeSlots = windowVal;
@@ -839,7 +881,7 @@ function renderStudentUpcoming() {
   if (upcomingStatEl) upcomingStatEl.textContent = upcoming.length;
   if (completedStatEl) completedStatEl.textContent = completed.length;
   if (spentStatEl) spentStatEl.textContent = `P${totalSpent}`;
-  if (ratingStatEl) ratingStatEl.textContent = completed.length > 0 ? '5.0 ★' : 'New';
+  if (ratingStatEl) ratingStatEl.textContent = completed.length > 0 ? '5.0 ★' : '0.0 ★';
 
   if (upcoming.length === 0) {
     container.innerHTML = `<p class="sub-text">No upcoming scheduled sessions. Use AI Matching or Browse Tutors to book one!</p>`;
@@ -1036,7 +1078,7 @@ function renderTutorUpcoming() {
   container.innerHTML = tutorSessions.map(s => `
     <div class="session-card">
       <div class="session-card-info">
-        <h4>${s.subject} with Student <strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${s.studentName}</strong></h4>
+        <h4>${s.subject} with Student <strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${s.studentId || s.studentName}')">${s.studentName}</strong></h4>
         <p>Date: ${s.date} | Time: ${s.timeSlot} | Fee: <strong>P${s.hourlyRate}</strong></p>
       </div>
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -1083,7 +1125,7 @@ function renderTutorRequests() {
     return `
       <tr>
         <td><code>${m.id}</code></td>
-        <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${studentId}')">${m.studentName}</strong></td>
+        <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${m.studentId || m.studentName}')">${m.studentName}</strong></td>
         <td>${m.subject}</td>
         <td><span class="badge badge-match">${m.score}% Match</span></td>
         <td><span class="badge ${m.status === 'Approved' ? 'badge-success' : 'badge-info'}">${m.status}</span></td>
@@ -1122,7 +1164,7 @@ function renderTutorEarnings() {
     if (currentTutorObj && currentTutorObj.reviewsCount > 0) {
       tutorRatingEl.textContent = `${currentTutorObj.rating} ★`;
     } else {
-      tutorRatingEl.textContent = 'New';
+      tutorRatingEl.textContent = '0.0 ★';
     }
   }
 
@@ -1563,32 +1605,91 @@ function initWorkspaceSession() {
     document.getElementById('session-shared-notes').value = '';
   });
 
-  saveNotesBtn?.addEventListener('click', () => {
-    showToast('Session notes snapshot saved!');
+  saveNotesBtn?.addEventListener('click', async () => {
+    const notesVal = document.getElementById('session-shared-notes').value;
+    if (state.activeWorkspaceSession) {
+      state.activeWorkspaceSession.notes = notesVal;
+      const s = state.sessions.find(x => x.id === state.activeWorkspaceSession.id);
+      if (s) s.notes = notesVal;
+
+      try {
+        await fetch('api/sessions.php', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: state.activeWorkspaceSession.id, notes: notesVal })
+        });
+      } catch (err) { console.log('Offline notes API fallback'); }
+
+      showToast('Session notes snapshot saved successfully!');
+    }
   });
 
-  chatForm?.addEventListener('submit', (e) => {
+  chatForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const input = document.getElementById('chat-input');
     const msgText = input.value.trim();
-    if (!msgText) return;
+    if (!msgText || !state.activeWorkspaceSession) return;
+
+    const senderName = state.currentUser ? state.currentUser.name : (state.currentRole === 'tutor' ? 'Prof. Alex Rivera' : 'Maria Santos');
+    const senderRole = state.currentRole || 'student';
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     const chatContainer = document.getElementById('chat-messages-container');
     const msgDiv = document.createElement('div');
-    msgDiv.className = `chat-msg ${state.currentRole === 'tutor' ? 'tutor' : 'student'}`;
-    msgDiv.innerHTML = `<strong>${state.currentRole === 'tutor' ? 'Prof. Alex' : 'Maria'}:</strong> ${msgText}`;
+    msgDiv.className = `chat-msg ${senderRole}`;
+    msgDiv.innerHTML = `<strong>${senderName}:</strong> ${msgText} <span style="font-size: 0.75rem; color: var(--muted); opacity: 0.8;">(${timestamp})</span>`;
     chatContainer.appendChild(msgDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
     input.value = '';
+
+    try {
+      await fetch('api/chat.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: state.activeWorkspaceSession.id,
+          senderName: senderName,
+          senderRole: senderRole,
+          message: msgText,
+          timestamp: timestamp
+        })
+      });
+    } catch (err) { console.log('Offline chat API fallback'); }
   });
 }
 
-window.launchWorkspace = function(sessionId) {
+window.launchWorkspace = async function(sessionId) {
   const session = state.sessions.find(s => s.id === sessionId);
   if (session) {
     state.activeWorkspaceSession = session;
     document.getElementById('workspace-session-title').textContent = `Live Session: ${session.subject}`;
     document.getElementById('workspace-participants').textContent = `${session.studentName} (Student) & ${session.tutorName} (Tutor)`;
+
+    const notesInput = document.getElementById('session-shared-notes');
+    if (notesInput) notesInput.value = session.notes || '';
+
+    // Load Chat Messages
+    const chatContainer = document.getElementById('chat-messages-container');
+    if (chatContainer) {
+      chatContainer.innerHTML = `<p class="sub-text center-text">Loading workspace chat...</p>`;
+      try {
+        const res = await fetch(`api/chat.php?session_id=${sessionId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.data && data.data.length > 0) {
+            chatContainer.innerHTML = data.data.map(m => `
+              <div class="chat-msg ${m.senderRole}">
+                <strong>${m.senderName}:</strong> ${m.message} <span style="font-size:0.75rem; color:var(--muted); opacity:0.8;">(${m.timestamp})</span>
+              </div>
+            `).join('');
+          } else {
+            chatContainer.innerHTML = `<p class="sub-text center-text">No workspace chat messages yet. Start conversation below!</p>`;
+          }
+        }
+      } catch (err) {
+        chatContainer.innerHTML = `<p class="sub-text center-text">Offline chat mode active.</p>`;
+      }
+    }
   }
   openModal('modal-session-workspace');
 };
@@ -1598,12 +1699,14 @@ function openRatingModal(tutorName) {
   document.getElementById('rating-tutor-name').textContent = tutorName;
   openModal('modal-rating');
 
+  let selectedRating = 5;
+
   document.querySelectorAll('.star-rating .star').forEach(star => {
     star.onclick = function() {
-      const val = parseInt(this.getAttribute('data-value'));
+      selectedRating = parseInt(this.getAttribute('data-value'));
       document.querySelectorAll('.star-rating .star').forEach(s => {
         const sVal = parseInt(s.getAttribute('data-value'));
-        if (sVal <= val) {
+        if (sVal <= selectedRating) {
           s.classList.add('active');
         } else {
           s.classList.remove('active');
@@ -1612,9 +1715,50 @@ function openRatingModal(tutorName) {
     };
   });
 
-  document.getElementById('submit-rating-btn').onclick = function() {
+  document.getElementById('submit-rating-btn').onclick = async function() {
+    const comment = document.getElementById('rating-comment')?.value || '';
+    if (state.activeWorkspaceSession) {
+      state.activeWorkspaceSession.rating = selectedRating;
+      state.activeWorkspaceSession.feedback = comment;
+      state.activeWorkspaceSession.status = 'Completed';
+
+      const s = state.sessions.find(x => x.id === state.activeWorkspaceSession.id);
+      if (s) {
+        s.rating = selectedRating;
+        s.feedback = comment;
+        s.status = 'Completed';
+      }
+
+      // Update tutor average rating and review count
+      const tutor = state.tutors.find(t => t.id === state.activeWorkspaceSession.tutorId || t.name === state.activeWorkspaceSession.tutorName);
+      if (tutor) {
+        const cnt = tutor.reviewsCount || 0;
+        const newCount = cnt + 1;
+        const newRating = parseFloat((((tutor.rating || 5.0) * cnt + selectedRating) / newCount).toFixed(1));
+        tutor.reviewsCount = newCount;
+        tutor.rating = newRating;
+
+        try {
+          await fetch('api/tutors.php', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: tutor.id, rating: newRating, reviewsCount: newCount })
+          });
+        } catch (err) { console.log('Offline API fallback'); }
+      }
+
+      try {
+        await fetch('api/sessions.php', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: state.activeWorkspaceSession.id, rating: selectedRating, feedback: comment, status: 'Completed' })
+        });
+      } catch (err) { console.log('Offline API fallback'); }
+    }
+
     closeModal('modal-rating');
-    showToast('Thank you for rating your session!');
+    renderAllViews();
+    showToast('Thank you for submitting feedback!');
   };
 
   document.getElementById('close-rating-modal').onclick = function() {
@@ -1690,7 +1834,7 @@ function initAdminView() {
     tbody.innerHTML = state.sessions.map(s => `
       <tr>
         <td><code>${s.id}</code></td>
-        <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${s.studentName}</span></td>
+        <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${s.studentId || s.studentName}')">${s.studentName}</span></td>
         <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</span></td>
         <td>${s.subject}</td>
         <td>${s.status}</td>
@@ -1856,8 +2000,8 @@ function renderAdminMatching() {
   tbody.innerHTML = state.matches.map(m => `
     <tr>
       <td><code>${m.id}</code></td>
-      <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${m.studentName}</span></td>
-      <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('tut-1')">${m.tutorName}</strong></td>
+      <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${m.studentId || m.studentName}')">${m.studentName}</span></td>
+      <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${m.tutorId || m.tutorName}')">${m.tutorName}</strong></td>
       <td>${m.subject}</td>
       <td><span class="badge badge-match">${m.score}% Match</span></td>
       <td><span class="badge ${m.status === 'Approved' ? 'badge-success' : m.status === 'Cancelled' ? 'badge-danger' : 'badge-info'}">${m.status}</span></td>
@@ -1906,7 +2050,7 @@ function renderAdminSchedule() {
   tbody.innerHTML = state.schedules.map(sch => `
     <tr>
       <td><code>${sch.id}</code></td>
-      <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('tut-1')">${sch.tutorName}</strong></td>
+      <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${sch.tutorId || sch.tutorName}')">${sch.tutorName}</strong></td>
       <td>${sch.dateSlot}</td>
       <td>${sch.subject}</td>
       <td><span class="badge ${sch.status === 'Available' ? 'badge-success' : 'badge-info'}">${sch.status}</span></td>
@@ -1933,7 +2077,7 @@ function renderAdminPayments() {
   tbody.innerHTML = state.payments.map(p => `
     <tr>
       <td><code>${p.id}</code></td>
-      <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${p.studentName}</span></td>
+      <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${p.studentId || p.studentName}')">${p.studentName}</span></td>
       <td>${p.method}</td>
       <td><code>${p.refNo}</code></td>
       <td>P${p.amount}</td>
@@ -1995,16 +2139,26 @@ function renderAdminReports() {
 
   const filter = state.activeReportFilter;
 
+  const today = new Date();
+  const weekAgo = new Date(today);
+  weekAgo.setDate(today.getDate() - 7);
+  const weekAgoStr = weekAgo.toISOString().split('T')[0];
+
+  const monthAgo = new Date(today);
+  monthAgo.setMonth(today.getMonth() - 1);
+  const monthAgoStr = monthAgo.toISOString().split('T')[0];
+
   const list = state.sessions.filter(s => {
-    if (filter === 'weekly') return s.date >= '2026-03-10';
-    if (filter === 'monthly') return s.date >= '2026-03-01';
+    const sDate = s.sessionDate || s.date || '';
+    if (filter === 'weekly') return sDate >= weekAgoStr;
+    if (filter === 'monthly') return sDate >= monthAgoStr;
     return s.status === 'Completed' || s.status === 'Confirmed';
   });
 
   tbody.innerHTML = list.map(s => `
     <tr>
       <td><code>${s.id}</code></td>
-      <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('STU-101')">${s.studentName}</span></td>
+      <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${s.studentId || s.studentName}')">${s.studentName}</span></td>
       <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</span></td>
       <td>${s.subject}</td>
       <td>${s.date} ${s.timeSlot}</td>
