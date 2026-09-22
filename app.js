@@ -772,22 +772,39 @@ function initTutorSubTabs() {
     showToast('Reset availability settings to default weekdays!');
   });
 
+  // Edit availability shortcut button on main tutor dashboard
+  document.getElementById('edit-tutor-availability-btn')?.addEventListener('click', () => {
+    switchView('view-tutor-profile');
+  });
+
   document.getElementById('tutor-availability-settings-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const checkedDays = Array.from(document.querySelectorAll('input[name="avail_day"]:checked')).map(cb => cb.value);
     const windowVal = document.getElementById('tutor-time-window-input').value;
     const blockedVal = document.getElementById('tutor-blocked-dates-input').value;
 
-    const currentTutor = state.tutors.find(t => t.id === 'tut-1') || state.tutors[0];
+    const activeTutorId = state.currentUser ? state.currentUser.id : 'tut-1';
+    const currentTutor = state.tutors.find(t => t.id === activeTutorId) || state.tutors[0];
     if (currentTutor) {
       currentTutor.availableDays = checkedDays;
       currentTutor.availableTimeSlots = windowVal;
       currentTutor.blockedDates = blockedVal;
     }
 
+    updateTutorAvailabilityOutputs(checkedDays, windowVal, blockedVal);
     renderTutorSlots();
     showToast('Tutor availability schedule updated!');
   });
+
+function updateTutorAvailabilityOutputs(days, windowVal, blockedVal) {
+  const daysEl = document.getElementById('output-tutor-working-days');
+  const windowEl = document.getElementById('output-tutor-teaching-window');
+  const blockedEl = document.getElementById('output-tutor-blocked-dates');
+
+  if (daysEl) daysEl.textContent = days.length > 0 ? days.join(', ') : 'None';
+  if (windowEl) windowEl.textContent = windowVal || '09:00 AM - 05:00 PM';
+  if (blockedEl) blockedEl.textContent = blockedVal || 'None';
+}
   renderTutorSlots();
 }
 

@@ -53,3 +53,12 @@
 [Tue Sep 22 00:20:35 2026] [::1]:47868 [200]: GET /app.js
 [Tue Sep 22 00:20:35 2026] [::1]:47854 Closing
 [Tue Sep 22 00:20:35 2026] [::1]:47868 Closing
+[Tue Sep 22 00:28:00 2026] [::1]:40822 Accepted
+[Tue Sep 22 00:28:00 2026] [::1]:40822 [200]: GET /index.html
+[Tue Sep 22 00:28:00 2026] [::1]:40822 Closing
+[Tue Sep 22 00:28:00 2026] [::1]:40826 Accepted
+[Tue Sep 22 00:28:00 2026] [::1]:40840 Accepted
+[Tue Sep 22 00:28:00 2026] [::1]:40826 [200]: GET /styles.css
+[Tue Sep 22 00:28:00 2026] [::1]:40826 Closing
+[Tue Sep 22 00:28:00 2026] [::1]:40840 [200]: GET /app.js
+[Tue Sep 22 00:28:00 2026] [::1]:40840 Closing

@@ -367,41 +367,28 @@
           </div>
         </div>
 
-        <!-- Tutor Tab 1: Availability & Schedule -->
+        <!-- Availability & Schedule Window Output -->
         <div class="tutor-tab-content active" id="tutor-tab-availability">
           <div class="dashboard-section">
             <div class="section-title-bar">
               <h3>Weekly Availability & Schedule Window</h3>
+              <button class="btn btn-secondary btn-small" id="edit-tutor-availability-btn">Edit in Profile</button>
             </div>
             <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 22px; border-radius: 6px; margin-bottom: 24px;">
-              <form id="tutor-availability-settings-form">
-                <div class="form-group">
-                  <label>Weekly Working Days</label>
-                  <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px;">
-                    <label><input type="checkbox" name="avail_day" value="Mon" checked> Mon</label>
-                    <label><input type="checkbox" name="avail_day" value="Tue" checked> Tue</label>
-                    <label><input type="checkbox" name="avail_day" value="Wed" checked> Wed</label>
-                    <label><input type="checkbox" name="avail_day" value="Thu" checked> Thu</label>
-                    <label><input type="checkbox" name="avail_day" value="Fri" checked> Fri</label>
-                    <label><input type="checkbox" name="avail_day" value="Sat"> Sat</label>
-                    <label><input type="checkbox" name="avail_day" value="Sun"> Sun</label>
-                  </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div>
+                  <div style="font-size: 0.85rem; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 4px;">ACTIVE WORKING DAYS</div>
+                  <div style="font-size: 1.1rem; font-weight: 600; color: var(--ink);" id="output-tutor-working-days">Mon, Tue, Wed, Thu, Fri</div>
                 </div>
-                <div class="form-row margin-top">
-                  <div class="form-group">
-                    <label>Daily Teaching Window</label>
-                    <input type="text" id="tutor-time-window-input" class="form-input" value="09:00 AM - 05:00 PM">
-                  </div>
-                  <div class="form-group">
-                    <label>Block Unavailable Dates (YYYY-MM-DD)</label>
-                    <input type="text" id="tutor-blocked-dates-input" class="form-input" placeholder="e.g. 2026-03-25">
-                  </div>
+                <div>
+                  <div style="font-size: 0.85rem; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 4px;">DAILY TEACHING WINDOW</div>
+                  <div style="font-size: 1.1rem; font-weight: 600; color: var(--ink);" id="output-tutor-teaching-window">09:00 AM - 05:00 PM</div>
                 </div>
-                <div style="display: flex; gap: 10px;" class="margin-top">
-                  <button type="submit" class="btn btn-primary btn-small">Save Availability</button>
-                  <button type="button" class="btn btn-secondary btn-small" id="tutor-reset-availability-btn">Reset Defaults</button>
+                <div>
+                  <div style="font-size: 0.85rem; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 4px;">BLOCKED DATES</div>
+                  <div style="font-size: 1rem; font-weight: 500; color: var(--ink-soft);" id="output-tutor-blocked-dates">None</div>
                 </div>
-              </form>
+              </div>
             </div>
 
             <div class="section-title-bar">
@@ -531,7 +518,48 @@
           <button class="btn btn-secondary btn-small" id="back-to-tutor-portal-btn">&larr; Back to Tutor Portal</button>
         </div>
 
+        <!-- Section 1: Weekly Availability & Schedule Settings -->
+        <div class="dashboard-section margin-bottom">
+          <div class="section-title-bar">
+            <h3>Weekly Availability & Schedule Window Settings</h3>
+          </div>
+          <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 22px; border-radius: 6px;">
+            <form id="tutor-availability-settings-form">
+              <div class="form-group">
+                <label>Weekly Working Days</label>
+                <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px;">
+                  <label><input type="checkbox" name="avail_day" value="Mon" checked> Mon</label>
+                  <label><input type="checkbox" name="avail_day" value="Tue" checked> Tue</label>
+                  <label><input type="checkbox" name="avail_day" value="Wed" checked> Wed</label>
+                  <label><input type="checkbox" name="avail_day" value="Thu" checked> Thu</label>
+                  <label><input type="checkbox" name="avail_day" value="Fri" checked> Fri</label>
+                  <label><input type="checkbox" name="avail_day" value="Sat"> Sat</label>
+                  <label><input type="checkbox" name="avail_day" value="Sun"> Sun</label>
+                </div>
+              </div>
+              <div class="form-row margin-top">
+                <div class="form-group">
+                  <label>Daily Teaching Window</label>
+                  <input type="text" id="tutor-time-window-input" class="form-input" value="09:00 AM - 05:00 PM">
+                </div>
+                <div class="form-group">
+                  <label>Block Unavailable Dates (YYYY-MM-DD)</label>
+                  <input type="text" id="tutor-blocked-dates-input" class="form-input" placeholder="e.g. 2026-03-25">
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px;" class="margin-top">
+                <button type="submit" class="btn btn-primary btn-small">Save Availability</button>
+                <button type="button" class="btn btn-secondary btn-small" id="tutor-reset-availability-btn">Reset Defaults</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Section 2: Tutor Profile & Account Info -->
         <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>Professional Profile Details</h3>
+          </div>
           <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 28px; border-radius: 4px;">
             <form id="tutor-profile-page-form">
               <div class="form-group">
