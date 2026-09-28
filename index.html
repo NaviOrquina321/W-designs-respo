@@ -1098,18 +1098,18 @@
         // Chart 1: Purok
         const purokLabels = d.purok_distribution.map(p => p.purok);
         const purokCounts = d.purok_distribution.map(p => p.count);
-        renderBarChart('purokChart', purokLabels, purokCounts, 'Residents per Purok', '#1e3a8a');
+        renderBarChart('purokChart', purokLabels, purokCounts, 'Residents per Purok', '#0f172a');
 
         // Chart 2: Age Demographics
-        renderPieChart('ageChart', ['Minors (<18)', 'Adults (18-59)', 'Seniors (60+)'], [d.minors, d.adults, d.seniors], ['#38bdf8', '#3b82f6', '#1e3a8a']);
+        renderPieChart('ageChart', ['Minors (<18)', 'Adults (18-59)', 'Seniors (60+)'], [d.minors, d.adults, d.seniors], ['#94a3b8', '#475569', '#0f172a']);
 
         // Chart 3: Civil Status
         const civilLabels = d.civil_status_distribution.map(c => c.count > 0 ? c.civil_status : '').filter(Boolean);
         const civilCounts = d.civil_status_distribution.map(c => c.count).filter(c => c > 0);
-        renderDoughnutChart('civilChart', civilLabels, civilCounts, ['#0f766e', '#0d9488', '#14b8a6', '#5eead4']);
+        renderDoughnutChart('civilChart', civilLabels, civilCounts, ['#0f172a', '#334155', '#64748b', '#94a3b8']);
 
         // Chart 4: Voter Status
-        renderPieChart('voterChart', ['Registered Voters', 'Not Registered'], [d.voters, d.non_voters], ['#16a34a', '#94a3b8']);
+        renderPieChart('voterChart', ['Registered Voters', 'Not Registered'], [d.voters, d.non_voters], ['#0f172a', '#cbd5e1']);
 
       } catch (err) {
         console.error('Error loading analytics:', err);

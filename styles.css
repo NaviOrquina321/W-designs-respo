@@ -1,26 +1,26 @@
 /* styles.css - Barangay Resident Information System (BRIS) Styling */
 
 :root {
-  --primary: #1e3a8a;
-  --primary-hover: #1d4ed8;
-  --primary-light: #eff6ff;
-  --secondary: #0f766e;
-  --secondary-hover: #115e59;
-  --accent: #d97706;
+  --primary: #0f172a;
+  --primary-hover: #1e293b;
+  --primary-light: #f1f5f9;
+  --secondary: #334155;
+  --secondary-hover: #1e293b;
+  --accent: #475569;
   --bg-main: #f8fafc;
   --card-bg: #ffffff;
   --border-color: #e2e8f0;
   --text-dark: #0f172a;
   --text-muted: #64748b;
-  --danger: #dc2626;
-  --danger-hover: #b91c1c;
-  --success: #16a34a;
-  --warning: #d97706;
+  --danger: #475569;
+  --danger-hover: #334155;
+  --success: #1e293b;
+  --warning: #475569;
   --sidebar-width: 260px;
-  --radius: 8px;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --radius: 6px;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -71,11 +71,11 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: rgba(56, 189, 248, 0.15);
+  background: rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #38bdf8;
+  color: #ffffff;
 }
 
 .brand-title {
@@ -126,10 +126,9 @@ body {
 }
 
 .nav-item button.active {
-  background-color: var(--primary);
+  background-color: #334155;
   color: #ffffff;
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.35);
 }
 
 .nav-icon {
@@ -258,11 +257,11 @@ body {
   flex-shrink: 0;
 }
 
-.stat-icon.blue { background-color: #dbeafe; color: #1e40af; }
-.stat-icon.green { background-color: #dcfce7; color: #15803d; }
-.stat-icon.amber { background-color: #fef3c7; color: #b45309; }
-.stat-icon.purple { background-color: #f3e8ff; color: #6b21a8; }
-.stat-icon.red { background-color: #fee2e2; color: #b91c1c; }
+.stat-icon.blue,
+.stat-icon.green,
+.stat-icon.amber,
+.stat-icon.purple,
+.stat-icon.red { background-color: #f1f5f9; color: #0f172a; border: 1px solid #e2e8f0; }
 
 .stat-info h3 {
   font-size: 1.5rem;
@@ -515,11 +514,11 @@ body {
   text-transform: capitalize;
 }
 
-.badge-active { background-color: #dcfce7; color: #166534; }
-.badge-moved { background-color: #fef3c7; color: #92400e; }
-.badge-deceased { background-color: #fee2e2; color: #991b1b; }
-.badge-registered { background-color: #dbeafe; color: #1e40af; }
-.badge-not-registered { background-color: #f1f5f9; color: #475569; }
+.badge-active { background-color: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; }
+.badge-moved { background-color: #f8fafc; color: #475569; border: 1px solid #e2e8f0; }
+.badge-deceased { background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+.badge-registered { background-color: #0f172a; color: #ffffff; }
+.badge-not-registered { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 
 /* Modals */
 .modal-overlay {
