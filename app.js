@@ -245,13 +245,6 @@ function initNavigation() {
     }
   });
 
-  const adminDirectBtn = document.getElementById('admin-direct-btn');
-  adminDirectBtn?.addEventListener('click', (e) => {
-    e.preventDefault();
-    switchRole('admin', { id: 'ADMIN-001', name: 'System Admin', role: 'admin', email: 'admin@tutorlink.ph' });
-    showToast('Entered Admin Monitoring Portal.');
-  });
-
   loginBtn.addEventListener('click', (e) => {
     e.preventDefault();
     openModal('modal-auth');
@@ -405,8 +398,6 @@ function switchRole(role, customUser = null) {
     state.currentUser = null;
     localStorage.removeItem('tutorlink_session');
     document.getElementById('view-landing').classList.add('active');
-    const adminDirectBtn = document.getElementById('admin-direct-btn');
-    if (adminDirectBtn) adminDirectBtn.classList.remove('hidden');
     if (publicNavLinks) publicNavLinks.style.display = 'flex';
     if (loginBtn) loginBtn.classList.remove('hidden');
     if (signupBtn) signupBtn.classList.remove('hidden');
@@ -423,11 +414,6 @@ function switchRole(role, customUser = null) {
       }));
     }
 
-    const adminDirectBtn = document.getElementById('admin-direct-btn');
-    if (adminDirectBtn) {
-      if (role === 'admin') adminDirectBtn.classList.add('hidden');
-      else adminDirectBtn.classList.add('hidden');
-    }
     if (publicNavLinks) publicNavLinks.style.display = 'none';
     if (loginBtn) loginBtn.classList.add('hidden');
     if (signupBtn) signupBtn.classList.add('hidden');

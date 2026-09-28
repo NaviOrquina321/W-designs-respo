@@ -47,7 +47,6 @@ require_once __DIR__ . '/api/config.php';
           <span class="notif-badge" id="notif-badge-count">2</span>
         </button>
 
-        <a class="link" href="#" id="admin-direct-btn">Admin Portal</a>
         <a class="link" href="#" id="login-link-btn">Log In</a>
         <button class="btn btn-primary btn-small" id="signup-btn">Sign Up</button>
         <button class="btn btn-secondary btn-small hidden" id="logout-btn">Log Out</button>
