@@ -488,3 +488,180 @@ Stack trace:
 [Mon Sep 28 13:47:06 2026] 127.0.0.1:43318 Accepted
 [Mon Sep 28 13:47:06 2026] 127.0.0.1:43318 [200]: POST /api/login.php
 [Mon Sep 28 13:47:06 2026] 127.0.0.1:43318 Closing
+[Mon Sep 28 14:02:14 2026] 127.0.0.1:37482 Accepted
+[Mon Sep 28 14:02:14 2026] 127.0.0.1:37482 [200]: GET /
+[Mon Sep 28 14:02:14 2026] 127.0.0.1:37482 Closing
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37484 Accepted
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37500 Accepted
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37484 [200]: GET /styles.css
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37500 [200]: GET /app.js
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37484 Closing
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37500 Closing
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37508 Accepted
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37508 [200]: GET /api/students.php
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37508 Closing
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37518 Accepted
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37518 [200]: GET /api/subjects.php
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37518 Closing
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37526 Accepted
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37526 [200]: GET /api/tutors.php
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37526 Closing
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37538 Accepted
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37538 [200]: GET /api/admin.php
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37538 Closing
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37540 Accepted
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37540 [200]: POST /api/register.php
+[Mon Sep 28 14:02:15 2026] 127.0.0.1:37540 Closing
+[Mon Sep 28 14:02:17 2026] 127.0.0.1:60106 Accepted
+[Mon Sep 28 14:02:17 2026] 127.0.0.1:60106 [200]: POST /api/register.php
+[Mon Sep 28 14:02:17 2026] 127.0.0.1:60106 Closing
+[Mon Sep 28 14:02:18 2026] 127.0.0.1:60114 Accepted
+[Mon Sep 28 14:02:18 2026] 127.0.0.1:60114 [200]: POST /api/matches.php
+[Mon Sep 28 14:02:18 2026] 127.0.0.1:60114 Closing
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42174 Accepted
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42174 [200]: GET /
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42174 Closing
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42180 Accepted
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42190 Accepted
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42180 [200]: GET /styles.css
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42190 [200]: GET /app.js
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42180 Closing
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42190 Closing
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42200 Accepted
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42200 [200]: GET /api/students.php
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42200 Closing
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42204 Accepted
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42204 [200]: GET /api/subjects.php
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42204 Closing
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42206 Accepted
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42206 [200]: GET /api/tutors.php
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42206 Closing
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42210 Accepted
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42210 [200]: GET /api/admin.php
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42210 Closing
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42222 Accepted
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42222 [400]: POST /api/register.php
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42222 Closing
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42228 Accepted
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42228 [200]: POST /api/tutors.php
+[Mon Sep 28 14:02:53 2026] 127.0.0.1:42228 Closing
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46620 Accepted
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46620 [200]: GET /
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46620 Closing
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46624 Accepted
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46626 Accepted
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46624 [200]: GET /styles.css
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46626 [200]: GET /app.js
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46624 Closing
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46626 Closing
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46630 Accepted
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46630 [200]: GET /api/students.php
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46630 Closing
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46642 Accepted
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46642 [200]: GET /api/subjects.php
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46642 Closing
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46656 Accepted
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46656 [200]: GET /api/tutors.php
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46656 Closing
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46666 Accepted
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46666 [200]: GET /api/admin.php
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46666 Closing
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46676 Accepted
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46676 [400]: POST /api/register.php
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46676 Closing
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46678 Accepted
+[Mon Sep 28 14:04:14 2026] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: tutors.email in /app/api/tutors.php:56
+Stack trace:
+#0 /app/api/tutors.php(56): PDOStatement->execute()
+#1 {main}
+  thrown in /app/api/tutors.php on line 56
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46678 [500]: POST /api/tutors.php - Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: tutors.email in /app/api/tutors.php:56
+Stack trace:
+#0 /app/api/tutors.php(56): PDOStatement->execute()
+#1 {main}
+  thrown in /app/api/tutors.php on line 56
+[Mon Sep 28 14:04:14 2026] 127.0.0.1:46678 Closing
+[Mon Sep 28 14:04:16 2026] 127.0.0.1:51656 Accepted
+[Mon Sep 28 14:04:16 2026] 127.0.0.1:51656 [400]: POST /api/register.php
+[Mon Sep 28 14:04:16 2026] 127.0.0.1:51656 Closing
+[Mon Sep 28 14:04:16 2026] 127.0.0.1:51670 Accepted
+[Mon Sep 28 14:04:16 2026] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: students.email in /app/api/students.php:29
+Stack trace:
+#0 /app/api/students.php(29): PDOStatement->execute()
+#1 {main}
+  thrown in /app/api/students.php on line 29
+[Mon Sep 28 14:04:16 2026] 127.0.0.1:51670 [500]: POST /api/students.php - Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: students.email in /app/api/students.php:29
+Stack trace:
+#0 /app/api/students.php(29): PDOStatement->execute()
+#1 {main}
+  thrown in /app/api/students.php on line 29
+[Mon Sep 28 14:04:16 2026] 127.0.0.1:51670 Closing
+[Mon Sep 28 14:04:19 2026] 127.0.0.1:51680 Accepted
+[Mon Sep 28 14:04:19 2026] 127.0.0.1:51680 [200]: POST /api/matches.php
+[Mon Sep 28 14:04:19 2026] 127.0.0.1:51680 Closing
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45852 Accepted
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45852 [200]: GET /
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45852 Closing
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45866 Accepted
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45880 Accepted
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45866 [200]: GET /styles.css
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45866 Closing
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45880 [200]: GET /app.js
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45880 Closing
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45882 Accepted
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45882 [200]: GET /api/students.php
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45882 Closing
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45888 Accepted
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45888 [200]: GET /api/subjects.php
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45888 Closing
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45902 Accepted
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45902 [200]: GET /api/tutors.php
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45902 Closing
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45918 Accepted
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45918 [200]: GET /api/admin.php
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45918 Closing
+[Mon Sep 28 14:04:50 2026] 127.0.0.1:45932 Accepted
+[Mon Sep 28 14:04:51 2026] 127.0.0.1:45932 [200]: POST /api/register.php
+[Mon Sep 28 14:04:51 2026] 127.0.0.1:45932 Closing
+[Mon Sep 28 14:04:52 2026] 127.0.0.1:45948 Accepted
+[Mon Sep 28 14:04:52 2026] 127.0.0.1:45948 [200]: POST /api/matches.php
+[Mon Sep 28 14:04:52 2026] 127.0.0.1:45948 Closing
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45486 Accepted
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45486 [200]: GET /
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45486 Closing
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45494 Accepted
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45496 Accepted
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45494 [200]: GET /styles.css
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45496 [200]: GET /app.js
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45494 Closing
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45496 Closing
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45504 Accepted
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45504 [200]: GET /api/students.php
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45504 Closing
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45512 Accepted
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45512 [200]: GET /api/subjects.php
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45512 Closing
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45526 Accepted
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45526 [200]: GET /api/tutors.php
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45526 Closing
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45538 Accepted
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45538 [200]: GET /api/admin.php
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45538 Closing
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45548 Accepted
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45548 [400]: POST /api/register.php
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45548 Closing
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45558 Accepted
+[Mon Sep 28 14:05:48 2026] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: students.email in /app/api/students.php:29
+Stack trace:
+#0 /app/api/students.php(29): PDOStatement->execute()
+#1 {main}
+  thrown in /app/api/students.php on line 29
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45558 [500]: POST /api/students.php - Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: students.email in /app/api/students.php:29
+Stack trace:
+#0 /app/api/students.php(29): PDOStatement->execute()
+#1 {main}
+  thrown in /app/api/students.php on line 29
+[Mon Sep 28 14:05:48 2026] 127.0.0.1:45558 Closing
+[Mon Sep 28 14:05:50 2026] 127.0.0.1:45562 Accepted
+[Mon Sep 28 14:05:50 2026] 127.0.0.1:45562 [200]: POST /api/matches.php
+[Mon Sep 28 14:05:50 2026] 127.0.0.1:45562 Closing

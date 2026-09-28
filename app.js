@@ -1309,10 +1309,13 @@ function initAIMatching() {
     }
 
     const matches = availableTutors.map(tutor => {
-      let score = 75;
+      let score = 80;
 
-      if (tutor.subjects && tutor.subjects.includes(subject)) score += 15;
-      if (tutor.learningStyles && tutor.learningStyles.some(s => style.includes(s) || s.includes(style))) score += 8;
+      const subjStr = Array.isArray(tutor.subjects) ? tutor.subjects.join(' ') : (tutor.subjects || '');
+      if (subjStr.toLowerCase().includes(subject.toLowerCase())) score += 15;
+
+      const styles = Array.isArray(tutor.learningStyles) ? tutor.learningStyles : [tutor.learningStyles || ''];
+      if (styles.some(s => s.toLowerCase().includes(style.toLowerCase()) || style.toLowerCase().includes(s.toLowerCase()))) score += 10;
 
       const compatibility = Math.min(score, 98);
 
@@ -1320,35 +1323,53 @@ function initAIMatching() {
     }).sort((a, b) => b.matchScore - a.matchScore);
 
     const topMatch = matches[0];
-    state.matches.unshift({
+    const newMatchRecord = {
       id: 'MATCH-' + Math.floor(100 + Math.random() * 900),
+      studentId: state.currentUser ? state.currentUser.id : 'STU-101',
       studentName: state.currentUser ? state.currentUser.name : 'Maria Santos',
+      tutorId: topMatch.id,
       tutorName: topMatch.name,
       subject: subject,
       score: topMatch.matchScore,
       status: 'Pending Review',
       matchReason: `Matched based on ${subject} expertise and ${style} learning preference.`
-    });
+    };
 
-    resultsList.innerHTML = matches.map(t => `
-      <div class="session-card" style="background: white; border: 1px solid var(--line);">
-        <div class="session-card-info">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="tutor-avatar" style="cursor: pointer;" onclick="viewTutorProfile('${t.id}')">${t.initials}</div>
-            <div>
-              <h4 style="font-size: 1.1rem; margin: 0; cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${t.id}')">${t.name}</h4>
-              <span class="badge badge-match">${t.matchScore}% Match Score</span>
+    state.matches.unshift(newMatchRecord);
+
+    try {
+      fetch('api/matches.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newMatchRecord)
+      });
+    } catch (e) { console.log('Offline match API fallback'); }
+
+    resultsList.innerHTML = matches.map(t => {
+      const subjDisplay = Array.isArray(t.subjects) ? t.subjects.join(', ') : (t.subjects || subject);
+      return `
+        <div class="session-card" style="background: white; border: 1px solid var(--line); margin-bottom: 12px; padding: 14px; border-radius: 6px;">
+          <div class="session-card-info">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="tutor-avatar" style="cursor: pointer;" onclick="viewTutorProfile('${t.id}')">${t.initials || t.name.split(' ').map(n=>n[0]).join('')}</div>
+              <div>
+                <h4 style="font-size: 1.1rem; margin: 0; cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${t.id}')">${t.name}</h4>
+                <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+                  <span class="badge badge-match">${t.matchScore}% Match Score</span>
+                  <span style="font-size: 0.85rem; font-weight: 600;">★ ${t.rating ? t.rating : '0.0'}</span>
+                </div>
+              </div>
             </div>
+            <p class="sub-text" style="margin-top: 10px; margin-bottom: 0;">
+              <strong>Subjects:</strong> ${subjDisplay} | <strong>Rate:</strong> P${t.hourlyRate || 350}/hr
+            </p>
           </div>
-          <p class="sub-text margin-top" style="margin-top: 8px;">
-            Subjects: ${t.subjects.join(', ')} | Rate: <strong>P${t.hourlyRate}/hr</strong>
-          </p>
+          <button class="btn btn-primary btn-small margin-top" onclick="selectMatchedTutor('${t.id}', '${subject}')">
+            Choose Tutor & Book Session
+          </button>
         </div>
-        <button class="btn btn-primary btn-small" onclick="selectMatchedTutor('${t.id}', '${subject}')">
-          Choose Tutor
-        </button>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
     resultsBox.classList.remove('hidden');
     renderAdminMatching();
