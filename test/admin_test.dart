@@ -92,14 +92,14 @@ void main() {
       await tester.tap(find.text('Admin'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Admin Portal Dashboard'), findsOneWidget);
-      expect(find.text('Manage Students'), findsOneWidget);
-      expect(find.text('Manage Tutor Matching'), findsOneWidget);
-      expect(find.text('Manage Schedule'), findsOneWidget);
-      expect(find.text('Manage Payments'), findsOneWidget);
-      expect(find.text('Manage Notifications'), findsOneWidget);
-      expect(find.text('Manage Reports'), findsOneWidget);
-      expect(find.text('View Student List'), findsOneWidget);
+      expect(find.text('ADMIN MANAGEMENT PORTAL'), findsOneWidget);
+      expect(find.text('Manage\nStudents'), findsOneWidget);
+      expect(find.text('Manage Tutor\nMatching'), findsOneWidget);
+      expect(find.text('Manage\nSchedule'), findsOneWidget);
+      expect(find.text('Manage\nPayments'), findsOneWidget);
+      expect(find.text('Manage\nNotifications'), findsOneWidget);
+      expect(find.text('Manage\nReports'), findsOneWidget);
+      expect(find.text('View Student\nList'), findsOneWidget);
     });
   });
 }

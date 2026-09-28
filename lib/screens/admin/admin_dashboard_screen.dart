@@ -12,118 +12,124 @@ class AdminDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0C2B3E), // Dark theme matching reference UI
+      backgroundColor: const Color(0xFF071B26), // Dark background matching image.png
       appBar: AppBar(
-        title: const Text('Admin Portal Dashboard'),
-        backgroundColor: const Color(0xFF081C29),
+        title: const Text(
+          'ADMIN MANAGEMENT PORTAL',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
+          ),
+        ),
+        backgroundColor: const Color(0xFF05131C),
         foregroundColor: Colors.white,
-        elevation: 2,
+        elevation: 4,
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Management Overview',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+              // Top Main Connector Horizontal Line Representation
+              Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0E2A3A),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFF1B4F6C)),
+                ),
+                child: Row(
+                  children: const [
+                    Icon(Icons.account_tree_outlined, color: Colors.cyanAccent),
+                    SizedBox(width: 10),
+                    Text(
+                      'Admin Function Architecture & Navigation Tree',
+                      style: TextStyle(
+                        color: Colors.cyanAccent,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 6),
-              const Text(
-                'Select a module below to manage operations',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Expanded(
-                child: SingleChildScrollView(
+
+              // Interactive Horizontal Tree Layout (Scrollable for desktop/mobile)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: IntrinsicHeight(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Column 1: Manage Students
-                      Expanded(
-                        child: _buildMainModuleColumn(
-                          context,
-                          title: 'Manage Students',
-                          subItems: [
-                            ModuleSubItem('View Student List', (ctx) => const ManageStudentsScreen(initialTab: 0)),
-                            ModuleSubItem('Validate Student List', (ctx) => const ManageStudentsScreen(initialTab: 1)),
-                          ],
-                        ),
+                      // Module 1: Manage Students
+                      _buildTreeColumn(
+                        context,
+                        title: 'Manage\nStudents',
+                        subNodes: [
+                          _SubNode('View Student\nList', (ctx) => const ManageStudentsScreen(initialTab: 0)),
+                          _SubNode('Validate Student\nList', (ctx) => const ManageStudentsScreen(initialTab: 1)),
+                        ],
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 16),
 
-                      // Column 2: Manage Tutor Matching
-                      Expanded(
-                        child: _buildMainModuleColumn(
-                          context,
-                          title: 'Manage Tutor Matching',
-                          subItems: [
-                            ModuleSubItem('Review Matching Results', (ctx) => const ManageTutorMatchingScreen(initialTab: 0)),
-                            ModuleSubItem('Approve Matching Sessions', (ctx) => const ManageTutorMatchingScreen(initialTab: 1)),
-                            ModuleSubItem('Cancel Matching Sessions', (ctx) => const ManageTutorMatchingScreen(initialTab: 2)),
-                          ],
-                        ),
+                      // Module 2: Manage Tutor Matching
+                      _buildTreeColumn(
+                        context,
+                        title: 'Manage Tutor\nMatching',
+                        subNodes: [
+                          _SubNode('Review\nMatching\nResults', (ctx) => const ManageTutorMatchingScreen(initialTab: 0)),
+                          _SubNode('Approve\nMatching\nSessions', (ctx) => const ManageTutorMatchingScreen(initialTab: 1)),
+                          _SubNode('Cancel\nMatching\nSessions', (ctx) => const ManageTutorMatchingScreen(initialTab: 2)),
+                        ],
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 16),
 
-                      // Column 3: Manage Schedule
-                      Expanded(
-                        child: _buildMainModuleColumn(
-                          context,
-                          title: 'Manage Schedule',
-                          subItems: [
-                            ModuleSubItem('New Calendar Schedule', (ctx) => const ManageScheduleScreen(initialTab: 0)),
-                            ModuleSubItem('Modify Sessions Schedule', (ctx) => const ManageScheduleScreen(initialTab: 1)),
-                          ],
-                        ),
+                      // Module 3: Manage Schedule
+                      _buildTreeColumn(
+                        context,
+                        title: 'Manage\nSchedule',
+                        subNodes: [
+                          _SubNode('New Calendar\nSchedule', (ctx) => const ManageScheduleScreen(initialTab: 0)),
+                          _SubNode('Modify Sessions\nSchedule', (ctx) => const ManageScheduleScreen(initialTab: 1)),
+                        ],
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 16),
 
-                      // Column 4: Manage Payments
-                      Expanded(
-                        child: _buildMainModuleColumn(
-                          context,
-                          title: 'Manage Payments',
-                          subItems: [
-                            ModuleSubItem('New Payment Records', (ctx) => const ManagePaymentsScreen(initialTab: 0)),
-                            ModuleSubItem('Confirm Payment Status', (ctx) => const ManagePaymentsScreen(initialTab: 1)),
-                          ],
-                        ),
+                      // Module 4: Manage Payments
+                      _buildTreeColumn(
+                        context,
+                        title: 'Manage\nPayments',
+                        subNodes: [
+                          _SubNode('New Payment\nRecords', (ctx) => const ManagePaymentsScreen(initialTab: 0)),
+                          _SubNode('Confirm\nPayment Status', (ctx) => const ManagePaymentsScreen(initialTab: 1)),
+                        ],
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 16),
 
-                      // Column 5: Manage Notifications
-                      Expanded(
-                        child: _buildMainModuleColumn(
-                          context,
-                          title: 'Manage Notifications',
-                          subItems: [
-                            ModuleSubItem('Send Notifications', (ctx) => const ManageNotificationsScreen(initialTab: 0)),
-                            ModuleSubItem('View Notifications', (ctx) => const ManageNotificationsScreen(initialTab: 1)),
-                          ],
-                        ),
+                      // Module 5: Manage Notifications
+                      _buildTreeColumn(
+                        context,
+                        title: 'Manage\nNotifications',
+                        subNodes: [
+                          _SubNode('Send\nNotifications', (ctx) => const ManageNotificationsScreen(initialTab: 0)),
+                          _SubNode('View\nNotifications', (ctx) => const ManageNotificationsScreen(initialTab: 1)),
+                        ],
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 16),
 
-                      // Column 6: Manage Reports
-                      Expanded(
-                        child: _buildMainModuleColumn(
-                          context,
-                          title: 'Manage Reports',
-                          subItems: [
-                            ModuleSubItem('View Completed Tutoring', (ctx) => const ManageReportsScreen(initialTab: 0)),
-                            ModuleSubItem('View Weekly Sessions', (ctx) => const ManageReportsScreen(initialTab: 1)),
-                            ModuleSubItem('View Monthly Sessions', (ctx) => const ManageReportsScreen(initialTab: 2)),
-                          ],
-                        ),
+                      // Module 6: Manage Reports
+                      _buildTreeColumn(
+                        context,
+                        title: 'Manage\nReports',
+                        subNodes: [
+                          _SubNode('View Completed\nTutoring', (ctx) => const ManageReportsScreen(initialTab: 0)),
+                          _SubNode('View Weekly\nSessions', (ctx) => const ManageReportsScreen(initialTab: 1)),
+                          _SubNode('View Monthly\nSessions', (ctx) => const ManageReportsScreen(initialTab: 2)),
+                        ],
                       ),
                     ],
                   ),
@@ -136,85 +142,115 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMainModuleColumn(
+  Widget _buildTreeColumn(
     BuildContext context, {
     required String title,
-    required List<ModuleSubItem> subItems,
+    required List<_SubNode> subNodes,
   }) {
-    return Column(
-      children: [
-        // Main Header Node
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0A4F70),
-            border: Border.all(color: Colors.white, width: 2),
-            borderRadius: BorderRadius.circular(4),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 4,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        const SizedBox(height: 12),
+    const nodeWidth = 140.0;
 
-        // Connecting vertical branch line
-        Container(width: 2, height: 12, color: Colors.cyanAccent),
-        const SizedBox(height: 4),
-
-        // Sub Items List
-        ...subItems.map(
-          (sub) => Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            child: InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => sub.builder(context)),
-                );
-              },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0F3E56),
-                  border: Border.all(color: Colors.white70, width: 1.5),
-                  borderRadius: BorderRadius.circular(4),
+    return SizedBox(
+      width: nodeWidth,
+      child: Column(
+        children: [
+          // Top Header Node Card (Exact style matching image.png)
+          Container(
+            width: nodeWidth,
+            height: 60,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F4866),
+              border: Border.all(color: Colors.white, width: 2),
+              borderRadius: BorderRadius.circular(2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.cyanAccent.withAlpha(40),
+                  blurRadius: 6,
+                  spreadRadius: 1,
                 ),
-                child: Text(
-                  sub.label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+              ],
+            ),
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                height: 1.2,
+              ),
+            ),
+          ),
+
+          // Main vertical blue connector line
+          Container(
+            width: 3,
+            height: 24,
+            color: const Color(0xFF00A2D3),
+          ),
+
+          // Sub Nodes Column linked with vertical lines
+          ...subNodes.asMap().entries.map((entry) {
+            final idx = entry.key;
+            final sub = entry.value;
+
+            return Column(
+              children: [
+                if (idx > 0)
+                  Container(
+                    width: 3,
+                    height: 16,
+                    color: const Color(0xFF00A2D3),
                   ),
-                  textAlign: TextAlign.center,
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => sub.builder(context)),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(2),
+                  child: Container(
+                    width: nodeWidth,
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+                    alignment: Alignment.center,
+                    constraints: const BoxConstraints(minHeight: 56),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0E3850),
+                      border: Border.all(color: Colors.white, width: 1.8),
+                      borderRadius: BorderRadius.circular(2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(100),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      sub.title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        height: 1.25,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
-        ),
-      ],
+              ],
+            );
+          }),
+        ],
+      ),
     );
   }
 }
 
-class ModuleSubItem {
-  final String label;
+class _SubNode {
+  final String title;
   final WidgetBuilder builder;
 
-  ModuleSubItem(this.label, this.builder);
+  _SubNode(this.title, this.builder);
 }
