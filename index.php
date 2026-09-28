@@ -1105,8 +1105,25 @@ require_once __DIR__ . '/api/config.php';
             <input type="password" id="reg-password" required placeholder="Create password" class="form-input">
           </div>
           <div class="form-group">
-            <label>Grade Level / Academic Specialty</label>
-            <input type="text" id="reg-specialty" required placeholder="e.g. Senior High / Mathematics" class="form-input">
+            <label id="reg-grade-label">Grade Level</label>
+            <select id="reg-grade" class="form-select" required>
+              <option value="Elementary">Elementary (Grades 1-6)</option>
+              <option value="Junior High">Junior High (Grades 7-10)</option>
+              <option value="Senior High" selected>Senior High (Grades 11-12 STEM/ABM/HUMSS)</option>
+              <option value="College">College / Tertiary Level</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label id="reg-subject-label">Subject Needed</label>
+            <select id="reg-subject" class="form-select" required>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Calculus">Calculus</option>
+              <option value="Physics">Physics</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Programming">Programming</option>
+              <option value="English">English</option>
+              <option value="Literature">Literature</option>
+            </select>
           </div>
           <button type="submit" class="btn btn-primary full-width margin-top">Submit Registration</button>
         </form>

@@ -349,11 +349,14 @@ function initNavigation() {
   });
 
   document.getElementById('reg-role')?.addEventListener('change', (e) => {
-    const creds = document.getElementById('tutor-credentials-upload-fields');
+    const gradeLabel = document.getElementById('reg-grade-label');
+    const subjLabel = document.getElementById('reg-subject-label');
     if (e.target.value === 'tutor') {
-      creds?.classList.remove('hidden');
+      if (gradeLabel) gradeLabel.textContent = 'Grade Level to Teach';
+      if (subjLabel) subjLabel.textContent = 'Subject to Teach';
     } else {
-      creds?.classList.add('hidden');
+      if (gradeLabel) gradeLabel.textContent = 'Grade Level';
+      if (subjLabel) subjLabel.textContent = 'Subject Needed';
     }
   });
 
@@ -467,7 +470,8 @@ function initAuthModalTabs() {
     const fullname = document.getElementById('reg-fullname').value;
     const email = document.getElementById('reg-email').value;
     const password = document.getElementById('reg-password').value;
-    const specialty = document.getElementById('reg-specialty').value;
+    const grade = document.getElementById('reg-grade')?.value || 'Senior High';
+    const subject = document.getElementById('reg-subject')?.value || 'Mathematics';
 
     try {
       const res = await fetch('api/register.php', {
@@ -478,7 +482,9 @@ function initAuthModalTabs() {
           name: fullname,
           email,
           password,
-          specialty
+          grade,
+          subject,
+          specialty: `${grade} / ${subject}`
         })
       });
       const data = await res.json();

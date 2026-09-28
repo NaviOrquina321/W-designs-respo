@@ -12,12 +12,9 @@ if ($method === 'POST') {
     $name = trim($input['name'] ?? '');
     $email = strtolower(trim($input['email'] ?? ''));
     $password = $input['password'] ?? '';
-    $specialty = trim($input['specialty'] ?? '');
-
-    // Files status if tutor registration
-    $diplomaStatus = $input['diploma_status'] ?? 'Pending';
-    $torStatus = $input['tor_status'] ?? 'Pending';
-    $idStatus = $input['id_status'] ?? 'Pending';
+    $grade = trim($input['grade'] ?? ($input['specialty'] ?? 'Senior High'));
+    $subject = trim($input['subject'] ?? ($input['specialty'] ?? 'Mathematics'));
+    $specialty = "$grade / $subject";
 
     if (empty($name) || empty($email) || empty($password)) {
         http_response_code(400);
@@ -50,9 +47,9 @@ if ($method === 'POST') {
             $userId,
             $name,
             $email,
-            $specialty,
-            "$specialty Student eager to connect with expert tutors on TutorLink.",
-            $specialty
+            $grade,
+            "$grade Student eager to connect with expert tutors on TutorLink.",
+            $subject
         ]);
 
         // 3. Create Admin Notification
@@ -80,17 +77,14 @@ if ($method === 'POST') {
         $stmtUser->execute([$userId, $email, $passwordHash, $name]);
 
         // 2. Insert into tutors table
-        $stmtTut = $pdo->prepare("INSERT INTO tutors (id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, diploma_status, tor_status, id_status, approval_status, available_days, available_time_slots, availability_slots) VALUES (?, ?, ?, ?, 0.0, 0, 350, ?, 'Step-by-Step Explanation', ?, 1, 0, ?, ?, ?, 'Pending Review', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')");
+        $stmtTut = $pdo->prepare("INSERT INTO tutors (id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, diploma_status, tor_status, id_status, approval_status, available_days, available_time_slots, availability_slots) VALUES (?, ?, ?, ?, 0.0, 0, 350, ?, 'Step-by-Step Explanation', ?, 1, 0, 'Verified', 'Verified', 'Verified', 'Pending Review', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')");
         $stmtTut->execute([
             $userId,
             $name,
             $email,
             $initials,
-            $specialty,
-            "$specialty Specialist tutor. Dedicated to student growth.",
-            $diplomaStatus,
-            $torStatus,
-            $idStatus
+            $subject,
+            "$grade Specialist Tutor in $subject. Dedicated to student growth."
         ]);
 
         // 3. Create Admin Notification
