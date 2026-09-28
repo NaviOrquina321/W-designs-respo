@@ -1,5 +1,5 @@
 <?php
-// admin.php - Standalone Admin Monitoring Portal
+// admin.php - Standalone Admin Monitoring Portal (Direct Open Access)
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,34 +22,13 @@
       </div>
 
       <div class="nav-actions">
-        <button class="btn btn-secondary btn-small" id="admin-logout-btn">Log Out</button>
+        <a href="index.php" class="btn btn-secondary btn-small">Return to Main Site</a>
       </div>
     </nav>
   </header>
 
-  <!-- ADMIN AUTH MODAL / OVERLAY IF NOT LOGGED IN -->
-  <div id="admin-auth-overlay" class="modal-backdrop" style="display: flex; background: rgba(0,0,0,0.85); z-index: 9999;">
-    <div class="modal-card" style="max-width: 400px; margin: auto;">
-      <div class="modal-header">
-        <h3>Admin Portal Authentication</h3>
-      </div>
-      <form id="admin-login-form" style="padding: 16px;">
-        <p class="sub-text margin-bottom">Please enter administrator credentials to access system management.</p>
-        <div class="form-group">
-          <label>Admin Email</label>
-          <input type="email" id="admin-login-email" required placeholder="admin@tutorlink.ph" value="admin@tutorlink.ph" class="form-input">
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="admin-login-password" required placeholder="Enter password" value="admin123" class="form-input">
-        </div>
-        <button type="submit" class="btn btn-primary full-width margin-top">Access Admin Portal</button>
-      </form>
-    </div>
-  </div>
-
   <!-- MAIN ADMIN DASHBOARD CONTENT -->
-  <main class="wrap margin-top" id="admin-main-content" style="display: none;">
+  <main class="wrap margin-top" id="admin-main-content">
     <div class="dashboard-container">
       <div class="dashboard-header">
         <div>
@@ -510,64 +489,11 @@
 
   <script src="app.js"></script>
   <script>
-    // Standalone Admin Portal Initialization Script
+    // Direct open access for Admin Portal
     document.addEventListener('DOMContentLoaded', () => {
-      const loginForm = document.getElementById('admin-login-form');
-      const authOverlay = document.getElementById('admin-auth-overlay');
-      const mainContent = document.getElementById('admin-main-content');
-      const logoutBtn = document.getElementById('admin-logout-btn');
-
-      // Check existing session
-      const saved = localStorage.getItem('tutorlink_session');
-      if (saved) {
-        try {
-          const sess = JSON.parse(saved);
-          if (sess.role === 'admin') {
-            authOverlay.style.display = 'none';
-            mainContent.style.display = 'block';
-            if (typeof switchRole === 'function') switchRole('admin', sess.user);
-          }
-        } catch(e){}
+      if (typeof switchRole === 'function') {
+        switchRole('admin', { id: 'ADMIN-001', name: 'System Admin', role: 'admin' });
       }
-
-      loginForm?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('admin-login-email').value.trim();
-        const password = document.getElementById('admin-login-password').value;
-
-        try {
-          const res = await fetch('api/login.php', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ email, password })
-          });
-          const data = await res.json();
-          if (res.ok && data.status === 'success' && data.user.role === 'admin') {
-            authOverlay.style.display = 'none';
-            mainContent.style.display = 'block';
-            if (typeof switchRole === 'function') switchRole('admin', data.user);
-            showToast('Welcome back, System Admin!');
-          } else {
-            alert(data.message || 'Invalid administrator credentials.');
-          }
-        } catch(err) {
-          if (email.includes('admin') && password === 'admin123') {
-            authOverlay.style.display = 'none';
-            mainContent.style.display = 'block';
-            if (typeof switchRole === 'function') switchRole('admin', { id: 'ADMIN-001', name: 'System Admin', role: 'admin' });
-            showToast('Welcome back, System Admin!');
-          } else {
-            alert('Invalid administrator credentials.');
-          }
-        }
-      });
-
-      logoutBtn?.addEventListener('click', () => {
-        localStorage.removeItem('tutorlink_session');
-        mainContent.style.display = 'none';
-        authOverlay.style.display = 'flex';
-        showToast('Logged out of Admin Portal.');
-      });
     });
   </script>
 </body>

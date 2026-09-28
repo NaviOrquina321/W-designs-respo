@@ -1481,3 +1481,12 @@ Stack trace:
 [Mon Sep 28 22:01:22 2026] 127.0.0.1:33386 Accepted
 [Mon Sep 28 22:01:22 2026] 127.0.0.1:33386 [200]: POST /api/login.php
 [Mon Sep 28 22:01:22 2026] 127.0.0.1:33386 Closing
+[Mon Sep 28 22:05:32 2026] 127.0.0.1:51570 Accepted
+[Mon Sep 28 22:05:32 2026] 127.0.0.1:51570 [200]: GET /admin.php
+[Mon Sep 28 22:05:32 2026] 127.0.0.1:51570 Closing
+[Mon Sep 28 22:05:32 2026] 127.0.0.1:51576 Accepted
+[Mon Sep 28 22:05:32 2026] 127.0.0.1:51584 Accepted
+[Mon Sep 28 22:05:32 2026] 127.0.0.1:51576 [200]: GET /styles.css
+[Mon Sep 28 22:05:32 2026] 127.0.0.1:51584 [200]: GET /app.js
+[Mon Sep 28 22:05:32 2026] 127.0.0.1:51576 Closing
+[Mon Sep 28 22:05:32 2026] 127.0.0.1:51584 Closing
