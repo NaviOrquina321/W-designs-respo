@@ -174,6 +174,46 @@ async function syncWithDatabase() {
   }
 
   try {
+    const resSes = await fetch('api/sessions.php');
+    if (resSes.ok) {
+      const jsonSes = await resSes.json();
+      if (jsonSes.data && jsonSes.data.length > 0) state.sessions = jsonSes.data;
+    }
+  } catch (e) {}
+
+  try {
+    const resPay = await fetch('api/payments.php');
+    if (resPay.ok) {
+      const jsonPay = await resPay.json();
+      if (jsonPay.data && jsonPay.data.length > 0) state.payments = jsonPay.data;
+    }
+  } catch (e) {}
+
+  try {
+    const resM = await fetch('api/matches.php');
+    if (resM.ok) {
+      const jsonM = await resM.json();
+      if (jsonM.data && jsonM.data.length > 0) state.matches = jsonM.data;
+    }
+  } catch (e) {}
+
+  try {
+    const resSch = await fetch('api/schedules.php');
+    if (resSch.ok) {
+      const jsonSch = await resSch.json();
+      if (jsonSch.data && jsonSch.data.length > 0) state.schedules = jsonSch.data;
+    }
+  } catch (e) {}
+
+  try {
+    const resN = await fetch('api/notifications.php');
+    if (resN.ok) {
+      const jsonN = await resN.json();
+      if (jsonN.data && jsonN.data.length > 0) state.notifications = jsonN.data;
+    }
+  } catch (e) {}
+
+  try {
     const resA = await fetch('api/admin.php');
     if (resA.ok) {
       const jsonA = await resA.json();
@@ -253,6 +293,22 @@ function initNavigation() {
 
     if (state.currentUser) state.currentUser.name = name;
     document.getElementById('tutor-welcome-heading').textContent = `Tutor Portal - ${name}`;
+
+    try {
+      fetch('api/tutors.php', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: currentTutor ? currentTutor.id : (state.currentUser ? state.currentUser.id : ''),
+          name: name,
+          subjects: subjects.split(',').map(s => s.trim()),
+          learningStyles: [style],
+          hourlyRate: parseInt(rate) || 350,
+          bio: bio,
+          available: available
+        })
+      });
+    } catch (e) { console.log('Offline tutor profile edit fallback'); }
 
     switchRole('tutor');
     showToast('Tutor profile updated successfully!');
@@ -423,6 +479,9 @@ function initAuthModalTabs() {
         switchRole(user.role, user);
         closeModal('modal-auth');
         showToast(`Welcome to TutorLink, ${user.name}!`);
+        return;
+      } else {
+        showToast(data.message || 'Registration failed.', 'error');
         return;
       }
     } catch (err) {
@@ -928,7 +987,7 @@ function renderStudentUpcoming() {
     <div class="session-card">
       <div class="session-card-info">
         <h4>${s.subject} - with <span style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</span></h4>
-        <p>${s.date} at ${s.timeSlot} | GCash Ref: <strong>${s.gcashRef}</strong></p>
+        <p>${s.sessionDate || s.date || 'Today'} at ${s.timeSlot} | GCash Ref: <strong>${s.gcashRef}</strong></p>
       </div>
       <div>
         <span class="badge badge-success margin-bottom">Confirmed</span>
@@ -1514,15 +1573,32 @@ function initGCashPayment() {
 
     state.sessions.unshift(newSession);
 
-    state.payments.unshift({
+    const newPayObj = {
       id: 'PAY-' + Math.floor(100 + Math.random() * 900),
+      studentId: state.currentUser ? state.currentUser.id : 'STU-101',
       studentName: studentName,
+      tutorId: b.tutorId,
+      tutorName: b.tutorName,
       method: b.paymentMethod,
       refNo: randomRef,
       amount: b.total,
       status: 'Confirmed',
       payoutStatus: 'Pending'
-    });
+    };
+    state.payments.unshift(newPayObj);
+
+    try {
+      fetch('api/sessions.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newSession)
+      });
+      fetch('api/payments.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newPayObj)
+      });
+    } catch (e) { console.log('Offline booking API fallback'); }
 
     state.notifications.unshift({
       id: 'notif-' + Date.now(),

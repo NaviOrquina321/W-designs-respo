@@ -36,7 +36,7 @@ if ($method === 'GET') {
 
     $id = $input['id'] ?? ('tut-' . rand(100, 999));
     $name = $input['name'] ?? '';
-    $email = $input['email'] ?? '';
+    $email = strtolower(trim($input['email'] ?? ''));
     $initials = $input['initials'] ?? 'TR';
     $rating = (float)($input['rating'] ?? 0.0);
     $reviewsCount = (int)($input['reviewsCount'] ?? ($input['reviews_count'] ?? 0));
@@ -52,7 +52,7 @@ if ($method === 'GET') {
     if ($isSQLite) {
         $stmt = $pdo->prepare("INSERT INTO tutors (id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, diploma_status, tor_status, id_status, approval_status)
                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                               ON CONFLICT(id) DO UPDATE SET name=excluded.name, rating=excluded.rating, reviews_count=excluded.reviews_count, hourly_rate=excluded.hourly_rate, subjects=excluded.subjects, learning_styles=excluded.learning_styles, bio=excluded.bio, diploma_status=excluded.diploma_status, tor_status=excluded.tor_status, id_status=excluded.id_status, approval_status=excluded.approval_status");
+                               ON CONFLICT(email) DO UPDATE SET name=excluded.name, rating=excluded.rating, reviews_count=excluded.reviews_count, hourly_rate=excluded.hourly_rate, subjects=excluded.subjects, learning_styles=excluded.learning_styles, bio=excluded.bio, diploma_status=excluded.diploma_status, tor_status=excluded.tor_status, id_status=excluded.id_status, approval_status=excluded.approval_status");
         $stmt->execute([$id, $name, $email, $initials, $rating, $reviewsCount, $hourlyRate, $subjects, $learningStyles, $bio, $diplomaStatus, $torStatus, $idStatus, $approvalStatus]);
     } else {
         $stmt = $pdo->prepare("INSERT INTO tutors (id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, diploma_status, tor_status, id_status, approval_status)
@@ -109,15 +109,17 @@ if ($method === 'GET') {
         $stmt->execute([$status, $id]);
     }
 
-    if (isset($input['bio']) || isset($input['hourlyRate']) || isset($input['subjects'])) {
+    if (isset($input['bio']) || isset($input['hourlyRate']) || isset($input['subjects']) || isset($input['name'])) {
         $subjects = is_array($input['subjects'] ?? null) ? implode(', ', $input['subjects']) : ($input['subjects'] ?? '');
         $learningStyles = is_array($input['learningStyles'] ?? null) ? implode(', ', $input['learningStyles']) : ($input['learningStyles'] ?? '');
-        $stmt = $pdo->prepare("UPDATE tutors SET bio = ?, hourly_rate = ?, subjects = ?, learning_styles = ? WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE tutors SET name = ?, bio = ?, hourly_rate = ?, subjects = ?, learning_styles = ? WHERE id = ? OR name = ?");
         $stmt->execute([
+            $input['name'] ?? $id,
             $input['bio'] ?? '',
             (int)($input['hourlyRate'] ?? $input['hourly_rate'] ?? 350),
             $subjects,
             $learningStyles,
+            $id,
             $id
         ]);
     }
@@ -126,8 +128,8 @@ if ($method === 'GET') {
         $days = is_array($input['availableDays'] ?? null) ? implode(', ', $input['availableDays']) : ($input['available_days'] ?? '');
         $timeSlots = $input['availableTimeSlots'] ?? ($input['available_time_slots'] ?? '');
         $blockedDates = $input['blockedDates'] ?? ($input['blocked_dates'] ?? '');
-        $stmt = $pdo->prepare("UPDATE tutors SET available_days = ?, available_time_slots = ?, blocked_dates = ? WHERE id = ?");
-        $stmt->execute([$days, $timeSlots, $blockedDates, $id]);
+        $stmt = $pdo->prepare("UPDATE tutors SET available_days = ?, available_time_slots = ?, blocked_dates = ? WHERE id = ? OR name = ?");
+        $stmt->execute([$days, $timeSlots, $blockedDates, $id, $id]);
     }
 
     echo json_encode(['status' => 'success', 'message' => 'Tutor profile updated successfully']);

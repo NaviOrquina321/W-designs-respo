@@ -15,7 +15,7 @@ if ($method === 'GET') {
 
     $id = $input['id'] ?? ('STU-' . rand(100, 999));
     $name = $input['name'] ?? '';
-    $email = $input['email'] ?? '';
+    $email = strtolower(trim($input['email'] ?? ''));
     $grade = $input['grade'] ?? '';
     $validated = isset($input['validated']) ? ($input['validated'] ? 1 : 0) : 0;
     $deactivated = isset($input['deactivated']) ? ($input['deactivated'] ? 1 : 0) : 0;
@@ -25,7 +25,7 @@ if ($method === 'GET') {
     if ($isSQLite) {
         $stmt = $pdo->prepare("INSERT INTO students (id, name, email, grade, validated, deactivated, bio, subjects_needed)
                                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                               ON CONFLICT(id) DO UPDATE SET name=excluded.name, grade=excluded.grade, validated=excluded.validated, deactivated=excluded.deactivated, bio=excluded.bio, subjects_needed=excluded.subjects_needed");
+                               ON CONFLICT(email) DO UPDATE SET name=excluded.name, grade=excluded.grade, validated=excluded.validated, deactivated=excluded.deactivated, bio=excluded.bio, subjects_needed=excluded.subjects_needed");
         $stmt->execute([$id, $name, $email, $grade, $validated, $deactivated, $bio, $subjectsNeeded]);
     } else {
         $stmt = $pdo->prepare("INSERT INTO students (id, name, email, grade, validated, deactivated, bio, subjects_needed)

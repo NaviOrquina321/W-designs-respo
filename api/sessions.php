@@ -13,6 +13,7 @@ if ($method === 'GET') {
         $s['commissionFee'] = (int)$s['commission_fee'];
         $s['totalPaid'] = (int)$s['total_paid'];
         $s['gcashRef'] = $s['gcash_ref'];
+        $s['date'] = $s['session_date'];
         $s['sessionDate'] = $s['session_date'];
         $s['timeSlot'] = $s['time_slot'];
         $s['studentId'] = $s['student_id'] ?? '';
@@ -34,7 +35,7 @@ if ($method === 'GET') {
     $tutorId = $input['tutorId'] ?? ($input['tutor_id'] ?? '');
     $tutorName = $input['tutorName'] ?? ($input['tutor_name'] ?? '');
     $subject = $input['subject'] ?? '';
-    $sessionDate = $input['sessionDate'] ?? ($input['session_date'] ?? date('Y-m-d'));
+    $sessionDate = $input['sessionDate'] ?? ($input['session_date'] ?? ($input['date'] ?? date('Y-m-d')));
     $timeSlot = $input['timeSlot'] ?? ($input['time_slot'] ?? '02:00 PM');
     $hourlyRate = (int)($input['hourlyRate'] ?? ($input['hourly_rate'] ?? 350));
     $commissionFee = (int)($input['commissionFee'] ?? ($input['commission_fee'] ?? 35));
