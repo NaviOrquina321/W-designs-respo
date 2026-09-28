@@ -367,32 +367,13 @@ require_once __DIR__ . '/api/config.php';
 
         <!-- Tutor Sub-Navigation Tabs (Uniform Design & Sizing) -->
         <div class="admin-tab-bar margin-bottom">
-          <button class="tutor-tab-btn active" data-tab="tutor-tab-availability">Availability & Schedule</button>
-          <button class="tutor-tab-btn" data-tab="tutor-tab-requests">Match Requests</button>
+          <button class="tutor-tab-btn active" data-tab="tutor-tab-requests">Match Requests</button>
           <button class="tutor-tab-btn" data-tab="tutor-tab-sessions">Teaching Sessions</button>
           <button class="tutor-tab-btn" data-tab="tutor-tab-earnings">Earnings & Performance</button>
         </div>
 
-        <!-- Tutor Tab 1: Availability & Schedule -->
-        <div class="tutor-tab-content active" id="tutor-tab-availability">
-          <div class="dashboard-section">
-            <div class="section-title-bar">
-              <h3>Weekly Availability & Schedule Summary</h3>
-              <button class="btn btn-primary btn-small" id="edit-tutor-schedule-profile-btn">Edit Schedule in Profile</button>
-            </div>
-            <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 22px; border-radius: 6px; margin-bottom: 24px;">
-              <div class="tutor-details-list">
-                <div><strong>Weekly Days:</strong> <span id="tutor-summary-days">Mon, Tue, Wed, Thu, Fri</span></div>
-                <div><strong>Daily Window:</strong> <span id="tutor-summary-window">09:00 AM - 05:00 PM</span></div>
-                <div><strong>Blocked Dates:</strong> <span id="tutor-summary-blocked">None</span></div>
-                <div><strong>Status:</strong> <span class="badge badge-success">Active & Accepting Bookings</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tutor Tab 2: Match Requests -->
-        <div class="tutor-tab-content" id="tutor-tab-requests">
+        <!-- Tutor Tab 1: Match Requests -->
+        <div class="tutor-tab-content active" id="tutor-tab-requests">
           <div class="dashboard-section">
             <div class="section-title-bar">
               <h3>Incoming Student Match Requests</h3>
