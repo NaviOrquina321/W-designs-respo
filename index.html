@@ -608,42 +608,388 @@
 
         <!-- Admin FDD Management Tabs (Clean Labels & No Word Wrapping) -->
         <div class="admin-tab-bar">
-          <button class="admin-tab-btn active" data-tab="tab-students">Students</button>
-          <button class="admin-tab-btn" data-tab="tab-tutors">Tutors</button>
-          <button class="admin-tab-btn" data-tab="tab-subjects">Subjects</button>
-          <button class="admin-tab-btn" data-tab="tab-matching">Tutor Matching</button>
-          <button class="admin-tab-btn" data-tab="tab-schedule">Schedules</button>
-          <button class="admin-tab-btn" data-tab="tab-payments">Payments</button>
-          <button class="admin-tab-btn" data-tab="tab-notifications">Notifications</button>
-          <button class="admin-tab-btn" data-tab="tab-reports">Reports</button>
+          <button class="admin-tab-btn active" data-tab="tab-students">Manage Students</button>
+          <button class="admin-tab-btn" data-tab="tab-matching">Manage Tutor Matching</button>
+          <button class="admin-tab-btn" data-tab="tab-schedule">Manage Schedule</button>
+          <button class="admin-tab-btn" data-tab="tab-payments">Manage Payments</button>
+          <button class="admin-tab-btn" data-tab="tab-notifications">Manage Notifications</button>
+          <button class="admin-tab-btn" data-tab="tab-reports">Manage Reports</button>
+          <button class="admin-tab-btn" data-tab="tab-tutors">Manage Tutors</button>
+          <button class="admin-tab-btn" data-tab="tab-subjects">Manage Subjects</button>
         </div>
 
-        <!-- Admin Tab 1: Manage Students -->
+        <!-- 1. Manage Students -->
         <div class="admin-tab-content active" id="tab-students">
-          <div class="dashboard-section">
-            <div class="section-title-bar">
-              <h3>Student Management & Validation</h3>
+          <div class="admin-subtab-bar">
+            <button class="admin-subtab-btn active" data-subtab="subtab-student-view">View Student List</button>
+            <button class="admin-subtab-btn" data-subtab="subtab-student-validate">Validate Student List</button>
+          </div>
+
+          <div class="admin-subtab-content active" id="subtab-student-view">
+            <div class="dashboard-section">
+              <div class="section-title-bar">
+                <h3>View Student List</h3>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Student ID</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Grade Level</th>
+                    <th>Validation Status</th>
+                    <th>Account Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-students-table-body">
+                  <!-- Dynamic student list -->
+                </tbody>
+              </table>
             </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Student ID</th>
-                  <th>Full Name</th>
-                  <th>Email</th>
-                  <th>Grade Level</th>
-                  <th>Validation Status</th>
-                  <th>Account Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="admin-students-table-body">
-                <!-- Dynamic student list -->
-              </tbody>
-            </table>
+          </div>
+
+          <div class="admin-subtab-content" id="subtab-student-validate">
+            <div class="dashboard-section">
+              <div class="section-title-bar">
+                <h3>Validate Student List (Pending Approval)</h3>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Student ID</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Grade Level</th>
+                    <th>Validation Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-students-validate-table-body">
+                  <!-- Dynamic pending student list -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        <!-- Admin Tab 1B: Manage Tutors -->
+        <!-- 2. Manage Tutor Matching -->
+        <div class="admin-tab-content" id="tab-matching">
+          <div class="admin-subtab-bar">
+            <button class="admin-subtab-btn active" data-subtab="subtab-match-review">Review Matching Results</button>
+            <button class="admin-subtab-btn" data-subtab="subtab-match-approve">Approve Matching Sessions</button>
+            <button class="admin-subtab-btn" data-subtab="subtab-match-cancel">Cancel Matching Sessions</button>
+          </div>
+
+          <div class="admin-subtab-content active" id="subtab-match-review">
+            <div class="dashboard-section">
+              <div class="section-title-bar">
+                <h3>Review Matching Results</h3>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Match ID</th>
+                    <th>Student</th>
+                    <th>Recommended Tutor</th>
+                    <th>Subject</th>
+                    <th>Matching Score</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-matching-table-body">
+                  <!-- Dynamic matching rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="admin-subtab-content" id="subtab-match-approve">
+            <div class="dashboard-section">
+              <div class="section-title-bar">
+                <h3>Approve Matching Sessions (Pending Review)</h3>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Match ID</th>
+                    <th>Student</th>
+                    <th>Recommended Tutor</th>
+                    <th>Subject</th>
+                    <th>Score</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-matching-approve-table-body">
+                  <!-- Dynamic pending approval matches -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="admin-subtab-content" id="subtab-match-cancel">
+            <div class="dashboard-section">
+              <div class="section-title-bar">
+                <h3>Cancel Matching Sessions</h3>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Match ID</th>
+                    <th>Student</th>
+                    <th>Tutor</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Cancel Action</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-matching-cancel-table-body">
+                  <!-- Dynamic matches to cancel -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Manage Schedule -->
+        <div class="admin-tab-content" id="tab-schedule">
+          <div class="admin-subtab-bar">
+            <button class="admin-subtab-btn active" data-subtab="subtab-sch-new">New Calendar Schedule</button>
+            <button class="admin-subtab-btn" data-subtab="subtab-sch-modify">Modify Sessions Schedule</button>
+          </div>
+
+          <div class="admin-subtab-content active" id="subtab-sch-new">
+            <div class="dashboard-section">
+              <div class="section-title-bar">
+                <h3>New Calendar Schedule Slot</h3>
+              </div>
+              <div class="profile-card-edit">
+                <form id="admin-add-schedule-form">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Select Tutor</label>
+                      <select id="admin-sch-tutor-select" class="form-select"></select>
+                    </div>
+                    <div class="form-group">
+                      <label>Subject</label>
+                      <input type="text" id="admin-sch-subject" class="form-input" placeholder="e.g. Calculus II" required>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Date & Slot</label>
+                      <input type="text" id="admin-sch-dateslot" class="form-input" placeholder="e.g. 2026-03-20 (02:00 PM - 04:00 PM)" required>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary full-width margin-top">Create Schedule Slot</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-subtab-content" id="subtab-sch-modify">
+            <div class="dashboard-section">
+              <div class="section-title-bar">
+                <h3>Modify Sessions Schedule</h3>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Schedule ID</th>
+                    <th>Tutor</th>
+                    <th>Date & Slot</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-schedule-table-body">
+                  <!-- Dynamic schedule rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Manage Payments -->
+        <div class="admin-tab-content" id="tab-payments">
+          <div class="admin-subtab-bar">
+            <button class="admin-subtab-btn active" data-subtab="subtab-pay-new">New Payment Records</button>
+            <button class="admin-subtab-btn" data-subtab="subtab-pay-confirm">Confirm Payment Status</button>
+          </div>
+
+          <div class="admin-subtab-content active" id="subtab-pay-new">
+            <div class="dashboard-section">
+              <div class="section-title-bar">
+                <h3>New Payment Records</h3>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Payment ID</th>
+                    <th>Payer (Student)</th>
+                    <th>Method</th>
+                    <th>GCash Ref #</th>
+                    <th>Amount (₱)</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-payments-table-body">
+                  <!-- Dynamic payment rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="admin-subtab-content" id="subtab-pay-confirm">
+            <div class="dashboard-section">
+              <div class="section-title-bar">
+                <h3>Confirm Payment Status</h3>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Payment ID</th>
+                    <th>Student</th>
+                    <th>GCash Ref #</th>
+                    <th>Amount (₱)</th>
+                    <th>Status</th>
+                    <th>Confirm Action</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-payments-confirm-table-body">
+                  <!-- Dynamic pending payment rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Manage Notifications -->
+        <div class="admin-tab-content" id="tab-notifications">
+          <div class="admin-subtab-bar">
+            <button class="admin-subtab-btn active" data-subtab="subtab-notif-send">Send Notifications</button>
+            <button class="admin-subtab-btn" data-subtab="subtab-notif-view">View Notifications</button>
+          </div>
+
+          <div class="admin-subtab-content active" id="subtab-notif-send">
+            <div class="dashboard-section">
+              <div class="section-title-bar">
+                <h3>Send Broadcast Notifications</h3>
+              </div>
+              <div class="profile-card-edit">
+                <div class="form-group">
+                  <label>Notification Recipient</label>
+                  <select id="admin-notif-target" class="form-select">
+                    <option value="all">All Users (Students & Tutors)</option>
+                    <option value="students">All Students</option>
+                    <option value="tutors">All Tutors</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Message Content</label>
+                  <input type="text" id="admin-notif-message" placeholder="Type notification broadcast message..." class="form-input">
+                </div>
+                <button class="btn btn-primary full-width margin-top" id="admin-send-notif-btn">Send Notification Broadcast</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-subtab-content" id="subtab-notif-view">
+            <div class="dashboard-section">
+              <div class="section-title-bar">
+                <h3>View Notifications History</h3>
+              </div>
+              <div id="admin-notifications-log" class="cards-list">
+                <!-- Broadcast log -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Manage Reports -->
+        <div class="admin-tab-content" id="tab-reports">
+          <div class="admin-subtab-bar">
+            <button class="admin-subtab-btn active" data-subtab="subtab-rep-completed">View Completed Tutoring</button>
+            <button class="admin-subtab-btn" data-subtab="subtab-rep-weekly">View Weekly Sessions</button>
+            <button class="admin-subtab-btn" data-subtab="subtab-rep-monthly">View Monthly Sessions</button>
+          </div>
+
+          <div class="admin-subtab-content active" id="subtab-rep-completed">
+            <div class="dashboard-section">
+              <div class="section-title-bar">
+                <h3>View Completed Tutoring Sessions</h3>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Session ID</th>
+                    <th>Student</th>
+                    <th>Tutor</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Fee</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-reports-completed-table-body">
+                  <!-- Dynamic completed report rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="admin-subtab-content" id="subtab-rep-weekly">
+            <div class="dashboard-section">
+              <div class="section-title-bar">
+                <h3>View Weekly Sessions (Rolling 7 Days)</h3>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Session ID</th>
+                    <th>Student</th>
+                    <th>Tutor</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Fee</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-reports-weekly-table-body">
+                  <!-- Dynamic weekly report rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="admin-subtab-content" id="subtab-rep-monthly">
+            <div class="dashboard-section">
+              <div class="section-title-bar">
+                <h3>View Monthly Sessions (Rolling 30 Days)</h3>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Session ID</th>
+                    <th>Student</th>
+                    <th>Tutor</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Fee</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-reports-monthly-table-body">
+                  <!-- Dynamic monthly report rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. Manage Tutors -->
         <div class="admin-tab-content" id="tab-tutors">
           <div class="dashboard-section">
             <div class="section-title-bar">
@@ -668,7 +1014,7 @@
           </div>
         </div>
 
-        <!-- Admin Tab 1C: Manage Subjects -->
+        <!-- 8. Manage Subjects -->
         <div class="admin-tab-content" id="tab-subjects">
           <div class="dashboard-section">
             <div class="section-title-bar">
@@ -691,143 +1037,10 @@
           </div>
         </div>
 
-        <!-- Admin Tab 2: Manage Tutor Matching -->
-        <div class="admin-tab-content" id="tab-matching">
-          <div class="dashboard-section">
-            <div class="section-title-bar">
-              <h3>Review, Approve & Cancel Matching Sessions</h3>
-            </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Match ID</th>
-                  <th>Student</th>
-                  <th>Recommended Tutor</th>
-                  <th>Subject</th>
-                  <th>Matching Score</th>
-                  <th>Approval Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="admin-matching-table-body">
-                <!-- Dynamic matching rows -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Admin Tab 3: Manage Schedule -->
-        <div class="admin-tab-content" id="tab-schedule">
-          <div class="dashboard-section">
-            <div class="section-title-bar">
-              <h3>Calendar Schedules & Modify Sessions</h3>
-            </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Schedule ID</th>
-                  <th>Tutor</th>
-                  <th>Date & Slot</th>
-                  <th>Subject</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="admin-schedule-table-body">
-                <!-- Dynamic schedule rows -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Admin Tab 4: Manage Payments -->
-        <div class="admin-tab-content" id="tab-payments">
-          <div class="dashboard-section">
-            <div class="section-title-bar">
-              <h3>Payment Records & Confirmation</h3>
-            </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Payment ID</th>
-                  <th>Payer (Student)</th>
-                  <th>Method</th>
-                  <th>GCash Ref #</th>
-                  <th>Amount (₱)</th>
-                  <th>Payment Status</th>
-                  <th>Confirm Action</th>
-                </tr>
-              </thead>
-              <tbody id="admin-payments-table-body">
-                <!-- Dynamic payment rows -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Admin Tab 5: Manage Notifications -->
-        <div class="admin-tab-content" id="tab-notifications">
-          <div class="dashboard-section">
-            <div class="section-title-bar">
-              <h3>Send System Broadcast & View Notifications</h3>
-            </div>
-            <div class="profile-card-edit margin-bottom">
-              <div class="form-group">
-                <label>Notification Recipient</label>
-                <select id="admin-notif-target" class="form-select">
-                  <option value="all">All Users (Students & Tutors)</option>
-                  <option value="students">All Students</option>
-                  <option value="tutors">All Tutors</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Message Content</label>
-                <input type="text" id="admin-notif-message" placeholder="Type notification broadcast message..." class="form-input">
-              </div>
-              <button class="btn btn-primary btn-small" id="admin-send-notif-btn">Send Notification</button>
-            </div>
-            <h4>Notification History</h4>
-            <div id="admin-notifications-log" class="cards-list">
-              <!-- Broadcast log -->
-            </div>
-          </div>
-        </div>
-
-        <!-- Admin Tab 6: Manage Reports -->
-        <div class="admin-tab-content" id="tab-reports">
-          <div class="dashboard-section">
-            <div class="section-title-bar">
-              <h3>View Completed, Weekly & Monthly Tutoring Reports</h3>
-              <div class="filter-group">
-                <button class="btn btn-secondary btn-small active-filter" id="report-filter-all">All Completed</button>
-                <button class="btn btn-secondary btn-small" id="report-filter-weekly">View Weekly Sessions</button>
-                <button class="btn btn-secondary btn-small" id="report-filter-monthly">View Monthly Sessions</button>
-              </div>
-            </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Session ID</th>
-                  <th>Student</th>
-                  <th>Tutor</th>
-                  <th>Subject</th>
-                  <th>Date</th>
-                  <th>Fee</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="admin-reports-table-body">
-                <!-- Dynamic report rows -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
       </div>
     </div>
 
   </main>
-
 
   <!-- ================= MODALS ================= -->
 

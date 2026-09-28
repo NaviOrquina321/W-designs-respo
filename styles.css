@@ -648,3 +648,46 @@ footer .wrap { padding-top: 48px; padding-bottom: 48px; }
   .why-list { columns: 1; }
   .workspace-grid { grid-template-columns: 1fr; }
 }
+
+/* Admin Sub-Tab Bar Navigation */
+.admin-subtab-bar {
+  display: flex;
+  gap: 8px;
+  background: var(--panel);
+  padding: 6px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+}
+
+.admin-subtab-btn {
+  background: transparent;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.admin-subtab-btn:hover {
+  color: var(--ink);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.admin-subtab-btn.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.admin-subtab-content {
+  display: none;
+}
+
+.admin-subtab-content.active {
+  display: block;
+}

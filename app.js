@@ -1783,6 +1783,52 @@ function initAdminView() {
     });
   });
 
+  document.querySelectorAll('.admin-subtab-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const parentTab = e.target.closest('.admin-tab-content');
+      if (!parentTab) return;
+
+      parentTab.querySelectorAll('.admin-subtab-btn').forEach(b => b.classList.remove('active'));
+      parentTab.querySelectorAll('.admin-subtab-content').forEach(c => c.classList.remove('active'));
+
+      e.target.classList.add('active');
+      const targetSubtabId = e.target.getAttribute('data-subtab');
+      document.getElementById(targetSubtabId)?.classList.add('active');
+    });
+  });
+
+  document.getElementById('admin-add-schedule-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const tutorId = document.getElementById('admin-sch-tutor-select').value;
+    const tutorObj = state.tutors.find(t => t.id === tutorId) || state.tutors[0];
+    const tutorName = tutorObj ? tutorObj.name : 'Tutor';
+    const subject = document.getElementById('admin-sch-subject').value;
+    const dateSlot = document.getElementById('admin-sch-dateslot').value;
+
+    const newSch = {
+      id: 'sch-' + Math.floor(100 + Math.random() * 900),
+      tutorId: tutorId,
+      tutorName: tutorName,
+      dateSlot: dateSlot,
+      subject: subject,
+      status: 'Available'
+    };
+
+    state.schedules.unshift(newSch);
+
+    try {
+      await fetch('api/schedules.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newSch)
+      });
+    } catch (err) { console.log('Offline schedule API fallback'); }
+
+    renderAdminSchedule();
+    showToast(`New calendar schedule created for ${tutorName}!`);
+    document.getElementById('admin-add-schedule-form').reset();
+  });
+
   document.getElementById('admin-send-notif-btn')?.addEventListener('click', () => {
     const target = document.getElementById('admin-notif-target').value;
     const msg = document.getElementById('admin-notif-message').value;
@@ -1873,29 +1919,52 @@ function updateReportFilterUI(activeBtn) {
 
 function renderAdminStudents() {
   const tbody = document.getElementById('admin-students-table-body');
-  if (!tbody) return;
+  const tbodyValidate = document.getElementById('admin-students-validate-table-body');
 
-  tbody.innerHTML = state.students.map(s => `
-    <tr>
-      <td><code>${s.id}</code></td>
-      <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${s.id}')">${s.name}</strong></td>
-      <td>${s.email}</td>
-      <td>${s.grade}</td>
-      <td><span class="badge ${s.validated ? 'badge-success' : 'badge-info'}">${s.validated ? 'Validated' : 'Pending'}</span></td>
-      <td><span class="badge ${s.deactivated ? 'badge-danger' : 'badge-success'}">${s.deactivated ? 'Deactivated' : 'Active'}</span></td>
-      <td>
-        <button class="btn btn-secondary btn-small" onclick="viewStudentProfile('${s.id}')">Profile</button>
-        <button class="btn btn-secondary btn-small" onclick="toggleValidateStudent('${s.id}')">
-          ${s.validated ? 'Revoke' : 'Validate'}
-        </button>
-        <button class="btn btn-secondary btn-small" onclick="toggleDeactivateStudent('${s.id}')">
-          ${s.deactivated ? 'Activate' : 'Deactivate'}
-        </button>
-      </td>
-    </tr>
-  `).join('');
+  if (tbody) {
+    tbody.innerHTML = state.students.map(s => `
+      <tr>
+        <td><code>${s.id}</code></td>
+        <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${s.id}')">${s.name}</strong></td>
+        <td>${s.email}</td>
+        <td>${s.grade}</td>
+        <td><span class="badge ${s.validated ? 'badge-success' : 'badge-info'}">${s.validated ? 'Validated' : 'Pending Validation'}</span></td>
+        <td><span class="badge ${s.deactivated ? 'badge-danger' : 'badge-success'}">${s.deactivated ? 'Deactivated' : 'Active'}</span></td>
+        <td>
+          <button class="btn btn-secondary btn-small" onclick="viewStudentProfile('${s.id}')">Profile</button>
+          <button class="btn btn-secondary btn-small" onclick="toggleValidateStudent('${s.id}')">
+            ${s.validated ? 'Revoke' : 'Validate Account'}
+          </button>
+          <button class="btn btn-secondary btn-small" onclick="toggleDeactivateStudent('${s.id}')">
+            ${s.deactivated ? 'Activate' : 'Deactivate'}
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  }
 
-  document.getElementById('admin-stat-total-students').textContent = state.students.length;
+  if (tbodyValidate) {
+    const pending = state.students.filter(s => !s.validated);
+    if (pending.length === 0) {
+      tbodyValidate.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--ink-soft); padding: 20px;">All registered students have been validated.</td></tr>`;
+    } else {
+      tbodyValidate.innerHTML = pending.map(s => `
+        <tr>
+          <td><code>${s.id}</code></td>
+          <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${s.id}')">${s.name}</strong></td>
+          <td>${s.email}</td>
+          <td>${s.grade}</td>
+          <td><span class="badge badge-info">Pending Validation</span></td>
+          <td>
+            <button class="btn btn-primary btn-small" onclick="toggleValidateStudent('${s.id}')">Validate Account</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  const el = document.getElementById('admin-stat-total-students');
+  if (el) el.textContent = state.students.length;
 }
 
 window.toggleValidateStudent = function(studentId) {
@@ -1995,25 +2064,68 @@ function renderAdminSubjects() {
 
 function renderAdminMatching() {
   const tbody = document.getElementById('admin-matching-table-body');
-  if (!tbody) return;
+  const tbodyApprove = document.getElementById('admin-matching-approve-table-body');
+  const tbodyCancel = document.getElementById('admin-matching-cancel-table-body');
 
-  tbody.innerHTML = state.matches.map(m => `
-    <tr>
-      <td><code>${m.id}</code></td>
-      <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${m.studentId || m.studentName}')">${m.studentName}</span></td>
-      <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${m.tutorId || m.tutorName}')">${m.tutorName}</strong></td>
-      <td>${m.subject}</td>
-      <td><span class="badge badge-match">${m.score}% Match</span></td>
-      <td><span class="badge ${m.status === 'Approved' ? 'badge-success' : m.status === 'Cancelled' ? 'badge-danger' : 'badge-info'}">${m.status}</span></td>
-      <td>
-        ${m.status === 'Pending Review' ? `
-          <button class="btn btn-primary btn-small" onclick="approveMatch('${m.id}')">Approve</button>
-          <button class="btn btn-secondary btn-small" onclick="openReassignModal('${m.id}')">Reassign</button>
-          <button class="btn btn-secondary btn-small" onclick="cancelMatch('${m.id}')">Cancel</button>
-        ` : `<span class="sub-text">Completed</span>`}
-      </td>
-    </tr>
-  `).join('');
+  if (tbody) {
+    tbody.innerHTML = state.matches.map(m => `
+      <tr>
+        <td><code>${m.id}</code></td>
+        <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${m.studentId || m.studentName}')">${m.studentName}</span></td>
+        <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${m.tutorId || m.tutorName}')">${m.tutorName}</strong></td>
+        <td>${m.subject}</td>
+        <td><span class="badge badge-match">${m.score}% Match</span></td>
+        <td><span class="badge ${m.status === 'Approved' ? 'badge-success' : m.status === 'Cancelled' ? 'badge-danger' : 'badge-info'}">${m.status}</span></td>
+        <td>
+          ${m.status === 'Pending Review' ? `
+            <button class="btn btn-primary btn-small" onclick="approveMatch('${m.id}')">Approve</button>
+            <button class="btn btn-secondary btn-small" onclick="openReassignModal('${m.id}')">Reassign</button>
+            <button class="btn btn-secondary btn-small" onclick="cancelMatch('${m.id}')">Cancel</button>
+          ` : `<span class="sub-text">Processed</span>`}
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  if (tbodyApprove) {
+    const pendingMatches = state.matches.filter(m => m.status === 'Pending Review');
+    if (pendingMatches.length === 0) {
+      tbodyApprove.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--ink-soft); padding: 20px;">No matching sessions pending approval.</td></tr>`;
+    } else {
+      tbodyApprove.innerHTML = pendingMatches.map(m => `
+        <tr>
+          <td><code>${m.id}</code></td>
+          <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${m.studentId || m.studentName}')">${m.studentName}</span></td>
+          <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${m.tutorId || m.tutorName}')">${m.tutorName}</strong></td>
+          <td>${m.subject}</td>
+          <td><span class="badge badge-match">${m.score}% Match</span></td>
+          <td>
+            <button class="btn btn-primary btn-small" onclick="approveMatch('${m.id}')">Approve Matching Session</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  if (tbodyCancel) {
+    const activeMatches = state.matches.filter(m => m.status !== 'Cancelled');
+    if (activeMatches.length === 0) {
+      tbodyCancel.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--ink-soft); padding: 20px;">No active matching sessions available to cancel.</td></tr>`;
+    } else {
+      tbodyCancel.innerHTML = activeMatches.map(m => `
+        <tr>
+          <td><code>${m.id}</code></td>
+          <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${m.studentId || m.studentName}')">${m.studentName}</span></td>
+          <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${m.tutorId || m.tutorName}')">${m.tutorName}</strong></td>
+          <td>${m.subject}</td>
+          <td><span class="badge badge-info">${m.status}</span></td>
+          <td>
+            <button class="btn btn-secondary btn-small" onclick="cancelMatch('${m.id}')">Cancel Matching Session</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  }
 }
 
 window.openReassignModal = function(matchId) {
@@ -2045,20 +2157,32 @@ window.cancelMatch = function(matchId) {
 
 function renderAdminSchedule() {
   const tbody = document.getElementById('admin-schedule-table-body');
-  if (!tbody) return;
+  const tutorSelect = document.getElementById('admin-sch-tutor-select');
 
-  tbody.innerHTML = state.schedules.map(sch => `
-    <tr>
-      <td><code>${sch.id}</code></td>
-      <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${sch.tutorId || sch.tutorName}')">${sch.tutorName}</strong></td>
-      <td>${sch.dateSlot}</td>
-      <td>${sch.subject}</td>
-      <td><span class="badge ${sch.status === 'Available' ? 'badge-success' : 'badge-info'}">${sch.status}</span></td>
-      <td>
-        <button class="btn btn-secondary btn-small" onclick="deleteScheduleSlot('${sch.id}')">Remove Slot</button>
-      </td>
-    </tr>
-  `).join('');
+  if (tutorSelect && state.tutors.length > 0) {
+    tutorSelect.innerHTML = state.tutors.filter(t => !t.deactivated).map(t => `
+      <option value="${t.id}">${t.name} (${t.subjects.join(', ')})</option>
+    `).join('');
+  }
+
+  if (tbody) {
+    if (state.schedules.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--ink-soft); padding: 20px;">No schedule slots created yet. Use New Calendar Schedule to add one.</td></tr>`;
+    } else {
+      tbody.innerHTML = state.schedules.map(sch => `
+        <tr>
+          <td><code>${sch.id}</code></td>
+          <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${sch.tutorId || sch.tutorName}')">${sch.tutorName}</strong></td>
+          <td>${sch.dateSlot}</td>
+          <td>${sch.subject}</td>
+          <td><span class="badge ${sch.status === 'Available' ? 'badge-success' : 'badge-info'}">${sch.status}</span></td>
+          <td>
+            <button class="btn btn-secondary btn-small" onclick="deleteScheduleSlot('${sch.id}')">Remove Slot</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  }
 }
 
 window.deleteScheduleSlot = function(schId) {
@@ -2072,31 +2196,48 @@ window.deleteScheduleSlot = function(schId) {
 
 function renderAdminPayments() {
   const tbody = document.getElementById('admin-payments-table-body');
-  if (!tbody) return;
+  const tbodyConfirm = document.getElementById('admin-payments-confirm-table-body');
 
-  tbody.innerHTML = state.payments.map(p => `
-    <tr>
-      <td><code>${p.id}</code></td>
-      <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${p.studentId || p.studentName}')">${p.studentName}</span></td>
-      <td>${p.method}</td>
-      <td><code>${p.refNo}</code></td>
-      <td>P${p.amount}</td>
-      <td><span class="badge ${p.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${p.status}</span></td>
-      <td>
-        ${p.status === 'Pending Confirmation' ? `
-          <button class="btn btn-primary btn-small" onclick="confirmPayment('${p.id}')">Confirm Payment</button>
-        ` : p.payoutStatus !== 'Paid Out' ? `
-          <button class="btn btn-secondary btn-small" onclick="processTutorPayout('${p.id}')">Process Payout</button>
-        ` : `<span class="badge badge-success">Payout Completed</span>`}
-      </td>
-    </tr>
-  `).join('');
+  if (tbody) {
+    tbody.innerHTML = state.payments.map(p => `
+      <tr>
+        <td><code>${p.id}</code></td>
+        <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${p.studentId || p.studentName}')">${p.studentName}</span></td>
+        <td>${p.method}</td>
+        <td><code>${p.refNo}</code></td>
+        <td>P${p.amount}</td>
+        <td><span class="badge ${p.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${p.status}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  if (tbodyConfirm) {
+    const pendingPay = state.payments.filter(p => p.status === 'Pending Confirmation' || p.status === 'Pending');
+    if (pendingPay.length === 0) {
+      tbodyConfirm.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--ink-soft); padding: 20px;">All payment records confirmed.</td></tr>`;
+    } else {
+      tbodyConfirm.innerHTML = pendingPay.map(p => `
+        <tr>
+          <td><code>${p.id}</code></td>
+          <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${p.studentId || p.studentName}')">${p.studentName}</span></td>
+          <td><code>${p.refNo}</code></td>
+          <td>P${p.amount}</td>
+          <td><span class="badge badge-info">${p.status}</span></td>
+          <td>
+            <button class="btn btn-primary btn-small" onclick="confirmPayment('${p.id}')">Confirm Payment Status</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  }
 
   const totalVol = state.payments.reduce((sum, p) => sum + p.amount, 0);
   const totalComm = Math.round(totalVol * 0.10);
 
-  document.getElementById('admin-stat-total-volume').textContent = `P${totalVol.toLocaleString()}`;
-  document.getElementById('admin-stat-platform-commission').textContent = `P${totalComm.toLocaleString()}`;
+  const elV = document.getElementById('admin-stat-total-volume');
+  const elC = document.getElementById('admin-stat-platform-commission');
+  if (elV) elV.textContent = `P${totalVol.toLocaleString()}`;
+  if (elC) elC.textContent = `P${totalComm.toLocaleString()}`;
 }
 
 window.confirmPayment = function(payId) {
@@ -2134,10 +2275,9 @@ function renderAdminNotifications() {
 }
 
 function renderAdminReports() {
-  const tbody = document.getElementById('admin-reports-table-body');
-  if (!tbody) return;
-
-  const filter = state.activeReportFilter;
+  const tbodyCompleted = document.getElementById('admin-reports-completed-table-body');
+  const tbodyWeekly = document.getElementById('admin-reports-weekly-table-body');
+  const tbodyMonthly = document.getElementById('admin-reports-monthly-table-body');
 
   const today = new Date();
   const weekAgo = new Date(today);
@@ -2148,22 +2288,23 @@ function renderAdminReports() {
   monthAgo.setMonth(today.getMonth() - 1);
   const monthAgoStr = monthAgo.toISOString().split('T')[0];
 
-  const list = state.sessions.filter(s => {
-    const sDate = s.sessionDate || s.date || '';
-    if (filter === 'weekly') return sDate >= weekAgoStr;
-    if (filter === 'monthly') return sDate >= monthAgoStr;
-    return s.status === 'Completed' || s.status === 'Confirmed';
-  });
+  const completedList = state.sessions.filter(s => s.status === 'Completed');
+  const weeklyList = state.sessions.filter(s => (s.sessionDate || s.date || '') >= weekAgoStr);
+  const monthlyList = state.sessions.filter(s => (s.sessionDate || s.date || '') >= monthAgoStr);
 
-  tbody.innerHTML = list.map(s => `
+  const rowHtml = list => list.length === 0 ? `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 20px;">No report records found.</td></tr>` : list.map(s => `
     <tr>
       <td><code>${s.id}</code></td>
       <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${s.studentId || s.studentName}')">${s.studentName}</span></td>
       <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</span></td>
       <td>${s.subject}</td>
-      <td>${s.date} ${s.timeSlot}</td>
+      <td>${s.sessionDate || s.date} ${s.timeSlot}</td>
       <td>P${s.totalPaid}</td>
       <td><span class="badge ${s.status === 'Completed' ? 'badge-info' : 'badge-success'}">${s.status}</span></td>
     </tr>
   `).join('');
+
+  if (tbodyCompleted) tbodyCompleted.innerHTML = rowHtml(completedList);
+  if (tbodyWeekly) tbodyWeekly.innerHTML = rowHtml(weeklyList);
+  if (tbodyMonthly) tbodyMonthly.innerHTML = rowHtml(monthlyList);
 }
