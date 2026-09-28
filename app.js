@@ -277,6 +277,7 @@ function initNavigation() {
   });
 
   document.getElementById('back-to-tutor-portal-btn')?.addEventListener('click', () => switchRole('tutor'));
+  document.getElementById('edit-tutor-schedule-profile-btn')?.addEventListener('click', () => switchRole('tutor-profile'));
   document.getElementById('page-cancel-tutor-profile-btn')?.addEventListener('click', () => switchRole('tutor'));
 
   document.getElementById('tutor-profile-page-form')?.addEventListener('submit', (e) => {
@@ -288,6 +289,10 @@ function initNavigation() {
     const bio = document.getElementById('page-tutor-bio-input').value;
     const available = document.getElementById('page-tutor-availability-toggle').checked;
 
+    const checkedDays = Array.from(document.querySelectorAll('input[name="avail_day"]:checked')).map(cb => cb.value);
+    const windowVal = document.getElementById('tutor-time-window-input')?.value || '09:00 AM - 05:00 PM';
+    const blockedVal = document.getElementById('tutor-blocked-dates-input')?.value || '';
+
     const currentTutor = state.tutors.find(t => t.id === (state.currentUser ? state.currentUser.id : '') || t.name === (state.currentUser ? state.currentUser.name : '')) || state.tutors[0];
     if (currentTutor) {
       currentTutor.name = name;
@@ -297,6 +302,9 @@ function initNavigation() {
       currentTutor.hourlyRate = parseInt(rate) || 350;
       currentTutor.bio = bio;
       currentTutor.available = available;
+      currentTutor.availableDays = checkedDays;
+      currentTutor.availableTimeSlots = windowVal;
+      currentTutor.blockedDates = blockedVal;
     }
 
     if (state.currentUser) state.currentUser.name = name;
@@ -313,7 +321,10 @@ function initNavigation() {
           learningStyles: [style],
           hourlyRate: parseInt(rate) || 350,
           bio: bio,
-          available: available
+          available: available,
+          availableDays: checkedDays,
+          availableTimeSlots: windowVal,
+          blockedDates: blockedVal
         })
       });
     } catch (e) { console.log('Offline tutor profile edit fallback'); }
@@ -998,10 +1009,16 @@ function renderStudentUpcoming() {
         <p>${s.sessionDate || s.date || 'Today'} at ${s.timeSlot} | GCash Ref: <strong>${s.gcashRef}</strong></p>
       </div>
       <div>
-        <span class="badge badge-success margin-bottom">Confirmed</span>
-        <button class="btn btn-primary btn-small" onclick="launchWorkspace('${s.id}')">
-          Join Live Workspace Session
-        </button>
+        <span class="badge ${s.tutorStarted ? 'badge-success' : 'badge-info'} margin-bottom">${s.tutorStarted ? 'Session Live' : 'Confirmed'}</span>
+        ${s.tutorStarted ? `
+          <button class="btn btn-primary btn-small" onclick="launchWorkspace('${s.id}')">
+            Join Live Workspace Session
+          </button>
+        ` : `
+          <button class="btn btn-secondary btn-small" onclick="launchWorkspace('${s.id}')" title="Waiting for tutor to start session">
+            Session Pending - Waiting for Tutor to Start
+          </button>
+        `}
       </div>
     </div>
   `).join('');
@@ -1182,13 +1199,19 @@ function renderTutorUpcoming() {
     <div class="session-card">
       <div class="session-card-info">
         <h4>${s.subject} with Student <strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${s.studentId || s.studentName}')">${s.studentName}</strong></h4>
-        <p>Date: ${s.date} | Time: ${s.timeSlot} | Fee: <strong>P${s.hourlyRate}</strong></p>
+        <p>Date: ${s.sessionDate || s.date} | Time: ${s.timeSlot} | Fee: <strong>P${s.hourlyRate}</strong></p>
       </div>
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-        <span class="badge ${s.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${s.status}</span>
-        <button class="btn btn-primary btn-small" onclick="launchWorkspace('${s.id}')">
-          Launch Session
-        </button>
+        <span class="badge ${s.tutorStarted ? 'badge-success' : 'badge-info'}">${s.tutorStarted ? 'Active Live Session' : s.status}</span>
+        ${s.tutorStarted ? `
+          <button class="btn btn-primary btn-small" onclick="launchWorkspace('${s.id}')">
+            Enter Session Workspace
+          </button>
+        ` : `
+          <button class="btn btn-primary btn-small" onclick="startTutorSession('${s.id}')">
+            Start Workspace Session
+          </button>
+        `}
         <button class="btn btn-secondary btn-small" onclick="requestRescheduleSession('${s.id}')">
           Reschedule
         </button>
@@ -1217,30 +1240,29 @@ function renderTutorRequests() {
   const tbody = document.getElementById('tutor-requests-table-body');
   if (!tbody) return;
 
-  if (state.matches.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--ink-soft); padding: 20px;">No pending student match requests right now. Checked again soon!</td></tr>`;
+  const currentTutorName = state.currentUser ? state.currentUser.name : 'Prof. Alex Rivera';
+  const tutorMatches = state.matches.filter(m => m.tutorName === currentTutorName || m.tutorId === (state.currentUser ? state.currentUser.id : ''));
+
+  if (tutorMatches.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--ink-soft); padding: 20px;">No pending student match requests right now. Check back soon!</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = state.matches.map(m => {
-    const studentObj = state.students.find(s => s.name === m.studentName) || state.students[0];
-    const studentId = studentObj ? studentObj.id : 'STU-101';
-    return `
-      <tr>
-        <td><code>${m.id}</code></td>
-        <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${m.studentId || m.studentName}')">${m.studentName}</strong></td>
-        <td>${m.subject}</td>
-        <td><span class="badge badge-match">${m.score}% Match</span></td>
-        <td><span class="badge ${m.status === 'Approved' ? 'badge-success' : 'badge-info'}">${m.status}</span></td>
-        <td>
-          ${m.status === 'Pending Review' ? `
-            <button class="btn btn-primary btn-small" onclick="approveMatch('${m.id}')">Accept Match</button>
-            <button class="btn btn-secondary btn-small" onclick="cancelMatch('${m.id}')">Decline</button>
-          ` : `<span class="badge badge-success">Accepted</span>`}
-        </td>
-      </tr>
-    `;
-  }).join('');
+  tbody.innerHTML = tutorMatches.map(m => `
+    <tr>
+      <td><code>${m.id}</code></td>
+      <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${m.studentId || m.studentName}')">${m.studentName}</strong></td>
+      <td>${m.subject}</td>
+      <td><span class="badge badge-match">${m.score}% Match</span></td>
+      <td><span class="badge ${m.status === 'Approved' ? 'badge-success' : 'badge-info'}">${m.status}</span></td>
+      <td>
+        ${m.status === 'Pending Review' ? `
+          <button class="btn btn-primary btn-small" onclick="acceptTutorMatch('${m.id}')">Accept Match</button>
+          <button class="btn btn-secondary btn-small" onclick="cancelMatch('${m.id}')">Decline</button>
+        ` : `<span class="badge badge-success">Accepted</span>`}
+      </td>
+    </tr>
+  `).join('');
 }
 
 function renderTutorEarnings() {
@@ -1820,6 +1842,10 @@ function initWorkspaceSession() {
 window.launchWorkspace = async function(sessionId) {
   const session = state.sessions.find(s => s.id === sessionId);
   if (session) {
+    if (state.currentRole === 'student' && !session.tutorStarted) {
+      showToast(`Session Pending - Please wait for Tutor ${session.tutorName} to start the session.`, 'warning');
+      return;
+    }
     state.activeWorkspaceSession = session;
     document.getElementById('workspace-session-title').textContent = `Live Session: ${session.subject}`;
     document.getElementById('workspace-participants').textContent = `${session.studentName} (Student) & ${session.tutorName} (Tutor)`;
@@ -2512,4 +2538,94 @@ function populateTutorProfileEditPage() {
   if (elRate) elRate.value = t.hourlyRate || 350;
   if (elBio) elBio.value = t.bio || `${state.currentUser.name} Tutor Profile`;
   if (elAvail) elAvail.checked = Boolean(t.available);
+
+  const days = t.availableDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+  document.querySelectorAll('input[name="avail_day"]').forEach(cb => {
+    cb.checked = days.includes(cb.value);
+  });
+  const elWindow = document.getElementById('tutor-time-window-input');
+  if (elWindow) elWindow.value = t.availableTimeSlots || '09:00 AM - 05:00 PM';
+  const elBlocked = document.getElementById('tutor-blocked-dates-input');
+  if (elBlocked) elBlocked.value = t.blockedDates || '';
+
+  renderTutorSummary();
+}
+
+window.acceptTutorMatch = async function(matchId) {
+  const m = state.matches.find(x => x.id === matchId);
+  if (m) {
+    m.status = 'Approved';
+    renderTutorRequests();
+
+    const studentName = m.studentName;
+    const notifObj = {
+      targetRole: 'student',
+      target: studentName,
+      title: 'Match Request Accepted!',
+      message: `Your match request with ${m.tutorName} for ${m.subject} has been accepted! Please attend your scheduled session.`
+    };
+    state.notifications.unshift({ ...notifObj, id: 'notif-' + Date.now(), time: 'Just now', read: false });
+
+    try {
+      await fetch('api/matches.php', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: matchId, status: 'Approved' })
+      });
+      await fetch('api/notifications.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(notifObj)
+      });
+    } catch (err) { console.log('Offline API fallback'); }
+
+    showToast(`Match request accepted! Student ${studentName} notified.`);
+  }
+};
+
+window.startTutorSession = async function(sessionId) {
+  const s = state.sessions.find(x => x.id === sessionId);
+  if (s) {
+    s.tutorStarted = true;
+    renderTutorUpcoming();
+    renderStudentUpcoming();
+
+    const notifObj = {
+      targetRole: 'student',
+      target: s.studentName,
+      title: 'Session Started!',
+      message: `Tutor ${s.tutorName} has started the live workspace session for ${s.subject}. Please join now!`
+    };
+    state.notifications.unshift({ ...notifObj, id: 'notif-' + Date.now(), time: 'Just now', read: false });
+
+    try {
+      await fetch('api/sessions.php', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: sessionId, tutorStarted: true })
+      });
+      await fetch('api/notifications.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(notifObj)
+      });
+    } catch (err) { console.log('Offline API fallback'); }
+
+    showToast(`Session started! Student ${s.studentName} notified to join.`);
+    launchWorkspace(sessionId);
+  }
+};
+
+function renderTutorSummary() {
+  if (!state.currentUser) return;
+  const t = state.tutors.find(x => x.id === state.currentUser.id || x.email === state.currentUser.email || x.name === state.currentUser.name);
+  if (!t) return;
+
+  const daysEl = document.getElementById('tutor-summary-days');
+  const windowEl = document.getElementById('tutor-summary-window');
+  const blockedEl = document.getElementById('tutor-summary-blocked');
+
+  if (daysEl) daysEl.textContent = Array.isArray(t.availableDays) ? t.availableDays.join(', ') : (t.availableDays || 'Mon, Tue, Wed, Thu, Fri');
+  if (windowEl) windowEl.textContent = t.availableTimeSlots || '09:00 AM - 05:00 PM';
+  if (blockedEl) blockedEl.textContent = t.blockedDates || 'None';
 }

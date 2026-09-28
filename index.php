@@ -377,39 +377,17 @@ require_once __DIR__ . '/api/config.php';
         <div class="tutor-tab-content active" id="tutor-tab-availability">
           <div class="dashboard-section">
             <div class="section-title-bar">
-              <h3>Weekly Availability & Schedule Window</h3>
+              <h3>Weekly Availability & Schedule Summary</h3>
+              <button class="btn btn-primary btn-small" id="edit-tutor-schedule-profile-btn">Edit Schedule in Profile</button>
             </div>
             <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 22px; border-radius: 6px; margin-bottom: 24px;">
-              <form id="tutor-availability-settings-form">
-                <div class="form-group">
-                  <label>Weekly Working Days</label>
-                  <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px;">
-                    <label><input type="checkbox" name="avail_day" value="Mon" checked> Mon</label>
-                    <label><input type="checkbox" name="avail_day" value="Tue" checked> Tue</label>
-                    <label><input type="checkbox" name="avail_day" value="Wed" checked> Wed</label>
-                    <label><input type="checkbox" name="avail_day" value="Thu" checked> Thu</label>
-                    <label><input type="checkbox" name="avail_day" value="Fri" checked> Fri</label>
-                    <label><input type="checkbox" name="avail_day" value="Sat"> Sat</label>
-                    <label><input type="checkbox" name="avail_day" value="Sun"> Sun</label>
-                  </div>
-                </div>
-                <div class="form-row margin-top">
-                  <div class="form-group">
-                    <label>Daily Teaching Window</label>
-                    <input type="text" id="tutor-time-window-input" class="form-input" value="09:00 AM - 05:00 PM">
-                  </div>
-                  <div class="form-group">
-                    <label>Block Unavailable Dates (YYYY-MM-DD)</label>
-                    <input type="text" id="tutor-blocked-dates-input" class="form-input" placeholder="e.g. 2026-03-25">
-                  </div>
-                </div>
-                <div style="display: flex; gap: 10px;" class="margin-top">
-                  <button type="submit" class="btn btn-primary btn-small">Save Availability</button>
-                  <button type="button" class="btn btn-secondary btn-small" id="tutor-reset-availability-btn">Reset Defaults</button>
-                </div>
-              </form>
+              <div class="tutor-details-list">
+                <div><strong>Weekly Days:</strong> <span id="tutor-summary-days">Mon, Tue, Wed, Thu, Fri</span></div>
+                <div><strong>Daily Window:</strong> <span id="tutor-summary-window">09:00 AM - 05:00 PM</span></div>
+                <div><strong>Blocked Dates:</strong> <span id="tutor-summary-blocked">None</span></div>
+                <div><strong>Status:</strong> <span class="badge badge-success">Active & Accepting Bookings</span></div>
+              </div>
             </div>
-
           </div>
         </div>
 
@@ -567,6 +545,32 @@ require_once __DIR__ . '/api/config.php';
                 <label style="margin: 0;">Availability:</label>
                 <input type="checkbox" id="page-tutor-availability-toggle" checked style="width: 18px; height: 18px; cursor: pointer;">
                 <span class="sub-text">Accepting new students on TutorLink</span>
+              </div>
+
+              <hr class="divider margin-top" style="margin-top: 20px; margin-bottom: 20px;">
+
+              <h4 style="margin-bottom: 12px;">Weekly Availability & Schedule Window</h4>
+              <div class="form-group">
+                <label>Weekly Working Days</label>
+                <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px;">
+                  <label><input type="checkbox" name="avail_day" value="Mon" checked> Mon</label>
+                  <label><input type="checkbox" name="avail_day" value="Tue" checked> Tue</label>
+                  <label><input type="checkbox" name="avail_day" value="Wed" checked> Wed</label>
+                  <label><input type="checkbox" name="avail_day" value="Thu" checked> Thu</label>
+                  <label><input type="checkbox" name="avail_day" value="Fri" checked> Fri</label>
+                  <label><input type="checkbox" name="avail_day" value="Sat"> Sat</label>
+                  <label><input type="checkbox" name="avail_day" value="Sun"> Sun</label>
+                </div>
+              </div>
+              <div class="form-row margin-top">
+                <div class="form-group">
+                  <label>Daily Teaching Window</label>
+                  <input type="text" id="tutor-time-window-input" class="form-input" value="09:00 AM - 05:00 PM">
+                </div>
+                <div class="form-group">
+                  <label>Block Unavailable Dates (YYYY-MM-DD)</label>
+                  <input type="text" id="tutor-blocked-dates-input" class="form-input" placeholder="e.g. 2026-03-25">
+                </div>
               </div>
 
               <div class="margin-top" style="display: flex; gap: 12px;">
