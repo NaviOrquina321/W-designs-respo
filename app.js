@@ -1279,6 +1279,8 @@ function renderTutorEarnings() {
   const tutorRatingEl = document.getElementById('tutor-stat-rating');
 
   const totalEarnings = tutorSessions.reduce((sum, s) => sum + Math.round((s.totalPaid || 0) * 0.90), 0);
+  const grossRev = tutorSessions.reduce((sum, s) => sum + (s.totalPaid || 0), 0);
+  const pendingRev = tutorSessions.filter(s => s.payoutStatus !== 'Paid Out').reduce((sum, s) => sum + Math.round((s.totalPaid || 0) * 0.90), 0);
   const uniqueStudents = new Set(tutorSessions.map(s => s.studentName)).size;
   const currentTutorObj = state.tutors.find(t => t.name === currentTutorName);
 
@@ -1290,6 +1292,31 @@ function renderTutorEarnings() {
       tutorRatingEl.textContent = `${currentTutorObj.rating} ★`;
     } else {
       tutorRatingEl.textContent = '0.0 ★';
+    }
+  }
+
+  const grossEl = document.getElementById('tutor-gross-earnings');
+  const netEl = document.getElementById('tutor-net-earnings');
+  const pendingEl = document.getElementById('tutor-payout-pending');
+
+  if (grossEl) grossEl.textContent = `P${grossRev.toLocaleString()}`;
+  if (netEl) netEl.textContent = `P${totalEarnings.toLocaleString()}`;
+  if (pendingEl) pendingEl.textContent = `P${pendingRev.toLocaleString()}`;
+
+  const reviewsContainer = document.getElementById('tutor-reviews-list');
+  if (reviewsContainer) {
+    const ratedSessions = tutorSessions.filter(s => s.rating && s.rating > 0);
+    if (ratedSessions.length === 0) {
+      reviewsContainer.innerHTML = `<p class="sub-text">No student feedback or reviews received yet.</p>`;
+    } else {
+      reviewsContainer.innerHTML = ratedSessions.map(s => `
+        <div class="session-card" style="background: white; border: 1px solid var(--line); padding: 12px; margin-bottom: 8px;">
+          <div>
+            <strong>${s.studentName}</strong> <span class="sub-text">(${s.subject})</span>
+            <div style="font-size: 0.9rem; margin-top: 4px;">★ ${s.rating}.0 - "${s.feedback || 'Great session!'}"</div>
+          </div>
+        </div>
+      `).join('');
     }
   }
 
