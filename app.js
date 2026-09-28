@@ -1641,10 +1641,23 @@ function initGCashPayment() {
 }
 
 function openGCashPayment() {
-  const method = state.activeBooking.paymentMethod || 'GCash';
+  const b = state.activeBooking;
+  const method = b.paymentMethod || 'GCash';
   document.getElementById('payment-method-header-title').textContent = `${method} Payment`;
-  document.getElementById('gcash-modal-amount').textContent = `P${state.activeBooking.total}.00`;
-  document.getElementById('gcash-confirm-pay-btn').textContent = `Confirm & Pay P${state.activeBooking.total}.00`;
+  document.getElementById('gcash-modal-amount').textContent = `P${b.total}.00`;
+  document.getElementById('gcash-confirm-pay-btn').textContent = `Confirm & Pay P${b.total}.00`;
+
+  const detailsContainer = document.getElementById('gcash-booking-summary-preview');
+  if (detailsContainer) {
+    detailsContainer.innerHTML = `
+      <div class="receipt-box" style="margin-top: 10px; font-size: 0.88rem; text-align: left; background: rgba(255,255,255,0.9); border: 1px solid var(--line); padding: 10px; border-radius: 4px;">
+        <div><strong>Tutor:</strong> ${b.tutorName}</div>
+        <div><strong>Subject:</strong> ${b.subject}</div>
+        <div><strong>Schedule:</strong> ${b.date} (${b.timeSlot || '02:00 PM'})</div>
+      </div>
+    `;
+  }
+
   openModal('modal-gcash');
 }
 
