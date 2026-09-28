@@ -238,7 +238,15 @@ function initNavigation() {
   const logoutBtn = document.getElementById('logout-btn');
   const userProfileBtn = document.getElementById('user-profile-btn');
 
-  navLogo.addEventListener('click', () => switchRole('guest'));
+  navLogo.addEventListener('click', () => {
+    if (state.currentUser && state.currentUser.role) {
+      switchRole(state.currentUser.role);
+    } else if (state.currentRole && state.currentRole !== 'guest') {
+      switchRole(state.currentRole);
+    } else {
+      switchRole('guest');
+    }
+  });
 
   loginBtn.addEventListener('click', (e) => {
     e.preventDefault();
@@ -1642,7 +1650,11 @@ function initGCashPayment() {
 
 function openGCashPayment() {
   const b = state.activeBooking;
-  const method = b.paymentMethod || 'GCash';
+  b.paymentMethod = 'GCash';
+  const method = 'GCash';
+  const selectEl = document.getElementById('payment-method-select');
+  if (selectEl) selectEl.value = 'GCash';
+
   document.getElementById('payment-method-header-title').textContent = `${method} Payment`;
   document.getElementById('gcash-modal-amount').textContent = `P${b.total}.00`;
   document.getElementById('gcash-confirm-pay-btn').textContent = `Confirm & Pay P${b.total}.00`;
