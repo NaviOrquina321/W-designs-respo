@@ -151,21 +151,21 @@ async function syncWithDatabase() {
           name: t.name,
           initials: t.initials,
           rating: parseFloat(t.rating),
-          reviewsCount: parseInt(t.reviews_count),
-          hourlyRate: parseInt(t.hourly_rate),
-          subjects: t.subjects.split(',').map(x => x.trim()),
-          learningStyles: t.learning_styles.split(',').map(x => x.trim()),
+          reviewsCount: parseInt(t.reviewsCount || t.reviews_count || 0),
+          hourlyRate: parseInt(t.hourlyRate || t.hourly_rate || 350),
+          subjects: Array.isArray(t.subjects) ? t.subjects : (t.subjects ? t.subjects.split(',').map(x => x.trim()) : ['Mathematics']),
+          learningStyles: Array.isArray(t.learningStyles || t.learning_styles) ? (t.learningStyles || t.learning_styles) : ['Step-by-Step Explanation'],
           bio: t.bio,
-          availableDays: t.available_days ? t.available_days.split(',') : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-          availableTimeSlots: t.available_time_slots || '09:00 AM - 05:00 PM',
-          blockedDates: t.blocked_dates || '',
-          available: Boolean(parseInt(t.available)),
-          deactivated: Boolean(parseInt(t.deactivated || 0)),
-          diplomaStatus: t.diploma_status || 'Verified',
-          torStatus: t.tor_status || 'Verified',
-          idStatus: t.id_status || 'Verified',
-          approvalStatus: t.approval_status || 'Approved',
-          availabilitySlots: ['09:00 AM', '11:00 AM', '02:00 PM', '04:00 PM']
+          availableDays: Array.isArray(t.availableDays) ? t.availableDays : (t.available_days ? t.available_days.split(',') : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']),
+          availableTimeSlots: t.availableTimeSlots || t.available_time_slots || '09:00 AM - 05:00 PM',
+          blockedDates: t.blockedDates || t.blocked_dates || '',
+          available: Boolean(t.available),
+          deactivated: Boolean(t.deactivated),
+          diplomaStatus: t.diplomaStatus || t.diploma_status || 'Verified',
+          torStatus: t.torStatus || t.tor_status || 'Verified',
+          idStatus: t.idStatus || t.id_status || 'Verified',
+          approvalStatus: t.approvalStatus || t.approval_status || 'Approved',
+          availabilitySlots: Array.isArray(t.availabilitySlots) ? t.availabilitySlots : ['09:00 AM', '02:00 PM', '04:00 PM']
         }));
       }
     }
@@ -1418,7 +1418,8 @@ window.openCalendarBooking = function(tutorId, preferredSubject = null) {
   `;
 
   const slotsContainer = document.getElementById('time-slots-container');
-  slotsContainer.innerHTML = tutor.availabilitySlots.map(slot => `
+  const slots = (tutor.availabilitySlots && tutor.availabilitySlots.length > 0) ? tutor.availabilitySlots : ['09:00 AM', '02:00 PM', '04:00 PM'];
+  slotsContainer.innerHTML = slots.map(slot => `
     <div class="slot-chip" onclick="selectTimeSlot(this, '${slot}')">${slot}</div>
   `).join('');
 
