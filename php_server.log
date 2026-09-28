@@ -1259,3 +1259,42 @@ Stack trace:
 [Mon Sep 28 19:24:00 2026] 127.0.0.1:45328 Accepted
 [Mon Sep 28 19:24:00 2026] 127.0.0.1:45328 [200]: POST /api/register.php
 [Mon Sep 28 19:24:00 2026] 127.0.0.1:45328 Closing
+[Mon Sep 28 20:35:21 2026] 127.0.0.1:46294 Accepted
+[Mon Sep 28 20:35:21 2026] 127.0.0.1:46294 [200]: GET /index.php
+[Mon Sep 28 20:35:21 2026] 127.0.0.1:46294 Closing
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60168 Accepted
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60168 [200]: GET /index.php
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60168 Closing
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60182 Accepted
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60188 Accepted
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60182 [200]: GET /styles.css
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60182 Closing
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60188 [200]: GET /app.js
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60188 Closing
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60190 Accepted
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60190 [200]: GET /api/students.php
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60190 Closing
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60202 Accepted
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60202 [200]: GET /api/subjects.php
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60202 Closing
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60204 Accepted
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60204 [200]: GET /api/tutors.php
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60204 Closing
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60208 Accepted
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60208 [200]: GET /api/sessions.php
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60208 Closing
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60216 Accepted
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60216 [200]: GET /api/payments.php
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60216 Closing
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60232 Accepted
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60232 [200]: GET /api/matches.php
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60232 Closing
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60238 Accepted
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60238 [200]: GET /api/schedules.php
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60238 Closing
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60244 Accepted
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60244 [200]: GET /api/notifications.php
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60244 Closing
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60250 Accepted
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60250 [200]: GET /api/admin.php
+[Mon Sep 28 20:36:17 2026] 127.0.0.1:60250 Closing

@@ -47,6 +47,7 @@ require_once __DIR__ . '/api/config.php';
           <span class="notif-badge" id="notif-badge-count">2</span>
         </button>
 
+        <a class="link" href="#" id="admin-direct-btn">Admin Portal</a>
         <a class="link" href="#" id="login-link-btn">Log In</a>
         <button class="btn btn-primary btn-small" id="signup-btn">Sign Up</button>
         <button class="btn btn-secondary btn-small hidden" id="logout-btn">Log Out</button>
@@ -1013,7 +1014,6 @@ require_once __DIR__ . '/api/config.php';
                   <th>Tutor ID</th>
                   <th>Full Name</th>
                   <th>Subjects</th>
-                  <th>Credentials</th>
                   <th>Application Status</th>
                   <th>Account Status</th>
                   <th>Actions</th>
@@ -1108,21 +1108,6 @@ require_once __DIR__ . '/api/config.php';
           <div class="form-group">
             <label>Grade Level / Academic Specialty</label>
             <input type="text" id="reg-specialty" required placeholder="e.g. Senior High / Mathematics" class="form-input">
-          </div>
-          <div id="tutor-credentials-upload-fields" class="hidden margin-top" style="border-top: 1px solid var(--line); padding-top: 12px;">
-            <h4 style="margin-bottom: 8px;">Upload Credentials</h4>
-            <div class="form-group">
-              <label>Diploma / Degree Certificate</label>
-              <input type="file" id="reg-tutor-diploma" class="form-input" accept=".pdf,.png,.jpg,.jpeg">
-            </div>
-            <div class="form-group">
-              <label>Transcript of Records (TOR)</label>
-              <input type="file" id="reg-tutor-tor" class="form-input" accept=".pdf,.png,.jpg,.jpeg">
-            </div>
-            <div class="form-group">
-              <label>Government-issued ID Card</label>
-              <input type="file" id="reg-tutor-idcard" class="form-input" accept=".pdf,.png,.jpg,.jpeg">
-            </div>
           </div>
           <button type="submit" class="btn btn-primary full-width margin-top">Submit Registration</button>
         </form>

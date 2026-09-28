@@ -161,9 +161,6 @@ async function syncWithDatabase() {
           blockedDates: t.blockedDates || t.blocked_dates || '',
           available: Boolean(t.available),
           deactivated: Boolean(t.deactivated),
-          diplomaStatus: t.diplomaStatus || t.diploma_status || 'Verified',
-          torStatus: t.torStatus || t.tor_status || 'Verified',
-          idStatus: t.idStatus || t.id_status || 'Verified',
           approvalStatus: t.approvalStatus || t.approval_status || 'Approved',
           availabilitySlots: Array.isArray(t.availabilitySlots) ? t.availabilitySlots : ['09:00 AM', '02:00 PM', '04:00 PM']
         }));
@@ -246,6 +243,13 @@ function initNavigation() {
     } else {
       switchRole('guest');
     }
+  });
+
+  const adminDirectBtn = document.getElementById('admin-direct-btn');
+  adminDirectBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    switchRole('admin', { id: 'ADMIN-001', name: 'System Admin', role: 'admin', email: 'admin@tutorlink.ph' });
+    showToast('Entered Admin Monitoring Portal.');
   });
 
   loginBtn.addEventListener('click', (e) => {
@@ -401,6 +405,8 @@ function switchRole(role, customUser = null) {
     state.currentUser = null;
     localStorage.removeItem('tutorlink_session');
     document.getElementById('view-landing').classList.add('active');
+    const adminDirectBtn = document.getElementById('admin-direct-btn');
+    if (adminDirectBtn) adminDirectBtn.classList.remove('hidden');
     if (publicNavLinks) publicNavLinks.style.display = 'flex';
     if (loginBtn) loginBtn.classList.remove('hidden');
     if (signupBtn) signupBtn.classList.remove('hidden');
@@ -417,6 +423,11 @@ function switchRole(role, customUser = null) {
       }));
     }
 
+    const adminDirectBtn = document.getElementById('admin-direct-btn');
+    if (adminDirectBtn) {
+      if (role === 'admin') adminDirectBtn.classList.add('hidden');
+      else adminDirectBtn.classList.add('hidden');
+    }
     if (publicNavLinks) publicNavLinks.style.display = 'none';
     if (loginBtn) loginBtn.classList.add('hidden');
     if (signupBtn) signupBtn.classList.add('hidden');
@@ -472,10 +483,6 @@ function initAuthModalTabs() {
     const password = document.getElementById('reg-password').value;
     const specialty = document.getElementById('reg-specialty').value;
 
-    const diplomaFile = document.getElementById('reg-tutor-diploma')?.files[0];
-    const torFile = document.getElementById('reg-tutor-tor')?.files[0];
-    const idFile = document.getElementById('reg-tutor-id')?.files[0];
-
     try {
       const res = await fetch('api/register.php', {
         method: 'POST',
@@ -485,10 +492,7 @@ function initAuthModalTabs() {
           name: fullname,
           email,
           password,
-          specialty,
-          diploma_status: diplomaFile ? 'Uploaded' : 'Pending',
-          tor_status: torFile ? 'Uploaded' : 'Pending',
-          id_status: idFile ? 'Uploaded' : 'Pending'
+          specialty
         })
       });
       const data = await res.json();
@@ -564,9 +568,6 @@ function initAuthModalTabs() {
         availabilitySlots: ['09:00 AM', '02:00 PM', '04:00 PM'],
         available: true,
         deactivated: false,
-        diplomaStatus: 'Pending',
-        torStatus: 'Pending',
-        idStatus: 'Pending',
         approvalStatus: 'Pending Review'
       };
       state.tutors.unshift(newTutor);
@@ -2206,13 +2207,6 @@ function renderAdminTutors() {
       <td><code>${t.id}</code></td>
       <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${t.id}')">${t.name}</strong></td>
       <td>${t.subjects.join(', ')}</td>
-      <td>
-        <div style="font-size: 0.82rem;">
-          Diploma: <span class="badge ${t.diplomaStatus === 'Verified' ? 'badge-success' : 'badge-info'}" style="cursor: pointer;" onclick="verifyTutorDoc('${t.id}', 'diploma')">${t.diplomaStatus}</span><br>
-          TOR: <span class="badge ${t.torStatus === 'Verified' ? 'badge-success' : 'badge-info'}" style="cursor: pointer;" onclick="verifyTutorDoc('${t.id}', 'tor')">${t.torStatus}</span><br>
-          ID: <span class="badge ${t.idStatus === 'Verified' ? 'badge-success' : 'badge-info'}" style="cursor: pointer;" onclick="verifyTutorDoc('${t.id}', 'id')">${t.idStatus}</span>
-        </div>
-      </td>
       <td><span class="badge ${t.approvalStatus === 'Approved' ? 'badge-success' : 'badge-info'}">${t.approvalStatus}</span></td>
       <td><span class="badge ${t.deactivated ? 'badge-danger' : 'badge-success'}">${t.deactivated ? 'Deactivated' : 'Active'}</span></td>
       <td>
@@ -2227,16 +2221,6 @@ function renderAdminTutors() {
   document.getElementById('admin-stat-total-tutors').textContent = state.tutors.length;
 }
 
-window.verifyTutorDoc = function(tutorId, docType) {
-  const tutor = state.tutors.find(t => t.id === tutorId);
-  if (tutor) {
-    if (docType === 'diploma') tutor.diplomaStatus = 'Verified';
-    if (docType === 'tor') tutor.torStatus = 'Verified';
-    if (docType === 'id') tutor.idStatus = 'Verified';
-    renderAdminTutors();
-    showToast(`Tutor ${docType.toUpperCase()} credential verified for ${tutor.name}.`);
-  }
-};
 
 window.approveTutorApplication = function(tutorId) {
   const tutor = state.tutors.find(t => t.id === tutorId);
