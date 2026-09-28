@@ -1,28 +1,44 @@
 <?php
-// api/db.php - Database connection and auto-schema initialization using PDO + SQLite
+// api/db.php - SQL Database Connection with MySQL primary & SQLite fallback
 
 function getDbConnection() {
-    $dbFile = __DIR__ . '/bris_database.sqlite';
-    $dbExists = file_exists($dbFile);
+    $mysqlHost = '127.0.0.1';
+    $mysqlDb   = 'bris_db';
+    $mysqlUser = 'root';
+    $mysqlPass = '';
 
+    // Attempt MySQL connection first
     try {
-        $pdo = new PDO('sqlite:' . $dbFile);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
-        if (!$dbExists || filesize($dbFile) === 0) {
-            initializeDatabase($pdo);
-        }
-
+        $dsn = "mysql:host=$mysqlHost;dbname=$mysqlDb;charset=utf8mb4";
+        $pdo = new PDO($dsn, $mysqlUser, $mysqlPass, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]);
         return $pdo;
     } catch (PDOException $e) {
-        header('Content-Type: application/json', true, 500);
-        echo json_encode(['error' => 'Database Connection Failed: ' . $e->getMessage()]);
-        exit;
+        // Fallback to SQLite SQL engine if MySQL service is offline or unavailable in sandbox
+        $dbFile = __DIR__ . '/bris_database.sqlite';
+        $dbExists = file_exists($dbFile);
+
+        try {
+            $pdo = new PDO('sqlite:' . $dbFile);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+            if (!$dbExists || filesize($dbFile) === 0) {
+                initializeSqliteDatabase($pdo);
+            }
+
+            return $pdo;
+        } catch (PDOException $sqliteEx) {
+            header('Content-Type: application/json', true, 500);
+            echo json_encode(['error' => 'Database Connection Failed: ' . $sqliteEx->getMessage()]);
+            exit;
+        }
     }
 }
 
-function initializeDatabase($pdo) {
+function initializeSqliteDatabase($pdo) {
     $schema = "
     CREATE TABLE IF NOT EXISTS residents (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
