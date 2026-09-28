@@ -82,8 +82,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTutorProfileSettings();
   initTutorSubTabs();
   initSubjectManagement();
+
+  const savedSessionStr = localStorage.getItem('tutorlink_session');
+  if (savedSessionStr) {
+    try {
+      const savedSession = JSON.parse(savedSessionStr);
+      if (savedSession && savedSession.role && savedSession.user) {
+        state.currentUser = savedSession.user;
+        state.currentRole = savedSession.role;
+      }
+    } catch (e) {
+      localStorage.removeItem('tutorlink_session');
+    }
+  }
+
   await syncWithDatabase();
-  renderAllViews();
+
+  if (state.currentUser && state.currentRole && state.currentRole !== 'guest') {
+    switchRole(state.currentRole, state.currentUser);
+  } else {
+    switchRole('guest');
+  }
 });
 
 
@@ -199,8 +218,10 @@ function initNavigation() {
 
   userProfileBtn?.addEventListener('click', () => {
     if (state.currentRole === 'tutor') {
+      populateTutorProfileEditPage();
       switchRole('tutor-profile');
     } else if (state.currentRole === 'student') {
+      populateStudentProfileEditModal();
       openModal('modal-edit-student-profile');
     } else {
       showToast('Profile settings are available for logged-in students and tutors.');
@@ -303,6 +324,7 @@ function switchRole(role, customUser = null) {
 
   if (role === 'guest') {
     state.currentUser = null;
+    localStorage.removeItem('tutorlink_session');
     document.getElementById('view-landing').classList.add('active');
     if (publicNavLinks) publicNavLinks.style.display = 'flex';
     if (loginBtn) loginBtn.classList.remove('hidden');
@@ -312,6 +334,14 @@ function switchRole(role, customUser = null) {
     if (userProfileBtn) userProfileBtn.classList.add('hidden');
     if (floatingCalBtn) floatingCalBtn.classList.add('hidden');
   } else {
+    if (customUser) state.currentUser = customUser;
+    if (state.currentUser) {
+      localStorage.setItem('tutorlink_session', JSON.stringify({
+        role: role,
+        user: state.currentUser
+      }));
+    }
+
     if (publicNavLinks) publicNavLinks.style.display = 'none';
     if (loginBtn) loginBtn.classList.add('hidden');
     if (signupBtn) signupBtn.classList.add('hidden');
@@ -327,17 +357,19 @@ function switchRole(role, customUser = null) {
     }
 
     if (role === 'student') {
-      state.currentUser = customUser || { name: 'Maria Santos', role: 'student' };
-      const prefix = (state.currentUser && state.currentUser.isNew) ? 'Welcome to TutorLink,' : 'Welcome back,'; document.getElementById('student-welcome-heading').textContent = `${prefix} ${state.currentUser ? state.currentUser.name : ''}!`;
+      state.currentUser = customUser || state.currentUser || { name: 'Maria Santos', role: 'student' };
+      const prefix = (state.currentUser && state.currentUser.isNew) ? 'Welcome to TutorLink,' : 'Welcome back,';
+      document.getElementById('student-welcome-heading').textContent = `${prefix} ${state.currentUser ? state.currentUser.name : ''}!`;
       document.getElementById('view-student').classList.add('active');
     } else if (role === 'tutor') {
-      state.currentUser = customUser || { name: 'Prof. Alex Rivera', role: 'tutor' };
+      state.currentUser = customUser || state.currentUser || { name: 'Prof. Alex Rivera', role: 'tutor' };
       document.getElementById('tutor-welcome-heading').textContent = `Tutor Portal - ${state.currentUser.name}`;
       document.getElementById('view-tutor').classList.add('active');
     } else if (role === 'tutor-profile') {
+      populateTutorProfileEditPage();
       document.getElementById('view-tutor-profile').classList.add('active');
     } else if (role === 'admin') {
-      state.currentUser = customUser || { name: 'System Admin', role: 'admin' };
+      state.currentUser = customUser || state.currentUser || { name: 'System Admin', role: 'admin' };
       document.getElementById('view-admin').classList.add('active');
     }
   }
@@ -384,6 +416,7 @@ function initAuthModalTabs() {
       const data = await res.json();
       if (res.ok && data.status === 'success') {
         const user = data.user;
+        user.isNew = true;
         switchRole(user.role, user);
         closeModal('modal-auth');
         showToast(`Welcome to TutorLink, ${user.name}!`);
@@ -610,10 +643,10 @@ function initTutorSubTabs() {
       currentTutor.blockedDates = blockedVal;
     }
 
-    renderTutorSlots();
+    renderTutorCalendar();
     showToast('Tutor availability schedule updated!');
   });
-  renderTutorSlots();
+  renderTutorCalendar();
 }
 
 // Profile Modals & Settings Functionality
@@ -2307,4 +2340,50 @@ function renderAdminReports() {
   if (tbodyCompleted) tbodyCompleted.innerHTML = rowHtml(completedList);
   if (tbodyWeekly) tbodyWeekly.innerHTML = rowHtml(weeklyList);
   if (tbodyMonthly) tbodyMonthly.innerHTML = rowHtml(monthlyList);
+}
+
+function populateStudentProfileEditModal() {
+  if (!state.currentUser) return;
+  const s = state.students.find(x => x.id === state.currentUser.id || x.email === state.currentUser.email || x.name === state.currentUser.name) || {
+    name: state.currentUser.name || '',
+    grade: 'Senior High',
+    subjectsNeeded: [],
+    bio: ''
+  };
+
+  const elName = document.getElementById('edit-student-name');
+  const elGrade = document.getElementById('edit-student-grade');
+  const elSubj = document.getElementById('edit-student-subjects');
+  const elBio = document.getElementById('edit-student-bio');
+
+  if (elName) elName.value = s.name || state.currentUser.name || '';
+  if (elGrade) elGrade.value = s.grade || 'Senior High';
+  if (elSubj) elSubj.value = s.subjectsNeeded ? s.subjectsNeeded.join(', ') : (s.grade || '');
+  if (elBio) elBio.value = s.bio || `${state.currentUser.name} Student Profile`;
+}
+
+function populateTutorProfileEditPage() {
+  if (!state.currentUser) return;
+  const t = state.tutors.find(x => x.id === state.currentUser.id || x.email === state.currentUser.email || x.name === state.currentUser.name) || {
+    name: state.currentUser.name || '',
+    subjects: ['Mathematics'],
+    learningStyles: ['Step-by-Step Explanation'],
+    hourlyRate: 350,
+    bio: '',
+    available: true
+  };
+
+  const elName = document.getElementById('page-tutor-name-input');
+  const elSubj = document.getElementById('page-tutor-subjects-input');
+  const elStyle = document.getElementById('page-tutor-style-select');
+  const elRate = document.getElementById('page-tutor-rate-input');
+  const elBio = document.getElementById('page-tutor-bio-input');
+  const elAvail = document.getElementById('page-tutor-availability-toggle');
+
+  if (elName) elName.value = t.name || state.currentUser.name || '';
+  if (elSubj) elSubj.value = t.subjects ? t.subjects.join(', ') : 'Mathematics';
+  if (elStyle && t.learningStyles && t.learningStyles.length > 0) elStyle.value = t.learningStyles[0];
+  if (elRate) elRate.value = t.hourlyRate || 350;
+  if (elBio) elBio.value = t.bio || `${state.currentUser.name} Tutor Profile`;
+  if (elAvail) elAvail.checked = Boolean(t.available);
 }

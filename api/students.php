@@ -3,6 +3,7 @@
 require_once 'config.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
+$isSQLite = ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite');
 
 if ($method === 'GET') {
     $stmt = $pdo->query("SELECT * FROM students ORDER BY created_at DESC");
@@ -21,10 +22,17 @@ if ($method === 'GET') {
     $bio = $input['bio'] ?? '';
     $subjectsNeeded = $input['subjects_needed'] ?? ($input['subjectsNeeded'] ?? '');
 
-    $stmt = $pdo->prepare("INSERT INTO students (id, name, email, grade, validated, deactivated, bio, subjects_needed)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                           ON DUPLICATE KEY UPDATE name=?, grade=?, validated=?, deactivated=?, bio=?, subjects_needed=?");
-    $stmt->execute([$id, $name, $email, $grade, $validated, $deactivated, $bio, $subjectsNeeded, $name, $grade, $validated, $deactivated, $bio, $subjectsNeeded]);
+    if ($isSQLite) {
+        $stmt = $pdo->prepare("INSERT INTO students (id, name, email, grade, validated, deactivated, bio, subjects_needed)
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                               ON CONFLICT(id) DO UPDATE SET name=excluded.name, grade=excluded.grade, validated=excluded.validated, deactivated=excluded.deactivated, bio=excluded.bio, subjects_needed=excluded.subjects_needed");
+        $stmt->execute([$id, $name, $email, $grade, $validated, $deactivated, $bio, $subjectsNeeded]);
+    } else {
+        $stmt = $pdo->prepare("INSERT INTO students (id, name, email, grade, validated, deactivated, bio, subjects_needed)
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                               ON DUPLICATE KEY UPDATE name=?, grade=?, validated=?, deactivated=?, bio=?, subjects_needed=?");
+        $stmt->execute([$id, $name, $email, $grade, $validated, $deactivated, $bio, $subjectsNeeded, $name, $grade, $validated, $deactivated, $bio, $subjectsNeeded]);
+    }
 
     echo json_encode(['status' => 'success', 'message' => 'Student saved successfully', 'id' => $id]);
 } elseif ($method === 'PUT') {

@@ -3,6 +3,7 @@
 require_once 'config.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
+$isSQLite = ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite');
 
 if ($method === 'GET') {
     $stmt = $pdo->query("SELECT * FROM tutors ORDER BY created_at DESC");
@@ -48,13 +49,20 @@ if ($method === 'GET') {
     $idStatus = $input['idStatus'] ?? ($input['id_status'] ?? 'Pending');
     $approvalStatus = $input['approvalStatus'] ?? ($input['approval_status'] ?? 'Pending Review');
 
-    $stmt = $pdo->prepare("INSERT INTO tutors (id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, diploma_status, tor_status, id_status, approval_status)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                           ON DUPLICATE KEY UPDATE name=?, rating=?, reviews_count=?, hourly_rate=?, subjects=?, learning_styles=?, bio=?, diploma_status=?, tor_status=?, id_status=?, approval_status=?");
-    $stmt->execute([
-        $id, $name, $email, $initials, $rating, $reviewsCount, $hourlyRate, $subjects, $learningStyles, $bio, $diplomaStatus, $torStatus, $idStatus, $approvalStatus,
-        $name, $rating, $reviewsCount, $hourlyRate, $subjects, $learningStyles, $bio, $diplomaStatus, $torStatus, $idStatus, $approvalStatus
-    ]);
+    if ($isSQLite) {
+        $stmt = $pdo->prepare("INSERT INTO tutors (id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, diploma_status, tor_status, id_status, approval_status)
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                               ON CONFLICT(id) DO UPDATE SET name=excluded.name, rating=excluded.rating, reviews_count=excluded.reviews_count, hourly_rate=excluded.hourly_rate, subjects=excluded.subjects, learning_styles=excluded.learning_styles, bio=excluded.bio, diploma_status=excluded.diploma_status, tor_status=excluded.tor_status, id_status=excluded.id_status, approval_status=excluded.approval_status");
+        $stmt->execute([$id, $name, $email, $initials, $rating, $reviewsCount, $hourlyRate, $subjects, $learningStyles, $bio, $diplomaStatus, $torStatus, $idStatus, $approvalStatus]);
+    } else {
+        $stmt = $pdo->prepare("INSERT INTO tutors (id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, diploma_status, tor_status, id_status, approval_status)
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                               ON DUPLICATE KEY UPDATE name=?, rating=?, reviews_count=?, hourly_rate=?, subjects=?, learning_styles=?, bio=?, diploma_status=?, tor_status=?, id_status=?, approval_status=?");
+        $stmt->execute([
+            $id, $name, $email, $initials, $rating, $reviewsCount, $hourlyRate, $subjects, $learningStyles, $bio, $diplomaStatus, $torStatus, $idStatus, $approvalStatus,
+            $name, $rating, $reviewsCount, $hourlyRate, $subjects, $learningStyles, $bio, $diplomaStatus, $torStatus, $idStatus, $approvalStatus
+        ]);
+    }
 
     echo json_encode(['status' => 'success', 'message' => 'Tutor saved successfully', 'id' => $id]);
 } elseif ($method === 'PUT') {

@@ -32,3 +32,249 @@
 [Mon Sep 28 02:16:02 2026] 127.0.0.1:53350 Accepted
 [Mon Sep 28 02:16:02 2026] 127.0.0.1:53350 [200]: POST /api/login.php
 [Mon Sep 28 02:16:02 2026] 127.0.0.1:53350 Closing
+[Mon Sep 28 02:49:07 2026] 127.0.0.1:37668 Accepted
+[Mon Sep 28 02:49:07 2026] 127.0.0.1:37668 [200]: GET /
+[Mon Sep 28 02:49:07 2026] 127.0.0.1:37668 Closing
+[Mon Sep 28 02:49:07 2026] 127.0.0.1:37684 Accepted
+[Mon Sep 28 02:49:07 2026] 127.0.0.1:37698 Accepted
+[Mon Sep 28 02:49:07 2026] 127.0.0.1:37684 [200]: GET /styles.css
+[Mon Sep 28 02:49:07 2026] 127.0.0.1:37698 [200]: GET /app.js
+[Mon Sep 28 02:49:07 2026] 127.0.0.1:37684 Closing
+[Mon Sep 28 02:49:07 2026] 127.0.0.1:37698 Closing
+[Mon Sep 28 02:49:07 2026] 127.0.0.1:37710 Accepted
+[Mon Sep 28 02:49:07 2026] 127.0.0.1:37710 [200]: POST /api/register.php
+[Mon Sep 28 02:49:07 2026] 127.0.0.1:37710 Closing
+[Mon Sep 28 02:49:09 2026] 127.0.0.1:37718 Accepted
+[Mon Sep 28 02:49:09 2026] 127.0.0.1:37718 [200]: GET /
+[Mon Sep 28 02:49:09 2026] 127.0.0.1:37718 Closing
+[Mon Sep 28 02:49:09 2026] 127.0.0.1:37726 Accepted
+[Mon Sep 28 02:49:09 2026] 127.0.0.1:37730 Accepted
+[Mon Sep 28 02:49:09 2026] 127.0.0.1:37726 [200]: GET /styles.css
+[Mon Sep 28 02:49:09 2026] 127.0.0.1:37730 [200]: GET /app.js
+[Mon Sep 28 02:49:09 2026] 127.0.0.1:37726 Closing
+[Mon Sep 28 02:49:09 2026] 127.0.0.1:37730 Closing
+[Mon Sep 28 02:52:04 2026] 127.0.0.1:53452 Accepted
+[Mon Sep 28 02:52:04 2026] 127.0.0.1:53452 [200]: GET /
+[Mon Sep 28 02:52:04 2026] 127.0.0.1:53452 Closing
+[Mon Sep 28 02:52:04 2026] 127.0.0.1:53458 Accepted
+[Mon Sep 28 02:52:04 2026] 127.0.0.1:53472 Accepted
+[Mon Sep 28 02:52:04 2026] 127.0.0.1:53458 [200]: GET /styles.css
+[Mon Sep 28 02:52:04 2026] 127.0.0.1:53472 [200]: GET /app.js
+[Mon Sep 28 02:52:04 2026] 127.0.0.1:53458 Closing
+[Mon Sep 28 02:52:04 2026] 127.0.0.1:53472 Closing
+[Mon Sep 28 02:52:04 2026] 127.0.0.1:53482 Accepted
+[Mon Sep 28 02:52:04 2026] 127.0.0.1:53482 [400]: POST /api/register.php
+[Mon Sep 28 02:52:04 2026] 127.0.0.1:53482 Closing
+[Mon Sep 28 02:52:04 2026] 127.0.0.1:53498 Accepted
+[Mon Sep 28 02:52:04 2026] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000]: General error: 1 near "DUPLICATE": syntax error in /app/api/students.php:24
+Stack trace:
+#0 /app/api/students.php(24): PDO->prepare()
+#1 {main}
+  thrown in /app/api/students.php on line 24
+[Mon Sep 28 02:52:04 2026] 127.0.0.1:53498 [500]: POST /api/students.php - Uncaught PDOException: SQLSTATE[HY000]: General error: 1 near "DUPLICATE": syntax error in /app/api/students.php:24
+Stack trace:
+#0 /app/api/students.php(24): PDO->prepare()
+#1 {main}
+  thrown in /app/api/students.php on line 24
+[Mon Sep 28 02:52:04 2026] 127.0.0.1:53498 Closing
+[Mon Sep 28 02:52:05 2026] 127.0.0.1:53512 Accepted
+[Mon Sep 28 02:52:05 2026] 127.0.0.1:53512 [200]: GET /
+[Mon Sep 28 02:52:05 2026] 127.0.0.1:53512 Closing
+[Mon Sep 28 02:52:05 2026] 127.0.0.1:53524 Accepted
+[Mon Sep 28 02:52:05 2026] 127.0.0.1:53534 Accepted
+[Mon Sep 28 02:52:05 2026] 127.0.0.1:53524 [200]: GET /styles.css
+[Mon Sep 28 02:52:05 2026] 127.0.0.1:53524 Closing
+[Mon Sep 28 02:52:05 2026] 127.0.0.1:53534 [200]: GET /app.js
+[Mon Sep 28 02:52:05 2026] 127.0.0.1:53534 Closing
+[Mon Sep 28 02:53:59 2026] 127.0.0.1:42852 Accepted
+[Mon Sep 28 02:53:59 2026] 127.0.0.1:42852 [200]: GET /
+[Mon Sep 28 02:53:59 2026] 127.0.0.1:42852 Closing
+[Mon Sep 28 02:53:59 2026] 127.0.0.1:42860 Accepted
+[Mon Sep 28 02:53:59 2026] 127.0.0.1:42870 Accepted
+[Mon Sep 28 02:53:59 2026] 127.0.0.1:42860 [200]: GET /styles.css
+[Mon Sep 28 02:53:59 2026] 127.0.0.1:42860 Closing
+[Mon Sep 28 02:53:59 2026] 127.0.0.1:42870 [200]: GET /app.js
+[Mon Sep 28 02:53:59 2026] 127.0.0.1:42870 Closing
+[Mon Sep 28 02:53:59 2026] 127.0.0.1:42882 Accepted
+[Mon Sep 28 02:53:59 2026] 127.0.0.1:42882 [400]: POST /api/register.php
+[Mon Sep 28 02:53:59 2026] 127.0.0.1:42882 Closing
+[Mon Sep 28 02:53:59 2026] 127.0.0.1:42898 Accepted
+[Mon Sep 28 02:53:59 2026] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000]: General error: 1 near "DUPLICATE": syntax error in /app/api/students.php:24
+Stack trace:
+#0 /app/api/students.php(24): PDO->prepare()
+#1 {main}
+  thrown in /app/api/students.php on line 24
+[Mon Sep 28 02:53:59 2026] 127.0.0.1:42898 [500]: POST /api/students.php - Uncaught PDOException: SQLSTATE[HY000]: General error: 1 near "DUPLICATE": syntax error in /app/api/students.php:24
+Stack trace:
+#0 /app/api/students.php(24): PDO->prepare()
+#1 {main}
+  thrown in /app/api/students.php on line 24
+[Mon Sep 28 02:53:59 2026] 127.0.0.1:42898 Closing
+[Mon Sep 28 02:54:00 2026] 127.0.0.1:42906 Accepted
+[Mon Sep 28 02:54:00 2026] 127.0.0.1:42906 [200]: GET /
+[Mon Sep 28 02:54:00 2026] 127.0.0.1:42906 Closing
+[Mon Sep 28 02:54:00 2026] 127.0.0.1:42910 Accepted
+[Mon Sep 28 02:54:00 2026] 127.0.0.1:42912 Accepted
+[Mon Sep 28 02:54:00 2026] 127.0.0.1:42910 [200]: GET /styles.css
+[Mon Sep 28 02:54:00 2026] 127.0.0.1:42912 [200]: GET /app.js
+[Mon Sep 28 02:54:00 2026] 127.0.0.1:42910 Closing
+[Mon Sep 28 02:54:00 2026] 127.0.0.1:42912 Closing
+[Mon Sep 28 02:54:45 2026] 127.0.0.1:35398 Accepted
+[Mon Sep 28 02:54:45 2026] 127.0.0.1:35398 [200]: GET /
+[Mon Sep 28 02:54:45 2026] 127.0.0.1:35398 Closing
+[Mon Sep 28 02:54:45 2026] 127.0.0.1:35412 Accepted
+[Mon Sep 28 02:54:45 2026] 127.0.0.1:35418 Accepted
+[Mon Sep 28 02:54:45 2026] 127.0.0.1:35412 [200]: GET /styles.css
+[Mon Sep 28 02:54:45 2026] 127.0.0.1:35418 [200]: GET /app.js
+[Mon Sep 28 02:54:45 2026] 127.0.0.1:35412 Closing
+[Mon Sep 28 02:54:45 2026] 127.0.0.1:35418 Closing
+[Mon Sep 28 02:54:46 2026] 127.0.0.1:35422 Accepted
+[Mon Sep 28 02:54:46 2026] 127.0.0.1:35422 [400]: POST /api/register.php
+[Mon Sep 28 02:54:46 2026] 127.0.0.1:35422 Closing
+[Mon Sep 28 02:54:46 2026] 127.0.0.1:35434 Accepted
+[Mon Sep 28 02:54:46 2026] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000]: General error: 1 near "DUPLICATE": syntax error in /app/api/students.php:24
+Stack trace:
+#0 /app/api/students.php(24): PDO->prepare()
+#1 {main}
+  thrown in /app/api/students.php on line 24
+[Mon Sep 28 02:54:46 2026] 127.0.0.1:35434 [500]: POST /api/students.php - Uncaught PDOException: SQLSTATE[HY000]: General error: 1 near "DUPLICATE": syntax error in /app/api/students.php:24
+Stack trace:
+#0 /app/api/students.php(24): PDO->prepare()
+#1 {main}
+  thrown in /app/api/students.php on line 24
+[Mon Sep 28 02:54:46 2026] 127.0.0.1:35434 Closing
+[Mon Sep 28 02:54:47 2026] 127.0.0.1:35436 Accepted
+[Mon Sep 28 02:54:47 2026] 127.0.0.1:35436 [200]: GET /
+[Mon Sep 28 02:54:47 2026] 127.0.0.1:35436 Closing
+[Mon Sep 28 02:54:47 2026] 127.0.0.1:35444 Accepted
+[Mon Sep 28 02:54:47 2026] 127.0.0.1:35456 Accepted
+[Mon Sep 28 02:54:47 2026] 127.0.0.1:35444 [200]: GET /styles.css
+[Mon Sep 28 02:54:47 2026] 127.0.0.1:35456 [200]: GET /app.js
+[Mon Sep 28 02:54:47 2026] 127.0.0.1:35444 Closing
+[Mon Sep 28 02:54:47 2026] 127.0.0.1:35456 Closing
+[Mon Sep 28 02:55:16 2026] 127.0.0.1:56956 Accepted
+[Mon Sep 28 02:55:16 2026] 127.0.0.1:56956 [200]: GET /api/students.php
+[Mon Sep 28 02:55:16 2026] 127.0.0.1:56956 Closing
+[Mon Sep 28 02:56:23 2026] 127.0.0.1:59678 Accepted
+[Mon Sep 28 02:56:23 2026] 127.0.0.1:59678 [200]: GET /
+[Mon Sep 28 02:56:23 2026] 127.0.0.1:59678 Closing
+[Mon Sep 28 02:56:23 2026] 127.0.0.1:47658 Accepted
+[Mon Sep 28 02:56:23 2026] 127.0.0.1:47674 Accepted
+[Mon Sep 28 02:56:23 2026] 127.0.0.1:47658 [200]: GET /styles.css
+[Mon Sep 28 02:56:23 2026] 127.0.0.1:47658 Closing
+[Mon Sep 28 02:56:23 2026] 127.0.0.1:47674 [200]: GET /app.js
+[Mon Sep 28 02:56:23 2026] 127.0.0.1:47674 Closing
+[Mon Sep 28 02:56:24 2026] 127.0.0.1:47688 Accepted
+[Mon Sep 28 02:56:24 2026] 127.0.0.1:47688 [400]: POST /api/register.php
+[Mon Sep 28 02:56:24 2026] 127.0.0.1:47688 Closing
+[Mon Sep 28 02:56:24 2026] 127.0.0.1:47704 Accepted
+[Mon Sep 28 02:56:24 2026] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: students.email in /app/api/students.php:29
+Stack trace:
+#0 /app/api/students.php(29): PDOStatement->execute()
+#1 {main}
+  thrown in /app/api/students.php on line 29
+[Mon Sep 28 02:56:24 2026] 127.0.0.1:47704 [500]: POST /api/students.php - Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: students.email in /app/api/students.php:29
+Stack trace:
+#0 /app/api/students.php(29): PDOStatement->execute()
+#1 {main}
+  thrown in /app/api/students.php on line 29
+[Mon Sep 28 02:56:24 2026] 127.0.0.1:47704 Closing
+[Mon Sep 28 02:56:26 2026] 127.0.0.1:47708 Accepted
+[Mon Sep 28 02:56:26 2026] 127.0.0.1:47708 [200]: GET /
+[Mon Sep 28 02:56:26 2026] 127.0.0.1:47708 Closing
+[Mon Sep 28 02:56:26 2026] 127.0.0.1:47716 Accepted
+[Mon Sep 28 02:56:26 2026] 127.0.0.1:47730 Accepted
+[Mon Sep 28 02:56:26 2026] 127.0.0.1:47716 [200]: GET /styles.css
+[Mon Sep 28 02:56:26 2026] 127.0.0.1:47716 Closing
+[Mon Sep 28 02:56:26 2026] 127.0.0.1:47730 [200]: GET /app.js
+[Mon Sep 28 02:56:26 2026] 127.0.0.1:47730 Closing
+[Mon Sep 28 02:56:53 2026] 127.0.0.1:37674 Accepted
+[Mon Sep 28 02:56:53 2026] 127.0.0.1:37674 [200]: GET /
+[Mon Sep 28 02:56:53 2026] 127.0.0.1:37674 Closing
+[Mon Sep 28 02:56:53 2026] 127.0.0.1:37676 Accepted
+[Mon Sep 28 02:56:53 2026] 127.0.0.1:37684 Accepted
+[Mon Sep 28 02:56:53 2026] 127.0.0.1:37676 [200]: GET /styles.css
+[Mon Sep 28 02:56:53 2026] 127.0.0.1:37676 Closing
+[Mon Sep 28 02:56:53 2026] 127.0.0.1:37684 [200]: GET /app.js
+[Mon Sep 28 02:56:53 2026] 127.0.0.1:37684 Closing
+[Mon Sep 28 02:56:53 2026] 127.0.0.1:37686 Accepted
+[Mon Sep 28 02:56:53 2026] 127.0.0.1:37686 [400]: POST /api/register.php
+[Mon Sep 28 02:56:53 2026] 127.0.0.1:37686 Closing
+[Mon Sep 28 02:56:53 2026] 127.0.0.1:37690 Accepted
+[Mon Sep 28 02:56:53 2026] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: students.email in /app/api/students.php:29
+Stack trace:
+#0 /app/api/students.php(29): PDOStatement->execute()
+#1 {main}
+  thrown in /app/api/students.php on line 29
+[Mon Sep 28 02:56:53 2026] 127.0.0.1:37690 [500]: POST /api/students.php - Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: students.email in /app/api/students.php:29
+Stack trace:
+#0 /app/api/students.php(29): PDOStatement->execute()
+#1 {main}
+  thrown in /app/api/students.php on line 29
+[Mon Sep 28 02:56:53 2026] 127.0.0.1:37690 Closing
+[Mon Sep 28 02:56:54 2026] 127.0.0.1:37490 Accepted
+[Mon Sep 28 02:56:54 2026] 127.0.0.1:37490 [200]: GET /
+[Mon Sep 28 02:56:54 2026] 127.0.0.1:37490 Closing
+[Mon Sep 28 02:56:54 2026] 127.0.0.1:37494 Accepted
+[Mon Sep 28 02:56:54 2026] 127.0.0.1:37502 Accepted
+[Mon Sep 28 02:56:54 2026] 127.0.0.1:37494 [200]: GET /styles.css
+[Mon Sep 28 02:56:54 2026] 127.0.0.1:37502 [200]: GET /app.js
+[Mon Sep 28 02:56:54 2026] 127.0.0.1:37494 Closing
+[Mon Sep 28 02:56:54 2026] 127.0.0.1:37502 Closing
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38648 Accepted
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38648 [200]: GET /
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38648 Closing
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38662 Accepted
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38672 Accepted
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38662 [200]: GET /styles.css
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38672 [200]: GET /app.js
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38662 Closing
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38672 Closing
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38676 Accepted
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38676 [200]: GET /api/students.php
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38676 Closing
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38688 Accepted
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38688 [200]: GET /api/subjects.php
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38688 Closing
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38696 Accepted
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38696 [200]: GET /api/tutors.php
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38696 Closing
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38710 Accepted
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38710 [200]: GET /api/admin.php
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38710 Closing
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38724 Accepted
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38724 [400]: POST /api/register.php
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38724 Closing
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38740 Accepted
+[Mon Sep 28 02:58:12 2026] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: students.email in /app/api/students.php:29
+Stack trace:
+#0 /app/api/students.php(29): PDOStatement->execute()
+#1 {main}
+  thrown in /app/api/students.php on line 29
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38740 [500]: POST /api/students.php - Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: students.email in /app/api/students.php:29
+Stack trace:
+#0 /app/api/students.php(29): PDOStatement->execute()
+#1 {main}
+  thrown in /app/api/students.php on line 29
+[Mon Sep 28 02:58:12 2026] 127.0.0.1:38740 Closing
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59312 Accepted
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59312 [200]: GET /
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59312 Closing
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59328 Accepted
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59340 Accepted
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59328 [200]: GET /styles.css
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59340 [200]: GET /app.js
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59328 Closing
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59340 Closing
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59342 Accepted
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59342 [200]: GET /api/students.php
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59342 Closing
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59344 Accepted
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59344 [200]: GET /api/subjects.php
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59344 Closing
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59356 Accepted
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59356 [200]: GET /api/tutors.php
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59356 Closing
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59358 Accepted
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59358 [200]: GET /api/admin.php
+[Mon Sep 28 02:58:14 2026] 127.0.0.1:59358 Closing
