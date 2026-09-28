@@ -458,3 +458,33 @@ Stack trace:
 [Mon Sep 28 05:53:02 2026] 127.0.0.1:50892 Accepted
 [Mon Sep 28 05:53:02 2026] 127.0.0.1:50892 [200]: PUT /api/sessions.php
 [Mon Sep 28 05:53:02 2026] 127.0.0.1:50892 Closing
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43222 Accepted
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43222 [200]: GET /
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43222 Closing
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43236 Accepted
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43240 Accepted
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43236 [200]: GET /styles.css
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43240 [200]: GET /app.js
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43236 Closing
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43240 Closing
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43254 Accepted
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43254 [200]: GET /api/students.php
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43254 Closing
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43262 Accepted
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43262 [200]: GET /api/subjects.php
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43262 Closing
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43274 Accepted
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43274 [200]: GET /api/tutors.php
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43274 Closing
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43286 Accepted
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43286 [200]: GET /api/admin.php
+[Mon Sep 28 13:47:02 2026] 127.0.0.1:43286 Closing
+[Mon Sep 28 13:47:03 2026] 127.0.0.1:43298 Accepted
+[Mon Sep 28 13:47:03 2026] 127.0.0.1:43298 [200]: POST /api/register.php
+[Mon Sep 28 13:47:03 2026] 127.0.0.1:43298 Closing
+[Mon Sep 28 13:47:05 2026] 127.0.0.1:43308 Accepted
+[Mon Sep 28 13:47:05 2026] 127.0.0.1:43308 [200]: POST /api/register.php
+[Mon Sep 28 13:47:05 2026] 127.0.0.1:43308 Closing
+[Mon Sep 28 13:47:06 2026] 127.0.0.1:43318 Accepted
+[Mon Sep 28 13:47:06 2026] 127.0.0.1:43318 [200]: POST /api/login.php
+[Mon Sep 28 13:47:06 2026] 127.0.0.1:43318 Closing

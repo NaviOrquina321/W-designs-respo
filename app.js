@@ -358,12 +358,15 @@ function switchRole(role, customUser = null) {
 
     if (role === 'student') {
       state.currentUser = customUser || state.currentUser || { name: 'Maria Santos', role: 'student' };
-      const prefix = (state.currentUser && state.currentUser.isNew) ? 'Welcome to TutorLink,' : 'Welcome back,';
-      document.getElementById('student-welcome-heading').textContent = `${prefix} ${state.currentUser ? state.currentUser.name : ''}!`;
+      const prefix = (state.currentUser && state.currentUser.isNew) ? 'Welcome Student,' : 'Welcome back,';
+      const headingEl = document.getElementById('student-welcome-heading');
+      if (headingEl) headingEl.textContent = `${prefix} ${state.currentUser ? state.currentUser.name : ''}!`;
       document.getElementById('view-student').classList.add('active');
     } else if (role === 'tutor') {
       state.currentUser = customUser || state.currentUser || { name: 'Prof. Alex Rivera', role: 'tutor' };
-      document.getElementById('tutor-welcome-heading').textContent = `Tutor Portal - ${state.currentUser.name}`;
+      const prefix = (state.currentUser && state.currentUser.isNew) ? 'Welcome Tutor,' : 'Welcome back,';
+      const headingEl = document.getElementById('tutor-welcome-heading');
+      if (headingEl) headingEl.textContent = `${prefix} ${state.currentUser ? state.currentUser.name : ''}!`;
       document.getElementById('view-tutor').classList.add('active');
     } else if (role === 'tutor-profile') {
       populateTutorProfileEditPage();
