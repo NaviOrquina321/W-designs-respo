@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/appointment_store.dart';
+import 'services/admin_store.dart';
 import 'screens/main_navigation_screen.dart';
 
 void main() {
@@ -12,10 +13,13 @@ class DoctorAppointmentApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AppointmentStore(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AppointmentStore()),
+        ChangeNotifierProvider(create: (_) => AdminStore()),
+      ],
       child: MaterialApp(
-        title: 'Doctor Appointment App',
+        title: 'Doctor Appointment & Admin Portal App',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.blue,
