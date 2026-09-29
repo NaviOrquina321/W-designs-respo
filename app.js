@@ -103,6 +103,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   } else {
     switchRole('guest');
   }
+
+  renderAllViews();
 });
 
 
@@ -235,7 +237,7 @@ function initNavigation() {
   const logoutBtn = document.getElementById('logout-btn');
   const userProfileBtn = document.getElementById('user-profile-btn');
 
-  navLogo.addEventListener('click', () => {
+  navLogo?.addEventListener('click', () => {
     if (state.currentUser && state.currentUser.role) {
       switchRole(state.currentUser.role);
     } else if (state.currentRole && state.currentRole !== 'guest') {
@@ -245,13 +247,13 @@ function initNavigation() {
     }
   });
 
-  loginBtn.addEventListener('click', (e) => {
+  loginBtn?.addEventListener('click', (e) => {
     e.preventDefault();
     openModal('modal-auth');
     switchAuthTab('login');
   });
 
-  signupBtn.addEventListener('click', () => {
+  signupBtn?.addEventListener('click', () => {
     openModal('modal-auth');
     switchAuthTab('register');
   });
@@ -448,7 +450,8 @@ function switchRole(role, customUser = null) {
       document.getElementById('view-tutor-profile').classList.add('active');
     } else if (role === 'admin') {
       state.currentUser = customUser || state.currentUser || { name: 'System Admin', role: 'admin' };
-      document.getElementById('view-admin').classList.add('active');
+      const adminView = document.getElementById('view-admin');
+      if (adminView) adminView.classList.add('active');
     }
   }
 
@@ -1979,25 +1982,27 @@ function initAdminView() {
 
   document.querySelectorAll('.admin-tab-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
+      const targetBtn = e.currentTarget;
       document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
 
-      e.target.classList.add('active');
-      const targetTabId = e.target.getAttribute('data-tab');
+      targetBtn.classList.add('active');
+      const targetTabId = targetBtn.getAttribute('data-tab');
       document.getElementById(targetTabId)?.classList.add('active');
     });
   });
 
   document.querySelectorAll('.admin-subtab-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const parentTab = e.target.closest('.admin-tab-content');
+      const targetBtn = e.currentTarget;
+      const parentTab = targetBtn.closest('.admin-tab-content');
       if (!parentTab) return;
 
       parentTab.querySelectorAll('.admin-subtab-btn').forEach(b => b.classList.remove('active'));
       parentTab.querySelectorAll('.admin-subtab-content').forEach(c => c.classList.remove('active'));
 
-      e.target.classList.add('active');
-      const targetSubtabId = e.target.getAttribute('data-subtab');
+      targetBtn.classList.add('active');
+      const targetSubtabId = targetBtn.getAttribute('data-subtab');
       document.getElementById(targetSubtabId)?.classList.add('active');
     });
   });

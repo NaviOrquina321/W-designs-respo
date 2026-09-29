@@ -28,7 +28,7 @@
   </header>
 
   <!-- MAIN ADMIN DASHBOARD CONTENT -->
-  <main class="wrap margin-top" id="admin-main-content">
+  <main class="wrap margin-top app-view active" id="view-admin">
     <div class="dashboard-container">
       <div class="dashboard-header">
         <div>
