@@ -73,6 +73,8 @@ switch ($method) {
             archiveResident($pdo, $data, $resourceId);
         } else if ($action === 'restore') {
             restoreResident($pdo, $data, $resourceId);
+        } else if ($action === 'remove') {
+            softRemoveResident($pdo, $data, $resourceId);
         } else {
             createResident($pdo, $data);
         }
@@ -89,13 +91,15 @@ switch ($method) {
             archiveResident($pdo, $data, $resourceId);
         } else if ($action === 'restore') {
             restoreResident($pdo, $data, $resourceId);
+        } else if ($action === 'remove') {
+            softRemoveResident($pdo, $data, $resourceId);
         } else {
             updateResident($pdo, $data);
         }
         break;
 
     case 'DELETE':
-        deleteResident($pdo, $resourceId);
+        softRemoveResident($pdo, [], $resourceId);
         break;
 
     default:
@@ -105,7 +109,8 @@ switch ($method) {
 }
 
 function getResidentsList($pdo) {
-    $archived = isset($_GET['archived']) && $_GET['archived'] == '1' ? 1 : 0;
+    // archived: 0 = Active, 1 = Archived (Moved Out / Deceased), 2 = Removed
+    $archived = isset($_GET['archived']) ? (int)$_GET['archived'] : 0;
     $search = isset($_GET['search']) ? trim($_GET['search']) : '';
     $purok = isset($_GET['purok']) ? trim($_GET['purok']) : '';
     $sex = isset($_GET['sex']) ? trim($_GET['sex']) : '';
@@ -349,29 +354,38 @@ function restoreResident($pdo, $data, $resourceId = null) {
     }
 }
 
-function deleteResident($pdo, $id) {
+function softRemoveResident($pdo, $data, $resourceId = null) {
+    $id = $resourceId ? $resourceId : (isset($data['id']) ? (int)$data['id'] : 0);
     if (!$id) {
         http_response_code(400);
-        echo json_encode(['error' => 'Resident ID is required for permanent deletion']);
+        echo json_encode(['error' => 'Resident ID is required for removal']);
         return;
     }
 
-    $stmt = $pdo->prepare("DELETE FROM residents WHERE id = :id");
+    $sql = "UPDATE residents SET
+        archived = 2,
+        status = 'Removed',
+        archive_reason = 'Removed by Admin',
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = :id";
+
+    $stmt = $pdo->prepare($sql);
     $result = $stmt->execute([':id' => $id]);
 
     if ($result) {
         http_response_code(200);
-        echo json_encode(['success' => true, 'message' => 'Resident record permanently deleted']);
+        echo json_encode(['success' => true, 'message' => 'Resident moved to removed records']);
     } else {
         http_response_code(500);
-        echo json_encode(['error' => 'Failed to delete resident record']);
+        echo json_encode(['error' => 'Failed to remove resident record']);
     }
 }
 
 function getAnalytics($pdo) {
-    // Total Population Active vs Archived
+    // Total Population Active vs Archived vs Removed
     $totalActive = $pdo->query("SELECT COUNT(*) FROM residents WHERE archived = 0")->fetchColumn();
     $totalArchived = $pdo->query("SELECT COUNT(*) FROM residents WHERE archived = 1")->fetchColumn();
+    $totalRemoved = $pdo->query("SELECT COUNT(*) FROM residents WHERE archived = 2")->fetchColumn();
 
     // Demographics
     $minors = $pdo->query("SELECT COUNT(*) FROM residents WHERE archived = 0 AND age < 18")->fetchColumn();
@@ -400,6 +414,7 @@ function getAnalytics($pdo) {
         'data' => [
             'total_active' => (int)$totalActive,
             'total_archived' => (int)$totalArchived,
+            'total_removed' => (int)$totalRemoved,
             'minors' => (int)$minors,
             'adults' => (int)$adults,
             'seniors' => (int)$seniors,
