@@ -3,8 +3,8 @@
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -15,14 +15,49 @@ require_once __DIR__ . '/db.php';
 $pdo = getDbConnection();
 
 $method = $_SERVER['REQUEST_METHOD'];
+
+// Parse URL path info for RESTful resource routing
+// e.g. /api/residents.php/123 or /api/residents.php/analytics
+$requestUri = $_SERVER['REQUEST_URI'];
+$scriptName = $_SERVER['SCRIPT_NAME'];
+
+$pathInfo = '';
+if (strpos($requestUri, $scriptName) === 0) {
+    $pathInfo = substr($requestUri, strlen($scriptName));
+} else {
+    $pathInfo = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
+}
+
+$pathInfo = trim(parse_url($pathInfo, PHP_URL_PATH), '/');
+$pathSegments = $pathInfo !== '' ? explode('/', $pathInfo) : [];
+
+$resourceId = null;
 $action = isset($_GET['action']) ? $_GET['action'] : '';
+
+if (count($pathSegments) > 0) {
+    if (is_numeric($pathSegments[0])) {
+        $resourceId = (int)$pathSegments[0];
+        if (isset($pathSegments[1])) {
+            $action = $pathSegments[1];
+        }
+    } else {
+        $action = $pathSegments[0];
+        if (isset($pathSegments[1]) && is_numeric($pathSegments[1])) {
+            $resourceId = (int)$pathSegments[1];
+        }
+    }
+}
+
+if (!$resourceId && isset($_GET['id']) && is_numeric($_GET['id'])) {
+    $resourceId = (int)$_GET['id'];
+}
 
 switch ($method) {
     case 'GET':
         if ($action === 'analytics') {
             getAnalytics($pdo);
-        } else if (isset($_GET['id'])) {
-            getResidentById($pdo, (int)$_GET['id']);
+        } else if ($resourceId) {
+            getResidentById($pdo, $resourceId);
         } else {
             getResidentsList($pdo);
         }
@@ -35,22 +70,32 @@ switch ($method) {
         }
 
         if ($action === 'archive') {
-            archiveResident($pdo, $data);
+            archiveResident($pdo, $data, $resourceId);
         } else if ($action === 'restore') {
-            restoreResident($pdo, $data);
+            restoreResident($pdo, $data, $resourceId);
         } else {
             createResident($pdo, $data);
         }
         break;
 
     case 'PUT':
+    case 'PATCH':
         $data = json_decode(file_get_contents('php://input'), true);
-        updateResident($pdo, $data);
+        if ($resourceId && !isset($data['id'])) {
+            $data['id'] = $resourceId;
+        }
+
+        if ($action === 'archive') {
+            archiveResident($pdo, $data, $resourceId);
+        } else if ($action === 'restore') {
+            restoreResident($pdo, $data, $resourceId);
+        } else {
+            updateResident($pdo, $data);
+        }
         break;
 
     case 'DELETE':
-        $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-        deleteResident($pdo, $id);
+        deleteResident($pdo, $resourceId);
         break;
 
     default:
@@ -111,6 +156,7 @@ function getResidentsList($pdo) {
     $stmt->execute($params);
     $residents = $stmt->fetchAll();
 
+    http_response_code(200);
     echo json_encode(['success' => true, 'data' => $residents]);
 }
 
@@ -126,6 +172,7 @@ function getResidentById($pdo, $id) {
     $resident = $stmt->fetch();
 
     if ($resident) {
+        http_response_code(200);
         echo json_encode(['success' => true, 'data' => $resident]);
     } else {
         http_response_code(404);
@@ -176,7 +223,11 @@ function createResident($pdo, $data) {
 
     if ($result) {
         http_response_code(201);
-        echo json_encode(['success' => true, 'message' => 'Resident registered successfully', 'id' => $pdo->lastInsertId()]);
+        echo json_encode([
+            'success' => true,
+            'message' => 'Resident registered successfully',
+            'id' => (int)$pdo->lastInsertId()
+        ]);
     } else {
         http_response_code(500);
         echo json_encode(['error' => 'Failed to register resident']);
@@ -230,6 +281,7 @@ function updateResident($pdo, $data) {
     ]);
 
     if ($result) {
+        http_response_code(200);
         echo json_encode(['success' => true, 'message' => 'Resident updated successfully']);
     } else {
         http_response_code(500);
@@ -237,8 +289,9 @@ function updateResident($pdo, $data) {
     }
 }
 
-function archiveResident($pdo, $data) {
-    if (empty($data['id']) || empty($data['status'])) {
+function archiveResident($pdo, $data, $resourceId = null) {
+    $id = $resourceId ? $resourceId : (isset($data['id']) ? (int)$data['id'] : 0);
+    if (!$id || empty($data['status'])) {
         http_response_code(400);
         echo json_encode(['error' => 'Resident ID and Archive Status (Moved Out/Deceased) are required']);
         return;
@@ -255,12 +308,13 @@ function archiveResident($pdo, $data) {
 
     $stmt = $pdo->prepare($sql);
     $result = $stmt->execute([
-        ':id' => (int)$data['id'],
+        ':id' => $id,
         ':status' => $data['status'],
         ':reason' => $reason
     ]);
 
     if ($result) {
+        http_response_code(200);
         echo json_encode(['success' => true, 'message' => 'Resident archived successfully']);
     } else {
         http_response_code(500);
@@ -268,8 +322,9 @@ function archiveResident($pdo, $data) {
     }
 }
 
-function restoreResident($pdo, $data) {
-    if (empty($data['id'])) {
+function restoreResident($pdo, $data, $resourceId = null) {
+    $id = $resourceId ? $resourceId : (isset($data['id']) ? (int)$data['id'] : 0);
+    if (!$id) {
         http_response_code(400);
         echo json_encode(['error' => 'Resident ID is required to restore']);
         return;
@@ -283,9 +338,10 @@ function restoreResident($pdo, $data) {
     WHERE id = :id";
 
     $stmt = $pdo->prepare($sql);
-    $result = $stmt->execute([':id' => (int)$data['id']]);
+    $result = $stmt->execute([':id' => $id]);
 
     if ($result) {
+        http_response_code(200);
         echo json_encode(['success' => true, 'message' => 'Resident restored to active records']);
     } else {
         http_response_code(500);
@@ -304,6 +360,7 @@ function deleteResident($pdo, $id) {
     $result = $stmt->execute([':id' => $id]);
 
     if ($result) {
+        http_response_code(200);
         echo json_encode(['success' => true, 'message' => 'Resident record permanently deleted']);
     } else {
         http_response_code(500);
@@ -337,6 +394,7 @@ function getAnalytics($pdo) {
     $civilStmt = $pdo->query("SELECT civil_status, COUNT(*) as count FROM residents WHERE archived = 0 GROUP BY civil_status");
     $civilData = $civilStmt->fetchAll();
 
+    http_response_code(200);
     echo json_encode([
         'success' => true,
         'data' => [
