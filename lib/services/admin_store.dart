@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'database_helper.dart';
 
 class StudentItem {
   final String id;
@@ -22,7 +23,7 @@ class MatchingSession {
   final String tutorName;
   final String subject;
   final String matchScore;
-  String status; // 'Pending', 'Approved', 'Cancelled'
+  String status;
 
   MatchingSession({
     required this.id,
@@ -55,7 +56,7 @@ class PaymentRecord {
   final String payerName;
   final double amount;
   final String date;
-  String status; // 'Pending', 'Confirmed'
+  String status;
 
   PaymentRecord({
     required this.id,
@@ -88,7 +89,7 @@ class TutoringReport {
   final String studentName;
   final String subject;
   final int totalHours;
-  final String period; // 'Weekly', 'Monthly', 'Completed'
+  final String period;
 
   TutoringReport({
     required this.id,
@@ -101,106 +102,19 @@ class TutoringReport {
 }
 
 class AdminStore extends ChangeNotifier {
-  final List<StudentItem> _students = [
-    StudentItem(
-        id: 'st_1',
-        name: 'Jordan Lee',
-        email: 'jordan@example.com',
-        gradeLevel: 'Grade 10',
-        isValidated: true),
-    StudentItem(
-        id: 'st_2',
-        name: 'Samantha Green',
-        email: 'sam@example.com',
-        gradeLevel: 'Grade 11',
-        isValidated: false),
-    StudentItem(
-        id: 'st_3',
-        name: 'David Kim',
-        email: 'david.k@example.com',
-        gradeLevel: 'Grade 12',
-        isValidated: false),
-  ];
+  List<StudentItem> _students = [];
+  List<MatchingSession> _matchings = [];
+  List<ScheduleSession> _schedules = [];
+  List<PaymentRecord> _payments = [];
+  List<AdminNotification> _notifications = [];
+  List<TutoringReport> _reports = [];
+  bool _isLoading = true;
 
-  final List<MatchingSession> _matchings = [
-    MatchingSession(
-        id: 'm_1',
-        studentName: 'Jordan Lee',
-        tutorName: 'Dr. Sarah Jenkins',
-        subject: 'Biology & Health',
-        matchScore: '98% Match',
-        status: 'Pending'),
-    MatchingSession(
-        id: 'm_2',
-        studentName: 'Samantha Green',
-        tutorName: 'Dr. Marcus Vance',
-        subject: 'Dermatology Studies',
-        matchScore: '92% Match',
-        status: 'Pending'),
-  ];
+  AdminStore() {
+    initDatabase();
+  }
 
-  final List<ScheduleSession> _schedules = [
-    ScheduleSession(
-        id: 'sch_1',
-        title: 'Cardiology 101 Lecture',
-        dateTime: 'Mon Oct 12, 10:00 AM',
-        tutorName: 'Dr. Sarah Jenkins',
-        studentName: 'Jordan Lee'),
-    ScheduleSession(
-        id: 'sch_2',
-        title: 'Advanced Dermatology Session',
-        dateTime: 'Wed Oct 14, 02:00 PM',
-        tutorName: 'Dr. Marcus Vance',
-        studentName: 'Samantha Green'),
-  ];
-
-  final List<PaymentRecord> _payments = [
-    PaymentRecord(
-        id: 'pay_1',
-        payerName: 'Jordan Lee',
-        amount: 120.00,
-        date: '2026-09-20',
-        status: 'Confirmed'),
-    PaymentRecord(
-        id: 'pay_2',
-        payerName: 'Samantha Green',
-        amount: 95.00,
-        date: '2026-09-25',
-        status: 'Pending'),
-  ];
-
-  final List<AdminNotification> _notifications = [
-    AdminNotification(
-        id: 'notif_1',
-        title: 'Schedule Updated',
-        message: 'Your tutoring session for Monday has been rescheduled.',
-        recipientGroup: 'All Students'),
-  ];
-
-  final List<TutoringReport> _reports = [
-    TutoringReport(
-        id: 'rep_1',
-        tutorName: 'Dr. Sarah Jenkins',
-        studentName: 'Jordan Lee',
-        subject: 'Cardiology Support',
-        totalHours: 12,
-        period: 'Completed'),
-    TutoringReport(
-        id: 'rep_2',
-        tutorName: 'Dr. Marcus Vance',
-        studentName: 'Samantha Green',
-        subject: 'Skin Science Basics',
-        totalHours: 4,
-        period: 'Weekly'),
-    TutoringReport(
-        id: 'rep_3',
-        tutorName: 'Dr. Emily Chen',
-        studentName: 'David Kim',
-        subject: 'Neuroscience Intro',
-        totalHours: 16,
-        period: 'Monthly'),
-  ];
-
+  bool get isLoading => _isLoading;
   List<StudentItem> get students => List.unmodifiable(_students);
   List<MatchingSession> get matchings => List.unmodifiable(_matchings);
   List<ScheduleSession> get schedules => List.unmodifiable(_schedules);
@@ -208,50 +122,76 @@ class AdminStore extends ChangeNotifier {
   List<AdminNotification> get notifications => List.unmodifiable(_notifications);
   List<TutoringReport> get reports => List.unmodifiable(_reports);
 
-  void validateStudent(String studentId) {
+  Future<void> initDatabase() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      _students = await DatabaseHelper.instance.getStudents();
+      _matchings = await DatabaseHelper.instance.getMatchings();
+      _schedules = await DatabaseHelper.instance.getSchedules();
+      _payments = await DatabaseHelper.instance.getPayments();
+      _notifications = await DatabaseHelper.instance.getNotifications();
+      _reports = await DatabaseHelper.instance.getReports();
+    } catch (e) {
+      debugPrint('Admin database load error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> validateStudent(String studentId) async {
     final index = _students.indexWhere((s) => s.id == studentId);
     if (index != -1) {
       _students[index].isValidated = true;
       notifyListeners();
+      await DatabaseHelper.instance.validateStudent(studentId);
     }
   }
 
-  void approveMatching(String matchingId) {
+  Future<void> approveMatching(String matchingId) async {
     final index = _matchings.indexWhere((m) => m.id == matchingId);
     if (index != -1) {
       _matchings[index].status = 'Approved';
       notifyListeners();
+      await DatabaseHelper.instance.updateMatchingStatus(matchingId, 'Approved');
     }
   }
 
-  void cancelMatching(String matchingId) {
+  Future<void> cancelMatching(String matchingId) async {
     final index = _matchings.indexWhere((m) => m.id == matchingId);
     if (index != -1) {
       _matchings[index].status = 'Cancelled';
       notifyListeners();
+      await DatabaseHelper.instance.updateMatchingStatus(matchingId, 'Cancelled');
     }
   }
 
-  void addSchedule(ScheduleSession schedule) {
+  Future<void> addSchedule(ScheduleSession schedule) async {
     _schedules.add(schedule);
     notifyListeners();
+    await DatabaseHelper.instance.insertSchedule(schedule);
   }
 
-  void addPayment(PaymentRecord payment) {
+  Future<void> addPayment(PaymentRecord payment) async {
     _payments.insert(0, payment);
     notifyListeners();
+    await DatabaseHelper.instance.insertPayment(payment);
   }
 
-  void confirmPayment(String paymentId) {
+  Future<void> confirmPayment(String paymentId) async {
     final index = _payments.indexWhere((p) => p.id == paymentId);
     if (index != -1) {
       _payments[index].status = 'Confirmed';
       notifyListeners();
+      await DatabaseHelper.instance.confirmPayment(paymentId);
     }
   }
 
-  void sendNotification(AdminNotification notification) {
+  Future<void> sendNotification(AdminNotification notification) async {
     _notifications.insert(0, notification);
     notifyListeners();
+    await DatabaseHelper.instance.insertNotification(notification);
   }
 }

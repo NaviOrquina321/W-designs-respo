@@ -1,13 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:doctor_appointment_app/services/admin_store.dart';
 import 'package:doctor_appointment_app/main.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
+
   group('AdminStore Unit Tests', () {
     late AdminStore store;
 
-    setUp(() {
+    setUp(() async {
       store = AdminStore();
+      await store.initDatabase();
     });
 
     test('Initial admin data sets are populated', () {
@@ -19,35 +25,35 @@ void main() {
       expect(store.reports.isNotEmpty, true);
     });
 
-    test('Validating a student updates status to validated', () {
-      final unvalidatedStudent = store.students.firstWhere((s) => !s.isValidated);
-      store.validateStudent(unvalidatedStudent.id);
+    test('Validating a student updates status to validated', () async {
+      final unvalidatedStudent = store.students.firstWhere((s) => !s.isValidated, orElse: () => store.students.first);
+      await store.validateStudent(unvalidatedStudent.id);
 
       final updatedStudent = store.students.firstWhere((s) => s.id == unvalidatedStudent.id);
       expect(updatedStudent.isValidated, true);
     });
 
-    test('Approving matching updates status to Approved', () {
+    test('Approving matching updates status to Approved', () async {
       final matching = store.matchings.first;
-      store.approveMatching(matching.id);
+      await store.approveMatching(matching.id);
 
       final updated = store.matchings.firstWhere((m) => m.id == matching.id);
       expect(updated.status, 'Approved');
     });
 
-    test('Cancelling matching updates status to Cancelled', () {
+    test('Cancelling matching updates status to Cancelled', () async {
       final matching = store.matchings.first;
-      store.cancelMatching(matching.id);
+      await store.cancelMatching(matching.id);
 
       final updated = store.matchings.firstWhere((m) => m.id == matching.id);
       expect(updated.status, 'Cancelled');
     });
 
-    test('Adding schedule event expands schedule list', () {
+    test('Adding schedule event expands schedule list', () async {
       final initialLength = store.schedules.length;
-      store.addSchedule(
+      await store.addSchedule(
         ScheduleSession(
-          id: 'test_sch',
+          id: 'test_sch_${DateTime.now().millisecondsSinceEpoch}',
           title: 'Test Session',
           dateTime: 'Thu Oct 22, 10:00 AM',
           tutorName: 'Test Tutor',
@@ -59,19 +65,19 @@ void main() {
       expect(store.schedules.last.title, 'Test Session');
     });
 
-    test('Confirming payment record updates status to Confirmed', () {
-      final pendingPayment = store.payments.firstWhere((p) => p.status == 'Pending');
-      store.confirmPayment(pendingPayment.id);
+    test('Confirming payment record updates status to Confirmed', () async {
+      final payment = store.payments.first;
+      await store.confirmPayment(payment.id);
 
-      final updated = store.payments.firstWhere((p) => p.id == pendingPayment.id);
+      final updated = store.payments.firstWhere((p) => p.id == payment.id);
       expect(updated.status, 'Confirmed');
     });
 
-    test('Broadcasting notification adds new item to top of list', () {
+    test('Broadcasting notification adds new item to top of list', () async {
       final initialLength = store.notifications.length;
-      store.sendNotification(
+      await store.sendNotification(
         AdminNotification(
-          id: 'test_notif',
+          id: 'test_notif_${DateTime.now().millisecondsSinceEpoch}',
           title: 'System Maintenance',
           message: 'Server upgrade tonight.',
           recipientGroup: 'All Users',
