@@ -45,12 +45,6 @@
           </button>
         </li>
         <li class="nav-item">
-          <button data-view="archived">
-            <span class="nav-icon"><svg class="svg-icon" viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg></span>
-            <span class="nav-text">Archived Residents</span>
-          </button>
-        </li>
-        <li class="nav-item">
           <button data-view="reports">
             <span class="nav-icon"><svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>
             <span class="nav-text">Reports & Analysis</span>
@@ -377,43 +371,6 @@
         </section>
 
 
-        <!-- VIEW 4: ARCHIVED RESIDENTS -->
-        <section id="view-archived" class="page-view">
-          <div class="card-section">
-            <div class="card-header">
-              <div class="card-title">
-                <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
-                Archived Resident Records
-              </div>
-            </div>
-
-            <div class="toolbar-container">
-              <div class="search-box">
-                <span class="search-icon"><svg class="svg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
-                <input type="text" id="archived-search" class="form-control" placeholder="Search archived residents..." oninput="fetchArchivedResidents()">
-              </div>
-            </div>
-
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Full Name</th>
-                    <th>Age</th>
-                    <th>Purok</th>
-                    <th>Archive Status</th>
-                    <th>Reason / Notes</th>
-                    <th style="text-align: center;">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="archived-residents-table">
-                  <tr><td colspan="7" style="text-align: center;">Loading archived residents...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
 
 
         <!-- VIEW 5: REPORTS & ANALYSIS -->
@@ -807,9 +764,6 @@
                   </button>
                   <button class="btn btn-sm btn-primary btn-icon-only" title="Edit Resident" onclick="openEditResidentModal(${r.id})">
                     <svg class="svg-icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                  </button>
-                  <button class="btn btn-sm btn-warning btn-icon-only" title="Archive Resident" onclick="openArchiveResidentModal(${r.id}, '${r.first_name} ${r.last_name}')">
-                    <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
                   </button>
                 </div>
               </td>
