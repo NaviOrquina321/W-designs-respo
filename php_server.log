@@ -1601,3 +1601,39 @@ Stack trace:
 [Tue Sep 29 02:58:39 2026] 127.0.0.1:47598 Accepted
 [Tue Sep 29 02:58:39 2026] 127.0.0.1:47598 [200]: GET /api/admin.php
 [Tue Sep 29 02:58:39 2026] 127.0.0.1:47598 Closing
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35150 Accepted
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35150 [200]: GET /admin.php
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35150 Closing
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35160 Accepted
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35166 Accepted
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35160 [200]: GET /styles.css
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35166 [200]: GET /app.js
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35160 Closing
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35166 Closing
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35178 Accepted
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35178 [200]: GET /api/students.php
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35178 Closing
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35182 Accepted
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35182 [200]: GET /api/subjects.php
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35182 Closing
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35198 Accepted
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35198 [200]: GET /api/tutors.php
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35198 Closing
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35202 Accepted
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35202 [200]: GET /api/sessions.php
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35202 Closing
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35212 Accepted
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35212 [200]: GET /api/payments.php
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35212 Closing
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35226 Accepted
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35226 [200]: GET /api/matches.php
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35226 Closing
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35240 Accepted
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35240 [200]: GET /api/schedules.php
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35240 Closing
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35252 Accepted
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35252 [200]: GET /api/notifications.php
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35252 Closing
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35258 Accepted
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35258 [200]: GET /api/admin.php
+[Mon Oct  5 16:27:13 2026] 127.0.0.1:35258 Closing

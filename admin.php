@@ -69,8 +69,6 @@
         <button class="admin-tab-btn" data-tab="tab-payments">Manage Payments</button>
         <button class="admin-tab-btn" data-tab="tab-notifications">Manage Notifications</button>
         <button class="admin-tab-btn" data-tab="tab-reports">Manage Reports</button>
-        <button class="admin-tab-btn" data-tab="tab-tutors">Manage Tutors</button>
-        <button class="admin-tab-btn" data-tab="tab-subjects">Manage Subjects</button>
       </div>
 
       <!-- 1. Manage Students -->
@@ -436,52 +434,6 @@
         </div>
       </div>
 
-      <!-- 7. Manage Tutors -->
-      <div class="admin-tab-content" id="tab-tutors">
-        <div class="dashboard-section">
-          <div class="section-title-bar">
-            <h3>Tutor Verification & Account Management</h3>
-          </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Tutor ID</th>
-                <th>Full Name</th>
-                <th>Subjects</th>
-                <th>Application Status</th>
-                <th>Account Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="admin-tutors-table-body">
-              <!-- Dynamic tutors list -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- 8. Manage Subjects -->
-      <div class="admin-tab-content" id="tab-subjects">
-        <div class="dashboard-section">
-          <div class="section-title-bar">
-            <h3>System Subjects & Academic Categories</h3>
-            <button class="btn btn-primary btn-small" id="admin-add-subject-btn">+ Add New Subject</button>
-          </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Subject ID</th>
-                <th>Subject Name</th>
-                <th>Category</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="admin-subjects-table-body">
-              <!-- Dynamic subjects list -->
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
   </main>
 
