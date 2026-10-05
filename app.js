@@ -494,6 +494,7 @@ function initAuthModalTabs() {
       if (res.ok && data.status === 'success') {
         const user = data.user;
         user.isNew = true;
+        await syncWithDatabase();
         switchRole(user.role, user);
         closeModal('modal-auth');
         showToast(`Welcome to TutorLink, ${user.name}!`);

@@ -1637,3 +1637,105 @@ Stack trace:
 [Mon Oct  5 16:27:13 2026] 127.0.0.1:35258 Accepted
 [Mon Oct  5 16:27:13 2026] 127.0.0.1:35258 [200]: GET /api/admin.php
 [Mon Oct  5 16:27:13 2026] 127.0.0.1:35258 Closing
+[Mon Oct  5 20:49:19 2026] 127.0.0.1:50346 Accepted
+[Mon Oct  5 20:49:19 2026] 127.0.0.1:50346 [200]: GET /index.php
+[Mon Oct  5 20:49:19 2026] 127.0.0.1:50346 Closing
+[Mon Oct  5 20:49:19 2026] 127.0.0.1:50362 Accepted
+[Mon Oct  5 20:49:19 2026] 127.0.0.1:50364 Accepted
+[Mon Oct  5 20:49:19 2026] 127.0.0.1:50362 [200]: GET /styles.css
+[Mon Oct  5 20:49:19 2026] 127.0.0.1:50364 [200]: GET /app.js
+[Mon Oct  5 20:49:19 2026] 127.0.0.1:50362 Closing
+[Mon Oct  5 20:49:19 2026] 127.0.0.1:50364 Closing
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50372 Accepted
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50372 [200]: GET /api/students.php
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50372 Closing
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50374 Accepted
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50374 [200]: GET /api/subjects.php
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50374 Closing
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50390 Accepted
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50390 [200]: GET /api/tutors.php
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50390 Closing
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50406 Accepted
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50406 [200]: GET /api/sessions.php
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50406 Closing
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50414 Accepted
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50414 [200]: GET /api/payments.php
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50414 Closing
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50426 Accepted
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50426 [200]: GET /api/matches.php
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50426 Closing
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50438 Accepted
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50438 [200]: GET /api/schedules.php
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50438 Closing
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50452 Accepted
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50452 [200]: GET /api/notifications.php
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50452 Closing
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50460 Accepted
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50460 [200]: GET /api/admin.php
+[Mon Oct  5 20:49:20 2026] 127.0.0.1:50460 Closing
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50474 Accepted
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50474 [200]: POST /api/register.php
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50474 Closing
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50480 Accepted
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50480 [200]: GET /api/students.php
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50480 Closing
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50488 Accepted
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50488 [200]: GET /api/subjects.php
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50488 Closing
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50494 Accepted
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50494 [200]: GET /api/tutors.php
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50494 Closing
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50504 Accepted
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50504 [200]: GET /api/sessions.php
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50504 Closing
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50512 Accepted
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50512 [200]: GET /api/payments.php
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50512 Closing
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50528 Accepted
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50528 [200]: GET /api/matches.php
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50528 Closing
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50542 Accepted
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50542 [200]: GET /api/schedules.php
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50542 Closing
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50552 Accepted
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50552 [200]: GET /api/notifications.php
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50552 Closing
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50566 Accepted
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50566 [200]: GET /api/admin.php
+[Mon Oct  5 20:49:21 2026] 127.0.0.1:50566 Closing
+[Mon Oct  5 20:49:23 2026] 127.0.0.1:50578 Accepted
+[Mon Oct  5 20:49:23 2026] 127.0.0.1:50578 [200]: POST /api/login.php
+[Mon Oct  5 20:49:23 2026] 127.0.0.1:50578 Closing
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50586 Accepted
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50586 [200]: POST /api/register.php
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50586 Closing
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50596 Accepted
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50596 [200]: GET /api/students.php
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50596 Closing
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50598 Accepted
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50598 [200]: GET /api/subjects.php
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50598 Closing
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50614 Accepted
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50614 [200]: GET /api/tutors.php
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50614 Closing
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50624 Accepted
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50624 [200]: GET /api/sessions.php
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50624 Closing
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50638 Accepted
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50638 [200]: GET /api/payments.php
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50638 Closing
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50652 Accepted
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50652 [200]: GET /api/matches.php
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50652 Closing
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50668 Accepted
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50668 [200]: GET /api/schedules.php
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50668 Closing
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50682 Accepted
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50682 [200]: GET /api/notifications.php
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50682 Closing
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50692 Accepted
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50692 [200]: GET /api/admin.php
+[Mon Oct  5 20:49:25 2026] 127.0.0.1:50692 Closing
+[Mon Oct  5 20:49:27 2026] 127.0.0.1:50708 Accepted
+[Mon Oct  5 20:49:27 2026] 127.0.0.1:50708 [200]: POST /api/login.php
+[Mon Oct  5 20:49:27 2026] 127.0.0.1:50708 Closing
