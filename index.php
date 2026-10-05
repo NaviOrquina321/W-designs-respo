@@ -1548,6 +1548,7 @@ require_once __DIR__ . '/api/config.php';
             <span>Total Paid:</span>
             <strong id="view-receipt-amount">₱385.00</strong>
           </div>
+          <div id="view-receipt-tutor-feedback" style="display: none; margin-top: 8px; text-align: left; padding: 8px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid var(--ink);"></div>
         </div>
 
         <div style="display: flex; gap: 10px;" class="margin-top">

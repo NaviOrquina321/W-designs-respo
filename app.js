@@ -1043,7 +1043,10 @@ function renderStudentHistory() {
       <td>${s.subject}</td>
       <td>P${s.totalPaid}</td>
       <td><code>${s.gcashRef}</code></td>
-      <td><span class="badge ${s.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${s.status}</span></td>
+      <td>
+        <span class="badge ${s.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${s.status}</span>
+        ${s.feedback ? `<div style="font-size: 0.8rem; margin-top: 4px; color: var(--ink-soft); max-width: 180px;"><strong>Tutor Feedback:</strong> "${s.feedback}"</div>` : ''}
+      </td>
       <td>
         <button class="btn btn-secondary btn-small" onclick="viewPaymentReceipt('${s.id}')">View Receipt</button>
         ${s.status === 'Completed' ?
@@ -1069,6 +1072,16 @@ window.viewPaymentReceipt = function(sessionId) {
   document.getElementById('view-receipt-subject').textContent = session.subject;
   document.getElementById('view-receipt-date').textContent = `${session.date} (${session.timeSlot})`;
   document.getElementById('view-receipt-amount').textContent = `P${session.totalPaid}.00`;
+
+  const feedbackEl = document.getElementById('view-receipt-tutor-feedback');
+  if (feedbackEl) {
+    if (session.feedback) {
+      feedbackEl.style.display = 'block';
+      feedbackEl.innerHTML = `<strong>Tutor Feedback:</strong> ${session.feedback}`;
+    } else {
+      feedbackEl.style.display = 'none';
+    }
+  }
 
   openModal('modal-view-receipt');
 };
@@ -1212,11 +1225,6 @@ function renderTutorUpcoming() {
         <button class="btn btn-secondary btn-small" onclick="requestRescheduleSession('${s.id}')">
           Reschedule
         </button>
-        ${s.status !== 'Completed' ? `
-          <button class="btn btn-secondary btn-small" onclick="markSessionCompleted('${s.id}')">
-            Complete
-          </button>
-        ` : ''}
       </div>
     </div>
   `).join('');
@@ -1795,14 +1803,36 @@ function initWorkspaceSession() {
 
   closeBtn?.addEventListener('click', () => closeModal('modal-session-workspace'));
 
-  endBtn?.addEventListener('click', () => {
+  endBtn?.addEventListener('click', async () => {
     if (confirm('Are you sure you want to complete and end this tutoring session?')) {
-      if (state.activeWorkspaceSession) {
-        state.activeWorkspaceSession.status = 'Completed';
+      const activeSes = state.activeWorkspaceSession;
+      if (activeSes) {
+        let tutorFeedback = '';
+        if (state.currentRole === 'tutor') {
+          tutorFeedback = prompt('Enter your completion feedback or summary notes for the student:', 'Great progress in today\'s session! Keep up the good work.') || '';
+        }
+
+        activeSes.status = 'Completed';
+        if (tutorFeedback) activeSes.feedback = tutorFeedback;
+
+        const s = state.sessions.find(x => x.id === activeSes.id);
+        if (s) {
+          s.status = 'Completed';
+          if (tutorFeedback) s.feedback = tutorFeedback;
+        }
+
+        try {
+          await fetch('api/sessions.php', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: activeSes.id, status: 'Completed', feedback: tutorFeedback })
+          });
+        } catch (err) { console.log('Offline API fallback'); }
+
         renderAllViews();
+        showToast('Session completed successfully!');
       }
       closeModal('modal-session-workspace');
-      openRatingModal(state.activeWorkspaceSession?.tutorName || 'Prof. Alex Rivera');
     }
   });
 

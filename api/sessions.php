@@ -78,6 +78,9 @@ if ($method === 'GET') {
     if (isset($input['rating'])) {
         $stmt = $pdo->prepare("UPDATE sessions SET rating = ?, feedback = ? WHERE id = ?");
         $stmt->execute([(int)$input['rating'], $input['feedback'] ?? '', $id]);
+    } else if (isset($input['feedback'])) {
+        $stmt = $pdo->prepare("UPDATE sessions SET feedback = ? WHERE id = ?");
+        $stmt->execute([$input['feedback'], $id]);
     }
 
     if (isset($input['payout_status'])) {
