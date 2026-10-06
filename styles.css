@@ -164,6 +164,10 @@ nav.wrap {
 .app-view { display: none; }
 .app-view.active { display: block; }
 
+/* Admin Inline Views Toggle */
+.admin-view { display: block; width: 100%; }
+.admin-view.hidden { display: none !important; }
+
 /* Tab Bar Navigation (Admin, Tutor & Auth Tabs) */
 .admin-tab-bar, .auth-tab-bar {
   display: flex;
