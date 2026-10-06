@@ -7,7 +7,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Apex Admin - TutorLink Management</title>
-  <meta name="description" content="TutorLink Administrator Portal with Direct Inline Navigation Views for Management Modules.">
+  <meta name="description" content="TutorLink Administrator Portal with Unified Slide-out Management Drawer with Sub-Tabs.">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,27 +32,27 @@
         <div class="nav-section-title">OVERVIEW</div>
         <ul class="sidebar-menu">
           <li class="menu-item active" data-admin-nav="dashboard">
-            <a href="javascript:void(0)" class="menu-link" onclick="showAdminView('dashboard')">
+            <a href="javascript:void(0)" class="menu-link" onclick="showDashboardOverview()">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
               <span>Dashboard</span>
             </a>
           </li>
           <li class="menu-item" data-admin-nav="students">
-            <a href="javascript:void(0)" class="menu-link" onclick="showAdminView('students')">
+            <a href="javascript:void(0)" class="menu-link" onclick="openAdminDrawerTab('students')">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              <span>Students</span>
+              <span>Students Drawer</span>
             </a>
           </li>
           <li class="menu-item" data-admin-nav="matching">
-            <a href="javascript:void(0)" class="menu-link" onclick="showAdminView('matching')">
+            <a href="javascript:void(0)" class="menu-link" onclick="openAdminDrawerTab('matching')">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
-              <span>Tutor Matching</span>
+              <span>Tutor Matching Drawer</span>
             </a>
           </li>
           <li class="menu-item" data-admin-nav="schedule">
-            <a href="javascript:void(0)" class="menu-link" onclick="showAdminView('schedule')">
+            <a href="javascript:void(0)" class="menu-link" onclick="openAdminDrawerTab('schedule')">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              <span>Schedule</span>
+              <span>Schedule Drawer</span>
             </a>
           </li>
         </ul>
@@ -60,15 +60,15 @@
         <div class="nav-section-title">COMMERCE & FINANCE</div>
         <ul class="sidebar-menu">
           <li class="menu-item" data-admin-nav="payments">
-            <a href="javascript:void(0)" class="menu-link" onclick="showAdminView('payments')">
+            <a href="javascript:void(0)" class="menu-link" onclick="openAdminDrawerTab('payments')">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-              <span>Payments</span>
+              <span>Payments Drawer</span>
             </a>
           </li>
           <li class="menu-item" data-admin-nav="reports">
-            <a href="javascript:void(0)" class="menu-link" onclick="showAdminView('reports')">
+            <a href="javascript:void(0)" class="menu-link" onclick="openAdminDrawerTab('reports')">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-              <span>Reports</span>
+              <span>Reports Drawer</span>
             </a>
           </li>
         </ul>
@@ -76,9 +76,9 @@
         <div class="nav-section-title">SYSTEM</div>
         <ul class="sidebar-menu">
           <li class="menu-item" data-admin-nav="notifications">
-            <a href="javascript:void(0)" class="menu-link" onclick="showAdminView('notifications')">
+            <a href="javascript:void(0)" class="menu-link" onclick="openAdminDrawerTab('notifications')">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              <span>Notifications</span>
+              <span>Notifications Drawer</span>
             </a>
           </li>
           <li class="menu-item">
@@ -116,21 +116,21 @@
         </div>
 
         <div class="header-actions">
-          <button class="btn btn-emerald" onclick="showAdminView('students')">
+          <button class="btn btn-emerald" onclick="openAdminDrawerTab('students')">
             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-            Students
+            Students Drawer
           </button>
 
-          <button class="btn btn-outline" id="generate-admin-report-btn" onclick="showAdminView('reports')">
+          <button class="btn btn-outline" id="generate-admin-report-btn" onclick="openAdminDrawerTab('reports')">
             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Reports
+            Reports Drawer
           </button>
 
           <div class="header-icon-group">
             <button class="icon-btn" title="Theme Toggle">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             </button>
-            <button class="icon-btn relative" title="Notifications" onclick="showAdminView('notifications')">
+            <button class="icon-btn relative" title="Notifications" onclick="openAdminDrawerTab('notifications')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
               <span class="notification-badge"></span>
             </button>
@@ -143,18 +143,18 @@
       <!-- Dashboard View Content Area -->
       <main class="content-container">
 
-        <!-- INLINE VIEW 1: Dashboard Overview -->
+        <!-- Dashboard Overview -->
         <section id="admin-view-dashboard" class="admin-view active">
           <div class="dashboard-title-area">
             <div>
               <h1 class="page-title">Dashboard Overview</h1>
-              <p class="page-subtitle">Welcome back, Admin. Click any module item on the sidebar to switch views.</p>
+              <p class="page-subtitle">Welcome back, Admin. Click any KPI card or sidebar item to slide open the management drawer.</p>
             </div>
           </div>
 
           <!-- Apex Style KPI Metric Cards -->
           <div class="apex-kpi-grid">
-            <div class="apex-kpi-card" onclick="showAdminView('payments')">
+            <div class="apex-kpi-card" onclick="openAdminDrawerTab('payments')">
               <div class="kpi-header">
                 <span class="kpi-label">Total Revenue</span>
                 <div class="kpi-icon-wrapper green-light">
@@ -173,7 +173,7 @@
               </div>
             </div>
 
-            <div class="apex-kpi-card" onclick="showAdminView('students')">
+            <div class="apex-kpi-card" onclick="openAdminDrawerTab('students')">
               <div class="kpi-header">
                 <span class="kpi-label">Active Registered Students</span>
                 <div class="kpi-icon-wrapper cyan-light">
@@ -192,7 +192,7 @@
               </div>
             </div>
 
-            <div class="apex-kpi-card" onclick="showAdminView('matching')">
+            <div class="apex-kpi-card" onclick="openAdminDrawerTab('matching')">
               <div class="kpi-header">
                 <span class="kpi-label">Verified Tutors</span>
                 <div class="kpi-icon-wrapper blue-light">
@@ -211,7 +211,7 @@
               </div>
             </div>
 
-            <div class="apex-kpi-card" onclick="showAdminView('reports')">
+            <div class="apex-kpi-card" onclick="openAdminDrawerTab('reports')">
               <div class="kpi-header">
                 <span class="kpi-label">Platform Commission (10%)</span>
                 <div class="kpi-icon-wrapper amber-light">
@@ -295,16 +295,50 @@
           </div>
         </section>
 
-        <!-- INLINE VIEW 2: Students Module -->
-        <section id="admin-view-students" class="admin-view hidden">
-          <div class="dashboard-title-area">
-            <div>
-              <h1 class="page-title">Manage Students</h1>
-              <p class="page-subtitle">View registered student accounts and validate registrations.</p>
-            </div>
-            <button class="btn btn-outline" onclick="showAdminView('dashboard')">&larr; Back to Dashboard</button>
-          </div>
+      </main>
+    </div>
+  </div>
 
+  <!-- UNIFIED MASTER ADMIN MANAGEMENT DRAWER WITH ALL 6 SUB-TABS -->
+  <div id="admin-master-drawer" class="drawer-backdrop hidden">
+    <div class="drawer-panel drawer-large">
+      <div class="drawer-header">
+        <div class="drawer-header-brand">
+          <svg class="drawer-icon text-emerald" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <div>
+            <h2 class="drawer-title" id="admin-drawer-active-title">Manage Students</h2>
+            <p class="drawer-subtitle" id="admin-drawer-active-sub">TutorLink Administrative Management Drawer</p>
+          </div>
+        </div>
+        <button class="drawer-close-btn" onclick="closeAdminMasterDrawer()">&times;</button>
+      </div>
+
+      <!-- Horizontal Tab Bar (Exactly matching image.png) -->
+      <div class="drawer-nav-pills">
+        <button class="drawer-pill-btn active" data-drawer-tab="students" onclick="switchAdminDrawerTab('students')">
+          Manage Students
+        </button>
+        <button class="drawer-pill-btn" data-drawer-tab="matching" onclick="switchAdminDrawerTab('matching')">
+          Manage Tutor Matching
+        </button>
+        <button class="drawer-pill-btn" data-drawer-tab="schedule" onclick="switchAdminDrawerTab('schedule')">
+          Manage Schedule
+        </button>
+        <button class="drawer-pill-btn" data-drawer-tab="payments" onclick="switchAdminDrawerTab('payments')">
+          Manage Payments
+        </button>
+        <button class="drawer-pill-btn" data-drawer-tab="notifications" onclick="switchAdminDrawerTab('notifications')">
+          Manage Notifications
+        </button>
+        <button class="drawer-pill-btn" data-drawer-tab="reports" onclick="switchAdminDrawerTab('reports')">
+          Manage Report
+        </button>
+      </div>
+
+      <div class="drawer-body">
+
+        <!-- TAB CONTENT 1: Manage Students -->
+        <div id="drawer-content-students" class="drawer-tab-content">
           <div class="card-table-wrapper">
             <div class="table-header-title">
               <h3>Registered Students List</h3>
@@ -326,18 +360,10 @@
               </tbody>
             </table>
           </div>
-        </section>
+        </div>
 
-        <!-- INLINE VIEW 3: Tutor Matching Module -->
-        <section id="admin-view-matching" class="admin-view hidden">
-          <div class="dashboard-title-area">
-            <div>
-              <h1 class="page-title">Manage Tutor Matching</h1>
-              <p class="page-subtitle">Review AI matching recommendations and approve tutoring sessions.</p>
-            </div>
-            <button class="btn btn-outline" onclick="showAdminView('dashboard')">&larr; Back to Dashboard</button>
-          </div>
-
+        <!-- TAB CONTENT 2: Manage Tutor Matching -->
+        <div id="drawer-content-matching" class="drawer-tab-content hidden">
           <div class="card-table-wrapper">
             <div class="table-header-title">
               <h3>Tutor Match Requests</h3>
@@ -359,18 +385,10 @@
               </tbody>
             </table>
           </div>
-        </section>
+        </div>
 
-        <!-- INLINE VIEW 4: Schedule Module -->
-        <section id="admin-view-schedule" class="admin-view hidden">
-          <div class="dashboard-title-area">
-            <div>
-              <h1 class="page-title">Manage Schedule</h1>
-              <p class="page-subtitle">Create and modify calendar schedule slots for verified tutors.</p>
-            </div>
-            <button class="btn btn-outline" onclick="showAdminView('dashboard')">&larr; Back to Dashboard</button>
-          </div>
-
+        <!-- TAB CONTENT 3: Manage Schedule -->
+        <div id="drawer-content-schedule" class="drawer-tab-content hidden">
           <div class="card-table-wrapper margin-bottom">
             <div class="table-header-title">
               <h3>New Schedule Slot</h3>
@@ -412,18 +430,10 @@
               </tbody>
             </table>
           </div>
-        </section>
+        </div>
 
-        <!-- INLINE VIEW 5: Payments & Fees Module -->
-        <section id="admin-view-payments" class="admin-view hidden">
-          <div class="dashboard-title-area">
-            <div>
-              <h1 class="page-title">Manage Payments & Fees</h1>
-              <p class="page-subtitle">Monitor GCash transactions, payment statuses, and tutor payouts.</p>
-            </div>
-            <button class="btn btn-outline" onclick="showAdminView('dashboard')">&larr; Back to Dashboard</button>
-          </div>
-
+        <!-- TAB CONTENT 4: Manage Payments -->
+        <div id="drawer-content-payments" class="drawer-tab-content hidden">
           <div class="card-table-wrapper">
             <div class="table-header-title">
               <h3>Payment Transactions Log</h3>
@@ -444,18 +454,10 @@
               </tbody>
             </table>
           </div>
-        </section>
+        </div>
 
-        <!-- INLINE VIEW 6: Notifications Module -->
-        <section id="admin-view-notifications" class="admin-view hidden">
-          <div class="dashboard-title-area">
-            <div>
-              <h1 class="page-title">Manage Notifications</h1>
-              <p class="page-subtitle">Send system broadcasts and view notification history log.</p>
-            </div>
-            <button class="btn btn-outline" onclick="showAdminView('dashboard')">&larr; Back to Dashboard</button>
-          </div>
-
+        <!-- TAB CONTENT 5: Manage Notifications -->
+        <div id="drawer-content-notifications" class="drawer-tab-content hidden">
           <div class="card-table-wrapper margin-bottom" style="padding: 20px;">
             <h3 class="margin-bottom">Send Broadcast Notification</h3>
             <div class="form-group margin-bottom">
@@ -481,21 +483,10 @@
               <!-- Broadcast log -->
             </div>
           </div>
-        </section>
+        </div>
 
-        <!-- INLINE VIEW 7: Reports Module -->
-        <section id="admin-view-reports" class="admin-view hidden">
-          <div class="dashboard-title-area">
-            <div>
-              <h1 class="page-title">Manage Reports</h1>
-              <p class="page-subtitle">View completed tutoring sessions and print activity summaries.</p>
-            </div>
-            <div style="display: flex; gap: 10px;">
-              <button class="btn btn-emerald" onclick="window.print()">Print Activity Summary</button>
-              <button class="btn btn-outline" onclick="showAdminView('dashboard')">&larr; Back to Dashboard</button>
-            </div>
-          </div>
-
+        <!-- TAB CONTENT 6: Manage Report -->
+        <div id="drawer-content-reports" class="drawer-tab-content hidden">
           <div class="card-table-wrapper">
             <div class="table-header-title">
               <h3>Completed Tutoring Sessions</h3>
@@ -517,9 +508,13 @@
               </tbody>
             </table>
           </div>
-        </section>
+        </div>
 
-      </main>
+      </div>
+
+      <div class="drawer-footer">
+        <button class="btn btn-outline" onclick="closeAdminMasterDrawer()">Close Drawer</button>
+      </div>
     </div>
   </div>
 
@@ -527,18 +522,62 @@
 
   <script src="app.js"></script>
   <script>
-    function showAdminView(viewName) {
-      // Hide all inline views
-      document.querySelectorAll('.admin-view').forEach(view => view.classList.add('hidden'));
+    const tabTitles = {
+      students: { title: 'Manage Students', sub: 'View student accounts and validate registrations' },
+      matching: { title: 'Manage Tutor Matching', sub: 'Review AI matching recommendations and approve sessions' },
+      schedule: { title: 'Manage Schedule', sub: 'Create and modify calendar schedule slots' },
+      payments: { title: 'Manage Payments', sub: 'GCash transactions, payment status, and payouts' },
+      notifications: { title: 'Manage Notifications', sub: 'Send system broadcasts and view notification history' },
+      reports: { title: 'Manage Report', sub: 'View completed tutoring sessions and generate system summaries' }
+    };
 
-      // Show requested inline view
-      const targetView = document.getElementById(`admin-view-${viewName}`);
-      if (targetView) targetView.classList.remove('hidden');
+    function openAdminDrawerTab(tabName) {
+      const drawer = document.getElementById('admin-master-drawer');
+      if (drawer) drawer.classList.remove('hidden');
+      switchAdminDrawerTab(tabName);
+    }
 
-      // Update sidebar active menu styling
+    function switchAdminDrawerTab(tabName) {
+      // Hide all drawer tab contents
+      document.querySelectorAll('.drawer-tab-content').forEach(c => c.classList.add('hidden'));
+
+      // Show requested tab content
+      const activeContent = document.getElementById(`drawer-content-${tabName}`);
+      if (activeContent) activeContent.classList.remove('hidden');
+
+      // Update active pill styling
+      document.querySelectorAll('.drawer-pill-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-drawer-tab') === tabName) {
+          btn.classList.add('active');
+        }
+      });
+
+      // Update active sidebar link styling
       document.querySelectorAll('.sidebar-menu .menu-item').forEach(item => {
         item.classList.remove('active');
-        if (item.getAttribute('data-admin-nav') === viewName) {
+        if (item.getAttribute('data-admin-nav') === tabName) {
+          item.classList.add('active');
+        }
+      });
+
+      // Update drawer title and subtitle
+      if (tabTitles[tabName]) {
+        document.getElementById('admin-drawer-active-title').innerText = tabTitles[tabName].title;
+        document.getElementById('admin-drawer-active-sub').innerText = tabTitles[tabName].sub;
+      }
+    }
+
+    function closeAdminMasterDrawer() {
+      const drawer = document.getElementById('admin-master-drawer');
+      if (drawer) drawer.classList.add('hidden');
+    }
+
+    function showDashboardOverview() {
+      closeAdminMasterDrawer();
+      document.querySelectorAll('.sidebar-menu .menu-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-admin-nav') === 'dashboard') {
           item.classList.add('active');
         }
       });
