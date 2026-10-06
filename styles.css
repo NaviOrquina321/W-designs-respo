@@ -439,6 +439,10 @@ footer .wrap { padding-top: 48px; padding-bottom: 48px; }
   transition: opacity 0.25s ease;
 }
 
+.drawer-backdrop.left-side-drawer {
+  justify-content: flex-start !important;
+}
+
 .drawer-backdrop.hidden {
   display: none !important;
 }
@@ -454,6 +458,12 @@ footer .wrap { padding-top: 48px; padding-bottom: 48px; }
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: -10px 0 36px rgba(0, 0, 0, 0.18);
   border-left: 1px solid var(--apex-border);
+}
+
+.drawer-panel-left {
+  border-left: none;
+  border-right: 1px solid var(--apex-border);
+  box-shadow: 10px 0 36px rgba(0, 0, 0, 0.18);
 }
 
 .drawer-panel.drawer-large {
