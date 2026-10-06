@@ -143,20 +143,12 @@
       <!-- Dashboard View Content Area -->
       <main class="content-container">
 
-        <!-- Left Side Drawer Trigger Banner -->
-        <div class="left-drawer-trigger-banner margin-bottom">
-          <button class="btn btn-emerald" onclick="openAdminLeftDrawer()">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;margin-right:6px;"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-            Open Management Modules Drawer (Left Side)
-          </button>
-        </div>
-
-        <!-- Dashboard Overview (Default Page View) -->
-        <div id="main-tab-dashboard-kpis" class="dashboard-kpi-wrapper">
+        <!-- SECTION 1: Dashboard Overview KPIs & Visual Analytics -->
+        <section id="admin-section-dashboard" class="admin-canvas-section margin-bottom">
           <div class="dashboard-title-area">
             <div>
               <h1 class="page-title">Dashboard Overview</h1>
-              <p class="page-subtitle">Welcome back, Admin. Select any management module tab above to switch views.</p>
+              <p class="page-subtitle">Welcome back, Admin. Here is your real-time platform overview.</p>
             </div>
           </div>
 
@@ -301,56 +293,13 @@
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-      </main>
-    </div>
-  </div>
-
-  <!-- SLIDE-OUT LEFT DRAWER FOR MANAGEMENT MODULES -->
-  <div id="admin-left-drawer-backdrop" class="drawer-backdrop left-side-drawer hidden" onclick="if(event.target === this) closeAdminLeftDrawer();">
-    <div class="drawer-panel drawer-panel-left drawer-large">
-      <div class="drawer-header">
-        <div class="drawer-header-brand">
-          <div class="brand-logo" style="background:#10b981; width:32px; height:32px;">
-            <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          </div>
-          <div>
-            <div class="drawer-title">Admin Management Modules</div>
-            <div class="drawer-subtitle">Apex Control Panel</div>
-          </div>
-        </div>
-        <button class="drawer-close-btn" onclick="closeAdminLeftDrawer()">&times;</button>
-      </div>
-
-      <!-- TAB BAR INSIDE LEFT DRAWER (Exact image.png labels) -->
-      <div class="drawer-nav-pills">
-        <button class="drawer-pill-btn active" data-drawer-tab="students" onclick="switchDrawerAdminTab('students')">
-          Manage Students
-        </button>
-        <button class="drawer-pill-btn" data-drawer-tab="matching" onclick="switchDrawerAdminTab('matching')">
-          Manage Tutor Matching
-        </button>
-        <button class="drawer-pill-btn" data-drawer-tab="schedule" onclick="switchDrawerAdminTab('schedule')">
-          Manage Schedule
-        </button>
-        <button class="drawer-pill-btn" data-drawer-tab="payments" onclick="switchDrawerAdminTab('payments')">
-          Manage Payments
-        </button>
-        <button class="drawer-pill-btn" data-drawer-tab="notifications" onclick="switchDrawerAdminTab('notifications')">
-          Manage Notifications
-        </button>
-        <button class="drawer-pill-btn" data-drawer-tab="reports" onclick="switchDrawerAdminTab('reports')">
-          Manage Report
-        </button>
-      </div>
-
-      <div class="drawer-body">
-        <!-- MODULE 1: Manage Students -->
-        <div id="drawer-tab-content-students" class="drawer-tab-view">
+        <!-- SECTION 2: Students Module -->
+        <section id="admin-section-students" class="admin-canvas-section margin-bottom">
           <div class="dashboard-title-area">
             <div>
-              <h2 class="page-title" style="font-size:1.3rem;">Manage Students</h2>
+              <h2 class="page-title">Students</h2>
               <p class="page-subtitle">View registered student accounts and validate registrations.</p>
             </div>
           </div>
@@ -376,13 +325,13 @@
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
 
-        <!-- MODULE 2: Manage Tutor Matching -->
-        <div id="drawer-tab-content-matching" class="drawer-tab-view hidden">
+        <!-- SECTION 3: Tutor Matching Module -->
+        <section id="admin-section-matching" class="admin-canvas-section margin-bottom">
           <div class="dashboard-title-area">
             <div>
-              <h2 class="page-title" style="font-size:1.3rem;">Manage Tutor Matching</h2>
+              <h2 class="page-title">Tutor Matching</h2>
               <p class="page-subtitle">Review AI matching recommendations and approve tutoring sessions.</p>
             </div>
           </div>
@@ -408,13 +357,13 @@
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
 
-        <!-- MODULE 3: Manage Schedule -->
-        <div id="drawer-tab-content-schedule" class="drawer-tab-view hidden">
+        <!-- SECTION 4: Schedule Module -->
+        <section id="admin-section-schedule" class="admin-canvas-section margin-bottom">
           <div class="dashboard-title-area">
             <div>
-              <h2 class="page-title" style="font-size:1.3rem;">Manage Schedule</h2>
+              <h2 class="page-title">Schedule</h2>
               <p class="page-subtitle">Create and modify calendar schedule slots for verified tutors.</p>
             </div>
           </div>
@@ -460,13 +409,13 @@
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
 
-        <!-- MODULE 4: Manage Payments -->
-        <div id="drawer-tab-content-payments" class="drawer-tab-view hidden">
+        <!-- SECTION 5: Payments Module -->
+        <section id="admin-section-payments" class="admin-canvas-section margin-bottom">
           <div class="dashboard-title-area">
             <div>
-              <h2 class="page-title" style="font-size:1.3rem;">Manage Payments & Fees</h2>
+              <h2 class="page-title">Payments & Fees</h2>
               <p class="page-subtitle">Monitor GCash transactions, payment statuses, and tutor payouts.</p>
             </div>
           </div>
@@ -491,13 +440,46 @@
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
 
-        <!-- MODULE 5: Manage Notifications -->
-        <div id="drawer-tab-content-notifications" class="drawer-tab-view hidden">
+        <!-- SECTION 6: Reports Module -->
+        <section id="admin-section-reports" class="admin-canvas-section margin-bottom">
           <div class="dashboard-title-area">
             <div>
-              <h2 class="page-title" style="font-size:1.3rem;">Manage Notifications</h2>
+              <h2 class="page-title">Reports</h2>
+              <p class="page-subtitle">View completed tutoring sessions and print activity summaries.</p>
+            </div>
+            <button class="btn btn-emerald" onclick="window.print()">Print Activity Summary</button>
+          </div>
+
+          <div class="card-table-wrapper">
+            <div class="table-header-title">
+              <h3>Completed Tutoring Sessions</h3>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Session ID</th>
+                  <th>Student</th>
+                  <th>Tutor</th>
+                  <th>Subject</th>
+                  <th>Date</th>
+                  <th>Fee</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="admin-reports-completed-table-body">
+                <!-- Dynamic completed report rows -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- SECTION 7: Notifications Module -->
+        <section id="admin-section-notifications" class="admin-canvas-section margin-bottom">
+          <div class="dashboard-title-area">
+            <div>
+              <h2 class="page-title">Notifications</h2>
               <p class="page-subtitle">Send system broadcasts and view notification history log.</p>
             </div>
           </div>
@@ -527,87 +509,21 @@
               <!-- Broadcast log -->
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- MODULE 6: Manage Report -->
-        <div id="drawer-tab-content-reports" class="drawer-tab-view hidden">
-          <div class="dashboard-title-area">
-            <div>
-              <h2 class="page-title" style="font-size:1.3rem;">Manage Reports</h2>
-              <p class="page-subtitle">View completed tutoring sessions and print activity summaries.</p>
-            </div>
-            <button class="btn btn-emerald" onclick="window.print()">Print Activity Summary</button>
-          </div>
-
-          <div class="card-table-wrapper">
-            <div class="table-header-title">
-              <h3>Completed Tutoring Sessions</h3>
-            </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Session ID</th>
-                  <th>Student</th>
-                  <th>Tutor</th>
-                  <th>Subject</th>
-                  <th>Date</th>
-                  <th>Fee</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="admin-reports-completed-table-body">
-                <!-- Dynamic completed report rows -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div class="drawer-footer">
-        <div class="drawer-footer-info">
-          <span class="status-indicator active"></span>
-          <span>Admin Modules Live Sync</span>
-        </div>
-        <button class="btn btn-secondary btn-small" onclick="closeAdminLeftDrawer()">Close Drawer</button>
-      </div>
+      </main>
     </div>
   </div>
+
 
   <div id="toast" class="toast hidden"></div>
 
   <script src="app.js"></script>
   <script>
-    function openAdminLeftDrawer(tabName) {
-      document.getElementById('admin-left-drawer-backdrop').classList.remove('hidden');
-      if (tabName) {
-        switchDrawerAdminTab(tabName);
-      }
-    }
-
-    function closeAdminLeftDrawer() {
-      document.getElementById('admin-left-drawer-backdrop').classList.add('hidden');
-    }
-
-    function switchDrawerAdminTab(tabName) {
-      document.querySelectorAll('.drawer-tab-view').forEach(v => v.classList.add('hidden'));
-
-      const activeView = document.getElementById(`drawer-tab-content-${tabName}`);
-      if (activeView) activeView.classList.remove('hidden');
-
-      document.querySelectorAll('.drawer-pill-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.getAttribute('data-drawer-tab') === tabName) {
-          btn.classList.add('active');
-        }
-      });
-    }
-
     function switchMainAdminTab(tabName) {
-      if (tabName === 'dashboard') {
-        document.getElementById('main-tab-dashboard-kpis').classList.remove('hidden');
-        closeAdminLeftDrawer();
-      } else {
-        openAdminLeftDrawer(tabName);
+      const targetSection = document.getElementById(`admin-section-${tabName}`);
+      if (targetSection) {
+        targetSection.scrollIntoView({ behavior: 'smooth' });
       }
 
       // Sync active state on sidebar navigation

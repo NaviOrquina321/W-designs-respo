@@ -2108,26 +2108,34 @@ function initAdminView() {
   });
 
   reportBtn?.addEventListener('click', () => {
-    document.getElementById('report-generated-date').textContent = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    document.getElementById('report-total-sessions').textContent = state.sessions.length;
+    const reportDateEl = document.getElementById('report-generated-date');
+    if (reportDateEl) reportDateEl.textContent = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+    const reportSessionsEl = document.getElementById('report-total-sessions');
+    if (reportSessionsEl) reportSessionsEl.textContent = state.sessions.length;
 
     const totalVolume = state.sessions.reduce((acc, s) => acc + s.totalPaid, 0);
     const totalNet = state.sessions.reduce((acc, s) => acc + s.commissionFee, 0);
 
-    document.getElementById('report-total-volume').textContent = `P${totalVolume}`;
-    document.getElementById('report-net-revenue').textContent = `P${totalNet}`;
+    const reportVolumeEl = document.getElementById('report-total-volume');
+    if (reportVolumeEl) reportVolumeEl.textContent = `P${totalVolume}`;
+
+    const reportNetEl = document.getElementById('report-net-revenue');
+    if (reportNetEl) reportNetEl.textContent = `P${totalNet}`;
 
     const tbody = document.getElementById('report-table-body');
-    tbody.innerHTML = state.sessions.map(s => `
-      <tr>
-        <td><code>${s.id}</code></td>
-        <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${s.studentId || s.studentName}')">${s.studentName}</span></td>
-        <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</span></td>
-        <td>${s.subject}</td>
-        <td>${s.status}</td>
-        <td>P${s.totalPaid}</td>
-      </tr>
-    `).join('');
+    if (tbody) {
+      tbody.innerHTML = state.sessions.map(s => `
+        <tr>
+          <td><code>${s.id}</code></td>
+          <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${s.studentId || s.studentName}')">${s.studentName}</span></td>
+          <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</span></td>
+          <td>${s.subject}</td>
+          <td>${s.status}</td>
+          <td>P${s.totalPaid}</td>
+        </tr>
+      `).join('');
+    }
 
     openModal('modal-admin-report');
   });

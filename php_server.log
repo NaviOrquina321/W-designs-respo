@@ -35,3 +35,39 @@
 [Tue Oct  6 05:07:27 2026] 127.0.0.1:33830 Accepted
 [Tue Oct  6 05:07:27 2026] 127.0.0.1:33830 [200]: GET /api/admin.php
 [Tue Oct  6 05:07:27 2026] 127.0.0.1:33830 Closing
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51426 Accepted
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51426 [200]: GET /admin.php
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51426 Closing
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51442 Accepted
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51446 Accepted
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51442 [200]: GET /styles.css
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51446 [200]: GET /app.js
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51442 Closing
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51446 Closing
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51448 Accepted
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51448 [200]: GET /api/students.php
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51448 Closing
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51462 Accepted
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51462 [200]: GET /api/subjects.php
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51462 Closing
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51466 Accepted
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51466 [200]: GET /api/tutors.php
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51466 Closing
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51472 Accepted
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51472 [200]: GET /api/sessions.php
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51472 Closing
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51476 Accepted
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51476 [200]: GET /api/payments.php
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51476 Closing
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51490 Accepted
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51490 [200]: GET /api/matches.php
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51490 Closing
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51500 Accepted
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51500 [200]: GET /api/schedules.php
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51500 Closing
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51506 Accepted
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51506 [200]: GET /api/notifications.php
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51506 Closing
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51520 Accepted
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51520 [200]: GET /api/admin.php
+[Tue Oct  6 07:37:18 2026] 127.0.0.1:51520 Closing
