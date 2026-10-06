@@ -315,22 +315,24 @@ require_once __DIR__ . '/api/config.php';
           <div class="section-title-bar">
             <h3>Session History & Payment Receipts</h3>
           </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Date & Time</th>
-                <th>Tutor</th>
-                <th>Subject</th>
-                <th>Fee</th>
-                <th>GCash Ref #</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="student-history-table-body">
-              <!-- Dynamic rows -->
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date & Time</th>
+                  <th>Tutor</th>
+                  <th>Subject</th>
+                  <th>Fee</th>
+                  <th>GCash Ref #</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="student-history-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -379,21 +381,23 @@ require_once __DIR__ . '/api/config.php';
             <div class="section-title-bar">
               <h3>Incoming Student Match Requests</h3>
             </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Request ID</th>
-                  <th>Student Name</th>
-                  <th>Subject</th>
-                  <th>Compatibility</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="tutor-requests-table-body">
-                <!-- Dynamic requests -->
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Request ID</th>
+                    <th>Student Name</th>
+                    <th>Subject</th>
+                    <th>Compatibility</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tutor-requests-table-body">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -429,22 +433,24 @@ require_once __DIR__ . '/api/config.php';
                 <span class="stat-label">Pending Payout</span>
               </div>
             </div>
-            <table class="data-table margin-bottom">
-              <thead>
-                <tr>
-                  <th>Session ID</th>
-                  <th>Student</th>
-                  <th>Subject</th>
-                  <th>Date</th>
-                  <th>Total Paid</th>
-                  <th>Net Payout</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="tutor-earnings-table-body">
-                <!-- Dynamic earnings rows -->
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="data-table margin-bottom">
+                <thead>
+                  <tr>
+                    <th>Session ID</th>
+                    <th>Student</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Total Paid</th>
+                    <th>Net Payout</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="tutor-earnings-table-body">
+                  <!-- Dynamic earnings rows -->
+                </tbody>
+              </table>
+            </div>
 
             <div class="section-title-bar margin-top">
               <h3>Performance & Student Reviews</h3>

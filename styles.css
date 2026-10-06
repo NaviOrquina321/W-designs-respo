@@ -424,6 +424,41 @@ footer .wrap { padding-top: 48px; padding-bottom: 48px; }
    SLIDE-OUT DRAWER OVERLAY & PANEL STYLES
    ========================================================================== */
 
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(18, 18, 18, 0.5);
+  z-index: 999;
+  display: none;
+}
+
+.drawer-overlay.active {
+  display: block;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: -380px;
+  width: 360px;
+  max-width: 90vw;
+  height: 100vh;
+  background: var(--paper);
+  border-left: 1px solid var(--line);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+}
+
+.drawer.active {
+  right: 0;
+}
+
 .drawer-backdrop {
   position: fixed;
   top: 0;
@@ -1226,8 +1261,61 @@ body.admin-body {
   color: #0f172a;
 }
 
+/* Responsive & Layout Safety Improvements for Landing, Student & Tutor Views */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  margin-bottom: 24px;
+}
+
+.table-responsive .data-table {
+  margin-bottom: 0;
+  border: none;
+}
+
+.tutor-card {
+  min-height: 280px;
+}
+
+.session-card {
+  min-height: 100px;
+  box-sizing: border-box;
+}
+
+.stat-card {
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 @media (max-width: 992px) {
   .charts-grid { grid-template-columns: 1fr; }
   .admin-sidebar { width: 200px; }
   .drawer-panel { width: 100vw; }
+  .audience-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .dashboard-header { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 768px) {
+  .hero h1 { font-size: 2.2rem; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .feature-grid .feature-card:nth-child(5) { grid-column: auto; }
+  .audience-grid { grid-template-columns: 1fr; }
+  .why-list { columns: 1; }
+  .tutor-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .cta-final h2 { font-size: 1.75rem; }
+  .modal-card { width: 95%; max-width: 100%; margin: 16px; padding: 20px; }
+}
+
+@media (max-width: 480px) {
+  .hero .actions { flex-direction: column; width: 100%; }
+  .hero .actions .btn { width: 100%; justify-content: center; }
+  .cta-final .actions { flex-direction: column; width: 100%; }
+  .cta-final .actions .btn { width: 100%; justify-content: center; }
+  .session-card { flex-direction: column; align-items: flex-start; }
 }
