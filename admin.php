@@ -7,7 +7,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Apex Admin - TutorLink Management</title>
-  <meta name="description" content="TutorLink Administrator Portal with Slide-out Drawer Navigation and Management Controls.">
+  <meta name="description" content="TutorLink Administrator Portal with Dedicated Slide-out Drawer Panels for Management Modules.">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,33 +32,27 @@
         <div class="nav-section-title">OVERVIEW</div>
         <ul class="sidebar-menu">
           <li class="menu-item active" data-admin-nav="dashboard">
-            <a href="#dashboard" class="menu-link">
+            <a href="#dashboard" class="menu-link" onclick="showDashboardOverview()">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
               <span>Dashboard</span>
             </a>
           </li>
-          <li class="menu-item" id="sidebar-open-drawer">
-            <a href="javascript:void(0)" class="menu-link" onclick="openAdminDrawer('management')">
-              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
-              <span>Management Drawer</span>
-            </a>
-          </li>
           <li class="menu-item" data-admin-nav="students">
-            <a href="#tab-students" class="menu-link">
+            <a href="javascript:void(0)" class="menu-link" onclick="openDedicatedAdminDrawer('students')">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              <span>Students</span>
+              <span>Students Drawer</span>
             </a>
           </li>
           <li class="menu-item" data-admin-nav="matching">
-            <a href="#tab-matching" class="menu-link">
+            <a href="javascript:void(0)" class="menu-link" onclick="openDedicatedAdminDrawer('matching')">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
-              <span>Tutor Matching</span>
+              <span>Tutor Matching Drawer</span>
             </a>
           </li>
           <li class="menu-item" data-admin-nav="schedule">
-            <a href="#tab-schedule" class="menu-link">
+            <a href="javascript:void(0)" class="menu-link" onclick="openDedicatedAdminDrawer('schedule')">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              <span>Calendar Schedule</span>
+              <span>Schedule Drawer</span>
             </a>
           </li>
         </ul>
@@ -66,15 +60,15 @@
         <div class="nav-section-title">COMMERCE & FINANCE</div>
         <ul class="sidebar-menu">
           <li class="menu-item" data-admin-nav="payments">
-            <a href="#tab-payments" class="menu-link">
+            <a href="javascript:void(0)" class="menu-link" onclick="openDedicatedAdminDrawer('payments')">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-              <span>Payments & Fees</span>
+              <span>Payments Drawer</span>
             </a>
           </li>
           <li class="menu-item" data-admin-nav="reports">
-            <a href="#tab-reports" class="menu-link">
+            <a href="javascript:void(0)" class="menu-link" onclick="openDedicatedAdminDrawer('reports')">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-              <span>Reports</span>
+              <span>Reports Drawer</span>
             </a>
           </li>
         </ul>
@@ -82,9 +76,9 @@
         <div class="nav-section-title">SYSTEM</div>
         <ul class="sidebar-menu">
           <li class="menu-item" data-admin-nav="notifications">
-            <a href="#tab-notifications" class="menu-link">
+            <a href="javascript:void(0)" class="menu-link" onclick="openDedicatedAdminDrawer('notifications')">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              <span>Notifications</span>
+              <span>Notifications Drawer</span>
             </a>
           </li>
           <li class="menu-item">
@@ -122,24 +116,21 @@
         </div>
 
         <div class="header-actions">
-          <button class="btn btn-emerald" id="open-management-drawer-btn" onclick="openAdminDrawer('management')">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
-            Management Drawer
+          <button class="btn btn-emerald" onclick="openDedicatedAdminDrawer('students')">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            Students Drawer
           </button>
 
-          <button class="btn btn-outline" id="generate-admin-report-btn">
+          <button class="btn btn-outline" id="generate-admin-report-btn" onclick="openDedicatedAdminDrawer('reports')">
             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Export Report
+            Export Reports Drawer
           </button>
 
           <div class="header-icon-group">
             <button class="icon-btn" title="Theme Toggle">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             </button>
-            <button class="icon-btn" title="System Settings" onclick="openAdminDrawer('settings')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            </button>
-            <button class="icon-btn relative" title="Notifications" onclick="openAdminDrawer('notifications')">
+            <button class="icon-btn relative" title="Notifications" onclick="openDedicatedAdminDrawer('notifications')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
               <span class="notification-badge"></span>
             </button>
@@ -154,17 +145,13 @@
         <div class="dashboard-title-area">
           <div>
             <h1 class="page-title">Dashboard Overview</h1>
-            <p class="page-subtitle">Welcome back, Admin. Real-time platform analytics and system controls.</p>
+            <p class="page-subtitle">Welcome back, Admin. Click any KPI card or sidebar item to slide open its dedicated drawer.</p>
           </div>
-          <button class="btn btn-emerald" onclick="openAdminDrawer('management')">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-            Open Off-Canvas Management Drawer
-          </button>
         </div>
 
         <!-- Apex Style KPI Metric Cards -->
         <div class="apex-kpi-grid">
-          <div class="apex-kpi-card" onclick="openAdminDrawer('payments')">
+          <div class="apex-kpi-card" onclick="openDedicatedAdminDrawer('payments')">
             <div class="kpi-header">
               <span class="kpi-label">Total Revenue</span>
               <div class="kpi-icon-wrapper green-light">
@@ -183,7 +170,7 @@
             </div>
           </div>
 
-          <div class="apex-kpi-card" onclick="openAdminDrawer('students')">
+          <div class="apex-kpi-card" onclick="openDedicatedAdminDrawer('students')">
             <div class="kpi-header">
               <span class="kpi-label">Active Registered Students</span>
               <div class="kpi-icon-wrapper cyan-light">
@@ -202,7 +189,7 @@
             </div>
           </div>
 
-          <div class="apex-kpi-card" onclick="openAdminDrawer('matching')">
+          <div class="apex-kpi-card" onclick="openDedicatedAdminDrawer('matching')">
             <div class="kpi-header">
               <span class="kpi-label">Verified Tutors</span>
               <div class="kpi-icon-wrapper blue-light">
@@ -221,7 +208,7 @@
             </div>
           </div>
 
-          <div class="apex-kpi-card" onclick="openAdminDrawer('reports')">
+          <div class="apex-kpi-card" onclick="openDedicatedAdminDrawer('reports')">
             <div class="kpi-header">
               <span class="kpi-label">Platform Commission (10%)</span>
               <div class="kpi-icon-wrapper amber-light">
@@ -303,560 +290,284 @@
             </div>
           </div>
         </div>
-
-        <!-- System Management Modules Container -->
-        <div class="management-section-wrapper margin-top-lg">
-          <div class="admin-tab-bar">
-            <button class="admin-tab-btn active" data-tab="tab-students">Manage Students</button>
-            <button class="admin-tab-btn" data-tab="tab-matching">Manage Tutor Matching</button>
-            <button class="admin-tab-btn" data-tab="tab-schedule">Manage Schedule</button>
-            <button class="admin-tab-btn" data-tab="tab-payments">Manage Payments</button>
-            <button class="admin-tab-btn" data-tab="tab-notifications">Manage Notifications</button>
-            <button class="admin-tab-btn" data-tab="tab-reports">Manage Reports</button>
-          </div>
-
-          <!-- 1. Manage Students -->
-          <div class="admin-tab-content active" id="tab-students">
-            <div class="admin-subtab-bar">
-              <button class="admin-subtab-btn active" data-subtab="subtab-student-view">View Student List</button>
-              <button class="admin-subtab-btn" data-subtab="subtab-student-validate">Validate Student List</button>
-            </div>
-
-            <div class="admin-subtab-content active" id="subtab-student-view">
-              <div class="card-table-wrapper">
-                <div class="table-header-title">
-                  <h3>View Student List</h3>
-                </div>
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Student ID</th>
-                      <th>Full Name</th>
-                      <th>Email</th>
-                      <th>Grade Level</th>
-                      <th>Validation Status</th>
-                      <th>Account Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin-students-table-body">
-                    <!-- Dynamic student rows -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="admin-subtab-content" id="subtab-student-validate">
-              <div class="card-table-wrapper">
-                <div class="table-header-title">
-                  <h3>Validate Student Registrations</h3>
-                </div>
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Student ID</th>
-                      <th>Full Name</th>
-                      <th>Grade Level</th>
-                      <th>Validation Status</th>
-                      <th>Validate Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin-students-validate-table-body">
-                    <!-- Dynamic pending validation student rows -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- 2. Manage Tutor Matching -->
-          <div class="admin-tab-content" id="tab-matching">
-            <div class="admin-subtab-bar">
-              <button class="admin-subtab-btn active" data-subtab="subtab-match-review">Review Matching Results</button>
-              <button class="admin-subtab-btn" data-subtab="subtab-match-approve">Approve Matching Sessions</button>
-              <button class="admin-subtab-btn" data-subtab="subtab-match-cancel">Cancel Matching Sessions</button>
-            </div>
-
-            <div class="admin-subtab-content active" id="subtab-match-review">
-              <div class="card-table-wrapper">
-                <div class="table-header-title">
-                  <h3>Review Matching Results</h3>
-                </div>
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Match ID</th>
-                      <th>Student</th>
-                      <th>Matched Tutor</th>
-                      <th>Subject</th>
-                      <th>Compatibility Score</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin-matching-table-body">
-                    <!-- Dynamic match rows -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="admin-subtab-content" id="subtab-match-approve">
-              <div class="card-table-wrapper">
-                <div class="table-header-title">
-                  <h3>Approve Matching Sessions</h3>
-                </div>
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Match ID</th>
-                      <th>Student</th>
-                      <th>Tutor</th>
-                      <th>Subject</th>
-                      <th>Status</th>
-                      <th>Approve Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin-matching-approve-table-body">
-                    <!-- Dynamic pending match rows -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="admin-subtab-content" id="subtab-match-cancel">
-              <div class="card-table-wrapper">
-                <div class="table-header-title">
-                  <h3>Cancel Matching Sessions</h3>
-                </div>
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Match ID</th>
-                      <th>Student</th>
-                      <th>Tutor</th>
-                      <th>Subject</th>
-                      <th>Status</th>
-                      <th>Cancel Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin-matching-cancel-table-body">
-                    <!-- Dynamic active match rows -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- 3. Manage Schedule -->
-          <div class="admin-tab-content" id="tab-schedule">
-            <div class="admin-subtab-bar">
-              <button class="admin-subtab-btn active" data-subtab="subtab-sch-new">New Calendar Schedule</button>
-              <button class="admin-subtab-btn" data-subtab="subtab-sch-modify">Modify Sessions Schedule</button>
-            </div>
-
-            <div class="admin-subtab-content active" id="subtab-sch-new">
-              <div class="card-table-wrapper">
-                <div class="table-header-title">
-                  <h3>New Calendar Schedule Slot</h3>
-                </div>
-                <form id="admin-add-schedule-form" class="profile-card-edit" style="padding: 20px;">
-                  <div class="form-group margin-bottom">
-                    <label>Select Tutor</label>
-                    <select id="admin-sch-tutor-select" class="form-select"></select>
-                  </div>
-                  <div class="form-group margin-bottom">
-                    <label>Subject</label>
-                    <input type="text" id="admin-sch-subject" class="form-input" placeholder="e.g. Calculus II" required>
-                  </div>
-                  <div class="form-group margin-bottom">
-                    <label>Date & Time Slot</label>
-                    <input type="text" id="admin-sch-dateslot" class="form-input" placeholder="e.g. 2026-03-20 (02:00 PM - 04:00 PM)" required>
-                  </div>
-                  <button type="submit" class="btn btn-emerald margin-top">Create Schedule Slot</button>
-                </form>
-              </div>
-            </div>
-
-            <div class="admin-subtab-content" id="subtab-sch-modify">
-              <div class="card-table-wrapper">
-                <div class="table-header-title">
-                  <h3>Modify Sessions Schedule</h3>
-                </div>
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Schedule ID</th>
-                      <th>Tutor</th>
-                      <th>Date & Slot</th>
-                      <th>Subject</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin-schedule-table-body">
-                    <!-- Dynamic schedule rows -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- 4. Manage Payments -->
-          <div class="admin-tab-content" id="tab-payments">
-            <div class="admin-subtab-bar">
-              <button class="admin-subtab-btn active" data-subtab="subtab-pay-new">New Payment Records</button>
-              <button class="admin-subtab-btn" data-subtab="subtab-pay-confirm">Confirm Payment Status</button>
-            </div>
-
-            <div class="admin-subtab-content active" id="subtab-pay-new">
-              <div class="card-table-wrapper">
-                <div class="table-header-title">
-                  <h3>New Payment Records</h3>
-                </div>
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Payment ID</th>
-                      <th>Payer (Student)</th>
-                      <th>Method</th>
-                      <th>GCash Ref #</th>
-                      <th>Amount (₱)</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin-payments-table-body">
-                    <!-- Dynamic payment rows -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="admin-subtab-content" id="subtab-pay-confirm">
-              <div class="card-table-wrapper">
-                <div class="table-header-title">
-                  <h3>Confirm Payment Status</h3>
-                </div>
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Payment ID</th>
-                      <th>Student</th>
-                      <th>GCash Ref #</th>
-                      <th>Amount (₱)</th>
-                      <th>Status</th>
-                      <th>Confirm Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin-payments-confirm-table-body">
-                    <!-- Dynamic pending payment rows -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- 5. Manage Notifications -->
-          <div class="admin-tab-content" id="tab-notifications">
-            <div class="admin-subtab-bar">
-              <button class="admin-subtab-btn active" data-subtab="subtab-notif-send">Send Notifications</button>
-              <button class="admin-subtab-btn" data-subtab="subtab-notif-view">View Notifications</button>
-            </div>
-
-            <div class="admin-subtab-content active" id="subtab-notif-send">
-              <div class="card-table-wrapper">
-                <div class="table-header-title">
-                  <h3>Send Broadcast Notifications</h3>
-                </div>
-                <div class="profile-card-edit" style="padding: 20px;">
-                  <div class="form-group margin-bottom">
-                    <label>Notification Recipient</label>
-                    <select id="admin-notif-target" class="form-select">
-                      <option value="all">All Users (Students & Tutors)</option>
-                      <option value="students">All Students</option>
-                      <option value="tutors">All Tutors</option>
-                    </select>
-                  </div>
-                  <div class="form-group margin-bottom">
-                    <label>Message Content</label>
-                    <input type="text" id="admin-notif-message" placeholder="Type notification broadcast message..." class="form-input">
-                  </div>
-                  <button class="btn btn-emerald full-width margin-top" id="admin-send-notif-btn">Send Notification Broadcast</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="admin-subtab-content" id="subtab-notif-view">
-              <div class="card-table-wrapper">
-                <div class="table-header-title">
-                  <h3>View Notifications History</h3>
-                </div>
-                <div id="admin-notifications-log" class="cards-list" style="padding: 20px;">
-                  <!-- Broadcast log -->
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 6. Manage Reports -->
-          <div class="admin-tab-content" id="tab-reports">
-            <div class="admin-subtab-bar">
-              <button class="admin-subtab-btn active" data-subtab="subtab-rep-completed">View Completed Tutoring</button>
-              <button class="admin-subtab-btn" data-subtab="subtab-rep-weekly">View Weekly Sessions</button>
-              <button class="admin-subtab-btn" data-subtab="subtab-rep-monthly">View Monthly Sessions</button>
-            </div>
-
-            <div class="admin-subtab-content active" id="subtab-rep-completed">
-              <div class="card-table-wrapper">
-                <div class="table-header-title">
-                  <h3>View Completed Tutoring Sessions</h3>
-                </div>
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Session ID</th>
-                      <th>Student</th>
-                      <th>Tutor</th>
-                      <th>Subject</th>
-                      <th>Date</th>
-                      <th>Fee</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin-reports-completed-table-body">
-                    <!-- Dynamic completed report rows -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="admin-subtab-content" id="subtab-rep-weekly">
-              <div class="card-table-wrapper">
-                <div class="table-header-title">
-                  <h3>View Weekly Sessions (Rolling 7 Days)</h3>
-                </div>
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Session ID</th>
-                      <th>Student</th>
-                      <th>Tutor</th>
-                      <th>Subject</th>
-                      <th>Date</th>
-                      <th>Fee</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin-reports-weekly-table-body">
-                    <!-- Dynamic weekly report rows -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="admin-subtab-content" id="subtab-rep-monthly">
-              <div class="card-table-wrapper">
-                <div class="table-header-title">
-                  <h3>View Monthly Sessions (Rolling 30 Days)</h3>
-                </div>
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Session ID</th>
-                      <th>Student</th>
-                      <th>Tutor</th>
-                      <th>Subject</th>
-                      <th>Date</th>
-                      <th>Fee</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin-reports-monthly-table-body">
-                    <!-- Dynamic monthly report rows -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
       </main>
     </div>
   </div>
 
-  <!-- SLIDE-OUT ADMINISTRATIVE MANAGEMENT DRAWER -->
-  <div id="admin-management-drawer" class="drawer-backdrop hidden">
+  <!-- DEDICATED INDIVIDUAL MODULE DRAWERS -->
+
+  <!-- 1. Dedicated Students Drawer -->
+  <div id="drawer-admin-students" class="drawer-backdrop hidden">
     <div class="drawer-panel drawer-large">
       <div class="drawer-header">
         <div class="drawer-header-brand">
-          <svg class="drawer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+          <svg class="drawer-icon text-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           <div>
-            <h2 class="drawer-title" id="drawer-main-title">Administrative Modules</h2>
-            <p class="drawer-subtitle" id="drawer-main-subtitle">Manage system operations, users, matches, payments, and schedules</p>
+            <h2 class="drawer-title">Manage Students</h2>
+            <p class="drawer-subtitle">View student accounts and validate registrations</p>
           </div>
         </div>
-        <button class="drawer-close-btn" onclick="closeAdminDrawer('management')">&times;</button>
-      </div>
-
-      <div class="drawer-nav-pills">
-        <button class="drawer-pill-btn active" data-drawer-tab="tab-students" onclick="switchDrawerModule('students')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-          Students
-        </button>
-        <button class="drawer-pill-btn" data-drawer-tab="tab-matching" onclick="switchDrawerModule('matching')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
-          Tutor Matching
-        </button>
-        <button class="drawer-pill-btn" data-drawer-tab="tab-schedule" onclick="switchDrawerModule('schedule')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          Schedule
-        </button>
-        <button class="drawer-pill-btn" data-drawer-tab="tab-payments" onclick="switchDrawerModule('payments')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Payments
-        </button>
-        <button class="drawer-pill-btn" data-drawer-tab="tab-notifications" onclick="switchDrawerModule('notifications')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          Notifications
-        </button>
-        <button class="drawer-pill-btn" data-drawer-tab="tab-reports" onclick="switchDrawerModule('reports')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Reports
-        </button>
-      </div>
-
-      <div class="drawer-body" id="drawer-module-container">
-        <!-- Module content rendered dynamically or cloned from tab contents -->
-        <div id="drawer-active-content">
-          <p class="text-muted text-center" style="padding: 40px;">Select a module above to view administrative controls.</p>
-        </div>
-      </div>
-
-      <div class="drawer-footer">
-        <div class="drawer-footer-info">
-          <span class="status-indicator active"></span> System Normal • Connected to API
-        </div>
-        <button class="btn btn-outline btn-sm" onclick="closeAdminDrawer('management')">Close Drawer</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- INTERACTIVE SPECIFIC FUNCTION DRAWERS -->
-  <!-- 1. Student Detail & Account Control Drawer -->
-  <div id="drawer-student-detail" class="drawer-backdrop hidden">
-    <div class="drawer-panel drawer-medium">
-      <div class="drawer-header">
-        <div class="drawer-header-brand">
-          <svg class="drawer-icon text-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <div>
-            <h2 class="drawer-title" id="student-detail-name">Student Account Details</h2>
-            <p class="drawer-subtitle" id="student-detail-id">ID: STU-000</p>
-          </div>
-        </div>
-        <button class="drawer-close-btn" onclick="closeAdminDrawer('student-detail')">&times;</button>
+        <button class="drawer-close-btn" onclick="closeDedicatedAdminDrawer('students')">&times;</button>
       </div>
       <div class="drawer-body">
-        <div class="detail-card margin-bottom">
-          <div class="detail-row"><span class="detail-label">Email:</span> <span id="student-detail-email" class="detail-value">student@example.com</span></div>
-          <div class="detail-row"><span class="detail-label">Grade Level:</span> <span id="student-detail-grade" class="detail-value">Grade 11</span></div>
-          <div class="detail-row"><span class="detail-label">Validation Status:</span> <span id="student-detail-validation" class="badge badge-success">Validated</span></div>
-          <div class="detail-row"><span class="detail-label">Account Status:</span> <span id="student-detail-status" class="badge badge-info">Active</span></div>
-        </div>
-
-        <div class="drawer-section-title">Administrative Actions</div>
-        <div class="drawer-actions-grid margin-bottom">
-          <button class="btn btn-emerald full-width" id="btn-validate-student-action">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            Validate Account
-          </button>
-          <button class="btn btn-danger full-width" id="btn-toggle-student-status">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
-            Suspend Account
-          </button>
-        </div>
-
-        <div class="form-group margin-top">
-          <label>Admin Audit Note</label>
-          <textarea id="student-admin-note" class="form-input" rows="3" placeholder="Enter reason for validation or account suspension..."></textarea>
+        <div class="card-table-wrapper">
+          <div class="table-header-title">
+            <h3>Registered Students List</h3>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Grade Level</th>
+                <th>Validation Status</th>
+                <th>Account Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-students-table-body">
+              <!-- Dynamic student rows -->
+            </tbody>
+          </table>
         </div>
       </div>
       <div class="drawer-footer">
-        <button class="btn btn-emerald" onclick="saveStudentAdminAction()">Save Action</button>
-        <button class="btn btn-outline" onclick="closeAdminDrawer('student-detail')">Cancel</button>
+        <button class="btn btn-outline" onclick="closeDedicatedAdminDrawer('students')">Close Drawer</button>
       </div>
     </div>
   </div>
 
-  <!-- 2. Match Approval / Rejection Drawer -->
-  <div id="drawer-match-detail" class="drawer-backdrop hidden">
-    <div class="drawer-panel drawer-medium">
+  <!-- 2. Dedicated Tutor Matching Drawer -->
+  <div id="drawer-admin-matching" class="drawer-backdrop hidden">
+    <div class="drawer-panel drawer-large">
       <div class="drawer-header">
         <div class="drawer-header-brand">
           <svg class="drawer-icon text-emerald" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
           <div>
-            <h2 class="drawer-title" id="match-detail-id">Match Request #MATCH-101</h2>
-            <p class="drawer-subtitle">Tutor Matching Review & Approval</p>
+            <h2 class="drawer-title">Manage Tutor Matching</h2>
+            <p class="drawer-subtitle">Review AI matching recommendations and approve sessions</p>
           </div>
         </div>
-        <button class="drawer-close-btn" onclick="closeAdminDrawer('match-detail')">&times;</button>
+        <button class="drawer-close-btn" onclick="closeDedicatedAdminDrawer('matching')">&times;</button>
       </div>
       <div class="drawer-body">
-        <div class="match-summary-card margin-bottom">
-          <div class="detail-row"><span class="detail-label">Student:</span> <strong id="match-detail-student">Maria Santos</strong></div>
-          <div class="detail-row"><span class="detail-label">Tutor:</span> <strong id="match-detail-tutor">Alex Cruz</strong></div>
-          <div class="detail-row"><span class="detail-label">Subject:</span> <span id="match-detail-subject">Calculus</span></div>
-          <div class="detail-row"><span class="detail-label">Compatibility:</span> <span id="match-detail-score" class="badge badge-success">98% Match</span></div>
-          <div class="detail-row"><span class="detail-label">Current Status:</span> <span id="match-detail-status" class="badge badge-warning">Pending Approval</span></div>
-        </div>
-
-        <div class="form-group">
-          <label>Administrative Notes / Feedback</label>
-          <textarea id="match-admin-feedback" class="form-input" rows="3" placeholder="Optional notes regarding match approval or schedule adjustment..."></textarea>
+        <div class="card-table-wrapper">
+          <div class="table-header-title">
+            <h3>Tutor Match Requests</h3>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Match ID</th>
+                <th>Student</th>
+                <th>Matched Tutor</th>
+                <th>Subject</th>
+                <th>Compatibility</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-matching-table-body">
+              <!-- Dynamic match rows -->
+            </tbody>
+          </table>
         </div>
       </div>
       <div class="drawer-footer">
-        <button class="btn btn-emerald" id="btn-approve-match-action">Approve Session Match</button>
-        <button class="btn btn-danger" id="btn-cancel-match-action">Reject / Cancel Match</button>
-        <button class="btn btn-outline" onclick="closeAdminDrawer('match-detail')">Close</button>
+        <button class="btn btn-outline" onclick="closeDedicatedAdminDrawer('matching')">Close Drawer</button>
       </div>
     </div>
   </div>
 
-  <!-- 3. GCash Payment Verification Drawer -->
-  <div id="drawer-payment-detail" class="drawer-backdrop hidden">
-    <div class="drawer-panel drawer-medium">
+  <!-- 3. Dedicated Calendar Schedule Drawer -->
+  <div id="drawer-admin-schedule" class="drawer-backdrop hidden">
+    <div class="drawer-panel drawer-large">
       <div class="drawer-header">
         <div class="drawer-header-brand">
-          <svg class="drawer-icon text-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          <svg class="drawer-icon text-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           <div>
-            <h2 class="drawer-title">GCash Payment Verification</h2>
-            <p class="drawer-subtitle" id="payment-detail-id">Transaction #PAY-000</p>
+            <h2 class="drawer-title">Manage Schedule</h2>
+            <p class="drawer-subtitle">Create and modify calendar schedule slots</p>
           </div>
         </div>
-        <button class="drawer-close-btn" onclick="closeAdminDrawer('payment-detail')">&times;</button>
+        <button class="drawer-close-btn" onclick="closeDedicatedAdminDrawer('schedule')">&times;</button>
       </div>
       <div class="drawer-body">
-        <div class="receipt-preview-box margin-bottom">
-          <div class="receipt-header">
-            <span class="gcash-badge">GCash Official Receipt</span>
-            <span class="receipt-amount" id="payment-detail-amount">₱500.00</span>
+        <div class="card-table-wrapper margin-bottom">
+          <div class="table-header-title">
+            <h3>New Schedule Slot</h3>
           </div>
-          <div class="receipt-body">
-            <div class="detail-row"><span class="detail-label">Payer Student:</span> <span id="payment-detail-payer">Maria Santos</span></div>
-            <div class="detail-row"><span class="detail-label">GCash Reference #:</span> <strong id="payment-detail-ref">100293847561</strong></div>
-            <div class="detail-row"><span class="detail-label">Payment Method:</span> <span>GCash E-Wallet</span></div>
-            <div class="detail-row"><span class="detail-label">Date Submitted:</span> <span id="payment-detail-date">Today</span></div>
-            <div class="detail-row"><span class="detail-label">Verification Status:</span> <span id="payment-detail-status" class="badge badge-warning">Pending Confirmation</span></div>
-          </div>
+          <form id="admin-add-schedule-form" style="padding: 20px;">
+            <div class="form-group margin-bottom">
+              <label>Select Tutor</label>
+              <select id="admin-sch-tutor-select" class="form-select"></select>
+            </div>
+            <div class="form-group margin-bottom">
+              <label>Subject</label>
+              <input type="text" id="admin-sch-subject" class="form-input" placeholder="e.g. Calculus II" required>
+            </div>
+            <div class="form-group margin-bottom">
+              <label>Date & Time Slot</label>
+              <input type="text" id="admin-sch-dateslot" class="form-input" placeholder="e.g. 2026-03-20 (02:00 PM - 04:00 PM)" required>
+            </div>
+            <button type="submit" class="btn btn-emerald">Create Schedule Slot</button>
+          </form>
         </div>
 
-        <div class="form-group">
-          <label>Audit Reference Code</label>
-          <input type="text" id="payment-audit-code" class="form-input" placeholder="e.g. AUD-9921-CONFIRMED">
+        <div class="card-table-wrapper">
+          <div class="table-header-title">
+            <h3>Active Schedules</h3>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Schedule ID</th>
+                <th>Tutor</th>
+                <th>Date & Slot</th>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-schedule-table-body">
+              <!-- Dynamic schedule rows -->
+            </tbody>
+          </table>
         </div>
       </div>
       <div class="drawer-footer">
-        <button class="btn btn-emerald" id="btn-confirm-payment-action">Confirm & Clear Payment</button>
-        <button class="btn btn-outline" onclick="closeAdminDrawer('payment-detail')">Cancel</button>
+        <button class="btn btn-outline" onclick="closeDedicatedAdminDrawer('schedule')">Close Drawer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Dedicated Payments & Fees Drawer -->
+  <div id="drawer-admin-payments" class="drawer-backdrop hidden">
+    <div class="drawer-panel drawer-large">
+      <div class="drawer-header">
+        <div class="drawer-header-brand">
+          <svg class="drawer-icon text-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          <div>
+            <h2 class="drawer-title">Manage Payments & Fees</h2>
+            <p class="drawer-subtitle">GCash transactions, payment status, and payouts</p>
+          </div>
+        </div>
+        <button class="drawer-close-btn" onclick="closeDedicatedAdminDrawer('payments')">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <div class="card-table-wrapper">
+          <div class="table-header-title">
+            <h3>Payment Transactions Log</h3>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Payment ID</th>
+                <th>Payer (Student)</th>
+                <th>Method</th>
+                <th>GCash Ref #</th>
+                <th>Amount (₱)</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="admin-payments-table-body">
+              <!-- Dynamic payment rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <button class="btn btn-outline" onclick="closeDedicatedAdminDrawer('payments')">Close Drawer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Dedicated Notifications Drawer -->
+  <div id="drawer-admin-notifications" class="drawer-backdrop hidden">
+    <div class="drawer-panel drawer-large">
+      <div class="drawer-header">
+        <div class="drawer-header-brand">
+          <svg class="drawer-icon text-emerald" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <div>
+            <h2 class="drawer-title">Manage Notifications</h2>
+            <p class="drawer-subtitle">Send system broadcasts and view notification history</p>
+          </div>
+        </div>
+        <button class="drawer-close-btn" onclick="closeDedicatedAdminDrawer('notifications')">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <div class="card-table-wrapper margin-bottom" style="padding: 20px;">
+          <h3 class="margin-bottom">Send Broadcast Notification</h3>
+          <div class="form-group margin-bottom">
+            <label>Recipient Target</label>
+            <select id="admin-notif-target" class="form-select">
+              <option value="all">All Users (Students & Tutors)</option>
+              <option value="students">All Students</option>
+              <option value="tutors">All Tutors</option>
+            </select>
+          </div>
+          <div class="form-group margin-bottom">
+            <label>Message Content</label>
+            <input type="text" id="admin-notif-message" placeholder="Type notification broadcast message..." class="form-input">
+          </div>
+          <button class="btn btn-emerald full-width margin-top" id="admin-send-notif-btn">Send Notification Broadcast</button>
+        </div>
+
+        <div class="card-table-wrapper">
+          <div class="table-header-title">
+            <h3>Notification History Log</h3>
+          </div>
+          <div id="admin-notifications-log" class="cards-list" style="padding: 20px;">
+            <!-- Broadcast log -->
+          </div>
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <button class="btn btn-outline" onclick="closeDedicatedAdminDrawer('notifications')">Close Drawer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Dedicated Reports Drawer -->
+  <div id="drawer-admin-reports" class="drawer-backdrop hidden">
+    <div class="drawer-panel drawer-large">
+      <div class="drawer-header">
+        <div class="drawer-header-brand">
+          <svg class="drawer-icon text-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <div>
+            <h2 class="drawer-title">Manage Reports</h2>
+            <p class="drawer-subtitle">View completed tutoring sessions and generate system summaries</p>
+          </div>
+        </div>
+        <button class="drawer-close-btn" onclick="closeDedicatedAdminDrawer('reports')">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <div class="card-table-wrapper">
+          <div class="table-header-title">
+            <h3>Completed Tutoring Sessions</h3>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Session ID</th>
+                <th>Student</th>
+                <th>Tutor</th>
+                <th>Subject</th>
+                <th>Date</th>
+                <th>Fee</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="admin-reports-completed-table-body">
+              <!-- Dynamic completed report rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <button class="btn btn-emerald" onclick="window.print()">Print Activity Summary</button>
+        <button class="btn btn-outline" onclick="closeDedicatedAdminDrawer('reports')">Close Drawer</button>
       </div>
     </div>
   </div>
@@ -865,69 +576,25 @@
 
   <script src="app.js"></script>
   <script>
-    function openAdminDrawer(drawerType) {
-      if (drawerType === 'management') {
-        const drawer = document.getElementById('admin-management-drawer');
-        if (drawer) {
-          drawer.classList.remove('hidden');
-          switchDrawerModule('students');
-        }
-      } else {
-        const drawer = document.getElementById(`drawer-${drawerType}`);
-        if (drawer) drawer.classList.remove('hidden');
-      }
+    function openDedicatedAdminDrawer(moduleName) {
+      const drawer = document.getElementById(`drawer-admin-${moduleName}`);
+      if (drawer) drawer.classList.remove('hidden');
     }
 
-    function closeAdminDrawer(drawerType) {
-      if (drawerType === 'management') {
-        const drawer = document.getElementById('admin-management-drawer');
-        if (drawer) drawer.classList.add('hidden');
-      } else {
-        const drawer = document.getElementById(`drawer-${drawerType}`);
-        if (drawer) drawer.classList.add('hidden');
-      }
+    function closeDedicatedAdminDrawer(moduleName) {
+      const drawer = document.getElementById(`drawer-admin-${moduleName}`);
+      if (drawer) drawer.classList.add('hidden');
     }
 
-    function switchDrawerModule(moduleName) {
-      document.querySelectorAll('.drawer-pill-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-drawer-tab') === `tab-${moduleName}`);
-      });
-      const sourceTab = document.getElementById(`tab-${moduleName}`);
-      const container = document.getElementById('drawer-active-content');
-      if (sourceTab && container) {
-        container.innerHTML = sourceTab.innerHTML;
-        // Re-attach tab listeners inside drawer if needed
-        container.querySelectorAll('.admin-subtab-btn').forEach(subBtn => {
-          subBtn.addEventListener('click', () => {
-            const parent = subBtn.parentElement;
-            parent.querySelectorAll('.admin-subtab-btn').forEach(b => b.classList.remove('active'));
-            subBtn.classList.add('active');
-            const targetId = subBtn.getAttribute('data-subtab');
-            container.querySelectorAll('.admin-subtab-content').forEach(content => {
-              content.classList.toggle('active', content.id === targetId);
-            });
-          });
-        });
-      }
+    function showDashboardOverview() {
+      // Closes all open drawers
+      document.querySelectorAll('.drawer-backdrop').forEach(d => d.classList.add('hidden'));
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof switchRole === 'function') {
         switchRole('admin', { id: 'ADMIN-001', name: 'System Admin', role: 'admin' });
       }
-
-      // Sidebar link handling
-      document.querySelectorAll('.sidebar-menu .menu-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-          const navTarget = item.getAttribute('data-admin-nav');
-          if (navTarget && navTarget !== 'dashboard' && navTarget !== 'analytics') {
-            document.querySelectorAll('.sidebar-menu .menu-item').forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-            openAdminDrawer('management');
-            switchDrawerModule(navTarget);
-          }
-        });
-      });
     });
   </script>
 </body>

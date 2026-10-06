@@ -6,16 +6,16 @@ async def main():
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page(viewport={"width": 1280, "height": 800})
 
-        # 1. Test admin.php drawer
+        # 1. Test admin.php dedicated drawer
         print("Navigating to admin.php...")
         await page.goto("http://localhost:3000/admin.php")
         await page.wait_for_timeout(1000)
 
-        # Click Management Drawer button
-        print("Opening admin management drawer...")
-        await page.click("#open-management-drawer-btn")
+        # Click Students Drawer item in sidebar
+        print("Opening dedicated students drawer...")
+        await page.click("li[data-admin-nav='students'] a")
         await page.wait_for_timeout(800)
-        await page.screenshot(path="/tmp/admin_drawer_open.png")
+        await page.screenshot(path="/tmp/admin_dedicated_students_drawer.png")
 
         # 2. Test index.php
         print("Navigating to index.php...")
