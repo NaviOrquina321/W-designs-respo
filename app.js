@@ -2668,3 +2668,37 @@ function renderTutorSummary() {
   if (windowEl) windowEl.textContent = t.availableTimeSlots || '09:00 AM - 05:00 PM';
   if (blockedEl) blockedEl.textContent = t.blockedDates || 'None';
 }
+
+// ADMINISTRATIVE DRAWER FUNCTIONS & ACTION CONTROLLERS
+window.saveStudentAdminAction = function() {
+  const note = document.getElementById('student-admin-note')?.value;
+  closeAdminDrawer('student-detail');
+  showToast('Student account administrative action saved successfully!');
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btn-validate-student-action')?.addEventListener('click', () => {
+    showToast('Student account validated!');
+    closeAdminDrawer('student-detail');
+  });
+
+  document.getElementById('btn-toggle-student-status')?.addEventListener('click', () => {
+    showToast('Student account status updated!');
+    closeAdminDrawer('student-detail');
+  });
+
+  document.getElementById('btn-approve-match-action')?.addEventListener('click', () => {
+    showToast('Tutor matching session approved!');
+    closeAdminDrawer('match-detail');
+  });
+
+  document.getElementById('btn-cancel-match-action')?.addEventListener('click', () => {
+    showToast('Tutor matching session cancelled.');
+    closeAdminDrawer('match-detail');
+  });
+
+  document.getElementById('btn-confirm-payment-action')?.addEventListener('click', () => {
+    showToast('GCash payment transaction confirmed and cleared.');
+    closeAdminDrawer('payment-detail');
+  });
+});
