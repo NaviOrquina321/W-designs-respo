@@ -930,17 +930,25 @@ window.viewTutorProfile = function(tutorId) {
   openModal('modal-tutor-profile');
 };
 
-// Toast Notifications
-function showToast(msg) {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
+// Toast Notifications - Top Right Pop-in
+function showToast(msg, type = 'info') {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
   const toast = document.createElement('div');
-  toast.className = 'toast';
+  toast.className = `toast ${type === 'error' ? 'toast-error' : type === 'warning' ? 'toast-warning' : ''}`;
   toast.textContent = msg;
   container.appendChild(toast);
 
   setTimeout(() => {
-    toast.remove();
+    toast.style.transition = 'all 0.3s ease';
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100px)';
+    setTimeout(() => toast.remove(), 300);
   }, 3500);
 }
 
@@ -1053,15 +1061,16 @@ function renderStudentUpcoming() {
         <h4>${s.subject} - with <span style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</span></h4>
         <p>${s.sessionDate || s.date || 'Today'} at ${s.timeSlot} | GCash Ref: <strong>${s.gcashRef}</strong></p>
       </div>
-      <div>
-        <span class="badge ${s.tutorStarted ? 'badge-success' : 'badge-info'} margin-bottom">${s.tutorStarted ? 'Session Live' : 'Confirmed'}</span>
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <span class="badge ${s.tutorStarted ? 'badge-success' : 'badge-info'}">${s.tutorStarted ? 'Session Live' : 'Confirmed'}</span>
+        <button class="btn btn-secondary btn-small" onclick="viewPaymentReceipt('${s.id}')">View Receipt</button>
         ${s.tutorStarted ? `
           <button class="btn btn-primary btn-small" onclick="launchWorkspace('${s.id}')">
             Join Live Workspace Session
           </button>
         ` : `
           <button class="btn btn-secondary btn-small" onclick="launchWorkspace('${s.id}')" title="Waiting for tutor to start session">
-            Session Pending - Waiting for Tutor to Start
+            Session Pending
           </button>
         `}
       </div>
@@ -1261,6 +1270,7 @@ function renderTutorUpcoming() {
       </div>
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
         <span class="badge ${s.tutorStarted ? 'badge-success' : 'badge-info'}">${s.tutorStarted ? 'Active Live Session' : s.status}</span>
+        <button class="btn btn-secondary btn-small" onclick="viewPaymentReceipt('${s.id}')">View Receipt</button>
         ${s.tutorStarted ? `
           <button class="btn btn-primary btn-small" onclick="launchWorkspace('${s.id}')">
             Enter Session Workspace

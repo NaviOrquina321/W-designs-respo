@@ -1066,6 +1066,36 @@ require_once __DIR__ . '/api/config.php';
     </div>
   </div>
 
+  <!-- Modal 11: View Payment Receipt Modal -->
+  <div class="modal-backdrop" id="modal-view-receipt">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Official Payment Receipt</h3>
+        <button class="close-btn" id="close-receipt-view-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="receipt-preview-box text-left margin-bottom">
+          <div class="receipt-header">
+            <div>
+              <strong style="font-size: 1.1rem; color: #0f172a;">TutorLink Official Receipt</strong>
+              <div class="sub-text">GCash Direct e-Wallet Checkout</div>
+            </div>
+            <span class="gcash-badge">GCash Confirmed</span>
+          </div>
+          <div class="summary-line margin-top"><span>Transaction Ref No.:</span> <strong id="view-receipt-ref" style="font-family: monospace;">GC-9920182341</strong></div>
+          <div class="summary-line"><span>Student Name:</span> <strong id="view-receipt-student">Maria Santos</strong></div>
+          <div class="summary-line"><span>Tutor Name:</span> <strong id="view-receipt-tutor">Prof. Alex Rivera</strong></div>
+          <div class="summary-line"><span>Subject / Course:</span> <strong id="view-receipt-subject">Calculus II</strong></div>
+          <div class="summary-line"><span>Session Schedule:</span> <span id="view-receipt-date">2026-03-16 (02:00 PM)</span></div>
+          <hr class="divider" style="margin: 12px 0;">
+          <div class="summary-line"><span style="font-size: 1.1rem; font-weight: 700;">Total Amount Paid:</span> <strong id="view-receipt-amount" class="receipt-amount text-emerald">₱385.00</strong></div>
+          <div id="view-receipt-tutor-feedback" class="sub-text margin-top" style="display: none; background: #ffffff; padding: 10px; border-radius: 6px; border: 1px solid var(--line);"></div>
+        </div>
+        <button class="btn btn-primary full-width" id="done-receipt-view-btn">Close Receipt</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal 10: Student Profile Settings Edit Modal -->
   <div class="modal-backdrop" id="modal-edit-student-profile">
     <div class="modal-card">

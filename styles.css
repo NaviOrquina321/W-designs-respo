@@ -1423,3 +1423,56 @@ body.admin-body {
   letter-spacing: -0.01em;
   font-weight: 500;
 }
+/* Toast Notifications Container - Top Right Floating */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 14px 22px;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border: 1px solid #1e293b;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: popInRight 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.toast.toast-error {
+  background: #7f1d1d;
+  border-color: #991b1b;
+  color: #fef2f2;
+}
+
+.toast.toast-warning {
+  background: #78350f;
+  border-color: #92400e;
+  color: #fffbeb;
+}
+
+@keyframes popInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(120px) scale(0.9);
+  }
+  70% {
+    transform: translateX(-8px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
