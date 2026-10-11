@@ -595,13 +595,15 @@ require_once __DIR__ . '/api/config.php';
           <div class="receipt-preview-box margin-bottom">
             <div class="summary-line"><span>Merchant:</span> <strong>TutorLink Inc.</strong></div>
             <div class="summary-line"><span>Tutoring Amount:</span> <strong id="drawer-gcash-modal-amount" class="text-emerald">₱385.00</strong></div>
+            <div class="trust-badge-line margin-top-xs text-xs text-muted" style="display: flex; align-items: center; gap: 6px;">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+              <span>256-bit SSL Encrypted Direct Checkout</span>
+            </div>
           </div>
           <div class="form-group margin-top">
             <label>Select Payment Method</label>
             <select id="drawer-payment-method-select" class="form-select">
               <option value="GCash">GCash e-Wallet</option>
-              <option value="PayMaya">PayMaya e-Wallet</option>
-              <option value="Credit Card">Credit / Debit Card</option>
             </select>
           </div>
           <div class="form-group margin-top">
@@ -933,8 +935,6 @@ require_once __DIR__ . '/api/config.php';
             <label>Select Payment Method</label>
             <select id="payment-method-select" class="form-select">
               <option value="GCash">GCash e-Wallet</option>
-              <option value="PayMaya">PayMaya e-Wallet</option>
-              <option value="Credit/Debit Card">Credit / Debit Card</option>
             </select>
           </div>
 

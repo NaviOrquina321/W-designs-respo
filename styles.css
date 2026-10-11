@@ -1393,3 +1393,33 @@ body.admin-body {
   .cta-final .actions .btn { width: 100%; justify-content: center; }
   .session-card { flex-direction: column; align-items: flex-start; }
 }
+
+/* Premium UI/UX Polish & Micro-interactions */
+.btn, .pill-btn, .action-btn, .apex-kpi-card, .tutor-card, .feature-card, .menu-link {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apex-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+}
+
+.btn-primary:hover, .btn-emerald:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.btn:active, .pill-btn:active {
+  transform: translateY(0);
+}
+
+.search-input:focus, .form-input:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--primary, #10b981);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+}
+
+.trust-badge-line {
+  letter-spacing: -0.01em;
+  font-weight: 500;
+}
