@@ -109,34 +109,27 @@
     <div class="admin-main">
       <!-- Top Header Navigation -->
       <header class="admin-header">
-        <div class="header-search">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" placeholder="Search anything..." class="search-input">
-          <span class="search-shortcut">⌘K</span>
+        <div class="header-left">
+          <button class="admin-mobile-toggle" onclick="toggleAdminSidebar()" aria-label="Toggle Sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div class="header-breadcrumb">
+            <span class="breadcrumb-prefix">Admin Portal</span>
+            <span class="breadcrumb-separator">/</span>
+            <span id="current-admin-tab-title" class="breadcrumb-active">Dashboard</span>
+          </div>
         </div>
 
         <div class="header-actions">
-          <button class="btn btn-emerald" onclick="switchMainAdminTab('students')">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-            Students
+          <button class="icon-btn relative" title="Notifications" onclick="switchMainAdminTab('notifications')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notification-badge"></span>
           </button>
-
-          <button class="btn btn-outline" id="generate-admin-report-btn" onclick="switchMainAdminTab('reports')">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Reports
-          </button>
-
-          <div class="header-icon-group">
-            <button class="icon-btn" title="Theme Toggle">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            </button>
-            <button class="icon-btn relative" title="Notifications" onclick="switchMainAdminTab('notifications')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              <span class="notification-badge"></span>
-            </button>
-          </div>
-
-          <div class="user-pill-avatar">DU</div>
+          <a href="index.php" class="btn btn-outline btn-sm">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            View Main App
+          </a>
+          <div class="user-pill-avatar" title="System Administrator">SA</div>
         </div>
       </header>
 
@@ -144,7 +137,7 @@
       <main class="content-container">
 
         <!-- SECTION 1: Dashboard Overview KPIs & Visual Analytics -->
-        <section id="admin-section-dashboard" class="admin-canvas-section margin-bottom">
+        <section id="admin-section-dashboard" class="admin-canvas-section active margin-bottom">
           <div class="dashboard-title-area">
             <div>
               <h1 class="page-title">Dashboard Overview</h1>
@@ -308,22 +301,24 @@
             <div class="table-header-title">
               <h3>Registered Students List</h3>
             </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Student ID</th>
-                  <th>Full Name</th>
-                  <th>Email</th>
-                  <th>Grade Level</th>
-                  <th>Validation Status</th>
-                  <th>Account Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="admin-students-table-body">
-                <!-- Dynamic student rows -->
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Student ID</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Grade Level</th>
+                    <th>Validation Status</th>
+                    <th>Account Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-students-table-body">
+                  <!-- Dynamic student rows -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
@@ -340,22 +335,24 @@
             <div class="table-header-title">
               <h3>Tutor Match Requests</h3>
             </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Match ID</th>
-                  <th>Student</th>
-                  <th>Matched Tutor</th>
-                  <th>Subject</th>
-                  <th>Compatibility</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="admin-matching-table-body">
-                <!-- Dynamic match rows -->
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Match ID</th>
+                    <th>Student</th>
+                    <th>Matched Tutor</th>
+                    <th>Subject</th>
+                    <th>Compatibility</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-matching-table-body">
+                  <!-- Dynamic match rows -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
@@ -393,21 +390,23 @@
             <div class="table-header-title">
               <h3>Active Schedules</h3>
             </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Schedule ID</th>
-                  <th>Tutor</th>
-                  <th>Date & Slot</th>
-                  <th>Subject</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="admin-schedule-table-body">
-                <!-- Dynamic schedule rows -->
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Schedule ID</th>
+                    <th>Tutor</th>
+                    <th>Date & Slot</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-schedule-table-body">
+                  <!-- Dynamic schedule rows -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
@@ -424,21 +423,23 @@
             <div class="table-header-title">
               <h3>Payment Transactions Log</h3>
             </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Payment ID</th>
-                  <th>Payer (Student)</th>
-                  <th>Method</th>
-                  <th>GCash Ref #</th>
-                  <th>Amount (₱)</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="admin-payments-table-body">
-                <!-- Dynamic payment rows -->
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Payment ID</th>
+                    <th>Payer (Student)</th>
+                    <th>Method</th>
+                    <th>GCash Ref #</th>
+                    <th>Amount (₱)</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-payments-table-body">
+                  <!-- Dynamic payment rows -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
@@ -456,22 +457,24 @@
             <div class="table-header-title">
               <h3>Completed Tutoring Sessions</h3>
             </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Session ID</th>
-                  <th>Student</th>
-                  <th>Tutor</th>
-                  <th>Subject</th>
-                  <th>Date</th>
-                  <th>Fee</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="admin-reports-completed-table-body">
-                <!-- Dynamic completed report rows -->
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Session ID</th>
+                    <th>Student</th>
+                    <th>Tutor</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Fee</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-reports-completed-table-body">
+                  <!-- Dynamic completed report rows -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
@@ -520,10 +523,31 @@
 
   <script src="app.js"></script>
   <script>
+    const tabTitles = {
+      'dashboard': 'Dashboard Overview',
+      'students': 'Student Management',
+      'matching': 'Tutor Matching',
+      'schedule': 'Schedules',
+      'payments': 'Payments & Fees',
+      'reports': 'System Reports',
+      'notifications': 'Notifications'
+    };
+
     function switchMainAdminTab(tabName) {
+      // Hide all admin canvas sections
+      const sections = document.querySelectorAll('.admin-canvas-section');
+      sections.forEach(sec => sec.classList.remove('active'));
+
+      // Show selected canvas section
       const targetSection = document.getElementById(`admin-section-${tabName}`);
       if (targetSection) {
-        targetSection.scrollIntoView({ behavior: 'smooth' });
+        targetSection.classList.add('active');
+      }
+
+      // Update header breadcrumb title
+      const titleElem = document.getElementById('current-admin-tab-title');
+      if (titleElem && tabTitles[tabName]) {
+        titleElem.textContent = tabTitles[tabName];
       }
 
       // Sync active state on sidebar navigation
@@ -533,12 +557,26 @@
           item.classList.add('active');
         }
       });
+
+      // Close mobile sidebar if open
+      const sidebar = document.querySelector('.admin-sidebar');
+      if (sidebar && sidebar.classList.contains('mobile-open')) {
+        sidebar.classList.remove('mobile-open');
+      }
+    }
+
+    function toggleAdminSidebar() {
+      const sidebar = document.querySelector('.admin-sidebar');
+      if (sidebar) {
+        sidebar.classList.toggle('mobile-open');
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof switchRole === 'function') {
         switchRole('admin', { id: 'ADMIN-001', name: 'System Admin', role: 'admin' });
       }
+      switchMainAdminTab('dashboard');
     });
   </script>
 </body>
