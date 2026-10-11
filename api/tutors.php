@@ -10,16 +10,24 @@ if ($method === 'GET') {
 
     if ($user && $user['role'] === 'admin') {
         $stmt = $pdo->query("SELECT id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, diploma_status, tor_status, id_status, approval_status, available_days, available_time_slots, blocked_dates, availability_slots, created_at FROM tutors ORDER BY created_at DESC");
-        $tutors = $stmt->fetchAll();
-    } elseif ($user && $user['role'] === 'tutor') {
-        $stmt = $pdo->prepare("SELECT id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, diploma_status, tor_status, id_status, approval_status, available_days, available_time_slots, blocked_dates, availability_slots, created_at FROM tutors WHERE (approval_status = 'Approved' AND deactivated = 0) OR id = ?");
-        $stmt->execute([$user['id']]);
-        $tutors = $stmt->fetchAll();
+        $rawTutors = $stmt->fetchAll();
     } else {
-        $stmt = $pdo->query("SELECT id, name, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, available_days, available_time_slots, blocked_dates, availability_slots, approval_status FROM tutors WHERE approval_status = 'Approved' AND deactivated = 0");
-        $tutors = $stmt->fetchAll();
+        $stmt = $pdo->prepare("SELECT id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, diploma_status, tor_status, id_status, approval_status, available_days, available_time_slots, blocked_dates, availability_slots, created_at FROM tutors WHERE (approval_status = 'Approved' AND deactivated = 0) OR id = ?");
+        $stmt->execute([$user['id'] ?? '']);
+        $rawTutors = $stmt->fetchAll();
     }
-    echo json_encode(['status' => 'success', 'data' => $tutors]);
+
+    // Strip sensitive fields (email, credential statuses) for other tutors
+    $tutors = [];
+    foreach ($rawTutors as $t) {
+        $isOwnerOrAdmin = ($user && ($user['role'] === 'admin' || $user['id'] === $t['id']));
+        if (!$isOwnerOrAdmin) {
+            unset($t['email'], $t['diploma_status'], $t['tor_status'], $t['id_status']);
+        }
+        $tutors[] = $t;
+    }
+
+    echo json_encode(['status' => 'success', 'data' => toCamelArray($tutors)]);
 } elseif ($method === 'PUT') {
     $user = requireLogin();
     $input = getInput();

@@ -24,8 +24,8 @@ if ($method === 'GET') {
 
     // Role check: Admin or participant student/tutor
     if ($user['role'] !== 'admin') {
-        $isStudent = ($session['student_id'] === $user['id'] || strtolower($session['student_name']) === strtolower($user['name']));
-        $isTutor = ($session['tutor_id'] === $user['id'] || strtolower($session['tutor_name']) === strtolower($user['name']));
+        $isStudent = ($session['student_id'] === $user['id']);
+        $isTutor = ($session['tutor_id'] === $user['id']);
         if (!$isStudent && !$isTutor) {
             jsonError(403, 'Forbidden: You are not a participant in this workspace session.');
         }
@@ -40,9 +40,9 @@ if ($method === 'GET') {
     }
 
     $messages = $stmt->fetchAll();
-    echo json_encode(['status' => 'success', 'data' => $messages]);
+    echo json_encode(['status' => 'success', 'data' => toCamelArray($messages)]);
 } elseif ($method === 'POST') {
-    $user = requireLogin();
+    $user = requireRole(['student', 'tutor']);
     $input = getInput();
 
     $sessionId = trim($input['sessionId'] ?? ($input['session_id'] ?? ''));
@@ -64,11 +64,11 @@ if ($method === 'GET') {
         jsonError(404, 'Session not found.');
     }
 
-    $isStudent = ($session['student_id'] === $user['id'] || strtolower($session['student_name']) === strtolower($user['name']));
-    $isTutor = ($session['tutor_id'] === $user['id'] || strtolower($session['tutor_name']) === strtolower($user['name']));
+    $isStudent = ($session['student_id'] === $user['id']);
+    $isTutor = ($session['tutor_id'] === $user['id']);
 
-    if (!$isStudent && !$isTutor && $user['role'] !== 'admin') {
-        jsonError(403, 'Forbidden: You are not a participant in this workspace session.');
+    if (!$isStudent && !$isTutor) {
+        jsonError(403, 'Forbidden: Only session participants can send messages.');
     }
 
     $senderName = $user['name'];

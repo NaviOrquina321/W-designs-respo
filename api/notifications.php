@@ -17,7 +17,7 @@ if ($method === 'GET') {
     }
     echo json_encode(['status' => 'success', 'data' => toCamelArray($notifications)]);
 } elseif ($method === 'POST') {
-    $user = requireLogin();
+    $user = requireRole(['admin']);
     $input = getInput();
 
     $targetRole = trim($input['target_role'] ?? ($input['targetRole'] ?? 'all'));
@@ -27,10 +27,6 @@ if ($method === 'GET') {
 
     if (empty($message)) {
         jsonError(400, 'Notification message required.');
-    }
-
-    if ($user['role'] !== 'admin' && ($targetRole === 'all' || $target === 'All Users')) {
-        jsonError(403, 'Only administrators can send system-wide notifications.');
     }
 
     $notifId = newId('notif-');

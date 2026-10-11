@@ -11,12 +11,12 @@ if ($method === 'GET') {
         $stmt = $pdo->query("SELECT * FROM sessions ORDER BY created_at DESC");
         $sessions = $stmt->fetchAll();
     } elseif ($user['role'] === 'student') {
-        $stmt = $pdo->prepare("SELECT * FROM sessions WHERE student_id = ? OR LOWER(student_name) = ? ORDER BY created_at DESC");
-        $stmt->execute([$user['id'], strtolower($user['name'])]);
+        $stmt = $pdo->prepare("SELECT * FROM sessions WHERE student_id = ? ORDER BY created_at DESC");
+        $stmt->execute([$user['id']]);
         $sessions = $stmt->fetchAll();
     } elseif ($user['role'] === 'tutor') {
-        $stmt = $pdo->prepare("SELECT * FROM sessions WHERE tutor_id = ? OR LOWER(tutor_name) = ? ORDER BY created_at DESC");
-        $stmt->execute([$user['id'], strtolower($user['name'])]);
+        $stmt = $pdo->prepare("SELECT * FROM sessions WHERE tutor_id = ? ORDER BY created_at DESC");
+        $stmt->execute([$user['id']]);
         $sessions = $stmt->fetchAll();
     } else {
         jsonError(403, 'Forbidden');
@@ -53,7 +53,7 @@ if ($method === 'GET') {
     }
 
     // Verify tutor exists, is approved, and not deactivated
-    $stTut = $pdo->prepare("SELECT id, name, hourly_rate, approval_status, deactivated FROM tutors WHERE id = ?");
+    $stTut = $pdo->prepare("SELECT id, name, hourly_rate, approval_status, deactivated, available_days, blocked_dates, subjects FROM tutors WHERE id = ?");
     $stTut->execute([$tutorId]);
     $tutorRecord = $stTut->fetch();
     if (!$tutorRecord) {
@@ -61,6 +61,21 @@ if ($method === 'GET') {
     }
     if ($tutorRecord['approval_status'] !== 'Approved' || !empty($tutorRecord['deactivated'])) {
         jsonError(400, 'Selected tutor is currently not available for booking.');
+    }
+
+    // Validate tutor schedule day
+    $bookingDay = date('D', strtotime($sessionDate));
+    $availDays = array_map('trim', explode(',', $tutorRecord['available_days'] ?? 'Mon,Tue,Wed,Thu,Fri'));
+    if (!in_array($bookingDay, $availDays, true)) {
+        jsonError(400, "Selected tutor is not available on $bookingDay.");
+    }
+
+    // Validate tutor blocked dates
+    if (!empty($tutorRecord['blocked_dates'])) {
+        $blockedList = array_map('trim', explode(',', $tutorRecord['blocked_dates']));
+        if (in_array($sessionDate, $blockedList, true)) {
+            jsonError(400, 'Selected tutor is unavailable on this date.');
+        }
     }
 
     // Reject double booking (same tutor + date + time_slot)
@@ -163,7 +178,7 @@ if ($method === 'GET') {
     }
 
     if ($user['role'] === 'tutor') {
-        if ($session['tutor_id'] !== $user['id'] && strtolower($session['tutor_name']) !== strtolower($user['name'])) {
+        if ($session['tutor_id'] !== $user['id']) {
             jsonError(403, 'You can only manage your own teaching sessions.');
         }
 
@@ -172,9 +187,11 @@ if ($method === 'GET') {
 
         if (isset($input['status']) && $input['status'] === 'Completed') {
             $fields[] = "`status` = 'Completed'";
-            // Increment student sessions_completed
-            $stInc = $pdo->prepare("UPDATE students SET sessions_completed = sessions_completed + 1 WHERE id = ? OR LOWER(name) = ?");
-            $stInc->execute([$session['student_id'], strtolower($session['student_name'])]);
+            // Only increment student sessions_completed if transitioning from Confirmed
+            if ($session['status'] === 'Confirmed') {
+                $stInc = $pdo->prepare("UPDATE students SET sessions_completed = sessions_completed + 1 WHERE id = ?");
+                $stInc->execute([$session['student_id']]);
+            }
         }
         if (isset($input['tutorStarted'])) {
             $fields[] = "`notes` = ?";
@@ -220,7 +237,7 @@ if ($method === 'GET') {
 
         echo json_encode(['status' => 'success', 'message' => 'Session updated by tutor.']);
     } elseif ($user['role'] === 'student') {
-        if ($session['student_id'] !== $user['id'] && strtolower($session['student_name']) !== strtolower($user['name'])) {
+        if ($session['student_id'] !== $user['id']) {
             jsonError(403, 'You can only rate your own sessions.');
         }
 

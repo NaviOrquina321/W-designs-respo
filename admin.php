@@ -95,16 +95,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 
       </div>
 
-      <!-- User Profile Box -->
-      <div class="sidebar-footer">
-        <div class="user-profile">
-          <div class="avatar">SA</div>
-          <div class="user-info">
-            <span class="user-name">System Admin</span>
-            <span class="user-role">Administrator</span>
-          </div>
-        </div>
-      </div>
     </aside>
 
     <!-- Main Content Canvas -->
@@ -232,8 +222,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
                 </div>
                 <div class="pill-segmented">
                   <button class="pill-btn active">Revenue</button>
-                  <button class="pill-btn">Orders</button>
-                  <button class="pill-btn">Profit</button>
+                  <button class="pill-btn">Sessions</button>
+                  <button class="pill-btn">Commission</button>
                 </div>
               </div>
               <div class="chart-body">

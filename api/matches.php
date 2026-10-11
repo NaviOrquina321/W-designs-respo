@@ -11,12 +11,12 @@ if ($method === 'GET') {
         $stmt = $pdo->query("SELECT * FROM matches ORDER BY created_at DESC");
         $matches = $stmt->fetchAll();
     } elseif ($user['role'] === 'student') {
-        $stmt = $pdo->prepare("SELECT * FROM matches WHERE student_id = ? OR LOWER(student_name) = ? ORDER BY created_at DESC");
-        $stmt->execute([$user['id'], strtolower($user['name'])]);
+        $stmt = $pdo->prepare("SELECT * FROM matches WHERE student_id = ? ORDER BY created_at DESC");
+        $stmt->execute([$user['id']]);
         $matches = $stmt->fetchAll();
     } elseif ($user['role'] === 'tutor') {
-        $stmt = $pdo->prepare("SELECT * FROM matches WHERE tutor_id = ? OR LOWER(tutor_name) = ? ORDER BY created_at DESC");
-        $stmt->execute([$user['id'], strtolower($user['name'])]);
+        $stmt = $pdo->prepare("SELECT * FROM matches WHERE tutor_id = ? ORDER BY created_at DESC");
+        $stmt->execute([$user['id']]);
         $matches = $stmt->fetchAll();
     } else {
         jsonError(403, 'Forbidden');
@@ -81,7 +81,7 @@ if ($method === 'GET') {
     }
 
     if ($user['role'] === 'tutor') {
-        if ($match['tutor_id'] !== $user['id'] && strtolower($match['tutor_name']) !== strtolower($user['name'])) {
+        if ($match['tutor_id'] !== $user['id']) {
             jsonError(403, 'You can only update match requests assigned to you.');
         }
     }

@@ -11,12 +11,12 @@ if ($method === 'GET') {
         $stmt = $pdo->query("SELECT * FROM payments ORDER BY created_at DESC");
         $payments = $stmt->fetchAll();
     } elseif ($user['role'] === 'student') {
-        $stmt = $pdo->prepare("SELECT * FROM payments WHERE student_id = ? OR LOWER(student_name) = ? ORDER BY created_at DESC");
-        $stmt->execute([$user['id'], strtolower($user['name'])]);
+        $stmt = $pdo->prepare("SELECT * FROM payments WHERE student_id = ? ORDER BY created_at DESC");
+        $stmt->execute([$user['id']]);
         $payments = $stmt->fetchAll();
     } elseif ($user['role'] === 'tutor') {
-        $stmt = $pdo->prepare("SELECT * FROM payments WHERE tutor_id = ? OR LOWER(tutor_name) = ? ORDER BY created_at DESC");
-        $stmt->execute([$user['id'], strtolower($user['name'])]);
+        $stmt = $pdo->prepare("SELECT * FROM payments WHERE tutor_id = ? ORDER BY created_at DESC");
+        $stmt->execute([$user['id']]);
         $payments = $stmt->fetchAll();
     } else {
         jsonError(403, 'Forbidden');

@@ -65,7 +65,7 @@ const state = {
     tutorId: 'tut-1',
     tutorName: 'Prof. Alex Rivera',
     subject: 'Calculus II',
-    date: '2026-03-16',
+    date: new Date().toISOString().split('T')[0],
     timeSlot: '02:00 PM',
     hourlyRate: 350,
     serviceFee: 35,
@@ -181,7 +181,7 @@ async function syncWithDatabase() {
           reviewsCount: parseInt(t.reviewsCount || t.reviews_count || 0),
           hourlyRate: parseInt(t.hourlyRate || t.hourly_rate || 350),
           subjects: Array.isArray(t.subjects) ? t.subjects : (t.subjects ? t.subjects.split(',').map(x => x.trim()) : ['Mathematics']),
-          learningStyles: Array.isArray(t.learningStyles || t.learning_styles) ? (t.learningStyles || t.learning_styles) : ['Step-by-Step Explanation'],
+          learningStyles: Array.isArray(t.learningStyles || t.learning_styles) ? (t.learningStyles || t.learning_styles) : (t.learningStyles || t.learning_styles ? (t.learningStyles || t.learning_styles).split(',').map(x => x.trim()) : ['Step-by-Step Explanation']),
           bio: t.bio,
           availableDays: Array.isArray(t.availableDays) ? t.availableDays : (t.available_days ? t.available_days.split(',') : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']),
           availableTimeSlots: t.availableTimeSlots || t.available_time_slots || '09:00 AM - 05:00 PM',
@@ -189,7 +189,7 @@ async function syncWithDatabase() {
           available: Boolean(t.available),
           deactivated: Boolean(t.deactivated),
           approvalStatus: t.approvalStatus || t.approval_status || 'Approved',
-          availabilitySlots: Array.isArray(t.availabilitySlots) ? t.availabilitySlots : ['09:00 AM', '02:00 PM', '04:00 PM']
+          availabilitySlots: Array.isArray(t.availabilitySlots) ? t.availabilitySlots : (t.availabilitySlots || t.availability_slots ? (t.availabilitySlots || t.availability_slots).split(',').map(x => x.trim()) : ['09:00 AM', '02:00 PM', '04:00 PM'])
         }));
       }
     }
@@ -201,7 +201,7 @@ async function syncWithDatabase() {
     const resSes = await fetch('api/sessions.php');
     if (resSes.ok) {
       const jsonSes = await resSes.json();
-      if (jsonSes.data && jsonSes.data.length > 0) state.sessions = jsonSes.data;
+      if (Array.isArray(jsonSes.data)) state.sessions = jsonSes.data;
     }
   } catch (e) {}
 
@@ -209,7 +209,7 @@ async function syncWithDatabase() {
     const resPay = await fetch('api/payments.php');
     if (resPay.ok) {
       const jsonPay = await resPay.json();
-      if (jsonPay.data && jsonPay.data.length > 0) state.payments = jsonPay.data;
+      if (Array.isArray(jsonPay.data)) state.payments = jsonPay.data;
     }
   } catch (e) {}
 
@@ -217,7 +217,7 @@ async function syncWithDatabase() {
     const resM = await fetch('api/matches.php');
     if (resM.ok) {
       const jsonM = await resM.json();
-      if (jsonM.data && jsonM.data.length > 0) state.matches = jsonM.data;
+      if (Array.isArray(jsonM.data)) state.matches = jsonM.data;
     }
   } catch (e) {}
 
@@ -225,7 +225,7 @@ async function syncWithDatabase() {
     const resSch = await fetch('api/schedules.php');
     if (resSch.ok) {
       const jsonSch = await resSch.json();
-      if (jsonSch.data && jsonSch.data.length > 0) state.schedules = jsonSch.data;
+      if (Array.isArray(jsonSch.data)) state.schedules = jsonSch.data;
     }
   } catch (e) {}
 
@@ -233,24 +233,30 @@ async function syncWithDatabase() {
     const resN = await fetch('api/notifications.php');
     if (resN.ok) {
       const jsonN = await resN.json();
-      if (jsonN.data && jsonN.data.length > 0) state.notifications = jsonN.data;
+      if (Array.isArray(jsonN.data)) state.notifications = jsonN.data;
     }
   } catch (e) {}
 
-  try {
-    const resA = await fetch('api/admin.php');
-    if (resA.ok) {
-      const jsonA = await resA.json();
-      if (jsonA.data) {
-        const d = jsonA.data;
-        document.getElementById('admin-stat-total-students').textContent = d.total_students;
-        document.getElementById('admin-stat-total-tutors').textContent = d.total_tutors;
-        document.getElementById('admin-stat-total-volume').textContent = `P${d.total_volume.toLocaleString()}`;
-        document.getElementById('admin-stat-platform-commission').textContent = `P${d.platform_commission.toLocaleString()}`;
+  if (state.currentRole === 'admin') {
+    try {
+      const resA = await fetch('api/admin.php');
+      if (resA.ok) {
+        const jsonA = await resA.json();
+        if (jsonA.data) {
+          const d = jsonA.data;
+          const elStu = document.getElementById('admin-stat-total-students');
+          const elTut = document.getElementById('admin-stat-total-tutors');
+          const elVol = document.getElementById('admin-stat-total-volume');
+          const elCom = document.getElementById('admin-stat-platform-commission');
+          if (elStu) elStu.textContent = d.total_students;
+          if (elTut) elTut.textContent = d.total_tutors;
+          if (elVol) elVol.textContent = `P${d.total_volume.toLocaleString()}`;
+          if (elCom) elCom.textContent = `P${d.platform_commission.toLocaleString()}`;
+        }
       }
+    } catch (e) {
+      console.log('Admin SQL stats API offline, computing from state.');
     }
-  } catch (e) {
-    console.log('Admin SQL stats API offline, computing from state.');
   }
 }
 
@@ -915,7 +921,7 @@ function renderAdminKPIs() {
   const totalStudents = state.students.length;
   const totalTutors = state.tutors.length;
   const totalVolume = state.sessions.reduce((acc, s) => acc + (s.totalPaid || 0), 0);
-  const platformCommission = state.sessions.reduce((acc, s) => acc + (s.commissionFee || (s.totalPaid - s.hourlyRate)), 0);
+  const platformCommission = state.sessions.reduce((acc, s) => acc + (s.commissionFee || Math.round(s.totalPaid * 0.10)), 0);
 
   const elStudents = document.getElementById('admin-stat-total-students');
   const elTutors = document.getElementById('admin-stat-total-tutors');
@@ -1607,90 +1613,45 @@ function initGCashPayment() {
     document.getElementById('gcash-step-2').classList.remove('hidden');
   });
 
-  step2Pay?.addEventListener('click', () => {
-    const refPrefix = state.activeBooking.paymentMethod === 'GCash' ? 'GC-' : 'PM-';
-    const randomRef = refPrefix + Math.floor(1000000000 + Math.random() * 9000000000);
-    const newSessionId = 'SESS-' + Math.floor(100 + Math.random() * 900);
-
+  step2Pay?.addEventListener('click', async () => {
     const b = state.activeBooking;
     const studentName = state.currentUser ? state.currentUser.name : 'Maria Santos';
 
-    const newSession = {
-      id: newSessionId,
-      studentName: studentName,
-      tutorId: b.tutorId,
-      tutorName: b.tutorName,
-      subject: b.subject,
-      date: b.date,
-      timeSlot: b.timeSlot,
-      hourlyRate: b.hourlyRate,
-      commissionFee: b.serviceFee,
-      totalPaid: b.total,
-      gcashRef: randomRef,
-      status: 'Confirmed',
-      payoutStatus: 'Unpaid',
-      notes: `Booked via ${b.paymentMethod}.`
-    };
-
-    state.sessions.unshift(newSession);
-
-    const newPayObj = {
-      id: 'PAY-' + Math.floor(100 + Math.random() * 900),
-      studentId: state.currentUser ? state.currentUser.id : 'STU-101',
-      studentName: studentName,
-      tutorId: b.tutorId,
-      tutorName: b.tutorName,
-      method: b.paymentMethod,
-      refNo: randomRef,
-      amount: b.total,
-      status: 'Confirmed',
-      payoutStatus: 'Pending'
-    };
-    state.payments.unshift(newPayObj);
-
     try {
-      fetch('api/sessions.php', {
+      const res = await fetch('api/sessions.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newSession)
+        body: JSON.stringify({
+          tutor_id: b.tutorId,
+          subject: b.subject,
+          session_date: b.date,
+          time_slot: b.timeSlot
+        })
       });
-      fetch('api/payments.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newPayObj)
-      });
-    } catch (e) { console.log('Offline booking API fallback'); }
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') {
+        showToast(data.message || 'Booking failed. Please try again.', 'error');
+        return;
+      }
 
-    state.notifications.unshift({
-      id: 'notif-' + Date.now(),
-      targetRole: 'student',
-      target: studentName,
-      title: 'Session Booked & Paid!',
-      message: `Your ${b.subject} session with ${b.tutorName} is confirmed for ${b.date} at ${b.timeSlot}. Ref: ${randomRef}`,
-      time: 'Just now',
-      read: false
-    });
+      await syncWithDatabase();
 
-    state.notifications.unshift({
-      id: 'notif-tutor-' + Date.now(),
-      targetRole: 'tutor',
-      target: b.tutorName,
-      title: 'New Student Session Booked',
-      message: `${studentName} booked a ${b.subject} tutoring session for ${b.date} at ${b.timeSlot}.`,
-      time: 'Just now',
-      read: false
-    });
+      const createdSession = data.session || {};
+      const randomRef = createdSession.gcash_ref || createdSession.gcashRef || 'GC-Confirmed';
 
-    document.getElementById('gcash-receipt-ref').textContent = randomRef;
-    document.getElementById('gcash-receipt-method').textContent = b.paymentMethod;
-    document.getElementById('gcash-receipt-date').textContent = `${b.date}, ${b.timeSlot}`;
-    document.getElementById('gcash-receipt-amount').textContent = `P${b.total}.00`;
+      document.getElementById('gcash-receipt-ref').textContent = randomRef;
+      document.getElementById('gcash-receipt-method').textContent = b.paymentMethod;
+      document.getElementById('gcash-receipt-date').textContent = `${b.date}, ${b.timeSlot}`;
+      document.getElementById('gcash-receipt-amount').textContent = `P${b.total}.00`;
 
-    document.getElementById('gcash-step-2').classList.add('hidden');
-    document.getElementById('gcash-step-3').classList.remove('hidden');
+      document.getElementById('gcash-step-2').classList.add('hidden');
+      document.getElementById('gcash-step-3').classList.remove('hidden');
 
-    renderAllViews();
-    showToast(`${b.paymentMethod} payment confirmed! Status: Confirmed.`);
+      renderAllViews();
+      showToast(`${b.paymentMethod} payment confirmed! Status: Confirmed.`);
+    } catch (e) {
+      showToast('Booking failed. Could not connect to backend.', 'error');
+    }
   });
 
   step3Done?.addEventListener('click', () => {
@@ -2476,22 +2437,51 @@ function renderAdminPayments() {
   if (elC) elC.textContent = `P${totalComm.toLocaleString()}`;
 }
 
-window.confirmPayment = function(payId) {
+window.confirmPayment = async function(payId) {
   const p = state.payments.find(x => x.id === payId);
   if (p) {
-    p.status = 'Confirmed';
-    renderAdminPayments();
-    showToast(`Payment ${payId} confirmed.`);
+    try {
+      const res = await fetch('api/payments.php', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: payId, status: 'Confirmed' })
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') {
+        showToast(data.message || 'Payment update failed.', 'error');
+        return;
+      }
+      p.status = 'Confirmed';
+      await syncWithDatabase();
+      renderAllViews();
+      showToast(`Payment ${payId} confirmed.`);
+    } catch (e) {
+      showToast('Could not connect to backend server.', 'error');
+    }
   }
 };
 
-window.processTutorPayout = function(payId) {
+window.processTutorPayout = async function(payId) {
   const p = state.payments.find(x => x.id === payId);
   if (p) {
-    p.payoutStatus = 'Paid Out';
-    renderAdminPayments();
-    renderTutorEarnings();
-    showToast(`Tutor payout processed for transaction ${payId}.`);
+    try {
+      const res = await fetch('api/payments.php', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: payId, payout_status: 'Paid Out' })
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') {
+        showToast(data.message || 'Payout update failed.', 'error');
+        return;
+      }
+      p.payoutStatus = 'Paid Out';
+      await syncWithDatabase();
+      renderAllViews();
+      showToast(`Tutor payout processed for transaction ${payId}.`);
+    } catch (e) {
+      showToast('Could not connect to backend server.', 'error');
+    }
   }
 };
 
