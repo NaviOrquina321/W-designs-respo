@@ -457,25 +457,25 @@ require_once __DIR__ . '/api/config.php';
             <div class="section-title-bar margin-top">
               <h3>Performance & Student Reviews</h3>
             </div>
-            <div class="profile-card-edit" style="background: var(--panel); border: 1px solid var(--line); padding: 22px; border-radius: 6px;">
-              <div style="display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 16px; border-bottom: 1px solid var(--line); padding-bottom: 16px;">
-                <div><strong>Overall Rating:</strong> <span style="font-size: 1.1rem; color: var(--ink); font-weight: bold;">4.9 / 5.0 ★</span></div>
+            <div class="detail-card">
+              <div style="display: flex; gap: 24px; flex-wrap: wrap; padding-bottom: 14px; border-bottom: 1px solid var(--line);">
+                <div><strong>Overall Rating:</strong> <span style="font-size: 1.05rem; color: var(--ink); font-weight: 700;">4.9 / 5.0 ★</span></div>
                 <div><strong>Total Reviews:</strong> <span>38 Verified Reviews</span></div>
                 <div><strong>Completion Rate:</strong> <span>98% On-Time Completion</span></div>
               </div>
-              <h4>Recent Student Feedback</h4>
+              <h4 style="margin-top: 14px;">Recent Student Feedback</h4>
               <div id="tutor-reviews-list" class="cards-list margin-top">
-                <div class="session-card" style="background: white;">
+                <div class="session-card">
                   <div>
                     <strong>Maria Santos</strong> <span class="sub-text">(Calculus II)</span>
-                    <div style="color: var(--ink); font-weight: bold;">★★★★★ 5.0</div>
+                    <div style="color: var(--ink); font-weight: 700; margin-top: 2px;">★★★★★ 5.0</div>
                     <p class="sub-text" style="margin-top: 4px;">Prof. Rivera made integration techniques so much easier to understand! Excellent step-by-step explanations.</p>
                   </div>
                 </div>
-                <div class="session-card" style="background: white;">
+                <div class="session-card">
                   <div>
                     <strong>Juan Dela Cruz</strong> <span class="sub-text">(Physics)</span>
-                    <div style="color: var(--ink); font-weight: bold;">★★★★★ 5.0</div>
+                    <div style="color: var(--ink); font-weight: 700; margin-top: 2px;">★★★★★ 5.0</div>
                     <p class="sub-text" style="margin-top: 4px;">Punctual and very encouraging. Solved complex mechanics problems together.</p>
                   </div>
                 </div>
