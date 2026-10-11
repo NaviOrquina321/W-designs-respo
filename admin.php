@@ -19,9 +19,6 @@
     <!-- Dark Left Sidebar Navigation -->
     <aside class="admin-sidebar">
       <div class="sidebar-brand">
-        <div class="brand-logo">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        </div>
         <div class="brand-text">
           <span class="brand-title">Apex</span>
           <span class="brand-subtitle">DASHBOARD</span>
@@ -113,7 +110,6 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span class="notification-badge"></span>
           </button>
-          <div class="user-pill-avatar" title="System Administrator">SA</div>
         </div>
       </header>
 
