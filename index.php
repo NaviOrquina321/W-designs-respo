@@ -98,25 +98,27 @@ require_once __DIR__ . '/api/config.php';
             <p>Between searching, scheduling, and paying, finding the right help can take longer than the tutoring itself.</p>
           </div>
 
-          <div class="problem-item">
-            <h3>Finding the right tutor takes forever</h3>
-            <p>Scrolling through profiles with no real way to know who's actually a good fit.</p>
-          </div>
-          <div class="problem-item">
-            <h3>Sessions fall through</h3>
-            <p>Schedules don't line up, and conflicts aren't caught until it's too late.</p>
-          </div>
-          <div class="problem-item">
-            <h3>Payments are slow to confirm</h3>
-            <p>A simple transaction ends up feeling uncertain while you wait.</p>
-          </div>
-          <div class="problem-item">
-            <h3>Updates arrive late, if at all</h3>
-            <p>A missed message about a session can mean a missed session.</p>
-          </div>
-          <div class="problem-item">
-            <h3>Tracking activity is a mess</h3>
-            <p>Without one system, keeping a clear record of who's tutoring whom falls entirely on the admin.</p>
+          <div class="problems-grid">
+            <div class="problem-item">
+              <h3>Finding the right tutor takes forever</h3>
+              <p>Scrolling through profiles with no real way to know who's actually a good fit.</p>
+            </div>
+            <div class="problem-item">
+              <h3>Sessions fall through</h3>
+              <p>Schedules don't line up, and conflicts aren't caught until it's too late.</p>
+            </div>
+            <div class="problem-item">
+              <h3>Payments are slow to confirm</h3>
+              <p>A simple transaction ends up feeling uncertain while you wait.</p>
+            </div>
+            <div class="problem-item">
+              <h3>Updates arrive late, if at all</h3>
+              <p>A missed message about a session can mean a missed session.</p>
+            </div>
+            <div class="problem-item">
+              <h3>Tracking activity is a mess</h3>
+              <p>Without one system, keeping a clear record of who's tutoring whom falls entirely on the admin.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -132,19 +134,19 @@ require_once __DIR__ . '/api/config.php';
               <h3>AI Tutor Matching</h3>
               <p>Tell us your subject and how you learn best. We match you with tutors suited to your needs, not just a list to scroll through.</p>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" id="landing-calendar-card" style="cursor: pointer;">
               <h3>Calendar Scheduling</h3>
               <p>See real tutor availability and book a time that works, without the back-and-forth messages.</p>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" id="landing-notif-card" style="cursor: pointer;">
               <h3>Real-Time Notifications</h3>
               <p>Know the moment a session is confirmed, rescheduled, or about to start.</p>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" id="landing-payment-card" style="cursor: pointer;">
               <h3>Online Payment</h3>
               <p>Pay securely through GCash as soon as a session is booked. No chasing receipts.</p>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" id="landing-session-card" style="cursor: pointer;">
               <h3>Matching Session</h3>
               <p>Once you're matched, connect with your tutor directly and get started.</p>
             </div>
@@ -190,15 +192,15 @@ require_once __DIR__ . '/api/config.php';
             <p>Students, tutors, and administrators each get what they need from the same system.</p>
           </div>
           <div class="audience-grid">
-            <div class="audience-card">
+            <div class="audience-card" id="landing-audience-student" style="cursor: pointer;">
               <h3>Students</h3>
               <p>Find a tutor who matches how you learn, book sessions, and pay - all from one dashboard.</p>
             </div>
-            <div class="audience-card">
+            <div class="audience-card" id="landing-audience-tutor" style="cursor: pointer;">
               <h3>Tutors</h3>
               <p>Set your availability, get matched with students, and get paid on time for every session.</p>
             </div>
-            <div class="audience-card">
+            <div class="audience-card" id="landing-audience-admin" style="cursor: pointer;">
               <h3>Admins</h3>
               <p>Monitor tutoring activity, keep records organized, and generate reports when you need them.</p>
             </div>

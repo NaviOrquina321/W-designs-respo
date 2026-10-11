@@ -341,9 +341,57 @@ function initNavigation() {
   document.getElementById('landing-ai-card')?.addEventListener('click', () => {
     openModal('modal-auth');
     switchAuthTab('login');
-    const authRoleSelect = document.getElementById('auth-role');
-    if (authRoleSelect) authRoleSelect.value = 'student';
-    showToast('Please sign in as a Student to access AI Tutor Matching.');
+    showToast('Please sign in to access AI Tutor Matching.');
+  });
+
+  document.getElementById('landing-calendar-card')?.addEventListener('click', () => {
+    openModal('modal-auth');
+    switchAuthTab('login');
+    showToast('Please sign in to view calendar scheduling.');
+  });
+
+  document.getElementById('landing-notif-card')?.addEventListener('click', () => {
+    openModal('modal-auth');
+    switchAuthTab('login');
+    showToast('Please sign in to access real-time notifications.');
+  });
+
+  document.getElementById('landing-payment-card')?.addEventListener('click', () => {
+    openModal('modal-auth');
+    switchAuthTab('login');
+    showToast('Please sign in to manage GCash payments.');
+  });
+
+  document.getElementById('landing-session-card')?.addEventListener('click', () => {
+    openModal('modal-auth');
+    switchAuthTab('login');
+    showToast('Please sign in to join virtual session workspaces.');
+  });
+
+  document.getElementById('landing-audience-student')?.addEventListener('click', () => {
+    openModal('modal-auth');
+    switchAuthTab('register');
+    const regRoleSelect = document.getElementById('reg-role');
+    if (regRoleSelect) {
+      regRoleSelect.value = 'student';
+      regRoleSelect.dispatchEvent(new Event('change'));
+    }
+  });
+
+  document.getElementById('landing-audience-tutor')?.addEventListener('click', () => {
+    openModal('modal-auth');
+    switchAuthTab('register');
+    const regRoleSelect = document.getElementById('reg-role');
+    if (regRoleSelect) {
+      regRoleSelect.value = 'tutor';
+      regRoleSelect.dispatchEvent(new Event('change'));
+    }
+  });
+
+  document.getElementById('landing-audience-admin')?.addEventListener('click', () => {
+    openModal('modal-auth');
+    switchAuthTab('login');
+    showToast('Admins please sign in using administrator credentials.');
   });
 
   document.getElementById('tutor-search-input')?.addEventListener('input', (e) => {
