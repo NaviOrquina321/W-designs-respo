@@ -1,137 +1,139 @@
 <?php
-// api/tutors.php
-require_once 'config.php';
+// api/tutors.php - Tutors REST API
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/helpers.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
-$isSQLite = ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite');
 
 if ($method === 'GET') {
-    $stmt = $pdo->query("SELECT * FROM tutors ORDER BY created_at DESC");
-    $tutors = $stmt->fetchAll();
+    $user = isset($_SESSION['role']) ? ['id' => $_SESSION['user_id'] ?? '', 'role' => $_SESSION['role']] : null;
 
-    // Normalize data fields for JSON
-    $formatted = array_map(function($t) {
-        $t['rating'] = (float)$t['rating'];
-        $t['reviewsCount'] = (int)$t['reviews_count'];
-        $t['hourlyRate'] = (int)$t['hourly_rate'];
-        $t['subjects'] = array_map('trim', explode(',', $t['subjects']));
-        $t['learningStyles'] = array_map('trim', explode(',', $t['learning_styles']));
-        $t['availableDays'] = array_map('trim', explode(',', $t['available_days'] ?? 'Mon,Tue,Wed,Thu,Fri'));
-        $t['availableTimeSlots'] = $t['available_time_slots'] ?? '09:00 AM - 05:00 PM';
-        $t['blockedDates'] = $t['blocked_dates'] ?? '';
-        $t['availabilitySlots'] = !empty($t['availability_slots']) ? array_map('trim', explode(',', $t['availability_slots'])) : ['09:00 AM', '02:00 PM', '04:00 PM'];
-        $t['diplomaStatus'] = $t['diploma_status'] ?? 'Pending';
-        $t['torStatus'] = $t['tor_status'] ?? 'Pending';
-        $t['idStatus'] = $t['id_status'] ?? 'Pending';
-        $t['approvalStatus'] = $t['approval_status'] ?? 'Pending Review';
-        $t['deactivated'] = (bool)$t['deactivated'];
-        $t['available'] = (bool)$t['available'];
-        return $t;
-    }, $tutors);
-
-    echo json_encode(['status' => 'success', 'data' => $formatted]);
-} elseif ($method === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    if (!$input) $input = $_POST;
-
-    $id = $input['id'] ?? ('tut-' . rand(100, 999));
-    $name = $input['name'] ?? '';
-    $email = strtolower(trim($input['email'] ?? ''));
-    $initials = $input['initials'] ?? 'TR';
-    $rating = (float)($input['rating'] ?? 0.0);
-    $reviewsCount = (int)($input['reviewsCount'] ?? ($input['reviews_count'] ?? 0));
-    $hourlyRate = (int)($input['hourlyRate'] ?? ($input['hourly_rate'] ?? 350));
-    $subjects = is_array($input['subjects'] ?? null) ? implode(', ', $input['subjects']) : ($input['subjects'] ?? '');
-    $learningStyles = is_array($input['learningStyles'] ?? null) ? implode(', ', $input['learningStyles']) : ($input['learningStyles'] ?? 'Step-by-Step Explanation');
-    $bio = $input['bio'] ?? '';
-    $diplomaStatus = $input['diplomaStatus'] ?? ($input['diploma_status'] ?? 'Pending');
-    $torStatus = $input['torStatus'] ?? ($input['tor_status'] ?? 'Pending');
-    $idStatus = $input['idStatus'] ?? ($input['id_status'] ?? 'Pending');
-    $approvalStatus = $input['approvalStatus'] ?? ($input['approval_status'] ?? 'Pending Review');
-
-    if ($isSQLite) {
-        $stmt = $pdo->prepare("INSERT INTO tutors (id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, diploma_status, tor_status, id_status, approval_status)
-                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                               ON CONFLICT(email) DO UPDATE SET name=excluded.name, rating=excluded.rating, reviews_count=excluded.reviews_count, hourly_rate=excluded.hourly_rate, subjects=excluded.subjects, learning_styles=excluded.learning_styles, bio=excluded.bio, diploma_status=excluded.diploma_status, tor_status=excluded.tor_status, id_status=excluded.id_status, approval_status=excluded.approval_status");
-        $stmt->execute([$id, $name, $email, $initials, $rating, $reviewsCount, $hourlyRate, $subjects, $learningStyles, $bio, $diplomaStatus, $torStatus, $idStatus, $approvalStatus]);
+    if ($user && $user['role'] === 'admin') {
+        $stmt = $pdo->query("SELECT id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, diploma_status, tor_status, id_status, approval_status, available_days, available_time_slots, blocked_dates, availability_slots, created_at FROM tutors ORDER BY created_at DESC");
+        $tutors = $stmt->fetchAll();
+    } elseif ($user && $user['role'] === 'tutor') {
+        $stmt = $pdo->prepare("SELECT id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, diploma_status, tor_status, id_status, approval_status, available_days, available_time_slots, blocked_dates, availability_slots, created_at FROM tutors WHERE (approval_status = 'Approved' AND deactivated = 0) OR id = ?");
+        $stmt->execute([$user['id']]);
+        $tutors = $stmt->fetchAll();
     } else {
-        $stmt = $pdo->prepare("INSERT INTO tutors (id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, diploma_status, tor_status, id_status, approval_status)
-                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                               ON DUPLICATE KEY UPDATE name=?, rating=?, reviews_count=?, hourly_rate=?, subjects=?, learning_styles=?, bio=?, diploma_status=?, tor_status=?, id_status=?, approval_status=?");
-        $stmt->execute([
-            $id, $name, $email, $initials, $rating, $reviewsCount, $hourlyRate, $subjects, $learningStyles, $bio, $diplomaStatus, $torStatus, $idStatus, $approvalStatus,
-            $name, $rating, $reviewsCount, $hourlyRate, $subjects, $learningStyles, $bio, $diplomaStatus, $torStatus, $idStatus, $approvalStatus
-        ]);
+        $stmt = $pdo->query("SELECT id, name, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, available_days, available_time_slots, blocked_dates, availability_slots, approval_status FROM tutors WHERE approval_status = 'Approved' AND deactivated = 0");
+        $tutors = $stmt->fetchAll();
     }
-
-    echo json_encode(['status' => 'success', 'message' => 'Tutor saved successfully', 'id' => $id]);
+    echo json_encode(['status' => 'success', 'data' => $tutors]);
 } elseif ($method === 'PUT') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $id = $input['id'] ?? '';
+    $user = requireLogin();
+    $input = getInput();
+    $tutorId = trim($input['id'] ?? '');
 
-    if (empty($id)) {
-        http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'Tutor ID is required']);
-        exit();
+    if (empty($tutorId)) {
+        jsonError(400, 'Tutor ID required.');
     }
 
-    if (isset($input['rating'])) {
-        $stmt = $pdo->prepare("UPDATE tutors SET rating = ?, reviews_count = ? WHERE id = ? OR name = ?");
-        $stmt->execute([(float)$input['rating'], (int)($input['reviewsCount'] ?? 1), $id, $id]);
-    }
+    if ($user['role'] === 'admin') {
+        $fields = [];
+        $params = [];
 
-    if (isset($input['approval_status']) || isset($input['approvalStatus'])) {
-        $status = $input['approval_status'] ?? $input['approvalStatus'];
-        $stmt = $pdo->prepare("UPDATE tutors SET approval_status = ? WHERE id = ?");
-        $stmt->execute([$status, $id]);
-    }
+        if (isset($input['approval_status'])) {
+            $fields[] = "`approval_status` = ?";
+            $params[] = trim($input['approval_status']);
+        }
+        if (isset($input['deactivated'])) {
+            $fields[] = "`deactivated` = ?";
+            $params[] = $input['deactivated'] ? 1 : 0;
+        }
+        if (isset($input['diploma_status'])) {
+            $fields[] = "`diploma_status` = ?";
+            $params[] = trim($input['diploma_status']);
+        }
+        if (isset($input['tor_status'])) {
+            $fields[] = "`tor_status` = ?";
+            $params[] = trim($input['tor_status']);
+        }
+        if (isset($input['id_status'])) {
+            $fields[] = "`id_status` = ?";
+            $params[] = trim($input['id_status']);
+        }
 
-    if (isset($input['deactivated'])) {
-        $stmt = $pdo->prepare("UPDATE tutors SET deactivated = ? WHERE id = ?");
-        $stmt->execute([$input['deactivated'] ? 1 : 0, $id]);
-    }
+        if (empty($fields)) {
+            jsonError(400, 'No valid fields provided for update.');
+        }
 
-    if (isset($input['diplomaStatus']) || isset($input['diploma_status'])) {
-        $status = $input['diplomaStatus'] ?? $input['diploma_status'];
-        $stmt = $pdo->prepare("UPDATE tutors SET diploma_status = ? WHERE id = ?");
-        $stmt->execute([$status, $id]);
-    }
+        $params[] = $tutorId;
+        $sql = "UPDATE tutors SET " . implode(', ', $fields) . " WHERE id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
 
-    if (isset($input['torStatus']) || isset($input['tor_status'])) {
-        $status = $input['torStatus'] ?? $input['tor_status'];
-        $stmt = $pdo->prepare("UPDATE tutors SET tor_status = ? WHERE id = ?");
-        $stmt->execute([$status, $id]);
-    }
+        echo json_encode(['status' => 'success', 'message' => 'Tutor updated by admin.']);
+    } elseif ($user['role'] === 'tutor') {
+        if ($user['id'] !== $tutorId) {
+            jsonError(403, 'You can only update your own tutor profile.');
+        }
 
-    if (isset($input['idStatus']) || isset($input['id_status'])) {
-        $status = $input['idStatus'] ?? $input['id_status'];
-        $stmt = $pdo->prepare("UPDATE tutors SET id_status = ? WHERE id = ?");
-        $stmt->execute([$status, $id]);
-    }
+        $fields = [];
+        $params = [];
 
-    if (isset($input['bio']) || isset($input['hourlyRate']) || isset($input['subjects']) || isset($input['name'])) {
-        $subjects = is_array($input['subjects'] ?? null) ? implode(', ', $input['subjects']) : ($input['subjects'] ?? '');
-        $learningStyles = is_array($input['learningStyles'] ?? null) ? implode(', ', $input['learningStyles']) : ($input['learningStyles'] ?? '');
-        $stmt = $pdo->prepare("UPDATE tutors SET name = ?, bio = ?, hourly_rate = ?, subjects = ?, learning_styles = ? WHERE id = ? OR name = ?");
-        $stmt->execute([
-            $input['name'] ?? $id,
-            $input['bio'] ?? '',
-            (int)($input['hourlyRate'] ?? $input['hourly_rate'] ?? 350),
-            $subjects,
-            $learningStyles,
-            $id,
-            $id
-        ]);
-    }
+        if (isset($input['name'])) {
+            $fields[] = "`name` = ?";
+            $params[] = trim($input['name']);
+            $_SESSION['name'] = trim($input['name']);
+        }
+        if (isset($input['hourlyRate']) || isset($input['hourly_rate'])) {
+            $rate = intval($input['hourlyRate'] ?? $input['hourly_rate']);
+            if ($rate > 0) {
+                $fields[] = "`hourly_rate` = ?";
+                $params[] = $rate;
+            }
+        }
+        if (isset($input['subjects'])) {
+            $subj = is_array($input['subjects']) ? implode(', ', $input['subjects']) : trim($input['subjects']);
+            $fields[] = "`subjects` = ?";
+            $params[] = $subj;
+        }
+        if (isset($input['learningStyles']) || isset($input['learning_styles'])) {
+            $styles = $input['learningStyles'] ?? $input['learning_styles'];
+            $styleVal = is_array($styles) ? implode(', ', $styles) : trim($styles);
+            $fields[] = "`learning_styles` = ?";
+            $params[] = $styleVal;
+        }
+        if (isset($input['bio'])) {
+            $fields[] = "`bio` = ?";
+            $params[] = trim($input['bio']);
+        }
+        if (isset($input['available'])) {
+            $fields[] = "`available` = ?";
+            $params[] = $input['available'] ? 1 : 0;
+        }
+        if (isset($input['availableDays']) || isset($input['available_days'])) {
+            $days = $input['availableDays'] ?? $input['available_days'];
+            $daysVal = is_array($days) ? implode(',', $days) : trim($days);
+            $fields[] = "`available_days` = ?";
+            $params[] = $daysVal;
+        }
+        if (isset($input['availableTimeSlots']) || isset($input['available_time_slots'])) {
+            $slotsVal = trim($input['availableTimeSlots'] ?? $input['available_time_slots']);
+            $fields[] = "`available_time_slots` = ?";
+            $params[] = $slotsVal;
+        }
+        if (isset($input['blockedDates']) || isset($input['blocked_dates'])) {
+            $blockedVal = trim($input['blockedDates'] ?? $input['blocked_dates']);
+            $fields[] = "`blocked_dates` = ?";
+            $params[] = $blockedVal;
+        }
 
-    if (isset($input['availableDays']) || isset($input['available_days'])) {
-        $days = is_array($input['availableDays'] ?? null) ? implode(', ', $input['availableDays']) : ($input['available_days'] ?? '');
-        $timeSlots = $input['availableTimeSlots'] ?? ($input['available_time_slots'] ?? '');
-        $blockedDates = $input['blockedDates'] ?? ($input['blocked_dates'] ?? '');
-        $stmt = $pdo->prepare("UPDATE tutors SET available_days = ?, available_time_slots = ?, blocked_dates = ? WHERE id = ? OR name = ?");
-        $stmt->execute([$days, $timeSlots, $blockedDates, $id, $id]);
-    }
+        if (empty($fields)) {
+            jsonError(400, 'No valid fields provided for update.');
+        }
 
-    echo json_encode(['status' => 'success', 'message' => 'Tutor profile updated successfully']);
+        $params[] = $tutorId;
+        $sql = "UPDATE tutors SET " . implode(', ', $fields) . " WHERE id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+
+        echo json_encode(['status' => 'success', 'message' => 'Tutor profile updated successfully.']);
+    } else {
+        jsonError(403, 'Forbidden action.');
+    }
+} else {
+    jsonError(405, 'Method not allowed');
 }
 ?>

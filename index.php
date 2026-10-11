@@ -24,7 +24,7 @@ require_once __DIR__ . '/api/config.php';
   <header>
     <nav class="wrap">
       <div class="logo" id="nav-logo" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
-        <img src="assets/logo.png" alt="TutorLink Logo" style="height: 36px; width: 36px; object-fit: contain; border-radius: 50%;">
+        <img src="assets/logo.png" alt="TutorLink Logo" style="height: 36px; width: 36px; object-fit: contain; border-radius: 50%;" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'36\' height=\'36\' viewBox=\'0 0 36 36\'><circle cx=\'18\' cy=\'18\' r=\'17\' fill=\'%23121212\'/><text x=\'50%\' y=\'55%\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23ffffff\' font-family=\'sans-serif\' font-size=\'13\' font-weight=\'bold\'>TL</text></svg>';">
         <span>TutorLink</span>
       </div>
 

@@ -1,69 +1,56 @@
 <?php
-// api/subjects.php
-require_once 'config.php';
+// api/subjects.php - Subjects Catalog REST API
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/helpers.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-    $stmt = $pdo->query("SELECT * FROM subjects ORDER BY name ASC");
+    $stmt = $pdo->query("SELECT id, name, category, created_at FROM subjects ORDER BY name ASC");
     $subjects = $stmt->fetchAll();
     echo json_encode(['status' => 'success', 'data' => $subjects]);
-    exit();
-}
+} elseif ($method === 'POST') {
+    $user = requireRole(['admin']);
+    $input = getInput();
 
-if ($method === 'POST') {
-    $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
-    $action = $data['action'] ?? 'add';
+    $subId = trim($input['id'] ?? '');
+    $name = trim($input['name'] ?? '');
+    $category = trim($input['category'] ?? 'STEM');
 
-    if ($action === 'add') {
-        $id = 'SUB-' . rand(100, 999);
-        $name = trim($data['name'] ?? '');
-        $category = trim($data['category'] ?? 'General');
-
-        if (empty($name)) {
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Subject name is required']);
-            exit();
-        }
-
-        $stmt = $pdo->prepare("INSERT INTO subjects (id, name, category) VALUES (?, ?, ?)");
-        $stmt->execute([$id, $name, $category]);
-
-        echo json_encode(['status' => 'success', 'message' => 'Subject added successfully', 'id' => $id]);
-        exit();
+    if (empty($name)) {
+        jsonError(400, 'Subject name required.');
     }
 
-    if ($action === 'edit') {
-        $id = $data['id'] ?? '';
-        $name = trim($data['name'] ?? '');
-        $category = trim($data['category'] ?? 'General');
-
-        if (empty($id) || empty($name)) {
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'ID and Subject name are required']);
-            exit();
-        }
-
+    if (!empty($subId)) {
+        // Edit subject
         $stmt = $pdo->prepare("UPDATE subjects SET name = ?, category = ? WHERE id = ?");
-        $stmt->execute([$name, $category, $id]);
+        $stmt->execute([$name, $category, $subId]);
+        echo json_encode(['status' => 'success', 'message' => 'Subject updated.']);
+    } else {
+        // Add subject
+        $newSubId = newId('SUB-');
+        $stmt = $pdo->prepare("INSERT INTO subjects (id, name, category) VALUES (?, ?, ?)");
+        $stmt->execute([$newSubId, $name, $category]);
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Subject created.',
+            'data' => ['id' => $newSubId, 'name' => $name, 'category' => $category]
+        ]);
+    }
+} elseif ($method === 'DELETE') {
+    $user = requireRole(['admin']);
+    $input = getInput();
+    $subId = trim($input['id'] ?? ($_GET['id'] ?? ''));
 
-        echo json_encode(['status' => 'success', 'message' => 'Subject updated successfully']);
-        exit();
+    if (empty($subId)) {
+        jsonError(400, 'Subject ID required.');
     }
 
-    if ($action === 'delete') {
-        $id = $data['id'] ?? '';
-        if (empty($id)) {
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'ID is required']);
-            exit();
-        }
+    $stmt = $pdo->prepare("DELETE FROM subjects WHERE id = ?");
+    $stmt->execute([$subId]);
 
-        $stmt = $pdo->prepare("DELETE FROM subjects WHERE id = ?");
-        $stmt->execute([$id]);
-
-        echo json_encode(['status' => 'success', 'message' => 'Subject deleted successfully']);
-        exit();
-    }
+    echo json_encode(['status' => 'success', 'message' => 'Subject deleted.']);
+} else {
+    jsonError(405, 'Method not allowed');
 }
 ?>

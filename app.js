@@ -78,6 +78,8 @@ const state = {
 };
 
 // DOM Content Loaded Handler
+let autoRefreshTimer = null;
+
 document.addEventListener('DOMContentLoaded', async () => {
   initNavigation();
   initAuthModalTabs();
@@ -94,17 +96,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTutorSubTabs();
   initSubjectManagement();
 
-  const savedSessionStr = localStorage.getItem('tutorlink_session');
-  if (savedSessionStr) {
-    try {
-      const savedSession = JSON.parse(savedSessionStr);
-      if (savedSession && savedSession.role && savedSession.user) {
-        state.currentUser = savedSession.user;
-        state.currentRole = savedSession.role;
+  // Check server session via api/me.php
+  try {
+    const res = await fetch('api/me.php');
+    if (res.ok) {
+      const json = await res.json();
+      if (json.status === 'success' && json.user) {
+        state.currentUser = json.user;
+        state.currentRole = json.user.role;
       }
-    } catch (e) {
-      localStorage.removeItem('tutorlink_session');
+    } else {
+      state.currentUser = null;
+      state.currentRole = 'guest';
     }
+  } catch (e) {
+    state.currentUser = null;
+    state.currentRole = 'guest';
   }
 
   await syncWithDatabase();
@@ -249,7 +256,9 @@ function initNavigation() {
   const userProfileBtn = document.getElementById('user-profile-btn');
 
   navLogo?.addEventListener('click', () => {
-    if (state.currentUser && state.currentUser.role) {
+    if (state.currentUser && state.currentUser.role === 'admin') {
+      window.location.href = 'admin.php';
+    } else if (state.currentUser && state.currentUser.role) {
       switchRole(state.currentUser.role);
     } else if (state.currentRole && state.currentRole !== 'guest') {
       switchRole(state.currentRole);
@@ -269,7 +278,14 @@ function initNavigation() {
     switchAuthTab('register');
   });
 
-  logoutBtn?.addEventListener('click', () => {
+  logoutBtn?.addEventListener('click', async () => {
+    if (autoRefreshTimer) {
+      clearInterval(autoRefreshTimer);
+      autoRefreshTimer = null;
+    }
+    try {
+      await fetch('api/logout.php', { method: 'POST' });
+    } catch (e) {}
     switchRole('guest');
     showToast('Logged out successfully.');
   });
@@ -492,7 +508,10 @@ function switchRole(role, customUser = null) {
       if (floatingCalBtn) floatingCalBtn.classList.add('hidden');
     }
 
-    if (role === 'student') {
+    if (role === 'admin') {
+      window.location.href = 'admin.php';
+      return;
+    } else if (role === 'student') {
       state.currentUser = customUser || state.currentUser || { name: 'Maria Santos', role: 'student' };
       const prefix = (state.currentUser && state.currentUser.isNew) ? 'Welcome Student,' : 'Welcome back,';
       const headingEl = document.getElementById('student-welcome-heading');
@@ -507,10 +526,6 @@ function switchRole(role, customUser = null) {
     } else if (role === 'tutor-profile') {
       populateTutorProfileEditPage();
       document.getElementById('view-tutor-profile').classList.add('active');
-    } else if (role === 'admin') {
-      state.currentUser = customUser || state.currentUser || { name: 'System Admin', role: 'admin' };
-      const adminView = document.getElementById('view-admin');
-      if (adminView) adminView.classList.add('active');
     }
   }
 
@@ -611,9 +626,10 @@ function initModals() {
 
       if (res.ok && data.status === 'success') {
         const user = data.user;
-        switchRole(user.role, { id: user.id, name: user.name, role: user.role, email: user.email });
         closeModal('modal-auth');
         showToast(`Welcome back, ${user.name}!`);
+        await syncWithDatabase();
+        switchRole(user.role, { id: user.id, name: user.name, role: user.role, email: user.email });
         return;
       } else {
         showToast(data.message || 'Invalid email or password.', 'error');
@@ -2402,17 +2418,21 @@ window.deleteScheduleSlot = function(schId) {
 
 function renderAdminPayments() {
   const tbody = document.getElementById('admin-payments-table-body');
-  const tbodyConfirm = document.getElementById('admin-payments-confirm-table-body');
 
   if (tbody) {
     tbody.innerHTML = state.payments.map(p => `
       <tr>
-        <td><code>${p.id}</code></td>
-        <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${p.studentId || p.studentName}')">${p.studentName}</span></td>
-        <td>${p.method}</td>
-        <td><code>${p.refNo}</code></td>
-        <td>P${p.amount}</td>
-        <td><span class="badge ${p.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${p.status}</span></td>
+        <td><code>${esc(p.id)}</code></td>
+        <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${esc(p.studentId || p.studentName)}')">${esc(p.studentName)}</span></td>
+        <td>${esc(p.method)}</td>
+        <td><code>${esc(p.refNo)}</code></td>
+        <td>P${esc(p.amount)}</td>
+        <td><span class="badge ${p.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${esc(p.status)}</span></td>
+        <td><span class="badge ${p.payoutStatus === 'Paid Out' ? 'badge-success' : 'badge-pending'}">${esc(p.payoutStatus || 'Pending')}</span></td>
+        <td>
+          ${p.status !== 'Confirmed' ? `<button class="btn btn-primary btn-small" onclick="confirmPayment('${esc(p.id)}')">Confirm</button>` : ''}
+          ${p.payoutStatus !== 'Paid Out' ? `<button class="btn btn-secondary btn-small" onclick="processTutorPayout('${esc(p.id)}')">Pay Out</button>` : ''}
+        </td>
       </tr>
     `).join('');
   }

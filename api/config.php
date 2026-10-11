@@ -1,14 +1,5 @@
 <?php
 // api/config.php - TutorLink Database Connection & Auto Migration
-header('Access-Control-Allow-Origin: http://localhost:3000');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
-
-if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
-
 $host = 'localhost';
 $user = 'root';
 $pass = '';
@@ -33,11 +24,13 @@ try {
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ]);
+        $pdo->exec("PRAGMA foreign_keys = ON;");
     } catch (Exception $sqle) {
+        error_log("Database Connection Failed: " . $sqle->getMessage());
         http_response_code(500);
         echo json_encode([
             'status' => 'error',
-            'message' => 'Database Connection Failed: ' . $sqle->getMessage()
+            'message' => 'Internal server error: Database connection failed.'
         ]);
         exit();
     }
@@ -48,7 +41,6 @@ try {
     $isSQLite = ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite');
 
     $autoInc = $isSQLite ? "INTEGER PRIMARY KEY AUTOINCREMENT" : "INT AUTO_INCREMENT PRIMARY KEY";
-    $textType = "TEXT";
 
     // 1. Table: users
     $pdo->exec("CREATE TABLE IF NOT EXISTS `users` (
@@ -128,7 +120,9 @@ try {
       `score` INT NOT NULL,
       `status` VARCHAR(50) DEFAULT 'Pending Review',
       `match_reason` TEXT,
-      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (`student_id`) REFERENCES `students`(`id`) ON DELETE SET NULL,
+      FOREIGN KEY (`tutor_id`) REFERENCES `tutors`(`id`) ON DELETE SET NULL
     );");
 
     // 7. Table: schedules
@@ -141,7 +135,9 @@ try {
       `date_slot` VARCHAR(100) NOT NULL,
       `subject` VARCHAR(100) NOT NULL,
       `status` VARCHAR(50) DEFAULT 'Available',
-      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (`tutor_id`) REFERENCES `tutors`(`id`) ON DELETE SET NULL,
+      FOREIGN KEY (`student_id`) REFERENCES `students`(`id`) ON DELETE SET NULL
     );");
 
     // 8. Table: payments
@@ -156,7 +152,9 @@ try {
       `amount` INT NOT NULL,
       `status` VARCHAR(50) DEFAULT 'Confirmed',
       `payout_status` VARCHAR(50) DEFAULT 'Pending',
-      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (`student_id`) REFERENCES `students`(`id`) ON DELETE SET NULL,
+      FOREIGN KEY (`tutor_id`) REFERENCES `tutors`(`id`) ON DELETE SET NULL
     );");
 
     // 9. Table: sessions
@@ -178,7 +176,9 @@ try {
       `notes` TEXT,
       `rating` INT DEFAULT 0,
       `feedback` TEXT,
-      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (`student_id`) REFERENCES `students`(`id`) ON DELETE RESTRICT,
+      FOREIGN KEY (`tutor_id`) REFERENCES `tutors`(`id`) ON DELETE RESTRICT
     );");
 
     // 10. Table: notifications
@@ -201,7 +201,8 @@ try {
       `sender_role` VARCHAR(50) NOT NULL,
       `message` TEXT NOT NULL,
       `timestamp` VARCHAR(50) NOT NULL,
-      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (`session_id`) REFERENCES `sessions`(`id`) ON DELETE CASCADE
     );");
 
     // Seed Admin Account if users table is empty
@@ -225,7 +226,7 @@ try {
 
         // Insert Seed Tutor Prof. Alex Rivera
         $stmt->execute(['tut-1', 'alex@tutorlink.ph', $tutorHash, 'tutor', 'Prof. Alex Rivera']);
-        $stmtTut = $pdo->prepare("INSERT INTO `tutors` (`id`, `name`, `email`, `initials`, `rating`, `reviews_count`, `hourly_rate`, `subjects`, `learning_styles`, `bio`, `available`, `deactivated`, `diploma_status`, `tor_status`, `id_status`, `approval_status`, `available_days`, `available_time_slots`, `availability_slots`) VALUES (?, ?, ?, ?, 5.0, 1, 350, ?, ?, ?, 1, 0, 'Verified', 'Verified', 'Verified', 'Approved', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')");
+        $stmtTut = $pdo->prepare("INSERT INTO `tutors` (`id`, `name`, `email`, `initials`, `rating`, `reviews_count`, `hourly_rate`, `subjects`, `learning_styles`, `bio`, `available`, `deactivated`, `diploma_status`, `tor_status`, `id_status`, `approval_status`, `available_days`, `available_time_slots`, `availability_slots`) VALUES (?, ?, ?, ?, 5.0, 1, 350, ?, ?, ?, 1, 0, 'Pending', 'Pending', 'Pending', 'Approved', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')");
         $stmtTut->execute(['tut-1', 'Prof. Alex Rivera', 'alex@tutorlink.ph', 'AR', 'Calculus, Physics, Mathematics', 'Step-by-Step Explanation, Visual Diagrams', 'Licensed High School & College Mathematics educator with 7+ years teaching STEM subjects.']);
 
         // Seed Default Subjects
@@ -245,6 +246,6 @@ try {
     }
 
 } catch (PDOException $e) {
-    // Ignore migration warnings
+    error_log("Schema initialization error: " . $e->getMessage());
 }
 ?>

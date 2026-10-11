@@ -1,54 +1,126 @@
 <?php
-// api/matches.php
-require_once 'config.php';
+// api/matches.php - Matches REST API
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/helpers.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-    $stmt = $pdo->query("SELECT * FROM matches ORDER BY created_at DESC");
-    $data = $stmt->fetchAll();
-    echo json_encode(['status' => 'success', 'data' => $data]);
+    $user = requireLogin();
+    if ($user['role'] === 'admin') {
+        $stmt = $pdo->query("SELECT * FROM matches ORDER BY created_at DESC");
+        $matches = $stmt->fetchAll();
+    } elseif ($user['role'] === 'student') {
+        $stmt = $pdo->prepare("SELECT * FROM matches WHERE student_id = ? OR LOWER(student_name) = ? ORDER BY created_at DESC");
+        $stmt->execute([$user['id'], strtolower($user['name'])]);
+        $matches = $stmt->fetchAll();
+    } elseif ($user['role'] === 'tutor') {
+        $stmt = $pdo->prepare("SELECT * FROM matches WHERE tutor_id = ? OR LOWER(tutor_name) = ? ORDER BY created_at DESC");
+        $stmt->execute([$user['id'], strtolower($user['name'])]);
+        $matches = $stmt->fetchAll();
+    } else {
+        jsonError(403, 'Forbidden');
+    }
+    echo json_encode(['status' => 'success', 'data' => $matches]);
 } elseif ($method === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    if (!$input) $input = $_POST;
+    $user = requireRole(['student']);
+    $input = getInput();
 
-    $id = $input['id'] ?? ('match-' . rand(100, 999));
-    $studentId = $input['student_id'] ?? ($input['studentId'] ?? '');
-    $studentName = $input['student_name'] ?? ($input['studentName'] ?? '');
-    $tutorId = $input['tutor_id'] ?? ($input['tutorId'] ?? '');
-    $tutorName = $input['tutor_name'] ?? ($input['tutorName'] ?? '');
-    $subject = $input['subject'] ?? '';
-    $score = (int)($input['score'] ?? 95);
-    $status = $input['status'] ?? 'Pending Review';
-    $reason = $input['match_reason'] ?? ($input['reason'] ?? '');
+    $tutorId = trim($input['tutor_id'] ?? ($input['tutorId'] ?? ''));
+    $tutorName = trim($input['tutor_name'] ?? ($input['tutorName'] ?? 'Tutor'));
+    $subject = trim($input['subject'] ?? 'Mathematics');
+    $score = max(0, min(100, intval($input['score'] ?? 80)));
+    $matchReason = trim($input['match_reason'] ?? ($input['matchReason'] ?? 'AI Compatibility Match'));
 
-    $stmt = $pdo->prepare("INSERT INTO matches (id, student_id, student_name, tutor_id, tutor_name, subject, score, status, match_reason)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$id, $studentId, $studentName, $tutorId, $tutorName, $subject, $score, $status, $reason]);
+    $studentId = $user['id'];
+    $studentName = $user['name'];
 
-    echo json_encode(['status' => 'success', 'message' => 'Match created successfully', 'id' => $id]);
+    $matchId = newId('MATCH-');
+
+    $stmt = $pdo->prepare("INSERT INTO matches (id, student_id, student_name, tutor_id, tutor_name, subject, score, status, match_reason) VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending Review', ?)");
+    $stmt->execute([
+        $matchId,
+        !empty($studentId) ? $studentId : null,
+        $studentName,
+        !empty($tutorId) ? $tutorId : null,
+        $tutorName,
+        $subject,
+        $score,
+        $matchReason
+    ]);
+
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Match request generated.',
+        'data' => [
+            'id' => $matchId,
+            'student_id' => $studentId,
+            'student_name' => $studentName,
+            'tutor_id' => $tutorId,
+            'tutor_name' => $tutorName,
+            'subject' => $subject,
+            'score' => $score,
+            'status' => 'Pending Review'
+        ]
+    ]);
 } elseif ($method === 'PUT') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $id = $input['id'] ?? '';
+    $user = requireRole(['admin', 'tutor']);
+    $input = getInput();
+    $matchId = trim($input['id'] ?? '');
 
-    if (empty($id)) {
-        http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'Match ID is required']);
-        exit();
+    if (empty($matchId)) {
+        jsonError(400, 'Match ID required.');
     }
 
-    if (isset($input['tutor_id']) || isset($input['tutorName'])) {
-        $tutorId = $input['tutor_id'] ?? ($input['tutorId'] ?? '');
-        $tutorName = $input['tutor_name'] ?? ($input['tutorName'] ?? '');
-        $stmt = $pdo->prepare("UPDATE matches SET tutor_id = ?, tutor_name = ?, status = 'Reassigned' WHERE id = ?");
-        $stmt->execute([$tutorId, $tutorName, $id]);
+    $st = $pdo->prepare("SELECT * FROM matches WHERE id = ?");
+    $st->execute([$matchId]);
+    $match = $st->fetch();
+
+    if (!$match) {
+        jsonError(404, 'Match record not found.');
     }
+
+    if ($user['role'] === 'tutor') {
+        if ($match['tutor_id'] !== $user['id'] && strtolower($match['tutor_name']) !== strtolower($user['name'])) {
+            jsonError(403, 'You can only update match requests assigned to you.');
+        }
+    }
+
+    $fields = [];
+    $params = [];
 
     if (isset($input['status'])) {
-        $stmt = $pdo->prepare("UPDATE matches SET status = ? WHERE id = ?");
-        $stmt->execute([$input['status'], $id]);
+        $statusVal = trim($input['status']);
+        if (in_array($statusVal, ['Approved', 'Cancelled', 'Pending Review'], true)) {
+            $fields[] = "`status` = ?";
+            $params[] = $statusVal;
+        }
     }
 
-    echo json_encode(['status' => 'success', 'message' => 'Match updated successfully']);
+    if (isset($input['tutor_id']) && $user['role'] === 'admin') {
+        $newTutId = trim($input['tutor_id']);
+        $stTut = $pdo->prepare("SELECT name FROM tutors WHERE id = ?");
+        $stTut->execute([$newTutId]);
+        $tut = $stTut->fetch();
+        if ($tut) {
+            $fields[] = "`tutor_id` = ?";
+            $params[] = $newTutId;
+            $fields[] = "`tutor_name` = ?";
+            $params[] = $tut['name'];
+        }
+    }
+
+    if (empty($fields)) {
+        jsonError(400, 'No valid fields provided for update.');
+    }
+
+    $params[] = $matchId;
+    $sql = "UPDATE matches SET " . implode(', ', $fields) . " WHERE id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    echo json_encode(['status' => 'success', 'message' => 'Match request updated.']);
+} else {
+    jsonError(405, 'Method not allowed');
 }
 ?>

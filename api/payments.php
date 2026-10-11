@@ -1,42 +1,73 @@
 <?php
-// api/payments.php
-require_once 'config.php';
+// api/payments.php - Payments REST API
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/helpers.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-    $stmt = $pdo->query("SELECT * FROM payments ORDER BY created_at DESC");
-    $data = $stmt->fetchAll();
-    echo json_encode(['status' => 'success', 'data' => $data]);
-} elseif ($method === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    if (!$input) $input = $_POST;
-
-    $id = $input['id'] ?? ('PAY-' . rand(100, 999));
-    $studentId = $input['student_id'] ?? ($input['studentId'] ?? '');
-    $studentName = $input['student_name'] ?? ($input['studentName'] ?? '');
-    $tutorId = $input['tutor_id'] ?? ($input['tutorId'] ?? '');
-    $tutorName = $input['tutor_name'] ?? ($input['tutorName'] ?? '');
-    $methodType = $input['method'] ?? 'GCash';
-    $refNo = $input['ref_no'] ?? ($input['refNo'] ?? ('GC-' . rand(1000000000, 9999999999)));
-    $amount = (int)($input['amount'] ?? 385);
-    $status = $input['status'] ?? 'Confirmed';
-    $payoutStatus = $input['payout_status'] ?? 'Pending';
-
-    $stmt = $pdo->prepare("INSERT INTO payments (id, student_id, student_name, tutor_id, tutor_name, method, ref_no, amount, status, payout_status)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$id, $studentId, $studentName, $tutorId, $tutorName, $methodType, $refNo, $amount, $status, $payoutStatus]);
-
-    echo json_encode(['status' => 'success', 'message' => 'Payment recorded successfully', 'id' => $id]);
+    $user = requireLogin();
+    if ($user['role'] === 'admin') {
+        $stmt = $pdo->query("SELECT * FROM payments ORDER BY created_at DESC");
+        $payments = $stmt->fetchAll();
+    } elseif ($user['role'] === 'student') {
+        $stmt = $pdo->prepare("SELECT * FROM payments WHERE student_id = ? OR LOWER(student_name) = ? ORDER BY created_at DESC");
+        $stmt->execute([$user['id'], strtolower($user['name'])]);
+        $payments = $stmt->fetchAll();
+    } elseif ($user['role'] === 'tutor') {
+        $stmt = $pdo->prepare("SELECT * FROM payments WHERE tutor_id = ? OR LOWER(tutor_name) = ? ORDER BY created_at DESC");
+        $stmt->execute([$user['id'], strtolower($user['name'])]);
+        $payments = $stmt->fetchAll();
+    } else {
+        jsonError(403, 'Forbidden');
+    }
+    echo json_encode(['status' => 'success', 'data' => $payments]);
 } elseif ($method === 'PUT') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $id = $input['id'] ?? '';
+    $user = requireRole(['admin']);
+    $input = getInput();
+    $paymentId = trim($input['id'] ?? '');
 
-    if (isset($input['payout_status'])) {
-        $stmt = $pdo->prepare("UPDATE payments SET payout_status = ? WHERE id = ?");
-        $stmt->execute([$input['payout_status'], $id]);
+    if (empty($paymentId)) {
+        jsonError(400, 'Payment ID required.');
     }
 
-    echo json_encode(['status' => 'success', 'message' => 'Payment updated successfully']);
+    $st = $pdo->prepare("SELECT * FROM payments WHERE id = ?");
+    $st->execute([$paymentId]);
+    $payment = $st->fetch();
+
+    if (!$payment) {
+        jsonError(404, 'Payment record not found.');
+    }
+
+    $fields = [];
+    $params = [];
+
+    if (isset($input['status'])) {
+        $fields[] = "`status` = ?";
+        $params[] = trim($input['status']);
+    }
+
+    if (isset($input['payout_status'])) {
+        $payoutVal = trim($input['payout_status']);
+        $fields[] = "`payout_status` = ?";
+        $params[] = $payoutVal;
+
+        // Sync linked sessions table row by gcash_ref = ref_no
+        $stSes = $pdo->prepare("UPDATE sessions SET payout_status = ? WHERE gcash_ref = ?");
+        $stSes->execute([$payoutVal, $payment['ref_no']]);
+    }
+
+    if (empty($fields)) {
+        jsonError(400, 'No valid fields provided for update.');
+    }
+
+    $params[] = $paymentId;
+    $sql = "UPDATE payments SET " . implode(', ', $fields) . " WHERE id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    echo json_encode(['status' => 'success', 'message' => 'Payment updated by admin.']);
+} else {
+    jsonError(405, 'Method not allowed');
 }
 ?>

@@ -24,7 +24,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     <!-- Dark Left Sidebar Navigation -->
     <aside class="admin-sidebar">
       <div class="sidebar-brand" style="display: flex; align-items: center; gap: 10px;">
-        <img src="assets/logo.png" alt="TutorLink Logo" style="height: 38px; width: 38px; object-fit: contain; border-radius: 50%;">
+        <img src="assets/logo.png" alt="TutorLink Logo" style="height: 38px; width: 38px; object-fit: contain; border-radius: 50%;" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'38\' height=\'38\' viewBox=\'0 0 38 38\'><circle cx=\'19\' cy=\'19\' r=\'18\' fill=\'%2310b981\'/><text x=\'50%\' y=\'55%\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23ffffff\' font-family=\'sans-serif\' font-size=\'14\' font-weight=\'bold\'>TL</text></svg>';">
         <div class="brand-text">
           <span class="brand-title">TutorLink</span>
           <span class="brand-subtitle">ADMIN PORTAL</span>
@@ -243,12 +243,12 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
               </div>
             </div>
 
-            <!-- Donut Traffic Sources Chart -->
+            <!-- Donut Subject Share Chart -->
             <div class="chart-card side-chart-card">
               <div class="chart-header">
                 <div>
-                  <h3 class="chart-title">Traffic Sources</h3>
-                  <p class="chart-subtitle">Where your visitors come from</p>
+                  <h3 class="chart-title">Subject Distribution</h3>
+                  <p class="chart-subtitle">Active tutoring sessions by subject category</p>
                 </div>
               </div>
               <div class="donut-chart-wrapper">
@@ -260,15 +260,15 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
                   <circle cx="80" cy="80" r="60" fill="none" stroke="#8b5cf6" stroke-width="20" stroke-dasharray="56 320" stroke-dashoffset="-318"/>
                 </svg>
                 <div class="donut-center-text">
-                  <span class="donut-number">284K</span>
-                  <span class="donut-label">Visits</span>
+                  <span class="donut-number">STEM</span>
+                  <span class="donut-label">Category</span>
                 </div>
               </div>
               <div class="legend-list">
-                <div class="legend-item"><span class="dot" style="background:#10b981;"></span> Direct <span class="pct">35%</span></div>
-                <div class="legend-item"><span class="dot" style="background:#06b6d4;"></span> Organic <span class="pct">28%</span></div>
-                <div class="legend-item"><span class="dot" style="background:#3b82f6;"></span> Referral <span class="pct">22%</span></div>
-                <div class="legend-item"><span class="dot" style="background:#8b5cf6;"></span> Social <span class="pct">15%</span></div>
+                <div class="legend-item"><span class="dot" style="background:#10b981;"></span> Mathematics <span class="pct">40%</span></div>
+                <div class="legend-item"><span class="dot" style="background:#06b6d4;"></span> Calculus <span class="pct">30%</span></div>
+                <div class="legend-item"><span class="dot" style="background:#3b82f6;"></span> Physics <span class="pct">20%</span></div>
+                <div class="legend-item"><span class="dot" style="background:#8b5cf6;"></span> Humanities <span class="pct">10%</span></div>
               </div>
             </div>
           </div>
@@ -419,6 +419,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
                     <th>GCash Ref #</th>
                     <th>Amount (₱)</th>
                     <th>Status</th>
+                    <th>Payout Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody id="admin-payments-table-body">
@@ -436,12 +438,20 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
               <h2 class="page-title">Reports</h2>
               <p class="page-subtitle">View completed tutoring sessions and print activity summaries.</p>
             </div>
-            <button class="btn btn-emerald" onclick="window.print()">Print Activity Summary</button>
+            <div style="display: flex; gap: 8px;">
+              <div class="pill-segmented">
+                <button class="pill-btn active" id="report-filter-all">All Time</button>
+                <button class="pill-btn" id="report-filter-weekly">Weekly</button>
+                <button class="pill-btn" id="report-filter-monthly">Monthly</button>
+              </div>
+              <button class="btn btn-emerald" onclick="window.print()">Print Activity Summary</button>
+            </div>
           </div>
 
-          <div class="card-table-wrapper">
+          <!-- All Completed Sessions Table -->
+          <div class="card-table-wrapper margin-bottom">
             <div class="table-header-title">
-              <h3>Completed Tutoring Sessions</h3>
+              <h3>All Completed Tutoring Sessions</h3>
             </div>
             <div class="table-responsive">
               <table class="data-table">
@@ -458,6 +468,56 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
                 </thead>
                 <tbody id="admin-reports-completed-table-body">
                   <!-- Dynamic completed report rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Weekly Sessions Table -->
+          <div class="card-table-wrapper margin-bottom">
+            <div class="table-header-title">
+              <h3>Weekly Sessions (Last 7 Days)</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Session ID</th>
+                    <th>Student</th>
+                    <th>Tutor</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Fee</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-reports-weekly-table-body">
+                  <!-- Dynamic weekly report rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Monthly Sessions Table -->
+          <div class="card-table-wrapper">
+            <div class="table-header-title">
+              <h3>Monthly Sessions (Last 30 Days)</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Session ID</th>
+                    <th>Student</th>
+                    <th>Tutor</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Fee</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-reports-monthly-table-body">
+                  <!-- Dynamic monthly report rows -->
                 </tbody>
               </table>
             </div>

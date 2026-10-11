@@ -1,48 +1,65 @@
 <?php
-// api/notifications.php
-require_once 'config.php';
+// api/notifications.php - Notifications REST API
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/helpers.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-    $stmt = $pdo->query("SELECT * FROM notifications ORDER BY created_at DESC");
-    $data = $stmt->fetchAll();
-
-    $formatted = array_map(function($n) {
-        $n['targetRole'] = $n['target_role'] ?? 'all';
-        $n['createdTime'] = $n['created_time'] ?? 'Just now';
-        $n['read'] = (bool)($n['is_read'] ?? 0);
-        return $n;
-    }, $data);
-
-    echo json_encode(['status' => 'success', 'data' => $formatted]);
-} elseif ($method === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    if (!$input) $input = $_POST;
-
-    $id = $input['id'] ?? ('notif-' . time() . '-' . rand(100, 999));
-    $targetRole = $input['targetRole'] ?? ($input['target_role'] ?? 'all');
-    $target = $input['target'] ?? 'All Users';
-    $title = $input['title'] ?? 'Notification';
-    $message = $input['message'] ?? '';
-    $createdTime = $input['createdTime'] ?? 'Just now';
-
-    $stmt = $pdo->prepare("INSERT INTO notifications (id, target_role, target, title, message, created_time, is_read)
-                           VALUES (?, ?, ?, ?, ?, ?, 0)");
-    $stmt->execute([$id, $targetRole, $target, $title, $message, $createdTime]);
-
-    echo json_encode(['status' => 'success', 'message' => 'Notification created successfully', 'id' => $id]);
-} elseif ($method === 'PUT') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $id = $input['id'] ?? '';
-
-    if (!empty($id)) {
-        $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE id = ?");
-        $stmt->execute([$id]);
+    $user = requireLogin();
+    if ($user['role'] === 'admin') {
+        $stmt = $pdo->query("SELECT id, target_role, target, title, message, is_read, created_at FROM notifications ORDER BY created_at DESC");
+        $notifications = $stmt->fetchAll();
     } else {
-        $pdo->exec("UPDATE notifications SET is_read = 1");
+        $stmt = $pdo->prepare("SELECT id, target_role, target, title, message, is_read, created_at FROM notifications WHERE target_role = 'all' OR (target_role = ? AND (target = ? OR target = 'All Users')) ORDER BY created_at DESC");
+        $stmt->execute([$user['role'], $user['name']]);
+        $notifications = $stmt->fetchAll();
+    }
+    echo json_encode(['status' => 'success', 'data' => $notifications]);
+} elseif ($method === 'POST') {
+    $user = requireLogin();
+    $input = getInput();
+
+    $targetRole = trim($input['target_role'] ?? ($input['targetRole'] ?? 'all'));
+    $target = trim($input['target'] ?? 'All Users');
+    $title = trim($input['title'] ?? 'Notification');
+    $message = trim($input['message'] ?? '');
+
+    if (empty($message)) {
+        jsonError(400, 'Notification message required.');
     }
 
-    echo json_encode(['status' => 'success', 'message' => 'Notifications marked as read']);
+    if ($user['role'] !== 'admin' && ($targetRole === 'all' || $target === 'All Users')) {
+        jsonError(403, 'Only administrators can send system-wide notifications.');
+    }
+
+    $notifId = newId('notif-');
+
+    $stmt = $pdo->prepare("INSERT INTO notifications (id, target_role, target, title, message, is_read) VALUES (?, ?, ?, ?, ?, 0)");
+    $stmt->execute([$notifId, $targetRole, $target, $title, $message]);
+
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Notification sent.',
+        'data' => [
+            'id' => $notifId,
+            'target_role' => $targetRole,
+            'target' => $target,
+            'title' => $title,
+            'message' => $message,
+            'is_read' => 0
+        ]
+    ]);
+} elseif ($method === 'PUT') {
+    $user = requireLogin();
+    if ($user['role'] === 'admin') {
+        $pdo->exec("UPDATE notifications SET is_read = 1");
+    } else {
+        $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE target_role = 'all' OR (target_role = ? AND (target = ? OR target = 'All Users'))");
+        $stmt->execute([$user['role'], $user['name']]);
+    }
+    echo json_encode(['status' => 'success', 'message' => 'Notifications marked as read.']);
+} else {
+    jsonError(405, 'Method not allowed');
 }
 ?>

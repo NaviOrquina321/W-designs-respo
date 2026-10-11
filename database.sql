@@ -2,7 +2,6 @@
 -- TutorLink - An Intelligent Tutor-Student Matching System
 -- Relational Database Schema & Setup Script
 -- Target Environment: XAMPP / MariaDB / MySQL 5.7+
--- (Note: api/config.php auto-handles SQLite syntax if SQLite fallback is used)
 -- ========================================================
 
 CREATE DATABASE IF NOT EXISTS `tutorlink_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -101,7 +100,9 @@ CREATE TABLE IF NOT EXISTS `schedules` (
   `date_slot` VARCHAR(100) NOT NULL,
   `subject` VARCHAR(100) NOT NULL,
   `status` VARCHAR(50) DEFAULT 'Available',
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`tutor_id`) REFERENCES `tutors`(`id`) ON DELETE SET NULL,
+  FOREIGN KEY (`student_id`) REFERENCES `students`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 8. Table: payments
@@ -116,7 +117,9 @@ CREATE TABLE IF NOT EXISTS `payments` (
   `amount` INT NOT NULL,
   `status` VARCHAR(50) DEFAULT 'Confirmed',
   `payout_status` VARCHAR(50) DEFAULT 'Pending',
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`student_id`) REFERENCES `students`(`id`) ON DELETE SET NULL,
+  FOREIGN KEY (`tutor_id`) REFERENCES `tutors`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 9. Table: sessions
@@ -138,7 +141,9 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   `notes` TEXT,
   `rating` INT DEFAULT 0,
   `feedback` TEXT,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`student_id`) REFERENCES `students`(`id`) ON DELETE RESTRICT,
+  FOREIGN KEY (`tutor_id`) REFERENCES `tutors`(`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 10. Table: notifications
@@ -161,15 +166,11 @@ CREATE TABLE IF NOT EXISTS `chat_messages` (
   `sender_role` VARCHAR(50) NOT NULL,
   `message` TEXT NOT NULL,
   `timestamp` VARCHAR(50) NOT NULL,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`session_id`) REFERENCES `sessions`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ========================================================
--- INITIAL SEED DATA FOR AUTH, USERS & SUBJECTS
--- ========================================================
-
--- Users: Admin (admin123), Maria Santos (student123), Prof. Alex Rivera (tutor123)
--- Password hashes generated via password_hash()
+-- Seed initial default users & subjects
 INSERT INTO `users` (`user_id`, `email`, `password_hash`, `role`, `name`) VALUES
 ('ADMIN-001', 'admin@tutorlink.ph', '$2y$10$4KtVRKjPTI1Etb2VYt0nVeQsv0tBnHxSEUIYUheMZ.NRFL63mXud.', 'admin', 'System Admin'),
 ('STU-101', 'maria@tutorlink.ph', '$2y$10$EoaI4ZcneLctw4BNmbF2UOocpbRSAoA/1e5BmhvkStB0nApxWIxzi', 'student', 'Maria Santos'),
@@ -185,7 +186,7 @@ INSERT INTO `students` (`id`, `name`, `email`, `grade`, `validated`, `deactivate
 ON DUPLICATE KEY UPDATE `email`=`email`;
 
 INSERT INTO `tutors` (`id`, `name`, `email`, `initials`, `rating`, `reviews_count`, `hourly_rate`, `subjects`, `learning_styles`, `bio`, `available`, `deactivated`, `diploma_status`, `tor_status`, `id_status`, `approval_status`, `available_days`, `available_time_slots`, `availability_slots`) VALUES
-('tut-1', 'Prof. Alex Rivera', 'alex@tutorlink.ph', 'AR', 5.0, 1, 350, 'Calculus, Physics, Mathematics', 'Step-by-Step Explanation, Visual Diagrams', 'Licensed High School & College Mathematics educator with 7+ years teaching STEM subjects.', 1, 0, 'Verified', 'Verified', 'Verified', 'Approved', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')
+('tut-1', 'Prof. Alex Rivera', 'alex@tutorlink.ph', 'AR', 5.0, 1, 350, 'Calculus, Physics, Mathematics', 'Step-by-Step Explanation, Visual Diagrams', 'Licensed High School & College Mathematics educator with 7+ years teaching STEM subjects.', 1, 0, 'Pending', 'Pending', 'Pending', 'Approved', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')
 ON DUPLICATE KEY UPDATE `email`=`email`;
 
 INSERT INTO `subjects` (`id`, `name`, `category`) VALUES
