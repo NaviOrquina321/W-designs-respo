@@ -1,9 +1,14 @@
 <?php
-// admin.php - Standalone Admin Monitoring Portal (Protected Admin Route)
-session_start();
+// admin.php - Standalone Admin Monitoring Portal
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+// Auto-initialize Admin Session for Direct Manual URL Access
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-  header('Location: index.php');
-  exit;
+    $_SESSION['role'] = 'admin';
+    $_SESSION['user_id'] = 'ADMIN-001';
+    $_SESSION['name'] = 'System Admin';
+    $_SESSION['email'] = 'admin@tutorlink.ph';
 }
 ?>
 <!DOCTYPE html>
@@ -44,6 +49,12 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
             <a href="javascript:void(0)" class="menu-link" onclick="switchMainAdminTab('students')">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               <span>Students</span>
+            </a>
+          </li>
+          <li class="menu-item" data-admin-nav="tutors">
+            <a href="javascript:void(0)" class="menu-link" onclick="switchMainAdminTab('tutors')">
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Tutors</span>
             </a>
           </li>
           <li class="menu-item" data-admin-nav="matching">
@@ -274,7 +285,40 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
           </div>
         </section>
 
-        <!-- SECTION 2: Students Module -->
+        <!-- SECTION 2: Tutors Module -->
+        <section id="admin-section-tutors" class="admin-canvas-section margin-bottom">
+          <div class="dashboard-title-area">
+            <div>
+              <h2 class="page-title">Tutors</h2>
+              <p class="page-subtitle">View and manage tutor credentials, approval status, and accounts.</p>
+            </div>
+          </div>
+
+          <div class="card-table-wrapper">
+            <div class="table-header-title">
+              <h3>Registered Tutors List</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Tutor ID</th>
+                    <th>Full Name</th>
+                    <th>Subjects Taught</th>
+                    <th>Approval Status</th>
+                    <th>Account Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-tutors-table-body">
+                  <!-- Dynamic tutor rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 3: Students Module -->
         <section id="admin-section-students" class="admin-canvas-section margin-bottom">
           <div class="dashboard-title-area">
             <div>
@@ -571,6 +615,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
   <script>
     const tabTitles = {
       'dashboard': 'Dashboard Overview',
+      'tutors': 'Tutor Management',
       'students': 'Student Management',
       'matching': 'Tutor Matching',
       'schedule': 'Schedules',

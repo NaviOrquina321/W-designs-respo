@@ -51,4 +51,22 @@ function requireRole($allowedRoles) {
 function newId($prefix = '') {
     return $prefix . bin2hex(random_bytes(6));
 }
+
+function snakeToCamel($string) {
+    return lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $string))));
+}
+
+function toCamelArray($data) {
+    if (!is_array($data)) return $data;
+    $result = [];
+    foreach ($data as $key => $value) {
+        $camelKey = is_string($key) ? snakeToCamel($key) : $key;
+        if (is_array($value)) {
+            $result[$camelKey] = toCamelArray($value);
+        } else {
+            $result[$camelKey] = $value;
+        }
+    }
+    return $result;
+}
 ?>

@@ -21,7 +21,7 @@ if ($method === 'GET') {
     } else {
         jsonError(403, 'Forbidden');
     }
-    echo json_encode(['status' => 'success', 'data' => $sessions]);
+    echo json_encode(['status' => 'success', 'data' => toCamelArray($sessions)]);
 } elseif ($method === 'POST') {
     $user = requireRole(['student']);
     $input = getInput();

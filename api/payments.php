@@ -21,7 +21,7 @@ if ($method === 'GET') {
     } else {
         jsonError(403, 'Forbidden');
     }
-    echo json_encode(['status' => 'success', 'data' => $payments]);
+    echo json_encode(['status' => 'success', 'data' => toCamelArray($payments)]);
 } elseif ($method === 'PUT') {
     $user = requireRole(['admin']);
     $input = getInput();

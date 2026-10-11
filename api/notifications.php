@@ -15,7 +15,7 @@ if ($method === 'GET') {
         $stmt->execute([$user['role'], $user['name']]);
         $notifications = $stmt->fetchAll();
     }
-    echo json_encode(['status' => 'success', 'data' => $notifications]);
+    echo json_encode(['status' => 'success', 'data' => toCamelArray($notifications)]);
 } elseif ($method === 'POST') {
     $user = requireLogin();
     $input = getInput();

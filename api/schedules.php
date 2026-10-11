@@ -9,7 +9,7 @@ if ($method === 'GET') {
     $user = requireLogin();
     $stmt = $pdo->query("SELECT * FROM schedules ORDER BY created_at DESC");
     $schedules = $stmt->fetchAll();
-    echo json_encode(['status' => 'success', 'data' => $schedules]);
+    echo json_encode(['status' => 'success', 'data' => toCamelArray($schedules)]);
 } elseif ($method === 'POST') {
     $user = requireRole(['tutor', 'admin']);
     $input = getInput();

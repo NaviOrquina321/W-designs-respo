@@ -123,6 +123,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   renderAllViews();
+
+  if (!autoRefreshTimer) {
+    autoRefreshTimer = setInterval(async () => {
+      await syncWithDatabase();
+      renderAllViews();
+    }, 10000);
+  }
 });
 
 
@@ -509,7 +516,9 @@ function switchRole(role, customUser = null) {
     }
 
     if (role === 'admin') {
-      window.location.href = 'admin.php';
+      if (!window.location.pathname.endsWith('admin.php')) {
+        window.location.href = 'admin.php';
+      }
       return;
     } else if (role === 'student') {
       state.currentUser = customUser || state.currentUser || { name: 'Maria Santos', role: 'student' };
@@ -2437,6 +2446,7 @@ function renderAdminPayments() {
     `).join('');
   }
 
+  const tbodyConfirm = document.getElementById('admin-payments-confirm-table-body');
   if (tbodyConfirm) {
     const pendingPay = state.payments.filter(p => p.status === 'Pending Confirmation' || p.status === 'Pending');
     if (pendingPay.length === 0) {
