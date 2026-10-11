@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS `payments` (
   `ref_no` VARCHAR(100) NOT NULL,
   `amount` INT NOT NULL,
   `status` VARCHAR(50) DEFAULT 'Confirmed',
-  `payout_status` VARCHAR(50) DEFAULT 'Pending',
+  `payout_status` VARCHAR(50) DEFAULT 'Unpaid',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`student_id`) REFERENCES `students`(`id`) ON DELETE SET NULL,
   FOREIGN KEY (`tutor_id`) REFERENCES `tutors`(`id`) ON DELETE SET NULL

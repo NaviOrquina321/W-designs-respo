@@ -3,12 +3,9 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-// Auto-initialize Admin Session for Direct Manual URL Access
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['role'] = 'admin';
-    $_SESSION['user_id'] = 'ADMIN-001';
-    $_SESSION['name'] = 'System Admin';
-    $_SESSION['email'] = 'admin@tutorlink.ph';
+    header('Location: index.php');
+    exit();
 }
 ?>
 <!DOCTYPE html>
@@ -55,12 +52,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
             <a href="javascript:void(0)" class="menu-link" onclick="switchMainAdminTab('tutors')">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               <span>Tutors</span>
-            </a>
-          </li>
-          <li class="menu-item" data-admin-nav="matching">
-            <a href="javascript:void(0)" class="menu-link" onclick="switchMainAdminTab('matching')">
-              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
-              <span>Tutor Matching</span>
             </a>
           </li>
           <li class="menu-item" data-admin-nav="schedule">
@@ -172,7 +163,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
               </div>
             </div>
 
-            <div class="apex-kpi-card" onclick="switchMainAdminTab('matching')">
+            <div class="apex-kpi-card" onclick="switchMainAdminTab('tutors')">
               <div class="kpi-header">
                 <span class="kpi-label">Verified Tutors</span>
                 <div class="kpi-icon-wrapper blue-light">
@@ -342,39 +333,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
           </div>
         </section>
 
-        <!-- SECTION 3: Tutor Matching Module -->
-        <section id="admin-section-matching" class="admin-canvas-section margin-bottom">
-          <div class="dashboard-title-area">
-            <div>
-              <h2 class="page-title">Tutor Matching</h2>
-              <p class="page-subtitle">Review AI matching recommendations and approve tutoring sessions.</p>
-            </div>
-          </div>
-
-          <div class="card-table-wrapper">
-            <div class="table-header-title">
-              <h3>Tutor Match Requests</h3>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Match ID</th>
-                    <th>Student</th>
-                    <th>Matched Tutor</th>
-                    <th>Subject</th>
-                    <th>Compatibility</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-matching-table-body">
-                  <!-- Dynamic match rows -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
 
         <!-- SECTION 4: Schedule Module -->
         <section id="admin-section-schedule" class="admin-canvas-section margin-bottom">
