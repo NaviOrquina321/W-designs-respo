@@ -18,10 +18,11 @@
   <div class="admin-layout">
     <!-- Dark Left Sidebar Navigation -->
     <aside class="admin-sidebar">
-      <div class="sidebar-brand">
+      <div class="sidebar-brand" style="display: flex; align-items: center; gap: 10px;">
+        <img src="assets/logo.png" alt="TutorLink Logo" style="height: 38px; width: 38px; object-fit: contain; border-radius: 50%;">
         <div class="brand-text">
-          <span class="brand-title">Apex</span>
-          <span class="brand-subtitle">DASHBOARD</span>
+          <span class="brand-title">TutorLink</span>
+          <span class="brand-subtitle">ADMIN PORTAL</span>
         </div>
       </div>
 

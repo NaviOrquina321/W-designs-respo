@@ -23,7 +23,10 @@ require_once __DIR__ . '/api/config.php';
   <!-- Top Navigation Header -->
   <header>
     <nav class="wrap">
-      <div class="logo" id="nav-logo" style="cursor: pointer;">TutorLink</div>
+      <div class="logo" id="nav-logo" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+        <img src="assets/logo.png" alt="TutorLink Logo" style="height: 36px; width: 36px; object-fit: contain; border-radius: 50%;">
+        <span>TutorLink</span>
+      </div>
 
       <div class="nav-links" id="public-nav-links">
         <a href="#features">Features</a>
@@ -239,7 +242,10 @@ require_once __DIR__ . '/api/config.php';
         <div class="wrap">
           <div class="footer-row">
             <div>
-              <div class="logo">TutorLink</div>
+              <div class="logo" style="display: flex; align-items: center; gap: 8px;">
+                <img src="assets/logo.png" alt="TutorLink Logo" style="height: 36px; width: 36px; object-fit: contain; border-radius: 50%;">
+                <span>TutorLink</span>
+              </div>
               <p class="tagline">An Intelligent Tutor-Student Matching System</p>
             </div>
             <div class="foot-links">
