@@ -1,5 +1,18 @@
 <?php
-// api/config.php - TutorLink Database Connection & Auto Migration
+// api/config.php - TutorLink Database Connection, Session Setup & Auto Migration
+ini_set('display_errors', '0');
+date_default_timezone_set('Asia/Manila');
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+    session_start();
+}
+
 $host = 'localhost';
 $user = 'root';
 $pass = '';
@@ -30,7 +43,7 @@ try {
         http_response_code(500);
         echo json_encode([
             'status' => 'error',
-            'message' => 'Internal server error: Database connection failed.'
+            'message' => 'Database Connection Failed'
         ]);
         exit();
     }
@@ -39,7 +52,6 @@ try {
 // Ensure database schema and tables exist
 try {
     $isSQLite = ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite');
-
     $autoInc = $isSQLite ? "INTEGER PRIMARY KEY AUTOINCREMENT" : "INT AUTO_INCREMENT PRIMARY KEY";
 
     // 1. Table: users
@@ -150,8 +162,8 @@ try {
       `method` VARCHAR(50) NOT NULL,
       `ref_no` VARCHAR(100) NOT NULL,
       `amount` INT NOT NULL,
-      `status` VARCHAR(50) DEFAULT 'Confirmed',
-      `payout_status` VARCHAR(50) DEFAULT 'Pending',
+      `status` VARCHAR(50) DEFAULT 'Pending',
+      `payout_status` VARCHAR(50) DEFAULT 'Unpaid',
       `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (`student_id`) REFERENCES `students`(`id`) ON DELETE SET NULL,
       FOREIGN KEY (`tutor_id`) REFERENCES `tutors`(`id`) ON DELETE SET NULL
@@ -205,7 +217,7 @@ try {
       FOREIGN KEY (`session_id`) REFERENCES `sessions`(`id`) ON DELETE CASCADE
     );");
 
-    // Seed Admin Account if users table is empty
+    // Seed Admin & Seed Users if users table is empty
     $checkUser = $pdo->query("SELECT COUNT(*) as cnt FROM `users`")->fetch();
     if ($checkUser['cnt'] == 0) {
         $adminHash = password_hash('admin123', PASSWORD_BCRYPT);
