@@ -2329,21 +2329,51 @@ window.openReassignModal = function(matchId) {
   openModal('modal-reassign-tutor');
 };
 
-window.approveMatch = function(matchId) {
+window.approveMatch = async function(matchId) {
   const m = state.matches.find(x => x.id === matchId);
   if (m) {
-    m.status = 'Approved';
-    renderAdminMatching();
-    showToast(`Matching session ${matchId} approved!`);
+    try {
+      const res = await fetch('api/matches.php', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: matchId, status: 'Approved' })
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') {
+        showToast(data.message || 'Match update failed.', 'error');
+        return;
+      }
+      m.status = 'Approved';
+      await syncWithDatabase();
+      renderAllViews();
+      showToast(`Matching session ${matchId} approved!`);
+    } catch (e) {
+      showToast('Could not connect to backend server.', 'error');
+    }
   }
 };
 
-window.cancelMatch = function(matchId) {
+window.cancelMatch = async function(matchId) {
   const m = state.matches.find(x => x.id === matchId);
   if (m) {
-    m.status = 'Cancelled';
-    renderAdminMatching();
-    showToast(`Matching session ${matchId} cancelled.`);
+    try {
+      const res = await fetch('api/matches.php', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: matchId, status: 'Cancelled' })
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') {
+        showToast(data.message || 'Match update failed.', 'error');
+        return;
+      }
+      m.status = 'Cancelled';
+      await syncWithDatabase();
+      renderAllViews();
+      showToast(`Matching session ${matchId} cancelled.`);
+    } catch (e) {
+      showToast('Could not connect to backend server.', 'error');
+    }
   }
 };
 
