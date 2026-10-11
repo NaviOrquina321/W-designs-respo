@@ -168,9 +168,9 @@ CREATE TABLE IF NOT EXISTS `chat_messages` (
 -- Users: Admin (admin123), Maria Santos (student123), Prof. Alex Rivera (tutor123)
 -- Password hashes generated via password_hash()
 INSERT INTO `users` (`user_id`, `email`, `password_hash`, `role`, `name`) VALUES
-('ADMIN-001', 'admin@tutorlink.ph', '$2y$10$e.Y571x0pS3E1oXWn.8P.uA2c/lQcI1xG/g8qQ.2h4eQ.7/b7A1aW', 'admin', 'System Admin'),
-('STU-101', 'maria@tutorlink.ph', '$2y$10$wT0C3v.4z/BfO6b5M.Yx.u1H7o8bS9w9E6Yx.2h4eQ.7/b7A1aW', 'student', 'Maria Santos'),
-('tut-1', 'alex@tutorlink.ph', '$2y$10$5G6H7I8J9K0L1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z5a6b7c8d9e0f1', 'tutor', 'Prof. Alex Rivera')
+('ADMIN-001', 'admin@tutorlink.ph', '$2y$10$4KtVRKjPTI1Etb2VYt0nVeQsv0tBnHxSEUIYUheMZ.NRFL63mXud.', 'admin', 'System Admin'),
+('STU-101', 'maria@tutorlink.ph', '$2y$10$EoaI4ZcneLctw4BNmbF2UOocpbRSAoA/1e5BmhvkStB0nApxWIxzi', 'student', 'Maria Santos'),
+('tut-1', 'alex@tutorlink.ph', '$2y$10$tM/i.UWwhopnQ1j8kNPUuO/ZYt9Xjkt.dSwBAKUSAecnnxoWeSEQy', 'tutor', 'Prof. Alex Rivera')
 ON DUPLICATE KEY UPDATE `email`=`email`;
 
 INSERT INTO `admins` (`id`, `name`, `email`, `role`) VALUES
