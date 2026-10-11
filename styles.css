@@ -1,25 +1,29 @@
 :root {
-  --ink: #121212;
-  --ink-soft: #4a4a4a;
-  --muted: #666666;
-  --line: #e2e2e2;
+  --ink: #0b192e;
+  --ink-soft: #334155;
+  --muted: #64748b;
+  --line: #e2e8f0;
   --paper: #ffffff;
-  --panel: #f7f7f5;
-  --primary-blue: #121212;
+  --panel: #f0f9ff;
+  --primary-blue: #0066ff;
+  --primary-blue-hover: #0052cc;
+  --navy-dark: #0b192e;
+  --sky-blue: #e0f2fe;
+  --accent-cyan: #0284c7;
   --gcash-blue: #0052FF;
-  --success-green: #00875A;
-  --warning-amber: #FFAB00;
-  --danger-red: #DE350B;
+  --success-green: #10b981;
+  --warning-amber: #f59e0b;
+  --danger-red: #ef4444;
 
-  /* Apex Admin Design System Variables */
-  --apex-sidebar-bg: #0f172a;
+  /* Apex Admin Design System Variables - Logo Palette Matched */
+  --apex-sidebar-bg: #081225;
   --apex-sidebar-text: #94a3b8;
-  --apex-sidebar-active: #10b981;
+  --apex-sidebar-active: #0066ff;
   --apex-canvas-bg: #f8fafc;
   --apex-card-bg: #ffffff;
   --apex-border: #e2e8f0;
-  --apex-emerald: #10b981;
-  --apex-emerald-hover: #059669;
+  --apex-emerald: #0066ff;
+  --apex-emerald-hover: #0052cc;
 }
 
 * { box-sizing: border-box; }
@@ -145,19 +149,19 @@ nav.wrap {
   white-space: nowrap;
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
-.btn-primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.btn-primary:hover { background: #2b2b2b; transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.btn-secondary { background: transparent; color: var(--ink); border-color: var(--ink); }
-.btn-secondary:hover { background: var(--panel); transform: translateY(-1px); }
-.btn-outline { background: transparent; color: #475569; border: 1px solid #cbd5e1; }
-.btn-outline:hover { background: #f8fafc; color: #0f172a; border-color: #94a3b8; }
+.btn-primary { background: var(--primary-blue); color: #ffffff; border-color: var(--primary-blue); }
+.btn-primary:hover { background: var(--primary-blue-hover); border-color: var(--primary-blue-hover); transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0, 102, 255, 0.25); }
+.btn-secondary { background: transparent; color: var(--navy-dark); border-color: var(--navy-dark); }
+.btn-secondary:hover { background: var(--sky-blue); color: var(--primary-blue); border-color: var(--primary-blue); transform: translateY(-1px); }
+.btn-outline { background: transparent; color: #334155; border: 1px solid #cbd5e1; }
+.btn-outline:hover { background: #f0f9ff; color: var(--primary-blue); border-color: var(--primary-blue); }
 .btn-small, .btn-sm { padding: 6px 14px; font-size: 0.85rem; border-radius: 5px; height: 32px; }
 .btn-danger { background: var(--danger-red); color: white; border-color: var(--danger-red); }
-.btn-danger:hover { background: #b02300; }
+.btn-danger:hover { background: #dc2626; }
 .btn-gcash { background: var(--gcash-blue); color: white; border-color: var(--gcash-blue); font-size: 0.95rem; font-weight: bold; }
 .btn-gcash:hover { background: #0043d1; }
-.btn-emerald { background: var(--apex-emerald); color: white; border: 1px solid var(--apex-emerald); }
-.btn-emerald:hover { background: var(--apex-emerald-hover); border-color: var(--apex-emerald-hover); }
+.btn-emerald { background: var(--primary-blue); color: white; border: 1px solid var(--primary-blue); }
+.btn-emerald:hover { background: var(--primary-blue-hover); border-color: var(--primary-blue-hover); }
 .full-width { width: 100%; display: flex; }
 
 /* Views Toggle */
