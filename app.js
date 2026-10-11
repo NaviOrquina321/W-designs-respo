@@ -3,6 +3,17 @@
  * Application Logic & State Management
  */
 
+// XSS Sanitization Helper Routine
+function esc(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[c]));
+}
+
 // Application Initial State & Mock Database
 const state = {
   currentRole: 'guest', // 'guest', 'student', 'tutor', 'admin'
@@ -552,95 +563,8 @@ function initAuthModalTabs() {
         return;
       }
     } catch (err) {
-      console.log('Offline API register fallback');
+      showToast('Cannot reach the server. Please try again.', 'error');
     }
-
-    if (role === 'student') {
-      const newId = 'STU-' + Math.floor(100 + Math.random() * 900);
-      const newStudent = {
-        id: newId,
-        name: fullname,
-        email: email,
-        grade: specialty,
-        validated: true,
-        deactivated: false,
-        bio: `${specialty} Student eager to connect with expert tutors on TutorLink.`,
-        subjectsNeeded: [specialty],
-        sessionsCompleted: 0
-      };
-      state.students.unshift(newStudent);
-
-      // Create Admin Notification ONLY
-      state.notifications.unshift({
-        id: 'notif-' + Date.now(),
-        targetRole: 'admin',
-        target: 'System Admin',
-        title: 'New Student Registered',
-        message: `New student registered: ${fullname} (${email})`,
-        time: 'Just now',
-        read: false
-      });
-
-      // API save
-      try {
-        await fetch('api/students.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...newStudent, is_new_registration: true, subjects_needed: specialty })
-        });
-      } catch (err) { console.log('Offline API fallback'); }
-
-      // Clear sessions for fresh isolated user state
-      state.sessions = state.sessions.filter(s => s.studentName !== fullname);
-
-      switchRole('student', { name: fullname, role: 'student', id: newId });
-    } else {
-      const newId = 'tut-' + (state.tutors.length + 1);
-      const newTutor = {
-        id: newId,
-        name: fullname,
-        initials: fullname.split(' ').map(n => n[0]).join(''),
-        rating: 5.0,
-        reviewsCount: 0,
-        hourlyRate: 350,
-        subjects: [specialty],
-        learningStyles: ['Step-by-Step Explanation'],
-        bio: `${specialty} Specialist tutor. Dedicated to student growth.`,
-        availableDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-        availableTimeSlots: '09:00 AM - 05:00 PM',
-        blockedDates: '',
-        availabilitySlots: ['09:00 AM', '02:00 PM', '04:00 PM'],
-        available: true,
-        deactivated: false,
-        approvalStatus: 'Pending Review'
-      };
-      state.tutors.unshift(newTutor);
-
-      // Create Admin Notification ONLY
-      state.notifications.unshift({
-        id: 'notif-' + Date.now(),
-        targetRole: 'admin',
-        target: 'System Admin',
-        title: 'New Tutor Registered',
-        message: `New tutor registered: ${fullname} (${specialty})`,
-        time: 'Just now',
-        read: false
-      });
-
-      // API save
-      try {
-        await fetch('api/tutors.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...newTutor, is_new_registration: true, subjects: specialty, learning_styles: 'Step-by-Step Explanation' })
-        });
-      } catch (err) { console.log('Offline API fallback'); }
-
-      switchRole('tutor', { name: fullname, role: 'tutor', id: newId });
-    }
-
-    closeModal('modal-auth');
-    showToast(`Registration complete! Welcome to TutorLink, ${fullname}.`);
   });
 }
 
@@ -696,19 +620,7 @@ function initModals() {
         return;
       }
     } catch (err) {
-      // Local fallback for offline testing
-      const studentMatch = state.students.find(s => s.email && s.email.toLowerCase() === email.toLowerCase());
-      if (studentMatch) {
-        switchRole('student', { id: studentMatch.id, name: studentMatch.name, role: 'student', email: studentMatch.email });
-        closeModal('modal-auth');
-        showToast(`Welcome back, ${studentMatch.name}!`);
-      } else if (email.includes('admin')) {
-        switchRole('admin', { id: 'ADMIN-001', name: 'System Admin', role: 'admin', email: email });
-        closeModal('modal-auth');
-        showToast('Welcome back, System Admin!');
-      } else {
-        showToast('Invalid email or password.', 'error');
-      }
+      showToast('Cannot reach the server. Please try again.', 'error');
     }
   });
 }
@@ -978,7 +890,7 @@ function renderAdminKPIs() {
   const totalStudents = state.students.length;
   const totalTutors = state.tutors.length;
   const totalVolume = state.sessions.reduce((acc, s) => acc + (s.totalPaid || 0), 0);
-  const platformCommission = state.sessions.reduce((acc, s) => acc + (s.commissionFee || Math.round(s.totalPaid * 0.10)), 0);
+  const platformCommission = state.sessions.reduce((acc, s) => acc + (s.commissionFee || (s.totalPaid - s.hourlyRate)), 0);
 
   const elStudents = document.getElementById('admin-stat-total-students');
   const elTutors = document.getElementById('admin-stat-total-tutors');
@@ -1006,23 +918,23 @@ function renderTutorDirectory(searchTerm = '') {
   grid.innerHTML = filtered.map(t => `
     <div class="tutor-card">
       <div>
-        <div class="tutor-card-head" style="cursor: pointer;" onclick="viewTutorProfile('${t.id}')">
-          <div class="tutor-avatar">${t.initials}</div>
+        <div class="tutor-card-head" style="cursor: pointer;" onclick="viewTutorProfile('${esc(t.id)}')">
+          <div class="tutor-avatar">${esc(t.initials)}</div>
           <div class="tutor-info">
-            <h4 style="text-decoration: underline;">${t.name}</h4>
-            <div class="tutor-rating">★ ${t.rating} (${t.reviewsCount} reviews)</div>
+            <h4 style="text-decoration: underline;">${esc(t.name)}</h4>
+            <div class="tutor-rating">★ ${esc(t.rating)} (${esc(t.reviewsCount)} reviews)</div>
           </div>
         </div>
-        <p class="sub-text margin-bottom">${t.bio}</p>
+        <p class="sub-text margin-bottom">${esc(t.bio)}</p>
         <div class="tutor-details-list">
-          <div><strong>Subjects:</strong> ${t.subjects.join(', ')}</div>
-          <div><strong>Style:</strong> ${t.learningStyles[0]}</div>
-          <div><strong>Rate:</strong> P${t.hourlyRate}/hr</div>
+          <div><strong>Subjects:</strong> ${esc(t.subjects.join(', '))}</div>
+          <div><strong>Style:</strong> ${esc(t.learningStyles[0])}</div>
+          <div><strong>Rate:</strong> P${esc(t.hourlyRate)}/hr</div>
         </div>
       </div>
       <div style="display: flex; gap: 8px;" class="margin-top">
-        <button class="btn btn-secondary btn-small full-width" onclick="viewTutorProfile('${t.id}')">View Profile</button>
-        <button class="btn btn-primary btn-small full-width" onclick="openCalendarBooking('${t.id}')">Book Session</button>
+        <button class="btn btn-secondary btn-small full-width" onclick="viewTutorProfile('${esc(t.id)}')">View Profile</button>
+        <button class="btn btn-primary btn-small full-width" onclick="openCalendarBooking('${esc(t.id)}')">Book Session</button>
       </div>
     </div>
   `).join('');
@@ -1341,9 +1253,9 @@ function renderTutorEarnings() {
   const sessionsEl = document.getElementById('tutor-stat-sessions');
   const tutorRatingEl = document.getElementById('tutor-stat-rating');
 
-  const totalEarnings = tutorSessions.reduce((sum, s) => sum + Math.round((s.totalPaid || 0) * 0.90), 0);
+  const totalEarnings = tutorSessions.reduce((sum, s) => sum + (s.hourlyRate || Math.round((s.totalPaid || 0) * 0.90)), 0);
   const grossRev = tutorSessions.reduce((sum, s) => sum + (s.totalPaid || 0), 0);
-  const pendingRev = tutorSessions.filter(s => s.payoutStatus !== 'Paid Out').reduce((sum, s) => sum + Math.round((s.totalPaid || 0) * 0.90), 0);
+  const pendingRev = tutorSessions.filter(s => s.payoutStatus !== 'Paid Out').reduce((sum, s) => sum + (s.hourlyRate || Math.round((s.totalPaid || 0) * 0.90)), 0);
   const uniqueStudents = new Set(tutorSessions.map(s => s.studentName)).size;
   const currentTutorObj = state.tutors.find(t => t.name === currentTutorName);
 
@@ -1389,7 +1301,7 @@ function renderTutorEarnings() {
   }
 
   tbody.innerHTML = tutorSessions.map(s => {
-    const netPayout = Math.round(s.totalPaid * 0.90);
+    const netPayout = s.hourlyRate || (s.totalPaid - (s.commissionFee || 35));
     return `
       <tr>
         <td><code>${s.id}</code></td>
@@ -1429,7 +1341,7 @@ function initTutorScheduleManager() {
     const subjectVal = document.getElementById('tutor-slot-subject').value;
 
     if (!dateVal || !timeVal || !subjectVal) {
-      alert('Please fill out all calendar slot details.');
+      showToast('Please fill out all calendar slot details.', 'error');
       return;
     }
 
@@ -1570,7 +1482,7 @@ function initCalendarBooking() {
 
   proceedBtn?.addEventListener('click', () => {
     if (!state.activeBooking.timeSlot) {
-      alert('Please select an available time slot before proceeding.');
+      showToast('Please select an available time slot before proceeding.', 'error');
       return;
     }
     closeModal('modal-calendar');
@@ -1580,8 +1492,9 @@ function initCalendarBooking() {
   const picker = document.getElementById('booking-date-picker');
   if (picker) {
     const today = new Date().toISOString().split('T')[0];
-    picker.value = today;
     picker.min = today;
+    if (!picker.value) picker.value = today;
+    state.activeBooking.date = picker.value;
     picker.addEventListener('change', (e) => {
       state.activeBooking.date = e.target.value;
     });
@@ -1597,11 +1510,14 @@ window.openCalendarBooking = function(tutorId, preferredSubject = null) {
   const serviceFee = Math.round(hourlyRate * 0.10);
   const total = hourlyRate + serviceFee;
 
+  const todayStr = new Date().toISOString().split('T')[0];
+  const activePickerVal = document.getElementById('booking-date-picker')?.value || todayStr;
+
   state.activeBooking = {
     tutorId: tutor.id,
     tutorName: tutor.name,
     subject: subject,
-    date: document.getElementById('booking-date-picker')?.value || '2026-03-16',
+    date: activePickerVal,
     timeSlot: null,
     hourlyRate: hourlyRate,
     serviceFee: serviceFee,
@@ -1659,7 +1575,7 @@ function initGCashPayment() {
   step1Next?.addEventListener('click', () => {
     const phone = document.getElementById('gcash-mobile').value;
     if (phone.length < 10) {
-      alert('Please enter a valid mobile / account number.');
+      showToast('Please enter a valid mobile / account number.', 'error');
       return;
     }
     document.getElementById('gcash-step-1').classList.add('hidden');
@@ -2132,7 +2048,7 @@ function initAdminView() {
     const target = document.getElementById('admin-notif-target').value;
     const msg = document.getElementById('admin-notif-message').value;
     if (!msg) {
-      alert('Please enter a message to send.');
+      showToast('Please enter a message to send.', 'error');
       return;
     }
 
@@ -2522,7 +2438,7 @@ function renderAdminPayments() {
   }
 
   const totalVol = state.payments.reduce((sum, p) => sum + p.amount, 0);
-  const totalComm = Math.round(totalVol * 0.10);
+  const totalComm = state.sessions.reduce((sum, s) => sum + (s.commissionFee || 35), 0);
 
   const elV = document.getElementById('admin-stat-total-volume');
   const elC = document.getElementById('admin-stat-platform-commission');

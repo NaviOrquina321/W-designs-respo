@@ -1,9 +1,9 @@
 # TutorLink System Architecture & Technical Analysis Report
 
 ## Executive Summary
-**TutorLink** is an intelligent, full-stack tutor-student matching and learning management platform built using a modern, minimalist monochrome UI/UX aesthetic backed by PHP REST APIs and relational database persistence (supporting both MySQL for XAMPP environments and zero-config SQLite fallback).
+**TutorLink** is a full-stack tutor-student matching and learning management web application built using a minimalist monochrome UI aesthetic backed by PHP REST APIs and relational database persistence (supporting MySQL with zero-config SQLite fallback).
 
-The platform facilitates automated tutor matching, real-time booking scheduling, direct GCash e-Wallet payments with commission calculations, live virtual workspace collaboration with embedded chat and draw tools, post-session evaluations, and comprehensive admin back-office management.
+The platform facilitates rule-based tutor matching recommendations, calendar booking scheduling, simulated GCash e-Wallet payments with platform service fee calculations, live virtual workspace collaboration with embedded chat and notes, post-session evaluations, and admin back-office management.
 
 ---
 
@@ -134,4 +134,4 @@ The system underwent automated Playwright testing across browser viewports, veri
 ---
 
 ## Conclusion
-The TutorLink codebase is robust, securely structured, highly maintainable, and fully compliant with clean software design practices. It delivers a streamlined end-to-end tutoring marketplace experience for students, tutors, and administrators.
+The TutorLink codebase provides a clean, functional web application for managing tutor-student sessions with rule-based matching recommendations and simulated GCash checkout workflows.

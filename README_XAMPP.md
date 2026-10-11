@@ -1,12 +1,12 @@
-# TutorLink - XAMPP / MySQL Setup Guide
+# TutorLink - XAMPP / Local Server Setup Guide
 
-TutorLink is designed for easy, zero-configuration deployment on **XAMPP**.
+TutorLink is designed for easy deployment on **XAMPP** or local PHP development servers.
 
 ---
 
 ## Quick 3-Step Setup Instructions
 
-### Step 1: Copy Files to XAMPP
+### Step 1: Copy Files to Server
 Copy or move the `tutorlink` project folder into your XAMPP `htdocs` directory:
 - **Windows:** `C:\xampp\htdocs\tutorlink`
 - **macOS:** `/Applications/XAMPP/htdocs/tutorlink`
@@ -26,17 +26,18 @@ Copy or move the `tutorlink` project folder into your XAMPP `htdocs` directory:
 3. Click **Choose File** and select `database.sql` from the project folder.
 4. Scroll down and click **Import** (or **Go**).
 
-*Note: The system also includes an automatic database auto-installer in `api/config.php` that will create the `tutorlink_db` database automatically if it does not already exist!*
+*Note: `api/config.php` automatically creates the `tutorlink_db` database and schema if it does not already exist, with a fallback to SQLite if MySQL is offline.*
 
 ---
 
 ## Access the Web Application
 Open your browser and navigate to:
 ```
-http://localhost/tutorlink/
+http://localhost:3000/
 ```
+*(or `http://localhost/tutorlink/` depending on your virtual host setup)*
 
 ### Test User Accounts (Log In)
-- **Student Role:** Maria Santos (`maria@tutorlink.ph`)
-- **Tutor Role:** Prof. Alex Rivera (`alex@tutorlink.ph`)
-- **Admin Role:** System Admin (`admin@tutorlink.ph`)
+- **Student Role:** Maria Santos (`maria@tutorlink.ph` / `student123`)
+- **Tutor Role:** Prof. Alex Rivera (`alex@tutorlink.ph` / `tutor123`)
+- **Admin Role:** System Admin (`admin@tutorlink.ph` / `admin123`)

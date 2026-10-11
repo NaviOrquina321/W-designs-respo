@@ -57,6 +57,14 @@ if ($method === 'POST') {
         $stmtNotif = $pdo->prepare("INSERT INTO notifications (id, target_role, target, title, message) VALUES (?, 'admin', 'System Admin', 'New Student Registered', ?)");
         $stmtNotif->execute([$notifId, "New student registered: $name ($email)"]);
 
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $_SESSION['user_id'] = $userId;
+        $_SESSION['email'] = $email;
+        $_SESSION['role'] = 'student';
+        $_SESSION['name'] = $name;
+
         echo json_encode([
             'status' => 'success',
             'message' => 'Registration successful! Welcome to TutorLink.',
@@ -91,6 +99,14 @@ if ($method === 'POST') {
         $notifId = 'notif-' . time() . '-' . rand(100, 999);
         $stmtNotif = $pdo->prepare("INSERT INTO notifications (id, target_role, target, title, message) VALUES (?, 'admin', 'System Admin', 'New Tutor Registered', ?)");
         $stmtNotif->execute([$notifId, "New tutor registered: $name ($email) - Verification Pending."]);
+
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $_SESSION['user_id'] = $userId;
+        $_SESSION['email'] = $email;
+        $_SESSION['role'] = 'tutor';
+        $_SESSION['name'] = $name;
 
         echo json_encode([
             'status' => 'success',

@@ -47,6 +47,14 @@ if ($method === 'POST') {
         $details = $st->fetch();
     }
 
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    $_SESSION['user_id'] = $user['user_id'];
+    $_SESSION['email'] = $user['email'];
+    $_SESSION['role'] = $user['role'];
+    $_SESSION['name'] = $user['name'];
+
     echo json_encode([
         'status' => 'success',
         'message' => 'Login successful',

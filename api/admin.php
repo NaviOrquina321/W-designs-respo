@@ -2,6 +2,15 @@
 // api/admin.php - Live SQL Admin KPI Calculations Endpoint
 require_once 'config.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'Forbidden: Unauthorized Admin Access Required']);
+    exit();
+}
+
 try {
     // 1. Total Registered Students
     $stmtStudents = $pdo->query("SELECT COUNT(*) AS total_students FROM students");

@@ -1,7 +1,8 @@
 -- ========================================================
 -- TutorLink - An Intelligent Tutor-Student Matching System
 -- Relational Database Schema & Setup Script
--- Compatible with XAMPP / MariaDB / MySQL 5.7+ & SQLite
+-- Target Environment: XAMPP / MariaDB / MySQL 5.7+
+-- (Note: api/config.php auto-handles SQLite syntax if SQLite fallback is used)
 -- ========================================================
 
 CREATE DATABASE IF NOT EXISTS `tutorlink_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -85,7 +86,9 @@ CREATE TABLE IF NOT EXISTS `matches` (
   `score` INT NOT NULL,
   `status` VARCHAR(50) DEFAULT 'Pending Review',
   `match_reason` TEXT,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`student_id`) REFERENCES `students`(`id`) ON DELETE SET NULL,
+  FOREIGN KEY (`tutor_id`) REFERENCES `tutors`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 7. Table: schedules

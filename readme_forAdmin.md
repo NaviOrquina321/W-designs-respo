@@ -8,17 +8,15 @@ Welcome to the **TutorLink System Administrator Manual**. This guide provides sy
 
 To log in to the TutorLink Admin Dashboard:
 
-* **Access URL:** `http://localhost:3000` (or `http://localhost/tutorlink/` on XAMPP)
+* **Access URL:** `http://localhost:3000/`
 * **Admin Email:** `admin@tutorlink.ph`
-* **Admin Password:** `admin123` (or any non-empty password during direct email authentication)
-
-> **Note:** Logins with `admin@tutorlink.ph` or containing `admin` automatically log you into the System Admin role (`ADMIN-001`).
+* **Admin Password:** `admin123`
 
 ---
 
 ## 2. Administrator Dashboard Capabilities
 
-The Admin Dashboard provides administrative controls across 8 FDD modules:
+The Admin Dashboard manages 11 relational tables (`users`, `admins`, `students`, `tutors`, `subjects`, `matches`, `schedules`, `payments`, `sessions`, `notifications`, `chat_messages`):
 
 1. **System KPI Monitoring Cards:**
    - **Total Registered Students:** Real-time count of registered students.
@@ -67,7 +65,7 @@ TutorLink is designed for zero-configuration integration with **MySQL / MariaDB*
 ### Manual Database Import (phpMyAdmin):
 1. Open `http://localhost/phpmyadmin/`
 2. Import `database.sql` located at the root of the project.
-3. The SQL script creates all required relational tables (`admins`, `students`, `tutors`, `subjects`, `matches`, `schedules`, `payments`, `sessions`, `notifications`) and seeds the default System Admin account.
+3. The SQL script creates all required relational tables (`users`, `admins`, `students`, `tutors`, `subjects`, `matches`, `schedules`, `payments`, `sessions`, `notifications`, `chat_messages`) and seeds default accounts.
 
 *Note: The backend API includes an auto-installer in `api/config.php` that will automatically create the `tutorlink_db` database and its tables if MySQL is running!*
 
