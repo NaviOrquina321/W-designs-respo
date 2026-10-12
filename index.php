@@ -82,11 +82,31 @@ header('Content-Type: text/html; charset=utf-8');
     <div id="view-landing" class="app-view active">
       <section class="hero">
         <div class="wrap">
-          <h1>Find a tutor who actually fits how you learn</h1>
-          <p class="lead">TutorLink matches you with a tutor suited to your needs, handles scheduling and payment, and keeps you updated at every step - all in one place.</p>
+          <h1>Empowering Students For A <span>Brighter Academic Future</span></h1>
+          <p class="lead">TutorLink matches you with premier tutors suited to your learning needs, handles scheduling and secure payment, and keeps you updated at every step - all in one seamless system.</p>
           <div class="actions">
             <button class="btn btn-primary" id="hero-find-tutor-btn">Find a Tutor</button>
             <button class="btn btn-secondary" id="hero-become-tutor-btn">Become a Tutor</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Metrics / Stats Counter Bar -->
+      <section class="metrics-counter-bar">
+        <div class="wrap">
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <span class="metric-num">5,000+</span>
+              <span class="metric-label">Hours of Tuition Delivered</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-num">200+</span>
+              <span class="metric-label">Elite Verified Tutors</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-num">98%</span>
+              <span class="metric-label">Student Success Rate</span>
+            </div>
           </div>
         </div>
       </section>
