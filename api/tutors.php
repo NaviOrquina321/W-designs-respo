@@ -41,9 +41,9 @@ if ($method === 'GET') {
         $fields = [];
         $params = [];
 
-        if (isset($input['approval_status'])) {
+        if (isset($input['approval_status']) || isset($input['approvalStatus'])) {
             $fields[] = "`approval_status` = ?";
-            $params[] = trim($input['approval_status']);
+            $params[] = trim($input['approval_status'] ?? $input['approvalStatus']);
         }
         if (isset($input['deactivated'])) {
             $fields[] = "`deactivated` = ?";

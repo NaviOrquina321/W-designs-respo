@@ -515,7 +515,9 @@ function switchRole(role, customUser = null) {
     }
 
     if (role === 'admin') {
-      document.getElementById('view-landing').classList.add('active');
+      if (!window.location.pathname.includes('admin.php')) {
+        window.location.href = 'admin.php';
+      }
       return;
     } else if (role === 'student') {
       state.currentUser = customUser || state.currentUser || { name: 'Maria Santos', role: 'student' };
@@ -768,20 +770,24 @@ function initSubjectManagement() {
     const name = document.getElementById('admin-subject-name').value;
     const category = document.getElementById('admin-subject-category').value;
 
-    if (id) {
-      const sub = state.subjects.find(s => s.id === id);
-      if (sub) {
-        sub.name = name;
-        sub.category = category;
+    try {
+      const res = await fetch('api/subjects.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, name, category })
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') {
+        showToast(data.message || 'Subject update failed.', 'error');
+        return;
       }
-    } else {
-      const newSub = { id: 'SUB-' + Math.floor(100 + Math.random() * 900), name, category };
-      state.subjects.push(newSub);
+      closeModal('modal-admin-subject');
+      await syncWithDatabase();
+      renderAllViews();
+      showToast('Subject catalog updated successfully!');
+    } catch (err) {
+      showToast('Could not connect to backend server.', 'error');
     }
-
-    closeModal('modal-admin-subject');
-    renderAdminSubjects();
-    showToast('Subject catalog updated successfully!');
   });
 }
 
@@ -796,12 +802,23 @@ window.editSubject = function(subId) {
   }
 };
 
-window.deleteSubject = function(subId) {
-  const idx = state.subjects.findIndex(s => s.id === subId);
-  if (idx !== -1) {
-    state.subjects.splice(idx, 1);
-    renderAdminSubjects();
+window.deleteSubject = async function(subId) {
+  try {
+    const res = await fetch('api/subjects.php', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: subId })
+    });
+    const data = await res.json();
+    if (!res.ok || data.status !== 'success') {
+      showToast(data.message || 'Delete subject failed.', 'error');
+      return;
+    }
+    await syncWithDatabase();
+    renderAllViews();
     showToast('Subject removed from system catalog.');
+  } catch (e) {
+    showToast('Could not connect to backend server.', 'error');
   }
 };
 
@@ -2167,21 +2184,53 @@ function renderAdminStudents() {
   if (el) el.textContent = state.students.length;
 }
 
-window.toggleValidateStudent = function(studentId) {
+window.toggleValidateStudent = async function(studentId) {
   const student = state.students.find(s => s.id === studentId);
   if (student) {
-    student.validated = !student.validated;
-    renderAdminStudents();
-    showToast(`Validation updated for ${student.name}.`);
+    const newVal = !student.validated;
+    try {
+      const res = await fetch('api/students.php', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: studentId, validated: newVal })
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') {
+        showToast(data.message || 'Validation update failed.', 'error');
+        return;
+      }
+      student.validated = newVal;
+      await syncWithDatabase();
+      renderAllViews();
+      showToast(`Validation updated for ${student.name}.`);
+    } catch (e) {
+      showToast('Could not connect to backend server.', 'error');
+    }
   }
 };
 
-window.toggleDeactivateStudent = function(studentId) {
+window.toggleDeactivateStudent = async function(studentId) {
   const student = state.students.find(s => s.id === studentId);
   if (student) {
-    student.deactivated = !student.deactivated;
-    renderAdminStudents();
-    showToast(`Account status updated for ${student.name}.`);
+    const newVal = !student.deactivated;
+    try {
+      const res = await fetch('api/students.php', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: studentId, deactivated: newVal })
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') {
+        showToast(data.message || 'Deactivation update failed.', 'error');
+        return;
+      }
+      student.deactivated = newVal;
+      await syncWithDatabase();
+      renderAllViews();
+      showToast(`Account status updated for ${student.name}.`);
+    } catch (e) {
+      showToast('Could not connect to backend server.', 'error');
+    }
   }
 };
 
@@ -2209,22 +2258,52 @@ function renderAdminTutors() {
 }
 
 
-window.approveTutorApplication = function(tutorId) {
+window.approveTutorApplication = async function(tutorId) {
   const tutor = state.tutors.find(t => t.id === tutorId);
   if (tutor) {
-    tutor.approvalStatus = 'Approved';
-    renderAdminTutors();
-    showToast(`Tutor application approved for ${tutor.name}.`);
+    try {
+      const res = await fetch('api/tutors.php', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: tutorId, approval_status: 'Approved' })
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') {
+        showToast(data.message || 'Approval failed.', 'error');
+        return;
+      }
+      tutor.approvalStatus = 'Approved';
+      await syncWithDatabase();
+      renderAllViews();
+      showToast(`Tutor application approved for ${tutor.name}.`);
+    } catch (e) {
+      showToast('Could not connect to backend server.', 'error');
+    }
   }
 };
 
-window.toggleDeactivateTutor = function(tutorId) {
+window.toggleDeactivateTutor = async function(tutorId) {
   const tutor = state.tutors.find(t => t.id === tutorId);
   if (tutor) {
-    tutor.deactivated = !tutor.deactivated;
-    renderAdminTutors();
-    renderTutorDirectory();
-    showToast(`Account status updated for ${tutor.name}.`);
+    const newVal = !tutor.deactivated;
+    try {
+      const res = await fetch('api/tutors.php', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: tutorId, deactivated: newVal })
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') {
+        showToast(data.message || 'Deactivation update failed.', 'error');
+        return;
+      }
+      tutor.deactivated = newVal;
+      await syncWithDatabase();
+      renderAllViews();
+      showToast(`Account status updated for ${tutor.name}.`);
+    } catch (e) {
+      showToast('Could not connect to backend server.', 'error');
+    }
   }
 };
 
@@ -2398,12 +2477,23 @@ function renderAdminSchedule() {
   }
 }
 
-window.deleteScheduleSlot = function(schId) {
-  const idx = state.schedules.findIndex(s => s.id === schId);
-  if (idx !== -1) {
-    state.schedules.splice(idx, 1);
-    renderAdminSchedule();
+window.deleteScheduleSlot = async function(schId) {
+  try {
+    const res = await fetch('api/schedules.php', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: schId })
+    });
+    const data = await res.json();
+    if (!res.ok || data.status !== 'success') {
+      showToast(data.message || 'Delete schedule failed.', 'error');
+      return;
+    }
+    await syncWithDatabase();
+    renderAllViews();
     showToast('Schedule slot removed.');
+  } catch (e) {
+    showToast('Could not connect to backend server.', 'error');
   }
 };
 

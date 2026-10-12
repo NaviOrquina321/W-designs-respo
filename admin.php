@@ -3,12 +3,10 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-// Auto-initialize Admin Session for Direct Manual URL Access
+// Strictly enforce Admin Session Access
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    $_SESSION['role'] = 'admin';
-    $_SESSION['user_id'] = 'ADMIN-001';
-    $_SESSION['name'] = 'System Admin';
-    $_SESSION['email'] = 'admin@tutorlink.ph';
+    header('Location: index.php');
+    exit;
 }
 ?>
 <!DOCTYPE html>
