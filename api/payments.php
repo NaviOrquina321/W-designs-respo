@@ -49,6 +49,17 @@ if ($method === 'GET') {
 
     if (isset($input['payout_status'])) {
         $payoutVal = trim($input['payout_status']);
+        if ($payoutVal === 'Paid Out') {
+            if ($payment['status'] !== 'Confirmed') {
+                jsonError(400, 'Cannot process payout for an unconfirmed payment.');
+            }
+            $stSesChk = $pdo->prepare("SELECT status FROM sessions WHERE gcash_ref = ?");
+            $stSesChk->execute([$payment['ref_no']]);
+            $linkedSes = $stSesChk->fetch();
+            if ($linkedSes && $linkedSes['status'] !== 'Completed') {
+                jsonError(400, 'Cannot process payout until the tutoring session is marked Completed.');
+            }
+        }
         $fields[] = "`payout_status` = ?";
         $params[] = $payoutVal;
 

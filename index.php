@@ -1,10 +1,7 @@
 <?php
 // index.php - TutorLink Main Application Entry Point (Requires PHP & Apache / Web Server)
-session_start();
-header('Content-Type: text/html; charset=utf-8');
-
-// Ensure Database & PHP Environment
 require_once __DIR__ . '/api/config.php';
+header('Content-Type: text/html; charset=utf-8');
 ?>
 <!DOCTYPE html>
 <html lang="en">

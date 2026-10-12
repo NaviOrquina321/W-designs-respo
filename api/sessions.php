@@ -78,13 +78,6 @@ if ($method === 'GET') {
         }
     }
 
-    // Reject double booking (same tutor + date + time_slot)
-    $stChk = $pdo->prepare("SELECT COUNT(*) as cnt FROM sessions WHERE tutor_id = ? AND session_date = ? AND time_slot = ? AND status != 'Cancelled'");
-    $stChk->execute([$tutorRecord['id'], $sessionDate, $timeSlot]);
-    if ($stChk->fetch()['cnt'] > 0) {
-        jsonError(400, 'This tutor is already booked for the selected date and time slot.');
-    }
-
     // Server-computed fee breakdown: Student pays Rate + 10% Service Fee; Tutor gets 100% Rate
     $hourlyRate = intval($tutorRecord['hourly_rate']);
     $commissionFee = intval(round($hourlyRate * 0.10));
@@ -97,6 +90,14 @@ if ($method === 'GET') {
 
     try {
         $pdo->beginTransaction();
+
+        // Concurrency Guard: Reject double booking within transaction
+        $stChk = $pdo->prepare("SELECT COUNT(*) as cnt FROM sessions WHERE tutor_id = ? AND session_date = ? AND time_slot = ? AND status != 'Cancelled'");
+        $stChk->execute([$tutorRecord['id'], $sessionDate, $timeSlot]);
+        if ($stChk->fetch()['cnt'] > 0) {
+            $pdo->rollBack();
+            jsonError(400, 'This tutor is already booked for the selected date and time slot.');
+        }
 
         // 1. Insert session row
         $stmtSes = $pdo->prepare("INSERT INTO sessions (id, student_id, student_name, tutor_id, tutor_name, subject, session_date, time_slot, hourly_rate, commission_fee, total_paid, gcash_ref, status, payout_status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed', 'Unpaid', 'Booked via GCash e-Wallet.')");
@@ -186,6 +187,9 @@ if ($method === 'GET') {
         $params = [];
 
         if (isset($input['status']) && $input['status'] === 'Completed') {
+            if ($session['status'] === 'Cancelled') {
+                jsonError(400, 'Cannot complete a cancelled session.');
+            }
             $fields[] = "`status` = 'Completed'";
             // Only increment student sessions_completed if transitioning from Confirmed
             if ($session['status'] === 'Confirmed') {
@@ -243,6 +247,10 @@ if ($method === 'GET') {
 
         if ($session['status'] !== 'Completed') {
             jsonError(400, 'You can only rate a completed session.');
+        }
+
+        if (!empty($session['rating']) && intval($session['rating']) > 0) {
+            jsonError(400, 'You have already rated this session.');
         }
 
         $rating = intval($input['rating'] ?? 0);

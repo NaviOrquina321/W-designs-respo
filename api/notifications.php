@@ -17,7 +17,7 @@ if ($method === 'GET') {
     }
     echo json_encode(['status' => 'success', 'data' => toCamelArray($notifications)]);
 } elseif ($method === 'POST') {
-    $user = requireRole(['admin']);
+    $user = requireRole(['admin', 'tutor', 'student']);
     $input = getInput();
 
     $targetRole = trim($input['target_role'] ?? ($input['targetRole'] ?? 'all'));
@@ -51,8 +51,8 @@ if ($method === 'GET') {
     if ($user['role'] === 'admin') {
         $pdo->exec("UPDATE notifications SET is_read = 1");
     } else {
-        $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE target_role = 'all' OR (target_role = ? AND (target = ? OR target = 'All Users'))");
-        $stmt->execute([$user['role'], $user['name']]);
+        $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE (target_role = ? AND target = ?) OR target = ?");
+        $stmt->execute([$user['role'], $user['name'], $user['name']]);
     }
     echo json_encode(['status' => 'success', 'message' => 'Notifications marked as read.']);
 } else {

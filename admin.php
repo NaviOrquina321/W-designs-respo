@@ -104,10 +104,14 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
           </div>
         </div>
 
-        <div class="header-actions">
+        <div class="header-actions" style="display: flex; align-items: center; gap: 12px;">
           <button class="icon-btn relative" title="Notifications" onclick="switchMainAdminTab('notifications')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span class="notification-badge"></span>
+          </button>
+          <button id="admin-logout-btn" class="btn btn-secondary btn-small" style="display: flex; align-items: center; gap: 6px;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Log Out</span>
           </button>
         </div>
       </header>
@@ -618,6 +622,14 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
         switchRole('admin', { id: 'ADMIN-001', name: 'System Admin', role: 'admin' });
       }
       switchMainAdminTab('dashboard');
+
+      document.getElementById('admin-logout-btn')?.addEventListener('click', async () => {
+        try {
+          await fetch('api/logout.php', { method: 'POST' });
+        } catch (e) {}
+        localStorage.removeItem('tutorlink_session');
+        window.location.href = 'index.php';
+      });
     });
   </script>
 </body>

@@ -1009,18 +1009,18 @@ function renderStudentUpcoming() {
   container.innerHTML = upcoming.map(s => `
     <div class="session-card">
       <div class="session-card-info">
-        <h4>${s.subject} - with <span style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</span></h4>
-        <p>${s.sessionDate || s.date || 'Today'} at ${s.timeSlot} | GCash Ref: <strong>${s.gcashRef}</strong></p>
+        <h4>${esc(s.subject)} - with <span style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(s.tutorId)}')">${esc(s.tutorName)}</span></h4>
+        <p>${esc(s.sessionDate || s.date || 'Today')} at ${esc(s.timeSlot)} | GCash Ref: <strong>${esc(s.gcashRef)}</strong></p>
       </div>
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
         <span class="badge ${s.tutorStarted ? 'badge-success' : 'badge-info'}">${s.tutorStarted ? 'Session Live' : 'Confirmed'}</span>
-        <button class="btn btn-secondary btn-small" onclick="viewPaymentReceipt('${s.id}')">View Receipt</button>
+        <button class="btn btn-secondary btn-small" onclick="viewPaymentReceipt('${esc(s.id)}')">View Receipt</button>
         ${s.tutorStarted ? `
-          <button class="btn btn-primary btn-small" onclick="launchWorkspace('${s.id}')">
+          <button class="btn btn-primary btn-small" onclick="launchWorkspace('${esc(s.id)}')">
             Join Live Workspace Session
           </button>
         ` : `
-          <button class="btn btn-secondary btn-small" onclick="launchWorkspace('${s.id}')" title="Waiting for tutor to start session">
+          <button class="btn btn-secondary btn-small" onclick="launchWorkspace('${esc(s.id)}')" title="Waiting for tutor to start session">
             Session Pending
           </button>
         `}
@@ -1046,20 +1046,20 @@ function renderStudentHistory() {
 
   tbody.innerHTML = userSessions.map(s => `
     <tr>
-      <td>${s.date} (${s.timeSlot})</td>
-      <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${s.tutorId}')">${s.tutorName}</strong></td>
-      <td>${s.subject}</td>
-      <td>P${s.totalPaid}</td>
-      <td><code>${s.gcashRef}</code></td>
+      <td>${esc(s.date)} (${esc(s.timeSlot)})</td>
+      <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(s.tutorId)}')">${esc(s.tutorName)}</strong></td>
+      <td>${esc(s.subject)}</td>
+      <td>P${esc(s.totalPaid)}</td>
+      <td><code>${esc(s.gcashRef)}</code></td>
       <td>
-        <span class="badge ${s.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${s.status}</span>
-        ${s.feedback ? `<div style="font-size: 0.8rem; margin-top: 4px; color: var(--ink-soft); max-width: 180px;"><strong>Tutor Feedback:</strong> "${s.feedback}"</div>` : ''}
+        <span class="badge ${s.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${esc(s.status)}</span>
+        ${s.feedback ? `<div style="font-size: 0.8rem; margin-top: 4px; color: var(--ink-soft); max-width: 180px;"><strong>Tutor Feedback:</strong> "${esc(s.feedback)}"</div>` : ''}
       </td>
       <td>
-        <button class="btn btn-secondary btn-small" onclick="viewPaymentReceipt('${s.id}')">View Receipt</button>
+        <button class="btn btn-secondary btn-small" onclick="viewPaymentReceipt('${esc(s.id)}')">View Receipt</button>
         ${s.status === 'Completed' ?
-          `<button class="btn btn-secondary btn-small" style="margin-left: 4px;" onclick="openRatingModal('${s.tutorName}')">Rate Tutor</button>` :
-          `<button class="btn btn-secondary btn-small" style="margin-left: 4px;" onclick="launchWorkspace('${s.id}')">View Room</button>`
+          `<button class="btn btn-secondary btn-small" style="margin-left: 4px;" onclick="openRatingModal('${esc(s.tutorName)}')">Rate Tutor</button>` :
+          `<button class="btn btn-secondary btn-small" style="margin-left: 4px;" onclick="launchWorkspace('${esc(s.id)}')">View Room</button>`
         }
       </td>
     </tr>
@@ -1781,19 +1781,19 @@ function initWorkspaceSession() {
         }
 
         activeSes.status = 'Completed';
-        if (tutorFeedback) activeSes.feedback = tutorFeedback;
+        if (tutorFeedback) activeSes.notes = tutorFeedback;
 
         const s = state.sessions.find(x => x.id === activeSes.id);
         if (s) {
           s.status = 'Completed';
-          if (tutorFeedback) s.feedback = tutorFeedback;
+          if (tutorFeedback) s.notes = tutorFeedback;
         }
 
         try {
           await fetch('api/sessions.php', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: activeSes.id, status: 'Completed', feedback: tutorFeedback })
+            body: JSON.stringify({ id: activeSes.id, status: 'Completed', notes: tutorFeedback })
           });
         } catch (err) { console.log('Offline API fallback'); }
 
