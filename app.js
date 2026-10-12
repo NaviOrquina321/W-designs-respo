@@ -1502,6 +1502,7 @@ function initAIMatching() {
     }).join('');
 
     resultsBox.classList.remove('hidden');
+    resultsBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     renderAdminMatching();
     showToast('AI Tutor Matching recommendation generated!');
   });
