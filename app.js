@@ -954,6 +954,11 @@ function renderTutorDirectory(searchTerm = '') {
     return matchName || matchSubj;
   });
 
+  if (filtered.length === 0) {
+    grid.innerHTML = `<p class="sub-text" style="grid-column: 1 / -1; padding: 20px; text-align: center;">No tutors found matching "${esc(searchTerm)}". Try searching another subject or name!</p>`;
+    return;
+  }
+
   grid.innerHTML = filtered.map(t => `
     <div class="tutor-card">
       <div>
@@ -961,14 +966,14 @@ function renderTutorDirectory(searchTerm = '') {
           <div class="tutor-avatar">${esc(t.initials)}</div>
           <div class="tutor-info">
             <h4 style="text-decoration: underline;">${esc(t.name)}</h4>
-            <div class="tutor-rating">★ ${esc(t.rating)} (${esc(t.reviewsCount)} reviews)</div>
+            <div class="tutor-rating">★ ${esc(t.rating ? t.rating : '5.0')} (${esc(t.reviewsCount || 0)} reviews)</div>
           </div>
         </div>
         <p class="sub-text margin-bottom">${esc(t.bio)}</p>
         <div class="tutor-details-list">
-          <div><strong>Subjects:</strong> ${esc(t.subjects.join(', '))}</div>
-          <div><strong>Style:</strong> ${esc(t.learningStyles[0])}</div>
-          <div><strong>Rate:</strong> P${esc(t.hourlyRate)}/hr</div>
+          <div><strong>Subjects:</strong> ${esc(Array.isArray(t.subjects) ? t.subjects.join(', ') : t.subjects)}</div>
+          <div><strong>Style:</strong> ${esc(Array.isArray(t.learningStyles) ? t.learningStyles[0] : t.learningStyles)}</div>
+          <div><strong>Rate:</strong> ₱${esc(t.hourlyRate || 350)}/hr</div>
         </div>
       </div>
       <div style="display: flex; gap: 8px;" class="margin-top">
