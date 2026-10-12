@@ -319,7 +319,7 @@ function initNavigation() {
   document.getElementById('edit-tutor-schedule-profile-btn')?.addEventListener('click', () => switchRole('tutor-profile'));
   document.getElementById('page-cancel-tutor-profile-btn')?.addEventListener('click', () => switchRole('tutor'));
 
-  document.getElementById('tutor-profile-page-form')?.addEventListener('submit', (e) => {
+  document.getElementById('tutor-profile-page-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('page-tutor-name-input').value;
     const subjects = document.getElementById('page-tutor-subjects-input').value;
@@ -333,24 +333,9 @@ function initNavigation() {
     const blockedVal = document.getElementById('tutor-blocked-dates-input')?.value || '';
 
     const currentTutor = state.tutors.find(t => t.id === (state.currentUser ? state.currentUser.id : '') || t.name === (state.currentUser ? state.currentUser.name : '')) || state.tutors[0];
-    if (currentTutor) {
-      currentTutor.name = name;
-      currentTutor.initials = name.split(' ').map(n=>n[0]).join('');
-      currentTutor.subjects = subjects.split(',').map(s => s.trim());
-      currentTutor.learningStyles = [style];
-      currentTutor.hourlyRate = parseInt(rate) || 350;
-      currentTutor.bio = bio;
-      currentTutor.available = available;
-      currentTutor.availableDays = checkedDays;
-      currentTutor.availableTimeSlots = windowVal;
-      currentTutor.blockedDates = blockedVal;
-    }
-
-    if (state.currentUser) state.currentUser.name = name;
-    document.getElementById('tutor-welcome-heading').textContent = `Tutor Portal - ${name}`;
 
     try {
-      fetch('api/tutors.php', {
+      const res = await fetch('api/tutors.php', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -366,10 +351,18 @@ function initNavigation() {
           blockedDates: blockedVal
         })
       });
-    } catch (e) { console.log('Offline tutor profile edit fallback'); }
-
-    switchRole('tutor');
-    showToast('Tutor profile updated successfully!');
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') {
+        showToast(data.message || 'Failed to update profile.', 'error');
+        return;
+      }
+      await syncWithDatabase();
+      renderAllViews();
+      switchRole('tutor');
+      showToast('Tutor profile updated successfully!');
+    } catch (e) {
+      showToast('Could not connect to backend server.', 'error');
+    }
   });
 
   document.getElementById('hero-find-tutor-btn')?.addEventListener('click', () => { openModal('modal-auth'); switchAuthTab('register'); });
@@ -522,9 +515,7 @@ function switchRole(role, customUser = null) {
     }
 
     if (role === 'admin') {
-      if (!window.location.pathname.endsWith('admin.php')) {
-        window.location.href = 'admin.php';
-      }
+      document.getElementById('view-landing').classList.add('active');
       return;
     } else if (role === 'student') {
       state.currentUser = customUser || state.currentUser || { name: 'Maria Santos', role: 'student' };
