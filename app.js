@@ -669,6 +669,14 @@ function initTutorSubTabs() {
       e.target.classList.add('active');
       const targetTab = e.target.getAttribute('data-tab');
       document.getElementById(targetTab)?.classList.add('active');
+
+      if (targetTab === 'tutor-tab-requests') {
+        renderTutorRequests();
+      } else if (targetTab === 'tutor-tab-sessions') {
+        renderTutorUpcoming();
+      } else if (targetTab === 'tutor-tab-earnings') {
+        renderTutorEarnings();
+      }
     });
   });
 
