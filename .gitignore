@@ -7,3 +7,6 @@
 test-results/
 node_modules/
 .DS_Store
+
+# AI API key (never commit)
+/ai_config.php

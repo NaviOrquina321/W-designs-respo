@@ -1312,60 +1312,88 @@ function initAIMatching() {
   cancelBtn?.addEventListener('click', () => closeModal('modal-ai-matching'));
   closeBtn?.addEventListener('click', () => closeModal('modal-ai-matching'));
 
-  form?.addEventListener('submit', (e) => {
+  form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const subject = document.getElementById('match-subject').value;
     const style = document.getElementById('match-style').value;
     const time = document.getElementById('match-time').value;
 
-    // Filter approved and non-deactivated tutors teaching the chosen subject
-    const candidates = state.tutors.filter(t => t.approvalStatus === 'Approved' && !t.deactivated && t.subjects.some(s => s.toLowerCase() === subject.toLowerCase()));
-
     const resultsBox = document.getElementById('ai-match-results');
     const cardsList = document.getElementById('ai-match-cards-list');
+    const runBtn = document.getElementById('run-match-btn');
+    const runBtnLabel = runBtn ? runBtn.textContent : '';
 
-    if (candidates.length === 0) {
-      cardsList.innerHTML = `<p class="sub-text center-text" style="padding: 20px;">No matching tutors yet for ${esc(subject)}.</p>`;
-      resultsBox.classList.remove('hidden');
-      return;
-    }
-
-    // Rule-based Score Calculation
-    const scoredCandidates = candidates.map(t => {
-      let score = 50; // Subject match base
-      if (t.learningStyles.some(ls => style.toLowerCase().includes(ls.toLowerCase()))) score += 20;
-      if (t.availabilitySlots.some(s => time.toLowerCase().includes(s.toLowerCase()))) score += 15;
-      score += Math.round((t.rating / 5) * 15);
-      score = Math.min(100, score);
-      return { tutor: t, score };
-    });
-
-    scoredCandidates.sort((a, b) => b.score - a.score);
-
-    cardsList.innerHTML = scoredCandidates.map(({ tutor, score }) => `
-      <div class="session-card" style="align-items: flex-start;">
-        <div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <strong style="font-size: 1.1rem; cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(tutor.id)}')">${esc(tutor.name)}</strong>
-            <span class="badge badge-match">${esc(score)}% AI Match Fit</span>
-          </div>
-          <div class="sub-text margin-top-xs">Subject: <strong>${esc(subject)}</strong></div>
-          <div class="sub-text">Teaching Style: ${esc(tutor.learningStyles.join(', '))}</div>
-          <div class="sub-text">Rating: ★ ${esc(tutor.rating.toFixed(1))} (${esc(tutor.reviewsCount)} reviews)</div>
-          <p class="sub-text" style="margin-top: 6px;">${esc(tutor.bio)}</p>
-        </div>
-        <div>
-          <button class="btn btn-primary btn-small" onclick="selectMatchedTutor('${esc(tutor.id)}', '${esc(subject)}', ${score})">Choose Tutor & Book</button>
-        </div>
-      </div>
-    `).join('');
-
+    // Loading state
+    if (runBtn) { runBtn.disabled = true; runBtn.textContent = 'Finding your best tutors...'; }
+    cardsList.innerHTML = `<p class="sub-text center-text" style="padding: 20px;">Matching you with tutors...</p>`;
     resultsBox.classList.remove('hidden');
-    resultsBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    try {
+      // The server ranks the tutors (AI model, or rule-based fallback)
+      const res = await fetch('api/match.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject, style, time })
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') {
+        cardsList.innerHTML = '';
+        resultsBox.classList.add('hidden');
+        showToast(data.message || 'Could not find matches. Please try again.', 'error');
+        return;
+      }
+
+      const ranked = (data.data || [])
+        .map(r => ({ r, tutor: state.tutors.find(t => t.id === r.tutorId) }))
+        .filter(x => x.tutor);
+
+      if (ranked.length === 0) {
+        cardsList.innerHTML = `<p class="sub-text center-text" style="padding: 20px;">No matching tutors yet for ${esc(subject)}.</p>`;
+        return;
+      }
+
+      const label = data.mode === 'ai' ? 'AI Match' : 'Rule-based match';
+      const note = data.mode === 'ai'
+        ? 'Ranked by our AI based on your needs.'
+        : 'AI is not available right now, so these tutors were ranked by our rule-based matcher.';
+
+      cardsList.innerHTML = `<p class="sub-text" style="margin-bottom: 10px;">${esc(note)}</p>` + ranked.map(({ r, tutor }) => `
+        <div class="session-card" style="align-items: flex-start;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <strong style="font-size: 1.1rem; cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(tutor.id)}')">${esc(tutor.name)}</strong>
+              <span class="badge badge-match">${esc(r.score)}% ${esc(label)}</span>
+            </div>
+            <div class="sub-text margin-top-xs">Subject: <strong>${esc(subject)}</strong></div>
+            <div class="sub-text">Teaching Style: ${esc(tutor.learningStyles.join(', '))}</div>
+            <div class="sub-text">Rating: ${tutor.reviewsCount > 0 ? '★ ' + esc(tutor.rating.toFixed(1)) + ' (' + esc(tutor.reviewsCount) + ' reviews)' : 'New tutor (no reviews yet)'}</div>
+            <p class="sub-text" style="margin-top: 6px;"><em>Why this tutor: ${esc(r.reason)}</em></p>
+            <p class="sub-text" style="margin-top: 6px;">${esc(tutor.bio)}</p>
+          </div>
+          <div>
+            <button class="btn btn-primary btn-small match-choose-btn" data-tutor-id="${esc(tutor.id)}" data-score="${esc(r.score)}" data-mode="${esc(data.mode)}" data-reason="${esc(r.reason)}">Choose Tutor & Book</button>
+          </div>
+        </div>
+      `).join('');
+
+      cardsList.querySelectorAll('.match-choose-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectMatchedTutor(btn.dataset.tutorId, subject, Number(btn.dataset.score), btn.dataset.mode, btn.dataset.reason);
+        });
+      });
+
+      resultsBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (err) {
+      cardsList.innerHTML = '';
+      resultsBox.classList.add('hidden');
+      showToast('Could not connect to server.', 'error');
+    } finally {
+      if (runBtn) { runBtn.disabled = false; runBtn.textContent = runBtnLabel; }
+    }
   });
 }
 
-window.selectMatchedTutor = async function(tutorId, subject, score) {
+window.selectMatchedTutor = async function(tutorId, subject, score, mode, reason) {
   closeModal('modal-ai-matching');
 
   // Submit match request row to backend
@@ -1377,7 +1405,7 @@ window.selectMatchedTutor = async function(tutorId, subject, score) {
         tutor_id: tutorId,
         subject,
         score,
-        match_reason: 'Rule-Based AI Compatibility Match'
+        match_reason: (mode === 'ai' ? 'AI match: ' : 'Rule-based match: ') + (reason || 'Compatibility match')
       })
     });
   } catch (e) {}

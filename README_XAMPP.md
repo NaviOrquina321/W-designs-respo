@@ -57,3 +57,23 @@ Each site has its own login session, so an admin and a student can be signed in 
 - **Student Role:** Maria Santos (`maria@tutorlink.ph` / `student123`)
 - **Tutor Role:** Prof. Alex Rivera (`alex@tutorlink.ph` / `tutor123`)
 - **Admin Role:** System Admin (`admin@tutorlink.ph` / `admin123`)
+
+---
+
+## Turning on AI Tutor Matching
+
+TutorLink ranks tutors with an AI model that runs on the **server** (the key never reaches the browser).
+Without a key it still works: it uses a rule-based matcher and labels results **"Rule-based match"** instead of **"AI match"**.
+
+1. Get an API key from your provider:
+   - **Claude (Anthropic):** https://console.anthropic.com (paid, pay per use)
+   - **Gemini (Google AI Studio):** https://aistudio.google.com (has a free tier)
+2. Copy `ai_config.sample.php` to `ai_config.php` (same folder).
+3. Open `ai_config.php`, set `'provider'` (`'anthropic'` or `'gemini'`), paste your key into `'api_key'`, and check that `'model'` is a model your provider currently offers.
+4. Save. Log in as a student, open **Find a Tutor**, and the results should say **AI Match**.
+
+Notes:
+- `ai_config.php` is gitignored and blocked from web download. Never commit or share it.
+- If the AI is slow (over 10 seconds), returns something invalid, or the key is wrong, the student still gets rule-based results.
+- Results are remembered for 10 minutes per student and search, and each student can trigger at most 10 AI calls per hour, to control cost.
+- Only the student's grade level, subjects needed and bio, plus public tutor details, are sent to the AI. Names and emails are never sent.

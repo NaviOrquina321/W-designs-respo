@@ -25,6 +25,15 @@ Tested by running the PHP API locally (SQLite) and calling every role's main flo
 - Fixed `admin.php` reloading itself in a loop (the shared script redirected admins to the page they were already on).
 - Main site: the "Admins" card and the footer link open the Admin Portal in a new tab. Admin header has "Open Main Site".
 
+## Added: real AI Tutor Matching
+- New `api/match.php`: the server asks an AI model (Claude or Gemini) to rank the tutors, then strictly validates the answer (known tutor ids only, integer score 0-100, plain-text reason).
+- Falls back to rule-based scoring when there is no key, a timeout (10 s), an HTTP error or an invalid answer. The screen shows "AI Match" or "Rule-based match" so nobody is misled.
+- Key lives in `ai_config.php` (gitignored, blocked from download). `ai_config.sample.php` is committed.
+- Privacy: student name and email are never sent. Tutor bio text is treated as data, not instructions.
+- Cost control: 10-minute result cache and a limit of 10 AI calls per hour per login.
+- Rule-based fallback fixed: the old time-of-day check never matched, and tutors with no reviews were scored as 0 stars (now neutral 3.5).
+- Tested against a fake AI server (success, fenced JSON, garbage, unknown tutor id, HTTP 500, timeout, cache, privacy, permissions). Not tested against a real provider because no key or internet AI access was available here.
+
 ## Verified working (no change needed)
 Login, registration, role checks on every endpoint, prepared statements everywhere, output escaping (XSS) in `app.js` and `admin.php`, server-side price and 10% commission, double-booking block, rating recalculation, chat access limited to session participants.
 
