@@ -150,6 +150,7 @@ CREATE TABLE IF NOT EXISTS `sessions` (
 CREATE TABLE IF NOT EXISTS `notifications` (
   `id` VARCHAR(50) PRIMARY KEY,
   `target_role` VARCHAR(50) DEFAULT 'all',
+  `target_id` VARCHAR(20),
   `target` VARCHAR(100) NOT NULL,
   `title` VARCHAR(150) NOT NULL,
   `message` TEXT NOT NULL,
@@ -185,7 +186,7 @@ INSERT INTO `students` (`id`, `name`, `email`, `grade`, `validated`, `deactivate
 ON DUPLICATE KEY UPDATE `email`=`email`;
 
 INSERT INTO `tutors` (`id`, `name`, `email`, `initials`, `rating`, `reviews_count`, `hourly_rate`, `subjects`, `learning_styles`, `bio`, `available`, `deactivated`, `diploma_status`, `tor_status`, `id_status`, `approval_status`, `available_days`, `available_time_slots`, `availability_slots`) VALUES
-('tut-1', 'Prof. Alex Rivera', 'alex@tutorlink.ph', 'AR', 5.0, 1, 350, 'Calculus, Physics, Mathematics', 'Step-by-Step Explanation, Visual Diagrams', 'Licensed High School & College Mathematics educator with 7+ years teaching STEM subjects.', 1, 0, 'Verified', 'Verified', 'Verified', 'Approved', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')
+('tut-1', 'Prof. Alex Rivera', 'alex@tutorlink.ph', 'AR', 0.0, 0, 350, 'Calculus, Physics, Mathematics', 'Step-by-Step Explanation, Visual Diagrams', 'Licensed High School & College Mathematics educator with 7+ years teaching STEM subjects.', 1, 0, 'Verified', 'Verified', 'Verified', 'Approved', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')
 ON DUPLICATE KEY UPDATE `email`=`email`;
 
 INSERT INTO `subjects` (`id`, `name`, `category`) VALUES

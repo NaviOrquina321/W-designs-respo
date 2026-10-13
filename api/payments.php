@@ -51,7 +51,7 @@ if ($method === 'GET') {
         $params[] = $statusVal;
 
         if ($statusVal === 'Confirmed' && $payment['status'] !== 'Confirmed') {
-            notify($pdo, 'student', $payment['student_name'], 'Payment Confirmed', "Your payment of ₱{$payment['amount']} (Ref: {$payment['ref_no']}) has been confirmed by Admin.");
+            notify($pdo, 'student', $payment['student_name'], 'Payment Confirmed', "Your payment of ₱{$payment['amount']} (Ref: {$payment['ref_no']}) has been confirmed by Admin.", $payment['student_id']);
         }
     }
 
@@ -82,7 +82,7 @@ if ($method === 'GET') {
         $stSes->execute([$payoutVal, $payment['ref_no']]);
 
         if ($payoutVal === 'Paid Out' && $payment['payout_status'] !== 'Paid Out') {
-            notify($pdo, 'tutor', $payment['tutor_name'], 'Payout Processed', "Your payout for Ref: {$payment['ref_no']} has been processed.");
+            notify($pdo, 'tutor', $payment['tutor_name'], 'Payout Processed', "Your payout for Ref: {$payment['ref_no']} has been processed.", $payment['tutor_id']);
         }
     }
 

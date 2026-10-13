@@ -5,6 +5,16 @@ require_once __DIR__ . '/helpers.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
+// A session can only start or finish after the admin has confirmed its GCash payment.
+function requirePaymentConfirmed($pdo, $session) {
+    $st = $pdo->prepare("SELECT status FROM payments WHERE ref_no = ?");
+    $st->execute([$session['gcash_ref']]);
+    $pay = $st->fetch();
+    if (!$pay || $pay['status'] !== 'Confirmed') {
+        jsonError(400, 'The payment for this session has not been confirmed by the admin yet.');
+    }
+}
+
 if ($method === 'GET') {
     $user = requireLogin();
     if ($user['role'] === 'admin') {
@@ -111,6 +121,11 @@ if ($method === 'GET') {
     try {
         $pdo->beginTransaction();
 
+        // Lock the tutor row so two simultaneous bookings cannot take the same slot (MySQL only)
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') {
+            $pdo->prepare("SELECT id FROM tutors WHERE id = ? FOR UPDATE")->execute([$tutorRecord['id']]);
+        }
+
         // Concurrency Guard: Reject double booking
         $stChk = $pdo->prepare("SELECT COUNT(*) as cnt FROM sessions WHERE tutor_id = ? AND session_date = ? AND time_slot = ? AND status != 'Cancelled'");
         $stChk->execute([$tutorRecord['id'], $sessionDate, $timeSlot]);
@@ -160,8 +175,8 @@ if ($method === 'GET') {
         }
 
         // 4. Server notifications
-        notify($pdo, 'student', $studentName, 'Session Booked', 'Session booked. Payment awaiting admin confirmation.');
-        notify($pdo, 'tutor', $tutorName, 'New Match/Session Request', "$studentName booked a $subject tutoring session for $sessionDate at $timeSlot.");
+        notify($pdo, 'student', $studentName, 'Session Booked', 'Session booked. Payment awaiting admin confirmation.', $studentRecord['id']);
+        notify($pdo, 'tutor', $tutorName, 'New Match/Session Request', "$studentName booked a $subject tutoring session for $sessionDate at $timeSlot.", $tutorRecord['id']);
         notify($pdo, 'admin', 'System Admin', 'New Session & Payment', "New session booked by $studentName with $tutorName ($sessionDate $timeSlot). Payment pending confirmation.");
 
         $pdo->commit();
@@ -212,17 +227,19 @@ if ($method === 'GET') {
                 if ($session['status'] !== 'Confirmed') {
                     jsonError(400, 'Can only start a session that is Confirmed.');
                 }
+                requirePaymentConfirmed($pdo, $session);
                 $fields[] = "`status` = 'In Progress'";
-                notify($pdo, 'student', $session['student_name'], 'Session Live', 'Your tutor started the session, join now.');
+                notify($pdo, 'student', $session['student_name'], 'Session Live', 'Your tutor started the session, join now.', $session['student_id']);
             } elseif ($newStatus === 'Completed') {
                 if ($session['status'] !== 'Confirmed' && $session['status'] !== 'In Progress') {
                     jsonError(400, 'Can only complete a Confirmed or In Progress session.');
                 }
+                requirePaymentConfirmed($pdo, $session);
                 $fields[] = "`status` = 'Completed'";
                 // sessions_completed rises once
                 $stInc = $pdo->prepare("UPDATE students SET sessions_completed = sessions_completed + 1 WHERE id = ?");
                 $stInc->execute([$session['student_id']]);
-                notify($pdo, 'student', $session['student_name'], 'Session Completed', 'Your session has been completed by the tutor.');
+                notify($pdo, 'student', $session['student_name'], 'Session Completed', 'Your session has been completed by the tutor.', $session['student_id']);
             } else {
                 jsonError(400, 'Invalid status transition for tutor.');
             }
@@ -281,7 +298,7 @@ if ($method === 'GET') {
             $fields[] = "`time_slot` = ?";
             $params[] = $newSlot;
 
-            notify($pdo, 'student', $session['student_name'], 'Session Rescheduled', "Your session with {$session['tutor_name']} has been rescheduled to $newDate at $newSlot.");
+            notify($pdo, 'student', $session['student_name'], 'Session Rescheduled', "Your session with {$session['tutor_name']} has been rescheduled to $newDate at $newSlot.", $session['student_id']);
         }
 
         if (!empty($fields)) {
@@ -339,17 +356,40 @@ if ($method === 'GET') {
             if (!in_array($newStatus, $validAdminStatuses, true)) {
                 jsonError(400, 'Invalid status for admin update.');
             }
-            $fields[] = "`status` = ?";
-            $params[] = $newStatus;
 
-            if ($newStatus === 'Cancelled') {
-                // Free schedule slot
-                $oldSlot = $session['session_date'] . ' ' . $session['time_slot'];
-                $stSchDel = $pdo->prepare("DELETE FROM schedules WHERE tutor_id = ? AND date_slot = ? AND student_id = ?");
-                $stSchDel->execute([$session['tutor_id'], $oldSlot, $session['student_id']]);
+            // Only forward transitions: a Completed or Cancelled session can never be reopened
+            $allowedNext = [
+                'Confirmed' => ['In Progress', 'Completed', 'Cancelled'],
+                'In Progress' => ['Completed', 'Cancelled'],
+                'Completed' => [],
+                'Cancelled' => []
+            ];
+            if ($newStatus !== $session['status']) {
+                if (!in_array($newStatus, $allowedNext[$session['status']] ?? [], true)) {
+                    jsonError(400, "A {$session['status']} session cannot be changed to $newStatus.");
+                }
+                if ($newStatus === 'In Progress' || $newStatus === 'Completed') {
+                    requirePaymentConfirmed($pdo, $session);
+                }
 
-                notify($pdo, 'student', $session['student_name'], 'Session Cancelled', "Your session with {$session['tutor_name']} on {$session['session_date']} was cancelled by Admin.");
-                notify($pdo, 'tutor', $session['tutor_name'], 'Session Cancelled', "Your session with {$session['student_name']} on {$session['session_date']} was cancelled by Admin.");
+                $fields[] = "`status` = ?";
+                $params[] = $newStatus;
+
+                if ($newStatus === 'Completed') {
+                    $stInc = $pdo->prepare("UPDATE students SET sessions_completed = sessions_completed + 1 WHERE id = ?");
+                    $stInc->execute([$session['student_id']]);
+                    notify($pdo, 'student', $session['student_name'], 'Session Completed', 'Your session has been marked completed by the admin.', $session['student_id']);
+                }
+
+                if ($newStatus === 'Cancelled') {
+                    // Free schedule slot
+                    $oldSlot = $session['session_date'] . ' ' . $session['time_slot'];
+                    $stSchDel = $pdo->prepare("DELETE FROM schedules WHERE tutor_id = ? AND date_slot = ? AND student_id = ?");
+                    $stSchDel->execute([$session['tutor_id'], $oldSlot, $session['student_id']]);
+
+                    notify($pdo, 'student', $session['student_name'], 'Session Cancelled', "Your session with {$session['tutor_name']} on {$session['session_date']} was cancelled by Admin.", $session['student_id']);
+                    notify($pdo, 'tutor', $session['tutor_name'], 'Session Cancelled', "Your session with {$session['student_name']} on {$session['session_date']} was cancelled by Admin.", $session['tutor_id']);
+                }
             }
         }
 
@@ -385,8 +425,8 @@ if ($method === 'GET') {
             $fields[] = "`time_slot` = ?";
             $params[] = $newSlot;
 
-            notify($pdo, 'student', $session['student_name'], 'Session Rescheduled', "Your session with {$session['tutor_name']} was rescheduled to $newDate at $newSlot.");
-            notify($pdo, 'tutor', $session['tutor_name'], 'Session Rescheduled', "Your session with {$session['student_name']} was rescheduled to $newDate at $newSlot.");
+            notify($pdo, 'student', $session['student_name'], 'Session Rescheduled', "Your session with {$session['tutor_name']} was rescheduled to $newDate at $newSlot.", $session['student_id']);
+            notify($pdo, 'tutor', $session['tutor_name'], 'Session Rescheduled', "Your session with {$session['student_name']} was rescheduled to $newDate at $newSlot.", $session['tutor_id']);
         }
 
         if (isset($input['payout_status'])) {

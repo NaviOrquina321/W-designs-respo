@@ -75,11 +75,12 @@ function snakeToCamel($string) {
     return lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $string))));
 }
 
-function notify($pdo, $role, $target, $title, $message) {
+// $targetId is the recipient's user id. Names are not unique, so notifications are matched by id.
+function notify($pdo, $role, $target, $title, $message, $targetId = null) {
     if (!$pdo) return;
     $id = 'notif-' . bin2hex(random_bytes(6));
-    $stmt = $pdo->prepare("INSERT INTO notifications (id, target_role, target, title, message, is_read) VALUES (?, ?, ?, ?, ?, 0)");
-    $stmt->execute([$id, $role, $target, $title, $message]);
+    $stmt = $pdo->prepare("INSERT INTO notifications (id, target_role, target_id, target, title, message, is_read) VALUES (?, ?, ?, ?, ?, ?, 0)");
+    $stmt->execute([$id, $role, $targetId, $target, $title, $message]);
 }
 
 function toCamelArray($data) {

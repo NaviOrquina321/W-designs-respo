@@ -11,8 +11,8 @@ if ($method === 'GET') {
         $stmt = $pdo->query("SELECT id, target_role, target, title, message, is_read, created_at FROM notifications ORDER BY created_at DESC");
         $notifications = $stmt->fetchAll();
     } else {
-        $stmt = $pdo->prepare("SELECT id, target_role, target, title, message, is_read, created_at FROM notifications WHERE target_role = 'all' OR (target_role = ? AND target = ?) ORDER BY created_at DESC");
-        $stmt->execute([$user['role'], $user['name']]);
+        $stmt = $pdo->prepare("SELECT id, target_role, target, title, message, is_read, created_at FROM notifications WHERE target_role = 'all' OR (target_role = ? AND (target_id = ? OR (target_id IS NULL AND target = ?))) ORDER BY created_at DESC");
+        $stmt->execute([$user['role'], $user['id'], $user['name']]);
         $notifications = $stmt->fetchAll();
     }
     echo json_encode(['status' => 'success', 'data' => toCamelArray($notifications)]);
@@ -49,8 +49,8 @@ if ($method === 'GET') {
         $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE target_role = 'admin'");
         $stmt->execute();
     } else {
-        $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE target_role = ? AND target = ?");
-        $stmt->execute([$user['role'], $user['name']]);
+        $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE target_role = ? AND (target_id = ? OR (target_id IS NULL AND target = ?))");
+        $stmt->execute([$user['role'], $user['id'], $user['name']]);
     }
     echo json_encode(['status' => 'success', 'message' => 'Targeted notifications marked as read.']);
 } else {

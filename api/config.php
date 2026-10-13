@@ -8,6 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
         'lifetime' => 0,
         'path' => '/',
         'httponly' => true,
+        'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
         'samesite' => 'Lax'
     ]);
     session_start();
@@ -32,7 +33,12 @@ try {
 } catch (PDOException $e) {
     // 2. Fallback to SQLite if local MySQL server is offline
     try {
-        $dbPath = __DIR__ . '/../tutorlink.db';
+        // Keep the SQLite file inside data/ (blocked from web access by data/.htaccess)
+        $dataDir = __DIR__ . '/../data';
+        if (!is_dir($dataDir)) {
+            @mkdir($dataDir, 0775, true);
+        }
+        $dbPath = $dataDir . '/tutorlink.db';
         $pdo = new PDO("sqlite:$dbPath", null, null, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
@@ -197,6 +203,7 @@ try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS `notifications` (
       `id` VARCHAR(50) PRIMARY KEY,
       `target_role` VARCHAR(50) DEFAULT 'all',
+      `target_id` VARCHAR(20),
       `target` VARCHAR(100) NOT NULL,
       `title` VARCHAR(150) NOT NULL,
       `message` TEXT NOT NULL,
@@ -215,6 +222,19 @@ try {
       `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (`session_id`) REFERENCES `sessions`(`id`) ON DELETE CASCADE
     );");
+
+    // Migration: older databases have no notifications.target_id column
+    $hasTargetId = false;
+    if ($isSQLite) {
+        foreach ($pdo->query("PRAGMA table_info(`notifications`)")->fetchAll() as $col) {
+            if ($col['name'] === 'target_id') { $hasTargetId = true; break; }
+        }
+    } else {
+        $hasTargetId = (bool)$pdo->query("SHOW COLUMNS FROM `notifications` LIKE 'target_id'")->fetch();
+    }
+    if (!$hasTargetId) {
+        $pdo->exec("ALTER TABLE `notifications` ADD COLUMN `target_id` VARCHAR(20)");
+    }
 
     // Seed Admin & Seed Users if users table is empty
     $checkUser = $pdo->query("SELECT COUNT(*) as cnt FROM `users`")->fetch();
@@ -237,7 +257,7 @@ try {
 
         // Insert Seed Tutor Prof. Alex Rivera
         $stmt->execute(['tut-1', 'alex@tutorlink.ph', $tutorHash, 'tutor', 'Prof. Alex Rivera']);
-        $stmtTut = $pdo->prepare("INSERT INTO `tutors` (`id`, `name`, `email`, `initials`, `rating`, `reviews_count`, `hourly_rate`, `subjects`, `learning_styles`, `bio`, `available`, `deactivated`, `diploma_status`, `tor_status`, `id_status`, `approval_status`, `available_days`, `available_time_slots`, `availability_slots`) VALUES (?, ?, ?, ?, 5.0, 1, 350, ?, ?, ?, 1, 0, 'Verified', 'Verified', 'Verified', 'Approved', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')");
+        $stmtTut = $pdo->prepare("INSERT INTO `tutors` (`id`, `name`, `email`, `initials`, `rating`, `reviews_count`, `hourly_rate`, `subjects`, `learning_styles`, `bio`, `available`, `deactivated`, `diploma_status`, `tor_status`, `id_status`, `approval_status`, `available_days`, `available_time_slots`, `availability_slots`) VALUES (?, ?, ?, ?, 0.0, 0, 350, ?, ?, ?, 1, 0, 'Verified', 'Verified', 'Verified', 'Approved', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')");
         $stmtTut->execute(['tut-1', 'Prof. Alex Rivera', 'alex@tutorlink.ph', 'AR', 'Calculus, Physics, Mathematics', 'Step-by-Step Explanation, Visual Diagrams', 'Licensed High School & College Mathematics educator with 7+ years teaching STEM subjects.']);
 
         // Seed Default Subjects

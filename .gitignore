@@ -1,0 +1,9 @@
+# Local database and logs
+/data/*.db
+/tutorlink.db
+*.log
+
+# Test / editor output
+test-results/
+node_modules/
+.DS_Store

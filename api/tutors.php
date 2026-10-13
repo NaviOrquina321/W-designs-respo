@@ -102,7 +102,7 @@ if ($method === 'GET') {
             $params[] = $appStatus;
 
             if ($appStatus !== $existing['approval_status']) {
-                notify($pdo, 'tutor', $existing['name'], 'Tutor Application Status Update', "Your application status has been updated to $appStatus.");
+                notify($pdo, 'tutor', $existing['name'], 'Tutor Application Status Update', "Your application status has been updated to $appStatus.", $existing['id']);
             }
         }
 

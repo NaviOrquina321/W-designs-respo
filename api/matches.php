@@ -36,7 +36,7 @@ if ($method === 'GET') {
     }
 
     // Verify tutor exists, is approved and not deactivated
-    $stT = $pdo->prepare("SELECT id, name, approval_status, deactivated FROM tutors WHERE id = ?");
+    $stT = $pdo->prepare("SELECT id, name, subjects, approval_status, deactivated FROM tutors WHERE id = ?");
     $stT->execute([$tutorId]);
     $tutor = $stT->fetch();
 
@@ -46,6 +46,12 @@ if ($method === 'GET') {
     if ($tutor['approval_status'] !== 'Approved' || !empty($tutor['deactivated'])) {
         jsonError(400, 'Selected tutor is not approved or is inactive.');
     }
+
+    $offered = array_map('strtolower', array_map('trim', explode(',', $tutor['subjects'] ?? '')));
+    if (!in_array(strtolower($subject), $offered, true)) {
+        jsonError(400, "Tutor does not offer the subject '$subject'.");
+    }
+    $matchReason = mb_substr($matchReason, 0, 300);
 
     $tutorName = $tutor['name'];
     $studentId = $user['id'];
@@ -73,7 +79,7 @@ if ($method === 'GET') {
     ]);
 
     // Notify tutor and admin
-    notify($pdo, 'tutor', $tutorName, 'New Tutor Match Request', "$studentName submitted a match request for $subject.");
+    notify($pdo, 'tutor', $tutorName, 'New Tutor Match Request', "$studentName submitted a match request for $subject.", $tutorId);
     notify($pdo, 'admin', 'System Admin', 'New Match Request Submitted', "$studentName requested match with $tutorName for $subject.");
 
     $stGet = $pdo->prepare("SELECT * FROM matches WHERE id = ?");
@@ -121,9 +127,9 @@ if ($method === 'GET') {
         $params[] = $statusVal;
 
         if ($statusVal === 'Approved') {
-            notify($pdo, 'student', $match['student_name'], 'Match Request Approved', "{$match['tutor_name']} accepted your match request for {$match['subject']}.");
+            notify($pdo, 'student', $match['student_name'], 'Match Request Approved', "{$match['tutor_name']} accepted your match request for {$match['subject']}.", $match['student_id']);
         } elseif ($statusVal === 'Cancelled') {
-            notify($pdo, 'student', $match['student_name'], 'Match Request Cancelled', "Match request for {$match['subject']} with {$match['tutor_name']} was cancelled.");
+            notify($pdo, 'student', $match['student_name'], 'Match Request Cancelled', "Match request for {$match['subject']} with {$match['tutor_name']} was cancelled.", $match['student_id']);
         }
     }
 

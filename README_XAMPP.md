@@ -26,7 +26,20 @@ Copy or move the `tutorlink` project folder into your XAMPP `htdocs` directory:
 3. Drop `tutorlink_db` if it exists, then click **Import** and select `database.sql` from the project folder.
 4. Click **Import** (or **Go**).
 
-*Note: `api/config.php` automatically creates the `tutorlink_db` database and schema if it does not already exist, with a fallback to SQLite (`tutorlink.db`) if MySQL is offline.*
+*Note: `api/config.php` automatically creates the `tutorlink_db` database and schema if it does not already exist. If MySQL is offline it silently falls back to a SQLite file at `data/tutorlink.db`, so always start MySQL in XAMPP or your data will go into that separate file.*
+
+The `.htaccess` files in the project root and in `data/` stop browsers from downloading the database, `.sql` and `.md` files. Keep Apache's `AllowOverride` enabled for the project folder (XAMPP's default allows it).
+
+### Running without XAMPP (PHP dev server)
+```
+php -S localhost:8000 router.php
+```
+`router.php` applies the same download protection that `.htaccess` gives on Apache.
+
+### Session rules to know when testing
+- A booked session starts out as *Confirmed* but its GCash payment is *Pending*.
+- The admin must confirm the payment (Payments tab) before the tutor can start or complete the session.
+- Completed and Cancelled sessions cannot be reopened.
 
 ---
 
