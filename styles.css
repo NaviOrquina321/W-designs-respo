@@ -700,9 +700,147 @@ footer .wrap { padding-top: 56px; padding-bottom: 56px; }
   display: flex; align-items: center; gap: 10px;
 }
 
+/* Calendar Engine & Grid Component Styles */
+.calendar-box {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 20px;
+}
+
+.calendar-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.calendar-header-bar h4 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  color: var(--oxford-navy);
+  margin: 0;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.calendar-day-header {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--oxford-navy);
+  padding: 8px 0;
+  background: var(--paper);
+  border-radius: 4px;
+}
+
+.calendar-day-cell {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  min-height: 52px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.calendar-day-cell:hover:not(.empty) {
+  border-color: var(--warm-gold);
+  background: #f0f4f8;
+}
+
+.calendar-day-cell.empty {
+  background: transparent;
+  border-color: transparent;
+  cursor: default;
+}
+
+.calendar-day-cell.has-session {
+  background: var(--oxford-navy);
+  color: #ffffff;
+  border-color: var(--warm-gold);
+}
+
+.session-badge-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--warm-gold);
+  border-radius: 50%;
+  align-self: flex-start;
+}
+
+.calendar-selected-details {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--paper);
+  border: 1px solid var(--warm-gold);
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Floating Calendar Widget Button */
+.floating-btn {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 990;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--oxford-navy);
+  color: #ffffff;
+  border: 1.5px solid var(--warm-gold);
+  padding: 12px 20px;
+  border-radius: 50px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(11, 19, 42, 0.28);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.floating-btn:hover {
+  background-color: var(--warm-gold);
+  color: var(--oxford-navy);
+  border-color: var(--oxford-navy);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(11, 19, 42, 0.38);
+}
+
+.floating-btn-icon {
+  width: 20px;
+  height: 20px;
+  stroke: var(--warm-gold);
+  transition: stroke 0.25s ease;
+}
+
+.floating-btn:hover .floating-btn-icon {
+  stroke: var(--oxford-navy);
+}
+
 @media (max-width: 768px) {
   .hero h1 { font-size: 2.3rem; }
   .metrics-grid { grid-template-columns: 1fr; gap: 16px; }
   .audience-grid { grid-template-columns: 1fr; }
   .feature-grid { grid-template-columns: 1fr; }
+  .floating-btn { bottom: 18px; right: 18px; padding: 10px 16px; font-size: 0.85rem; }
 }

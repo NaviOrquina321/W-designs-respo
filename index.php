@@ -374,7 +374,7 @@ header('Content-Type: text/html; charset=utf-8');
         </div>
 
         <!-- Quick Stats Grid -->
-        <div class="stats-grid">
+        <div class="stats-grid margin-bottom">
           <div class="stat-card">
             <span class="stat-num" id="tutor-stat-earnings">₱4,500</span>
             <span class="stat-label">Net Earnings</span>
@@ -393,114 +393,101 @@ header('Content-Type: text/html; charset=utf-8');
           </div>
         </div>
 
-        <!-- Tutor Sub-Navigation Tabs (Uniform Design & Sizing) -->
-        <div class="admin-tab-bar margin-bottom">
-          <button class="tutor-tab-btn active" data-tab="tutor-tab-requests">Match Requests</button>
-          <button class="tutor-tab-btn" data-tab="tutor-tab-sessions">Teaching Sessions</button>
-          <button class="tutor-tab-btn" data-tab="tutor-tab-earnings">Earnings & Performance</button>
-        </div>
-
-        <!-- Tutor Tab 1: Match Requests -->
-        <div class="tutor-tab-content active" id="tutor-tab-requests">
-          <div class="dashboard-section">
-            <div class="section-title-bar">
-              <h3>Incoming Student Match Requests</h3>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Request ID</th>
-                    <th>Student Name</th>
-                    <th>Subject</th>
-                    <th>Compatibility</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody id="tutor-requests-table-body">
-                  <!-- Dynamically populated -->
-                </tbody>
-              </table>
-            </div>
+        <!-- Section 1: Match Requests -->
+        <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>Incoming Student Match Requests</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Request ID</th>
+                  <th>Student Name</th>
+                  <th>Subject</th>
+                  <th>Compatibility</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="tutor-requests-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <!-- Tutor Tab 3: Teaching Sessions -->
-        <div class="tutor-tab-content" id="tutor-tab-sessions">
-          <div class="dashboard-section">
-            <div class="section-title-bar">
-              <h3>Upcoming & Active Teaching Sessions</h3>
-            </div>
-            <div id="tutor-upcoming-sessions-list" class="cards-list">
-              <!-- Dynamic sessions for tutor -->
-            </div>
+        <!-- Section 2: Teaching Sessions -->
+        <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>Upcoming & Active Teaching Sessions</h3>
+          </div>
+          <div id="tutor-upcoming-sessions-list" class="cards-list">
+            <!-- Dynamic sessions for tutor -->
           </div>
         </div>
 
-        <!-- Tutor Tab 4: Earnings & Performance -->
-        <div class="tutor-tab-content" id="tutor-tab-earnings">
-          <div class="dashboard-section">
-            <div class="section-title-bar">
-              <h3>Earnings & Payout Summary</h3>
+        <!-- Section 3: Earnings & Performance -->
+        <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>Earnings & Payout Summary</h3>
+          </div>
+          <div class="stats-grid margin-bottom">
+            <div class="stat-card">
+              <span class="stat-num" id="tutor-gross-earnings">₱4,950</span>
+              <span class="stat-label">Gross Revenue</span>
             </div>
-            <div class="stats-grid margin-bottom">
-              <div class="stat-card">
-                <span class="stat-num" id="tutor-gross-earnings">₱4,950</span>
-                <span class="stat-label">Gross Revenue</span>
-              </div>
-              <div class="stat-card">
-                <span class="stat-num" id="tutor-net-earnings">₱4,455</span>
-                <span class="stat-label">Net Earnings (90%)</span>
-              </div>
-              <div class="stat-card">
-                <span class="stat-num" id="tutor-payout-pending">₱315</span>
-                <span class="stat-label">Pending Payout</span>
-              </div>
+            <div class="stat-card">
+              <span class="stat-num" id="tutor-net-earnings">₱4,455</span>
+              <span class="stat-label">Net Earnings (90%)</span>
             </div>
-            <div class="table-responsive">
-              <table class="data-table margin-bottom">
-                <thead>
-                  <tr>
-                    <th>Session ID</th>
-                    <th>Student</th>
-                    <th>Subject</th>
-                    <th>Date</th>
-                    <th>Total Paid</th>
-                    <th>Net Payout</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="tutor-earnings-table-body">
-                  <!-- Dynamic earnings rows -->
-                </tbody>
-              </table>
+            <div class="stat-card">
+              <span class="stat-num" id="tutor-payout-pending">₱315</span>
+              <span class="stat-label">Pending Payout</span>
             </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table margin-bottom">
+              <thead>
+                <tr>
+                  <th>Session ID</th>
+                  <th>Student</th>
+                  <th>Subject</th>
+                  <th>Date</th>
+                  <th>Total Paid</th>
+                  <th>Net Payout</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="tutor-earnings-table-body">
+                <!-- Dynamic earnings rows -->
+              </tbody>
+            </table>
+          </div>
 
-            <div class="section-title-bar margin-top">
-              <h3>Performance & Student Reviews</h3>
+          <div class="section-title-bar margin-top">
+            <h3>Performance & Student Reviews</h3>
+          </div>
+          <div class="detail-card">
+            <div style="display: flex; gap: 24px; flex-wrap: wrap; padding-bottom: 14px; border-bottom: 1px solid var(--line);">
+              <div><strong>Overall Rating:</strong> <span style="font-size: 1.05rem; color: var(--ink); font-weight: 700;">4.9 / 5.0 ★</span></div>
+              <div><strong>Total Reviews:</strong> <span>38 Verified Reviews</span></div>
+              <div><strong>Completion Rate:</strong> <span>98% On-Time Completion</span></div>
             </div>
-            <div class="detail-card">
-              <div style="display: flex; gap: 24px; flex-wrap: wrap; padding-bottom: 14px; border-bottom: 1px solid var(--line);">
-                <div><strong>Overall Rating:</strong> <span style="font-size: 1.05rem; color: var(--ink); font-weight: 700;">4.9 / 5.0 ★</span></div>
-                <div><strong>Total Reviews:</strong> <span>38 Verified Reviews</span></div>
-                <div><strong>Completion Rate:</strong> <span>98% On-Time Completion</span></div>
-              </div>
-              <h4 style="margin-top: 14px;">Recent Student Feedback</h4>
-              <div id="tutor-reviews-list" class="cards-list margin-top">
-                <div class="session-card">
-                  <div>
-                    <strong>Maria Santos</strong> <span class="sub-text">(Calculus II)</span>
-                    <div style="color: var(--ink); font-weight: 700; margin-top: 2px;">★★★★★ 5.0</div>
-                    <p class="sub-text" style="margin-top: 4px;">Prof. Rivera made integration techniques so much easier to understand! Excellent step-by-step explanations.</p>
-                  </div>
+            <h4 style="margin-top: 14px;">Recent Student Feedback</h4>
+            <div id="tutor-reviews-list" class="cards-list margin-top">
+              <div class="session-card">
+                <div>
+                  <strong>Maria Santos</strong> <span class="sub-text">(Calculus II)</span>
+                  <div style="color: var(--ink); font-weight: 700; margin-top: 2px;">★★★★★ 5.0</div>
+                  <p class="sub-text" style="margin-top: 4px;">Prof. Rivera made integration techniques so much easier to understand! Excellent step-by-step explanations.</p>
                 </div>
-                <div class="session-card">
-                  <div>
-                    <strong>Juan Dela Cruz</strong> <span class="sub-text">(Physics)</span>
-                    <div style="color: var(--ink); font-weight: 700; margin-top: 2px;">★★★★★ 5.0</div>
-                    <p class="sub-text" style="margin-top: 4px;">Punctual and very encouraging. Solved complex mechanics problems together.</p>
-                  </div>
+              </div>
+              <div class="session-card">
+                <div>
+                  <strong>Juan Dela Cruz</strong> <span class="sub-text">(Physics)</span>
+                  <div style="color: var(--ink); font-weight: 700; margin-top: 2px;">★★★★★ 5.0</div>
+                  <p class="sub-text" style="margin-top: 4px;">Punctual and very encouraging. Solved complex mechanics problems together.</p>
                 </div>
               </div>
             </div>

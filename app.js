@@ -93,7 +93,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTutorScheduleManager();
   initProfileModals();
   initTutorProfileSettings();
-  initTutorSubTabs();
   initSubjectManagement();
 
   // Check server session via api/me.php
@@ -659,65 +658,6 @@ function closeModal(id) {
   if (modal) modal.classList.remove('active');
 }
 
-// Tutor Portal Sub-Tabs Logic
-function initTutorSubTabs() {
-  document.querySelectorAll('.tutor-tab-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      document.querySelectorAll('.tutor-tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tutor-tab-content').forEach(c => c.classList.remove('active'));
-
-      e.target.classList.add('active');
-      const targetTab = e.target.getAttribute('data-tab');
-      document.getElementById(targetTab)?.classList.add('active');
-
-      if (targetTab === 'tutor-tab-requests') {
-        renderTutorRequests();
-      } else if (targetTab === 'tutor-tab-sessions') {
-        renderTutorUpcoming();
-      } else if (targetTab === 'tutor-tab-earnings') {
-        renderTutorEarnings();
-      }
-    });
-  });
-
-  document.getElementById('tutor-add-slot-modal-btn')?.addEventListener('click', () => {
-    const slot = prompt('Enter custom availability time slot (e.g. 08:00 AM - 10:00 AM):', '08:00 AM - 10:00 AM');
-    if (slot) {
-      const currentTutor = state.tutors.find(t => t.id === (state.currentUser ? state.currentUser.id : '') || t.name === (state.currentUser ? state.currentUser.name : '')) || state.tutors[0];
-      if (currentTutor) {
-        currentTutor.availabilitySlots.push(slot);
-      }
-      showToast(`Custom slot "${slot}" added to availability!`);
-    }
-  });
-
-  document.getElementById('tutor-reset-availability-btn')?.addEventListener('click', () => {
-    document.getElementById('tutor-time-window-input').value = '09:00 AM - 05:00 PM';
-    document.getElementById('tutor-blocked-dates-input').value = '';
-    document.querySelectorAll('input[name="avail_day"]').forEach(cb => {
-      cb.checked = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].includes(cb.value);
-    });
-    showToast('Reset availability settings to default weekdays!');
-  });
-
-  document.getElementById('tutor-availability-settings-form')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const checkedDays = Array.from(document.querySelectorAll('input[name="avail_day"]:checked')).map(cb => cb.value);
-    const windowVal = document.getElementById('tutor-time-window-input').value;
-    const blockedVal = document.getElementById('tutor-blocked-dates-input').value;
-
-    const currentTutor = state.tutors.find(t => t.id === (state.currentUser ? state.currentUser.id : '') || t.name === (state.currentUser ? state.currentUser.name : '')) || state.tutors[0];
-    if (currentTutor) {
-      currentTutor.availableDays = checkedDays;
-      currentTutor.availableTimeSlots = windowVal;
-      currentTutor.blockedDates = blockedVal;
-    }
-
-    renderTutorCalendar();
-    showToast('Tutor availability schedule updated!');
-  });
-  renderTutorCalendar();
-}
 
 // Profile Modals & Settings Functionality
 function initProfileModals() {
