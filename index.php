@@ -427,6 +427,43 @@ header('Content-Type: text/html; charset=utf-8');
           </div>
         </div>
 
+        <!-- Section: Schedule Management & Available Slots -->
+        <div class="dashboard-section">
+          <div class="section-title-bar">
+            <h3>Manage Schedule & Available Slots</h3>
+            <button class="btn btn-secondary btn-small" id="edit-tutor-schedule-profile-btn">Edit Working Window</button>
+          </div>
+          <div class="detail-card margin-bottom">
+            <div style="display: flex; gap: 24px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid var(--line);">
+              <div><strong>Working Days:</strong> <span id="tutor-summary-days">Mon, Tue, Wed, Thu, Fri</span></div>
+              <div><strong>Time Window:</strong> <span id="tutor-summary-window">09:00 AM - 05:00 PM</span></div>
+              <div><strong>Blocked Dates:</strong> <span id="tutor-summary-blocked">None</span></div>
+            </div>
+
+            <form id="tutor-new-schedule-form" class="margin-top">
+              <h4 style="margin-bottom: 8px;">Create New Bookable Slot</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Date</label>
+                  <input type="date" id="tutor-slot-date" class="form-input" required>
+                </div>
+                <div class="form-group">
+                  <label>Time Slot</label>
+                  <input type="text" id="tutor-slot-time" placeholder="e.g. 02:00 PM" class="form-input" required>
+                </div>
+                <div class="form-group">
+                  <label>Subject</label>
+                  <input type="text" id="tutor-slot-subject" placeholder="e.g. Mathematics" class="form-input" required>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 8px;">
+                <button type="submit" class="btn btn-primary btn-small" id="tutor-save-slot-btn">Save Slot</button>
+                <button type="button" class="btn btn-secondary btn-small" id="tutor-cancel-slot-btn">Clear</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
         <!-- Section 3: Earnings & Performance -->
         <div class="dashboard-section">
           <div class="section-title-bar">
@@ -1039,6 +1076,58 @@ header('Content-Type: text/html; charset=utf-8');
             </form>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: End Session Notes Modal -->
+  <div class="modal-backdrop" id="modal-end-session">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Complete Session & Record Remarks</h3>
+        <button class="close-btn" id="close-end-session-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="end-session-form">
+          <input type="hidden" id="end-session-id">
+          <div class="form-group">
+            <label>Session Remarks & Tutor Notes</label>
+            <textarea id="end-session-notes-input" class="form-input" rows="4" placeholder="Enter session summary, homework assigned, or feedback for the student..."></textarea>
+          </div>
+          <div class="modal-actions margin-top">
+            <button type="button" class="btn btn-secondary" id="cancel-end-session-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="confirm-end-session-btn">Complete Session</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Reschedule Session Modal -->
+  <div class="modal-backdrop" id="modal-reschedule">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Reschedule Session</h3>
+        <button class="close-btn" id="close-reschedule-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="reschedule-session-form">
+          <input type="hidden" id="reschedule-session-id">
+          <div class="form-group">
+            <label>New Date</label>
+            <input type="date" id="reschedule-date-input" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label>New Time Slot</label>
+            <select id="reschedule-timeslot-select" class="form-select" required>
+              <!-- Populated dynamically from tutor's slots -->
+            </select>
+          </div>
+          <div class="modal-actions margin-top">
+            <button type="button" class="btn btn-secondary" id="cancel-reschedule-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="confirm-reschedule-btn">Confirm Reschedule</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

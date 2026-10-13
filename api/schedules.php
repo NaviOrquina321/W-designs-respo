@@ -14,14 +14,25 @@ if ($method === 'GET') {
     $user = requireRole(['tutor', 'admin']);
     $input = getInput();
 
-    $tutorId = $user['role'] === 'tutor' ? $user['id'] : trim($input['tutor_id'] ?? $input['tutorId'] ?? $user['id']);
-    $tutorName = $user['role'] === 'tutor' ? $user['name'] : trim($input['tutor_name'] ?? $input['tutorName'] ?? $user['name']);
-    $dateSlot = trim($input['date_slot'] ?? $input['dateSlot'] ?? '');
+    $tutorId = $user['role'] === 'tutor' ? $user['id'] : trim($input['tutor_id'] ?? ($input['tutorId'] ?? ''));
+    $dateSlot = trim($input['date_slot'] ?? ($input['dateSlot'] ?? ''));
     $subject = trim($input['subject'] ?? 'Mathematics');
 
+    if (empty($tutorId)) {
+        jsonError(400, 'Tutor ID required.');
+    }
     if (empty($dateSlot)) {
         jsonError(400, 'Date and time slot required.');
     }
+
+    $stT = $pdo->prepare("SELECT name FROM tutors WHERE id = ?");
+    $stT->execute([$tutorId]);
+    $tut = $stT->fetch();
+
+    if (!$tut) {
+        jsonError(404, 'Tutor not found.');
+    }
+    $tutorName = $tut['name'];
 
     $schId = newId('SCH-');
 
@@ -34,17 +45,14 @@ if ($method === 'GET') {
         $subject
     ]);
 
+    $stFetch = $pdo->prepare("SELECT * FROM schedules WHERE id = ?");
+    $stFetch->execute([$schId]);
+    $row = $stFetch->fetch();
+
     echo json_encode([
         'status' => 'success',
         'message' => 'Schedule slot created.',
-        'data' => [
-            'id' => $schId,
-            'tutor_id' => $tutorId,
-            'tutor_name' => $tutorName,
-            'date_slot' => $dateSlot,
-            'subject' => $subject,
-            'status' => 'Available'
-        ]
+        'data' => toCamelArray($row)
     ]);
 } elseif ($method === 'PUT') {
     $user = requireRole(['tutor', 'admin']);
@@ -70,9 +78,9 @@ if ($method === 'GET') {
     $fields = [];
     $params = [];
 
-    if (isset($input['date_slot'])) {
+    if (isset($input['date_slot']) || isset($input['dateSlot'])) {
         $fields[] = "`date_slot` = ?";
-        $params[] = trim($input['date_slot']);
+        $params[] = trim($input['date_slot'] ?? $input['dateSlot']);
     }
     if (isset($input['subject'])) {
         $fields[] = "`subject` = ?";

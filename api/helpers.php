@@ -1,15 +1,6 @@
 <?php
 // api/helpers.php - Core Security & API Utilities
-if (session_status() === PHP_SESSION_NONE) {
-    // Configure secure session cookie defaults
-    session_set_cookie_params([
-        'lifetime' => 0,
-        'path' => '/',
-        'httponly' => true,
-        'samesite' => 'Lax'
-    ]);
-    session_start();
-}
+// session handling is owned by api/config.php
 
 // Set JSON output header for API endpoints
 header('Content-Type: application/json; charset=utf-8');
@@ -29,10 +20,7 @@ function jsonError($code, $message) {
 
 function getInput() {
     $input = json_decode(file_get_contents('php://input'), true);
-    if (!is_array($input)) {
-        $input = $_POST;
-    }
-    return $input ?? [];
+    return is_array($input) ? $input : [];
 }
 
 function requireLogin() {
@@ -87,10 +75,18 @@ function snakeToCamel($string) {
     return lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $string))));
 }
 
+function notify($pdo, $role, $target, $title, $message) {
+    if (!$pdo) return;
+    $id = 'notif-' . bin2hex(random_bytes(6));
+    $stmt = $pdo->prepare("INSERT INTO notifications (id, target_role, target, title, message, is_read) VALUES (?, ?, ?, ?, ?, 0)");
+    $stmt->execute([$id, $role, $target, $title, $message]);
+}
+
 function toCamelArray($data) {
     if (!is_array($data)) return $data;
 
-    // Handle indexed array of row objects
+    // Handle empty or indexed array of row objects
+    if (empty($data)) return [];
     if (array_keys($data) === range(0, count($data) - 1)) {
         return array_map('toCamelArray', $data);
     }
@@ -104,15 +100,31 @@ function toCamelArray($data) {
         $result[$camelKey] = $value;
     }
 
+    // Cast boolean flags
+    $boolKeys = ['validated', 'deactivated', 'available', 'isRead'];
+    foreach ($boolKeys as $bk) {
+        if (isset($result[$bk])) {
+            $result[$bk] = (bool)(int)$result[$bk];
+        }
+    }
+    if (isset($result['isRead'])) {
+        $result['read'] = $result['isRead'];
+    }
+
+    // Cast numeric fields
+    $numKeys = ['amount', 'rating', 'hourlyRate', 'totalPaid', 'commissionFee', 'score', 'reviewsCount', 'sessionsCompleted'];
+    foreach ($numKeys as $nk) {
+        if (isset($result[$nk]) && $result[$nk] !== null) {
+            $result[$nk] = is_float($result[$nk] + 0) ? (float)$result[$nk] : (int)$result[$nk];
+        }
+    }
+
     // Add UI compatibility aliases if present in row assoc array
     if (isset($result['sessionDate']) && !isset($result['date'])) {
         $result['date'] = $result['sessionDate'];
     }
     if (isset($result['createdAt']) && !isset($result['time'])) {
         $result['time'] = date('M d, Y h:i A', strtotime($result['createdAt']));
-    }
-    if (isset($result['createdTime']) && !isset($result['time'])) {
-        $result['time'] = $result['createdTime'];
     }
 
     return $result;

@@ -43,14 +43,28 @@ if ($method === 'GET') {
     $params = [];
 
     if (isset($input['status'])) {
+        $statusVal = trim($input['status']);
+        if (!in_array($statusVal, ['Pending', 'Confirmed'], true)) {
+            jsonError(400, "Payment status must be 'Pending' or 'Confirmed'.");
+        }
         $fields[] = "`status` = ?";
-        $params[] = trim($input['status']);
+        $params[] = $statusVal;
+
+        if ($statusVal === 'Confirmed' && $payment['status'] !== 'Confirmed') {
+            notify($pdo, 'student', $payment['student_name'], 'Payment Confirmed', "Your payment of ₱{$payment['amount']} (Ref: {$payment['ref_no']}) has been confirmed by Admin.");
+        }
     }
 
-    if (isset($input['payout_status'])) {
-        $payoutVal = trim($input['payout_status']);
+    if (isset($input['payout_status']) || isset($input['payoutStatus'])) {
+        $payoutVal = trim($input['payout_status'] ?? $input['payoutStatus']);
+        if (!in_array($payoutVal, ['Unpaid', 'Paid Out'], true)) {
+            jsonError(400, "Payout status must be 'Unpaid' or 'Paid Out'.");
+        }
+
+        $currentStatus = isset($input['status']) ? trim($input['status']) : $payment['status'];
+
         if ($payoutVal === 'Paid Out') {
-            if ($payment['status'] !== 'Confirmed') {
+            if ($currentStatus !== 'Confirmed') {
                 jsonError(400, 'Cannot process payout for an unconfirmed payment.');
             }
             $stSesChk = $pdo->prepare("SELECT status FROM sessions WHERE gcash_ref = ?");
@@ -66,6 +80,10 @@ if ($method === 'GET') {
         // Sync linked sessions table row by gcash_ref = ref_no
         $stSes = $pdo->prepare("UPDATE sessions SET payout_status = ? WHERE gcash_ref = ?");
         $stSes->execute([$payoutVal, $payment['ref_no']]);
+
+        if ($payoutVal === 'Paid Out' && $payment['payout_status'] !== 'Paid Out') {
+            notify($pdo, 'tutor', $payment['tutor_name'], 'Payout Processed', "Your payout for Ref: {$payment['ref_no']} has been processed.");
+        }
     }
 
     if (empty($fields)) {

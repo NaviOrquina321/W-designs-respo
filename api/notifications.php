@@ -11,18 +11,18 @@ if ($method === 'GET') {
         $stmt = $pdo->query("SELECT id, target_role, target, title, message, is_read, created_at FROM notifications ORDER BY created_at DESC");
         $notifications = $stmt->fetchAll();
     } else {
-        $stmt = $pdo->prepare("SELECT id, target_role, target, title, message, is_read, created_at FROM notifications WHERE target_role = 'all' OR (target_role = ? AND (target = ? OR target = 'All Users')) ORDER BY created_at DESC");
+        $stmt = $pdo->prepare("SELECT id, target_role, target, title, message, is_read, created_at FROM notifications WHERE target_role = 'all' OR (target_role = ? AND target = ?) ORDER BY created_at DESC");
         $stmt->execute([$user['role'], $user['name']]);
         $notifications = $stmt->fetchAll();
     }
     echo json_encode(['status' => 'success', 'data' => toCamelArray($notifications)]);
 } elseif ($method === 'POST') {
-    $user = requireRole(['admin', 'tutor', 'student']);
+    $user = requireRole(['admin']);
     $input = getInput();
 
     $targetRole = trim($input['target_role'] ?? ($input['targetRole'] ?? 'all'));
     $target = trim($input['target'] ?? 'All Users');
-    $title = trim($input['title'] ?? 'Notification');
+    $title = trim($input['title'] ?? 'System Broadcast');
     $message = trim($input['message'] ?? '');
 
     if (empty($message)) {
@@ -34,27 +34,25 @@ if ($method === 'GET') {
     $stmt = $pdo->prepare("INSERT INTO notifications (id, target_role, target, title, message, is_read) VALUES (?, ?, ?, ?, ?, 0)");
     $stmt->execute([$notifId, $targetRole, $target, $title, $message]);
 
+    $stmtFetch = $pdo->prepare("SELECT id, target_role, target, title, message, is_read, created_at FROM notifications WHERE id = ?");
+    $stmtFetch->execute([$notifId]);
+    $row = $stmtFetch->fetch();
+
     echo json_encode([
         'status' => 'success',
-        'message' => 'Notification sent.',
-        'data' => [
-            'id' => $notifId,
-            'target_role' => $targetRole,
-            'target' => $target,
-            'title' => $title,
-            'message' => $message,
-            'is_read' => 0
-        ]
+        'message' => 'Notification broadcast sent successfully.',
+        'data' => toCamelArray($row)
     ]);
 } elseif ($method === 'PUT') {
     $user = requireLogin();
     if ($user['role'] === 'admin') {
-        $pdo->exec("UPDATE notifications SET is_read = 1");
+        $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE target_role = 'admin'");
+        $stmt->execute();
     } else {
-        $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE (target_role = ? AND target = ?) OR target = ?");
-        $stmt->execute([$user['role'], $user['name'], $user['name']]);
+        $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE target_role = ? AND target = ?");
+        $stmt->execute([$user['role'], $user['name']]);
     }
-    echo json_encode(['status' => 'success', 'message' => 'Notifications marked as read.']);
+    echo json_encode(['status' => 'success', 'message' => 'Targeted notifications marked as read.']);
 } else {
     jsonError(405, 'Method not allowed');
 }

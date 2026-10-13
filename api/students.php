@@ -15,7 +15,7 @@ if ($method === 'GET') {
         $stmt->execute([$user['id'], strtolower($user['email'])]);
         $students = $stmt->fetchAll();
     }
-    echo json_encode(['status' => 'success', 'data' => $students]);
+    echo json_encode(['status' => 'success', 'data' => toCamelArray($students)]);
 } elseif ($method === 'PUT') {
     $user = requireLogin();
     $input = getInput();
@@ -38,8 +38,12 @@ if ($method === 'GET') {
             $params[] = $input['deactivated'] ? 1 : 0;
         }
         if (isset($input['name'])) {
+            $newName = trim($input['name']);
             $fields[] = "`name` = ?";
-            $params[] = trim($input['name']);
+            $params[] = $newName;
+
+            $stmtU = $pdo->prepare("UPDATE users SET name = ? WHERE user_id = ?");
+            $stmtU->execute([$newName, $studentId]);
         }
         if (isset($input['grade'])) {
             $fields[] = "`grade` = ?";
@@ -69,9 +73,14 @@ if ($method === 'GET') {
         $params = [];
 
         if (isset($input['name'])) {
+            $newName = trim($input['name']);
+            if (empty($newName)) jsonError(400, 'Name cannot be empty.');
             $fields[] = "`name` = ?";
-            $params[] = trim($input['name']);
-            $_SESSION['name'] = trim($input['name']);
+            $params[] = $newName;
+            $_SESSION['name'] = $newName;
+
+            $stmtU = $pdo->prepare("UPDATE users SET name = ? WHERE user_id = ?");
+            $stmtU->execute([$newName, $studentId]);
         }
         if (isset($input['grade'])) {
             $fields[] = "`grade` = ?";
@@ -81,8 +90,9 @@ if ($method === 'GET') {
             $fields[] = "`bio` = ?";
             $params[] = trim($input['bio']);
         }
-        if (isset($input['subjects_needed'])) {
-            $subVal = is_array($input['subjects_needed']) ? implode(', ', $input['subjects_needed']) : trim($input['subjects_needed']);
+        if (isset($input['subjects_needed']) || isset($input['subjectsNeeded'])) {
+            $val = $input['subjects_needed'] ?? $input['subjectsNeeded'];
+            $subVal = is_array($val) ? implode(', ', $val) : trim($val);
             $fields[] = "`subjects_needed` = ?";
             $params[] = $subVal;
         }

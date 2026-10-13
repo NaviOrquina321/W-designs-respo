@@ -1,5 +1,6 @@
 <?php
 // api/logout.php - Terminate User Session
+require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/helpers.php';
 
 $_SESSION = [];

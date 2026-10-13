@@ -10,12 +10,16 @@ if ($method !== 'POST') {
 }
 
 $input = getInput();
-$role = strtolower(trim($input['role'] ?? 'student'));
+$role = strtolower(trim($input['role'] ?? ''));
 $name = trim($input['name'] ?? '');
 $email = strtolower(trim($input['email'] ?? ''));
 $password = $input['password'] ?? '';
 $grade = trim($input['grade'] ?? ($input['specialty'] ?? 'Senior High'));
 $subject = trim($input['subject'] ?? ($input['specialty'] ?? 'Mathematics'));
+
+if (!in_array($role, ['student', 'tutor'], true)) {
+    jsonError(400, 'Role must be student or tutor.');
+}
 
 if (empty($name) || empty($email) || empty($password)) {
     jsonError(400, 'Please fill in all required fields.');
@@ -82,7 +86,7 @@ try {
         $stmtUser = $pdo->prepare("INSERT INTO users (user_id, email, password_hash, role, name) VALUES (?, ?, ?, 'tutor', ?)");
         $stmtUser->execute([$userId, $email, $passwordHash, $name]);
 
-        $stmtTut = $pdo->prepare("INSERT INTO tutors (id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, diploma_status, tor_status, id_status, approval_status, available_days, available_time_slots, availability_slots) VALUES (?, ?, ?, ?, 5.0, 1, 350, ?, 'Step-by-Step Explanation', ?, 1, 0, 'Approved', 'Approved', 'Approved', 'Approved', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')");
+        $stmtTut = $pdo->prepare("INSERT INTO tutors (id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, diploma_status, tor_status, id_status, approval_status, available_days, available_time_slots, availability_slots) VALUES (?, ?, ?, ?, 0.0, 0, 350, ?, 'Step-by-Step Explanation', ?, 1, 0, 'Pending', 'Pending', 'Pending', 'Pending Review', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')");
         $stmtTut->execute([
             $userId,
             $name,
@@ -92,9 +96,7 @@ try {
             "$grade Specialist Tutor in $subject. Dedicated to student growth."
         ]);
 
-        $notifId = newId('notif-');
-        $stmtNotif = $pdo->prepare("INSERT INTO notifications (id, target_role, target, title, message) VALUES (?, 'admin', 'System Admin', 'New Tutor Registered', ?)");
-        $stmtNotif->execute([$notifId, "New tutor registered: $name ($email) - Verification Pending."]);
+        notify($pdo, 'admin', 'System Admin', 'New Tutor Registered', "New tutor registered: $name ($email) - Verification Pending.");
 
         session_regenerate_id(true);
         $_SESSION['user_id'] = $userId;

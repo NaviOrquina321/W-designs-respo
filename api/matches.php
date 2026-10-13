@@ -27,41 +27,63 @@ if ($method === 'GET') {
     $input = getInput();
 
     $tutorId = trim($input['tutor_id'] ?? ($input['tutorId'] ?? ''));
-    $tutorName = trim($input['tutor_name'] ?? ($input['tutorName'] ?? 'Tutor'));
     $subject = trim($input['subject'] ?? 'Mathematics');
     $score = max(0, min(100, intval($input['score'] ?? 80)));
-    $matchReason = trim($input['match_reason'] ?? ($input['matchReason'] ?? 'AI Compatibility Match'));
+    $matchReason = trim($input['match_reason'] ?? ($input['matchReason'] ?? 'Rule-Based Compatibility Match'));
 
+    if (empty($tutorId)) {
+        jsonError(400, 'Tutor ID required.');
+    }
+
+    // Verify tutor exists, is approved and not deactivated
+    $stT = $pdo->prepare("SELECT id, name, approval_status, deactivated FROM tutors WHERE id = ?");
+    $stT->execute([$tutorId]);
+    $tutor = $stT->fetch();
+
+    if (!$tutor) {
+        jsonError(404, 'Tutor not found.');
+    }
+    if ($tutor['approval_status'] !== 'Approved' || !empty($tutor['deactivated'])) {
+        jsonError(400, 'Selected tutor is not approved or is inactive.');
+    }
+
+    $tutorName = $tutor['name'];
     $studentId = $user['id'];
     $studentName = $user['name'];
+
+    // Reject duplicate pending match for same student + tutor + subject
+    $stDup = $pdo->prepare("SELECT COUNT(*) as cnt FROM matches WHERE student_id = ? AND tutor_id = ? AND subject = ? AND status = 'Pending Review'");
+    $stDup->execute([$studentId, $tutorId, $subject]);
+    if ($stDup->fetch()['cnt'] > 0) {
+        jsonError(400, 'You already have a pending match request with this tutor for this subject.');
+    }
 
     $matchId = newId('MATCH-');
 
     $stmt = $pdo->prepare("INSERT INTO matches (id, student_id, student_name, tutor_id, tutor_name, subject, score, status, match_reason) VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending Review', ?)");
     $stmt->execute([
         $matchId,
-        !empty($studentId) ? $studentId : null,
+        $studentId,
         $studentName,
-        !empty($tutorId) ? $tutorId : null,
+        $tutorId,
         $tutorName,
         $subject,
         $score,
         $matchReason
     ]);
 
+    // Notify tutor and admin
+    notify($pdo, 'tutor', $tutorName, 'New Tutor Match Request', "$studentName submitted a match request for $subject.");
+    notify($pdo, 'admin', 'System Admin', 'New Match Request Submitted', "$studentName requested match with $tutorName for $subject.");
+
+    $stGet = $pdo->prepare("SELECT * FROM matches WHERE id = ?");
+    $stGet->execute([$matchId]);
+    $row = $stGet->fetch();
+
     echo json_encode([
         'status' => 'success',
         'message' => 'Match request generated.',
-        'data' => [
-            'id' => $matchId,
-            'student_id' => $studentId,
-            'student_name' => $studentName,
-            'tutor_id' => $tutorId,
-            'tutor_name' => $tutorName,
-            'subject' => $subject,
-            'score' => $score,
-            'status' => 'Pending Review'
-        ]
+        'data' => toCamelArray($row)
     ]);
 } elseif ($method === 'PUT') {
     $user = requireRole(['admin', 'tutor']);
@@ -91,10 +113,24 @@ if ($method === 'GET') {
 
     if (isset($input['status'])) {
         $statusVal = trim($input['status']);
-        if (in_array($statusVal, ['Approved', 'Cancelled', 'Pending Review'], true)) {
-            $fields[] = "`status` = ?";
-            $params[] = $statusVal;
+        $validStatuses = ['Approved', 'Cancelled', 'Pending Review', 'Reassigned'];
+        if (!in_array($statusVal, $validStatuses, true)) {
+            jsonError(400, 'Invalid match status.');
         }
+        $fields[] = "`status` = ?";
+        $params[] = $statusVal;
+
+        if ($statusVal === 'Approved') {
+            notify($pdo, 'student', $match['student_name'], 'Match Request Approved', "{$match['tutor_name']} accepted your match request for {$match['subject']}.");
+        } elseif ($statusVal === 'Cancelled') {
+            notify($pdo, 'student', $match['student_name'], 'Match Request Cancelled', "Match request for {$match['subject']} with {$match['tutor_name']} was cancelled.");
+        }
+    }
+
+    if (isset($input['score'])) {
+        $score = max(0, min(100, intval($input['score'])));
+        $fields[] = "`score` = ?";
+        $params[] = $score;
     }
 
     if (isset($input['tutor_id']) && $user['role'] === 'admin') {

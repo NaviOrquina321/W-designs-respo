@@ -1,8 +1,7 @@
 <?php
 // admin.php - Standalone Admin Monitoring Portal
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/api/config.php';
+
 // Strictly enforce Admin Session Access
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header('Location: index.php');
@@ -14,7 +13,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apex Admin - TutorLink Management</title>
+  <title>TutorLink Admin</title>
   <meta name="description" content="TutorLink Administrator Portal with Main Page Canvas Tabs for Management Modules.">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,6 +40,12 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
             <a href="javascript:void(0)" class="menu-link" onclick="switchMainAdminTab('dashboard')">
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
               <span>Dashboard Overview</span>
+            </a>
+          </li>
+          <li class="menu-item" data-admin-nav="tutors">
+            <a href="javascript:void(0)" class="menu-link" onclick="switchMainAdminTab('tutors')">
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Tutors</span>
             </a>
           </li>
           <li class="menu-item" data-admin-nav="students">
@@ -142,11 +147,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                 <span>+12.5%</span> <span class="trend-sub">vs last month</span>
               </div>
-              <div class="kpi-sparkline">
-                <svg viewBox="0 0 300 40" preserveAspectRatio="none">
-                  <path d="M0,30 Q40,10 80,25 T160,15 T240,28 T300,5" fill="none" stroke="#10b981" stroke-width="2"/>
-                </svg>
-              </div>
             </div>
 
             <div class="apex-kpi-card" onclick="switchMainAdminTab('students')">
@@ -161,14 +161,9 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                 <span>+8.2%</span> <span class="trend-sub">vs last month</span>
               </div>
-              <div class="kpi-sparkline">
-                <svg viewBox="0 0 300 40" preserveAspectRatio="none">
-                  <path d="M0,25 Q50,35 100,20 T200,15 T300,8" fill="none" stroke="#06b6d4" stroke-width="2"/>
-                </svg>
-              </div>
             </div>
 
-            <div class="apex-kpi-card" onclick="switchMainAdminTab('matching')">
+            <div class="apex-kpi-card" onclick="switchMainAdminTab('tutors')">
               <div class="kpi-header">
                 <span class="kpi-label">Verified Tutors</span>
                 <div class="kpi-icon-wrapper blue-light">
@@ -176,14 +171,9 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
                 </div>
               </div>
               <div class="kpi-value" id="admin-stat-total-tutors">0</div>
-              <div class="kpi-trend negative">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
-                <span>-3.1%</span> <span class="trend-sub">vs last month</span>
-              </div>
-              <div class="kpi-sparkline">
-                <svg viewBox="0 0 300 40" preserveAspectRatio="none">
-                  <path d="M0,15 Q60,5 120,25 T240,20 T300,32" fill="none" stroke="#3b82f6" stroke-width="2"/>
-                </svg>
+              <div class="kpi-trend positive">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                <span>Active</span>
               </div>
             </div>
 
@@ -199,106 +189,41 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                 <span>+24.7%</span> <span class="trend-sub">vs last month</span>
               </div>
-              <div class="kpi-sparkline">
-                <svg viewBox="0 0 300 40" preserveAspectRatio="none">
-                  <path d="M0,35 Q70,28 140,22 T250,12 T300,5" fill="none" stroke="#f59e0b" stroke-width="2"/>
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <!-- Apex Visual Analytics Charts Grid -->
-          <div class="charts-grid">
-            <!-- Main Chart -->
-            <div class="chart-card main-chart-card">
-              <div class="chart-header">
-                <div>
-                  <h3 class="chart-title">Overview</h3>
-                  <p class="chart-subtitle">Monthly performance for the current year</p>
-                </div>
-                <div class="pill-segmented">
-                  <button class="pill-btn active">Revenue</button>
-                  <button class="pill-btn">Sessions</button>
-                  <button class="pill-btn">Commission</button>
-                </div>
-              </div>
-              <div class="chart-body">
-                <svg class="overview-svg-chart" viewBox="0 0 600 220" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#10b981" stop-opacity="0.25"/>
-                      <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
-                    </linearGradient>
-                  </defs>
-                  <line x1="0" y1="40" x2="600" y2="40" stroke="#f1f5f9" stroke-dasharray="4"/>
-                  <line x1="0" y1="90" x2="600" y2="90" stroke="#f1f5f9" stroke-dasharray="4"/>
-                  <line x1="0" y1="140" x2="600" y2="140" stroke="#f1f5f9" stroke-dasharray="4"/>
-                  <line x1="0" y1="190" x2="600" y2="190" stroke="#f1f5f9" stroke-dasharray="4"/>
-                  <path d="M0,180 Q60,160 120,130 T240,110 T360,70 T480,85 T600,40 L600,220 L0,220 Z" fill="url(#chartGradient)"/>
-                  <path d="M0,180 Q60,160 120,130 T240,110 T360,70 T480,85 T600,40" fill="none" stroke="#10b981" stroke-width="3"/>
-                </svg>
-              </div>
-            </div>
-
-            <!-- Donut Subject Share Chart -->
-            <div class="chart-card side-chart-card">
-              <div class="chart-header">
-                <div>
-                  <h3 class="chart-title">Subject Distribution</h3>
-                  <p class="chart-subtitle">Active tutoring sessions by subject category</p>
-                </div>
-              </div>
-              <div class="donut-chart-wrapper">
-                <svg class="donut-svg" viewBox="0 0 160 160">
-                  <circle cx="80" cy="80" r="60" fill="none" stroke="#e2e8f0" stroke-width="20"/>
-                  <circle cx="80" cy="80" r="60" fill="none" stroke="#10b981" stroke-width="20" stroke-dasharray="131 245" stroke-dashoffset="0"/>
-                  <circle cx="80" cy="80" r="60" fill="none" stroke="#06b6d4" stroke-width="20" stroke-dasharray="105 271" stroke-dashoffset="-131"/>
-                  <circle cx="80" cy="80" r="60" fill="none" stroke="#3b82f6" stroke-width="20" stroke-dasharray="82 294" stroke-dashoffset="-236"/>
-                  <circle cx="80" cy="80" r="60" fill="none" stroke="#8b5cf6" stroke-width="20" stroke-dasharray="56 320" stroke-dashoffset="-318"/>
-                </svg>
-                <div class="donut-center-text">
-                  <span class="donut-number">STEM</span>
-                  <span class="donut-label">Category</span>
-                </div>
-              </div>
-              <div class="legend-list">
-                <div class="legend-item"><span class="dot" style="background:#10b981;"></span> Mathematics <span class="pct">40%</span></div>
-                <div class="legend-item"><span class="dot" style="background:#06b6d4;"></span> Calculus <span class="pct">30%</span></div>
-                <div class="legend-item"><span class="dot" style="background:#3b82f6;"></span> Physics <span class="pct">20%</span></div>
-                <div class="legend-item"><span class="dot" style="background:#8b5cf6;"></span> Humanities <span class="pct">10%</span></div>
-              </div>
             </div>
           </div>
         </section>
 
-        <!-- SECTION 3: Tutor Matching Module -->
-        <section id="admin-section-matching" class="admin-canvas-section margin-bottom">
+        <!-- SECTION 2: Tutors Management Module -->
+        <section id="admin-section-tutors" class="admin-canvas-section margin-bottom">
           <div class="dashboard-title-area">
             <div>
-              <h2 class="page-title">Tutor Matching</h2>
-              <p class="page-subtitle">Review AI matching recommendations and approve tutoring sessions.</p>
+              <h2 class="page-title">Tutor Management</h2>
+              <p class="page-subtitle">Verify documents, approve tutor registrations, and manage tutor account statuses.</p>
             </div>
           </div>
 
           <div class="card-table-wrapper">
             <div class="table-header-title">
-              <h3>Tutor Match Requests</h3>
+              <h3>Tutors Directory</h3>
             </div>
             <div class="table-responsive">
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Match ID</th>
-                    <th>Student</th>
-                    <th>Matched Tutor</th>
-                    <th>Subject</th>
-                    <th>Compatibility</th>
-                    <th>Status</th>
+                    <th>Tutor ID</th>
+                    <th>Name</th>
+                    <th>Subjects</th>
+                    <th>Rate (₱)</th>
+                    <th>Diploma</th>
+                    <th>TOR</th>
+                    <th>Gov ID</th>
+                    <th>Approval Status</th>
+                    <th>Account Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody id="admin-matching-table-body">
-                  <!-- Dynamic match rows -->
+                <tbody id="admin-tutors-table-body">
+                  <!-- Dynamic tutor rows -->
                 </tbody>
               </table>
             </div>
@@ -339,19 +264,76 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
           </div>
         </section>
 
+        <!-- SECTION 4: Tutor Matching Module -->
+        <section id="admin-section-matching" class="admin-canvas-section margin-bottom">
+          <div class="dashboard-title-area">
+            <div>
+              <h2 class="page-title">Tutor Matching</h2>
+              <p class="page-subtitle">Review AI matching recommendations and approve tutoring sessions.</p>
+            </div>
+          </div>
 
-        <!-- SECTION 4: Schedule Module -->
+          <div class="card-table-wrapper">
+            <div class="table-header-title">
+              <h3>Tutor Match Requests</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Match ID</th>
+                    <th>Student</th>
+                    <th>Matched Tutor</th>
+                    <th>Subject</th>
+                    <th>Compatibility</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-matching-table-body">
+                  <!-- Dynamic match rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 5: Schedule Module -->
         <section id="admin-section-schedule" class="admin-canvas-section margin-bottom">
           <div class="dashboard-title-area">
             <div>
               <h2 class="page-title">Schedule</h2>
-              <p class="page-subtitle">Create and modify calendar schedule slots for verified tutors.</p>
+              <p class="page-subtitle">Modify scheduled sessions and create available calendar schedule slots.</p>
             </div>
           </div>
 
           <div class="card-table-wrapper margin-bottom">
             <div class="table-header-title">
-              <h3>New Schedule Slot</h3>
+              <h3>Scheduled Sessions</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Session ID</th>
+                    <th>Student</th>
+                    <th>Tutor</th>
+                    <th>Subject</th>
+                    <th>Date & Slot</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-scheduled-sessions-table-body">
+                  <!-- Dynamic scheduled sessions rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card-table-wrapper margin-bottom">
+            <div class="table-header-title">
+              <h3>New Calendar Schedule Slot</h3>
             </div>
             <form id="admin-add-schedule-form" style="padding: 20px;">
               <div class="form-group margin-bottom">
@@ -372,7 +354,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 
           <div class="card-table-wrapper">
             <div class="table-header-title">
-              <h3>Active Schedules</h3>
+              <h3>Active Available Schedules</h3>
             </div>
             <div class="table-responsive">
               <table class="data-table">
@@ -394,7 +376,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
           </div>
         </section>
 
-        <!-- SECTION 5: Payments Module -->
+        <!-- SECTION 6: Payments Module -->
         <section id="admin-section-payments" class="admin-canvas-section margin-bottom">
           <div class="dashboard-title-area">
             <div>
@@ -429,7 +411,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
           </div>
         </section>
 
-        <!-- SECTION 6: Reports Module -->
+        <!-- SECTION 7: Reports Module -->
         <section id="admin-section-reports" class="admin-canvas-section margin-bottom">
           <div class="dashboard-title-area">
             <div>
@@ -437,16 +419,10 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
               <p class="page-subtitle">View completed tutoring sessions and print activity summaries.</p>
             </div>
             <div style="display: flex; gap: 8px;">
-              <div class="pill-segmented">
-                <button class="pill-btn active" id="report-filter-all">All Time</button>
-                <button class="pill-btn" id="report-filter-weekly">Weekly</button>
-                <button class="pill-btn" id="report-filter-monthly">Monthly</button>
-              </div>
               <button class="btn btn-emerald" onclick="window.print()">Print Activity Summary</button>
             </div>
           </div>
 
-          <!-- All Completed Sessions Table -->
           <div class="card-table-wrapper margin-bottom">
             <div class="table-header-title">
               <h3>All Completed Tutoring Sessions</h3>
@@ -471,7 +447,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
             </div>
           </div>
 
-          <!-- Weekly Sessions Table -->
           <div class="card-table-wrapper margin-bottom">
             <div class="table-header-title">
               <h3>Weekly Sessions (Last 7 Days)</h3>
@@ -496,7 +471,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
             </div>
           </div>
 
-          <!-- Monthly Sessions Table -->
           <div class="card-table-wrapper">
             <div class="table-header-title">
               <h3>Monthly Sessions (Last 30 Days)</h3>
@@ -522,7 +496,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
           </div>
         </section>
 
-        <!-- SECTION 7: Notifications Module -->
+        <!-- SECTION 8: Notifications Module -->
         <section id="admin-section-notifications" class="admin-canvas-section margin-bottom">
           <div class="dashboard-title-area">
             <div>
@@ -537,8 +511,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
               <label>Recipient Target</label>
               <select id="admin-notif-target" class="form-select">
                 <option value="all">All Users (Students & Tutors)</option>
-                <option value="students">All Students</option>
-                <option value="tutors">All Tutors</option>
+                <option value="student">All Students</option>
+                <option value="tutor">All Tutors</option>
               </select>
             </div>
             <div class="form-group margin-bottom">
@@ -562,8 +536,37 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     </div>
   </div>
 
+  <!-- Notification Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
 
-  <div id="toast" class="toast hidden"></div>
+  <!-- Reschedule Modal for Admin Schedule Modifying -->
+  <div class="modal-backdrop" id="modal-reschedule">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Modify Session Schedule</h3>
+        <button class="close-btn" id="close-reschedule-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="reschedule-session-form">
+          <input type="hidden" id="reschedule-session-id">
+          <div class="form-group">
+            <label>New Date</label>
+            <input type="date" id="reschedule-date-input" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label>New Time Slot</label>
+            <select id="reschedule-timeslot-select" class="form-select" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="modal-actions margin-top">
+            <button type="button" class="btn btn-secondary" id="cancel-reschedule-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="confirm-reschedule-btn">Confirm Reschedule</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <script src="app.js"></script>
   <script>
@@ -579,23 +582,19 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     };
 
     function switchMainAdminTab(tabName) {
-      // Hide all admin canvas sections
       const sections = document.querySelectorAll('.admin-canvas-section');
       sections.forEach(sec => sec.classList.remove('active'));
 
-      // Show selected canvas section
       const targetSection = document.getElementById(`admin-section-${tabName}`);
       if (targetSection) {
         targetSection.classList.add('active');
       }
 
-      // Update header breadcrumb title
       const titleElem = document.getElementById('current-admin-tab-title');
       if (titleElem && tabTitles[tabName]) {
         titleElem.textContent = tabTitles[tabName];
       }
 
-      // Sync active state on sidebar navigation
       document.querySelectorAll('.sidebar-menu .menu-item').forEach(item => {
         item.classList.remove('active');
         if (item.getAttribute('data-admin-nav') === tabName) {
@@ -603,7 +602,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
         }
       });
 
-      // Close mobile sidebar if open
       const sidebar = document.querySelector('.admin-sidebar');
       if (sidebar && sidebar.classList.contains('mobile-open')) {
         sidebar.classList.remove('mobile-open');
@@ -617,17 +615,563 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      if (typeof switchRole === 'function') {
-        switchRole('admin', { id: 'ADMIN-001', name: 'System Admin', role: 'admin' });
+    // Admin-specific rendering handlers
+    function renderAdminTutors() {
+      const tbody = document.getElementById('admin-tutors-table-body');
+      if (!tbody) return;
+
+      if (state.tutors.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: var(--ink-soft); padding: 20px;">No tutors registered yet.</td></tr>`;
+        return;
       }
+
+      tbody.innerHTML = state.tutors.map(t => {
+        const docsAllVerified = (t.diplomaStatus === 'Verified' && t.torStatus === 'Verified' && t.idStatus === 'Verified');
+        const isApproved = t.approvalStatus === 'Approved';
+
+        return `
+          <tr>
+            <td><code>${esc(t.id)}</code></td>
+            <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(t.id)}')">${esc(t.name)}</strong></td>
+            <td>${esc(t.subjects.join(', '))}</td>
+            <td>₱${esc(t.hourlyRate)}</td>
+            <td>
+              <span class="badge ${t.diplomaStatus === 'Verified' ? 'badge-success' : t.diplomaStatus === 'Rejected' ? 'badge-danger' : 'badge-info'}">${esc(t.diplomaStatus)}</span>
+              <div style="margin-top: 4px; display: flex; gap: 4px;">
+                <button class="btn btn-secondary btn-small" onclick="updateTutorDoc('${esc(t.id)}', 'diploma_status', 'Verified')">Verify</button>
+                <button class="btn btn-secondary btn-small" onclick="updateTutorDoc('${esc(t.id)}', 'diploma_status', 'Rejected')">Reject</button>
+              </div>
+            </td>
+            <td>
+              <span class="badge ${t.torStatus === 'Verified' ? 'badge-success' : t.torStatus === 'Rejected' ? 'badge-danger' : 'badge-info'}">${esc(t.torStatus)}</span>
+              <div style="margin-top: 4px; display: flex; gap: 4px;">
+                <button class="btn btn-secondary btn-small" onclick="updateTutorDoc('${esc(t.id)}', 'tor_status', 'Verified')">Verify</button>
+                <button class="btn btn-secondary btn-small" onclick="updateTutorDoc('${esc(t.id)}', 'tor_status', 'Rejected')">Reject</button>
+              </div>
+            </td>
+            <td>
+              <span class="badge ${t.idStatus === 'Verified' ? 'badge-success' : t.idStatus === 'Rejected' ? 'badge-danger' : 'badge-info'}">${esc(t.idStatus)}</span>
+              <div style="margin-top: 4px; display: flex; gap: 4px;">
+                <button class="btn btn-secondary btn-small" onclick="updateTutorDoc('${esc(t.id)}', 'id_status', 'Verified')">Verify</button>
+                <button class="btn btn-secondary btn-small" onclick="updateTutorDoc('${esc(t.id)}', 'id_status', 'Rejected')">Reject</button>
+              </div>
+            </td>
+            <td><span class="badge ${isApproved ? 'badge-success' : t.approvalStatus === 'Declined' ? 'badge-danger' : 'badge-info'}">${esc(t.approvalStatus)}</span></td>
+            <td><span class="badge ${t.deactivated ? 'badge-danger' : 'badge-success'}">${t.deactivated ? 'Deactivated' : 'Active'}</span></td>
+            <td>
+              ${!docsAllVerified && !isApproved ? `
+                <button class="btn btn-secondary btn-small" disabled title="Cannot approve tutor: Diploma, TOR, and ID status must all be Verified.">Approve</button>
+              ` : `
+                <button class="btn btn-primary btn-small" onclick="updateTutorApproval('${esc(t.id)}', 'Approved')">Approve</button>
+              `}
+              <button class="btn btn-secondary btn-small" onclick="updateTutorApproval('${esc(t.id)}', 'Declined')">Decline</button>
+              <button class="btn btn-secondary btn-small" onclick="toggleDeactivateTutor('${esc(t.id)}')">${t.deactivated ? 'Activate' : 'Deactivate'}</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    window.updateTutorDoc = async function(tutorId, field, value) {
+      try {
+        const res = await fetch('api/tutors.php', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: tutorId, [field]: value })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'success') {
+          showToast(data.message || 'Doc update failed.', 'error');
+          return;
+        }
+        await syncWithDatabase();
+        renderAdminTutors();
+        showToast('Document status updated.');
+      } catch (e) {
+        showToast('Could not connect to server.', 'error');
+      }
+    };
+
+    window.updateTutorApproval = async function(tutorId, statusVal) {
+      try {
+        const res = await fetch('api/tutors.php', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: tutorId, approval_status: statusVal })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'success') {
+          showToast(data.message || 'Approval update failed.', 'error');
+          return;
+        }
+        await syncWithDatabase();
+        renderAdminTutors();
+        showToast(`Tutor approval status set to ${statusVal}.`);
+      } catch (e) {
+        showToast('Could not connect to server.', 'error');
+      }
+    };
+
+    window.toggleDeactivateTutor = async function(tutorId) {
+      const tutor = state.tutors.find(t => t.id === tutorId);
+      if (!tutor) return;
+      try {
+        const res = await fetch('api/tutors.php', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: tutorId, deactivated: !tutor.deactivated })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'success') {
+          showToast(data.message || 'Deactivation update failed.', 'error');
+          return;
+        }
+        await syncWithDatabase();
+        renderAdminTutors();
+        showToast('Tutor account status updated.');
+      } catch (e) {
+        showToast('Could not connect to server.', 'error');
+      }
+    };
+
+    function renderAdminStudents() {
+      const tbody = document.getElementById('admin-students-table-body');
+      if (!tbody) return;
+
+      if (state.students.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 20px;">No students registered yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = state.students.map(s => `
+        <tr>
+          <td><code>${esc(s.id)}</code></td>
+          <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${esc(s.id)}')">${esc(s.name)}</strong></td>
+          <td>${esc(s.email)}</td>
+          <td>${esc(s.grade)}</td>
+          <td><span class="badge ${s.validated ? 'badge-success' : 'badge-info'}">${s.validated ? 'Validated' : 'Pending Validation'}</span></td>
+          <td><span class="badge ${s.deactivated ? 'badge-danger' : 'badge-success'}">${s.deactivated ? 'Deactivated' : 'Active'}</span></td>
+          <td>
+            <button class="btn btn-secondary btn-small" onclick="viewStudentProfile('${esc(s.id)}')">Profile</button>
+            <button class="btn btn-secondary btn-small" onclick="toggleValidateStudent('${esc(s.id)}')">${s.validated ? 'Revoke' : 'Validate Account'}</button>
+            <button class="btn btn-secondary btn-small" onclick="toggleDeactivateStudent('${esc(s.id)}')">${s.deactivated ? 'Activate' : 'Deactivate'}</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.toggleValidateStudent = async function(studentId) {
+      const student = state.students.find(s => s.id === studentId);
+      if (!student) return;
+      try {
+        const res = await fetch('api/students.php', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: studentId, validated: !student.validated })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'success') {
+          showToast(data.message || 'Validation update failed.', 'error');
+          return;
+        }
+        await syncWithDatabase();
+        renderAdminStudents();
+        showToast('Student validation status updated.');
+      } catch (e) {
+        showToast('Could not connect to server.', 'error');
+      }
+    };
+
+    window.toggleDeactivateStudent = async function(studentId) {
+      const student = state.students.find(s => s.id === studentId);
+      if (!student) return;
+      try {
+        const res = await fetch('api/students.php', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: studentId, deactivated: !student.deactivated })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'success') {
+          showToast(data.message || 'Deactivation update failed.', 'error');
+          return;
+        }
+        await syncWithDatabase();
+        renderAdminStudents();
+        showToast('Student account status updated.');
+      } catch (e) {
+        showToast('Could not connect to server.', 'error');
+      }
+    };
+
+    function renderAdminMatching() {
+      const tbody = document.getElementById('admin-matching-table-body');
+      if (!tbody) return;
+
+      if (state.matches.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 20px;">No match requests recorded yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = state.matches.map(m => `
+        <tr>
+          <td><code>${esc(m.id)}</code></td>
+          <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${esc(m.studentId || m.studentName)}')">${esc(m.studentName)}</span></td>
+          <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(m.tutorId || m.tutorName)}')">${esc(m.tutorName)}</strong></td>
+          <td>${esc(m.subject)}</td>
+          <td><span class="badge badge-match">${esc(m.score)}% Match</span></td>
+          <td><span class="badge ${m.status === 'Approved' ? 'badge-success' : m.status === 'Cancelled' ? 'badge-danger' : 'badge-info'}">${esc(m.status)}</span></td>
+          <td>
+            ${m.status === 'Pending Review' ? `
+              <button class="btn btn-primary btn-small" onclick="approveMatch('${esc(m.id)}')">Approve</button>
+              <button class="btn btn-secondary btn-small" onclick="cancelMatch('${esc(m.id)}')">Cancel</button>
+            ` : `<span class="sub-text">Processed</span>`}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.approveMatch = async function(matchId) {
+      try {
+        const res = await fetch('api/matches.php', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: matchId, status: 'Approved' })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'success') {
+          showToast(data.message || 'Match approval failed.', 'error');
+          return;
+        }
+        await syncWithDatabase();
+        renderAdminMatching();
+        showToast('Match request approved.');
+      } catch (e) {
+        showToast('Could not connect to server.', 'error');
+      }
+    };
+
+    window.cancelMatch = async function(matchId) {
+      try {
+        const res = await fetch('api/matches.php', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: matchId, status: 'Cancelled' })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'success') {
+          showToast(data.message || 'Match cancel failed.', 'error');
+          return;
+        }
+        await syncWithDatabase();
+        renderAdminMatching();
+        showToast('Match request cancelled.');
+      } catch (e) {
+        showToast('Could not connect to server.', 'error');
+      }
+    };
+
+    function renderAdminSchedule() {
+      const tbodySch = document.getElementById('admin-schedule-table-body');
+      const tbodySes = document.getElementById('admin-scheduled-sessions-table-body');
+      const tutorSelect = document.getElementById('admin-sch-tutor-select');
+
+      if (tutorSelect) {
+        tutorSelect.innerHTML = state.tutors.filter(t => !t.deactivated).map(t => `
+          <option value="${esc(t.id)}">${esc(t.name)} (${esc(t.subjects.join(', '))})</option>
+        `).join('');
+      }
+
+      if (tbodySes) {
+        if (state.sessions.length === 0) {
+          tbodySes.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 20px;">No scheduled tutoring sessions found.</td></tr>`;
+        } else {
+          tbodySes.innerHTML = state.sessions.map(s => `
+            <tr>
+              <td><code>${esc(s.id)}</code></td>
+              <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${esc(s.studentId)}')">${esc(s.studentName)}</span></td>
+              <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(s.tutorId)}')">${esc(s.tutorName)}</strong></td>
+              <td>${esc(s.subject)}</td>
+              <td>${esc(s.date || s.sessionDate)} (${esc(s.timeSlot)})</td>
+              <td><span class="badge ${s.status === 'Completed' ? 'badge-success' : s.status === 'Cancelled' ? 'badge-danger' : 'badge-info'}">${esc(s.status)}</span></td>
+              <td>
+                ${s.status === 'Confirmed' ? `
+                  <button class="btn btn-secondary btn-small" onclick="openRescheduleModal('${esc(s.id)}')">Modify</button>
+                  <button class="btn btn-secondary btn-small" onclick="cancelAdminSession('${esc(s.id)}')">Cancel Session</button>
+                ` : `<span class="sub-text">Processed</span>`}
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+
+      if (tbodySch) {
+        if (state.schedules.length === 0) {
+          tbodySch.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--ink-soft); padding: 20px;">No available schedule slots created yet.</td></tr>`;
+        } else {
+          tbodySch.innerHTML = state.schedules.map(sch => `
+            <tr>
+              <td><code>${esc(sch.id)}</code></td>
+              <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(sch.tutorId)}')">${esc(sch.tutorName)}</strong></td>
+              <td>${esc(sch.dateSlot)}</td>
+              <td>${esc(sch.subject)}</td>
+              <td><span class="badge ${sch.status === 'Available' ? 'badge-success' : 'badge-info'}">${esc(sch.status)}</span></td>
+              <td>
+                <button class="btn btn-secondary btn-small" onclick="deleteScheduleSlot('${esc(sch.id)}')">Remove Slot</button>
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+    }
+
+    window.cancelAdminSession = async function(sessionId) {
+      try {
+        const res = await fetch('api/sessions.php', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: sessionId, status: 'Cancelled' })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'success') {
+          showToast(data.message || 'Session cancellation failed.', 'error');
+          return;
+        }
+        await syncWithDatabase();
+        renderAdminSchedule();
+        showToast('Session cancelled and schedule freed.');
+      } catch (e) {
+        showToast('Could not connect to server.', 'error');
+      }
+    };
+
+    window.deleteScheduleSlot = async function(schId) {
+      try {
+        const res = await fetch('api/schedules.php', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: schId })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'success') {
+          showToast(data.message || 'Delete schedule failed.', 'error');
+          return;
+        }
+        await syncWithDatabase();
+        renderAdminSchedule();
+        showToast('Schedule slot removed.');
+      } catch (e) {
+        showToast('Could not connect to server.', 'error');
+      }
+    };
+
+    function renderAdminPayments() {
+      const tbody = document.getElementById('admin-payments-table-body');
+      if (!tbody) return;
+
+      if (state.payments.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--ink-soft); padding: 20px;">No payment records logged yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = state.payments.map(p => `
+        <tr>
+          <td><code>${esc(p.id)}</code></td>
+          <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${esc(p.studentId)}')">${esc(p.studentName)}</span></td>
+          <td>${esc(p.method)}</td>
+          <td><code>${esc(p.refNo)}</code></td>
+          <td>₱${esc(p.amount)}</td>
+          <td><span class="badge ${p.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${esc(p.status)}</span></td>
+          <td><span class="badge ${p.payoutStatus === 'Paid Out' ? 'badge-success' : 'badge-pending'}">${esc(p.payoutStatus || 'Unpaid')}</span></td>
+          <td>
+            ${p.status === 'Pending' ? `
+              <button class="btn btn-primary btn-small" onclick="confirmPayment('${esc(p.id)}')">Confirm Payment</button>
+            ` : ''}
+            ${p.status === 'Confirmed' && p.payoutStatus !== 'Paid Out' ? `
+              <button class="btn btn-secondary btn-small" onclick="processTutorPayout('${esc(p.id)}')">Process Payout</button>
+            ` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.confirmPayment = async function(paymentId) {
+      try {
+        const res = await fetch('api/payments.php', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: paymentId, status: 'Confirmed' })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'success') {
+          showToast(data.message || 'Confirm payment failed.', 'error');
+          return;
+        }
+        await syncWithDatabase();
+        renderAdminPayments();
+        showToast('Payment confirmed!');
+      } catch (e) {
+        showToast('Could not connect to server.', 'error');
+      }
+    };
+
+    window.processTutorPayout = async function(paymentId) {
+      try {
+        const res = await fetch('api/payments.php', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: paymentId, payout_status: 'Paid Out' })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'success') {
+          showToast(data.message || 'Payout failed.', 'error');
+          return;
+        }
+        await syncWithDatabase();
+        renderAdminPayments();
+        showToast('Tutor payout processed successfully.');
+      } catch (e) {
+        showToast('Could not connect to server.', 'error');
+      }
+    };
+
+    function renderAdminReports() {
+      const tbodyComp = document.getElementById('admin-reports-completed-table-body');
+      const tbodyWk = document.getElementById('admin-reports-weekly-table-body');
+      const tbodyMo = document.getElementById('admin-reports-monthly-table-body');
+
+      const completed = state.sessions.filter(s => s.status === 'Completed');
+      const today = new Date();
+      const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+      const weekly = state.sessions.filter(s => (s.date || s.sessionDate) >= sevenDaysAgo);
+      const monthly = state.sessions.filter(s => (s.date || s.sessionDate) >= thirtyDaysAgo);
+
+      if (tbodyComp) tbodyComp.innerHTML = renderReportRows(completed);
+      if (tbodyWk) tbodyWk.innerHTML = renderReportRows(weekly);
+      if (tbodyMo) tbodyMo.innerHTML = renderReportRows(monthly);
+    }
+
+    function renderReportRows(list) {
+      if (list.length === 0) {
+        return `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 16px;">No sessions found for this report filter.</td></tr>`;
+      }
+      return list.map(s => `
+        <tr>
+          <td><code>${esc(s.id)}</code></td>
+          <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${esc(s.studentId)}')">${esc(s.studentName)}</span></td>
+          <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(s.tutorId)}')">${esc(s.tutorName)}</strong></td>
+          <td>${esc(s.subject)}</td>
+          <td>${esc(s.date || s.sessionDate)}</td>
+          <td>₱${esc(s.totalPaid)}</td>
+          <td><span class="badge ${s.status === 'Completed' ? 'badge-success' : 'badge-info'}">${esc(s.status)}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderAdminNotifications() {
+      const log = document.getElementById('admin-notifications-log');
+      if (!log) return;
+
+      if (state.notifications.length === 0) {
+        log.innerHTML = `<p class="sub-text center-text" style="padding: 16px;">No broadcast notifications log recorded.</p>`;
+        return;
+      }
+
+      log.innerHTML = state.notifications.map(n => `
+        <div class="session-card" style="margin-bottom: 8px;">
+          <div>
+            <strong>${esc(n.title)}</strong> <span class="badge badge-info">Target: ${esc(n.targetRole || n.target)}</span>
+            <p class="sub-text" style="margin-top: 4px;">${esc(n.message)}</p>
+            <div class="sub-text" style="font-size: 0.78rem;">${esc(n.time)}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Override renderAllViews for admin page
+    function renderAllViews() {
+      renderAdminTutors();
+      renderAdminStudents();
+      renderAdminMatching();
+      renderAdminSchedule();
+      renderAdminPayments();
+      renderAdminReports();
+      renderAdminNotifications();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
       switchMainAdminTab('dashboard');
+
+      document.getElementById('admin-add-schedule-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const tutorId = document.getElementById('admin-sch-tutor-select').value;
+        const subject = document.getElementById('admin-sch-subject').value;
+        const dateSlot = document.getElementById('admin-sch-dateslot').value;
+
+        try {
+          const res = await fetch('api/schedules.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tutor_id: tutorId,
+              subject,
+              date_slot: dateSlot
+            })
+          });
+          const data = await res.json();
+          if (!res.ok || data.status !== 'success') {
+            showToast(data.message || 'Schedule creation failed.', 'error');
+            return;
+          }
+          await syncWithDatabase();
+          renderAdminSchedule();
+          showToast('New calendar schedule slot created!');
+          document.getElementById('admin-add-schedule-form').reset();
+        } catch (e) {
+          showToast('Could not connect to server.', 'error');
+        }
+      });
+
+      document.getElementById('admin-send-notif-btn')?.addEventListener('click', async () => {
+        const targetRole = document.getElementById('admin-notif-target').value;
+        const message = document.getElementById('admin-notif-message').value.trim();
+
+        if (!message) {
+          showToast('Please enter notification content.', 'error');
+          return;
+        }
+
+        try {
+          const res = await fetch('api/notifications.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              target_role: targetRole,
+              target: 'All Users',
+              title: 'System Broadcast',
+              message: message
+            })
+          });
+          const data = await res.json();
+          if (!res.ok || data.status !== 'success') {
+            showToast(data.message || 'Broadcast failed.', 'error');
+            return;
+          }
+          document.getElementById('admin-notif-message').value = '';
+          await syncWithDatabase();
+          renderAdminNotifications();
+          showToast('Notification broadcast sent!');
+        } catch (e) {
+          showToast('Could not connect to server.', 'error');
+        }
+      });
 
       document.getElementById('admin-logout-btn')?.addEventListener('click', async () => {
         try {
           await fetch('api/logout.php', { method: 'POST' });
         } catch (e) {}
-        localStorage.removeItem('tutorlink_session');
         window.location.href = 'index.php';
       });
     });

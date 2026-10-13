@@ -838,10 +838,38 @@ footer .wrap { padding-top: 56px; padding-bottom: 56px; }
   stroke: var(--oxford-navy);
 }
 
+/* Responsive Table Wrapper */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 @media (max-width: 768px) {
   .hero h1 { font-size: 2.3rem; }
   .metrics-grid { grid-template-columns: 1fr; gap: 16px; }
   .audience-grid { grid-template-columns: 1fr; }
   .feature-grid { grid-template-columns: 1fr; }
   .floating-btn { bottom: 18px; right: 18px; padding: 10px 16px; font-size: 0.85rem; }
+}
+
+/* Print Media Styles for Clean Reports Printing */
+@media print {
+  header, .admin-sidebar, .admin-header, .btn, .icon-btn, .floating-btn, .toast-container, .modal-backdrop, .drawer {
+    display: none !important;
+  }
+  body, .admin-layout, .admin-main, .content-container {
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+  .data-table {
+    width: 100% !important;
+    border: 1px solid #000000 !important;
+  }
+  .data-table th, .data-table td {
+    border: 1px solid #000000 !important;
+    color: #000000 !important;
+  }
 }

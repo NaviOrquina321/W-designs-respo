@@ -14,7 +14,7 @@ The platform facilitates rule-based tutor matching recommendations, calendar boo
 |                                  FRONTEND LAYER                                   |
 |  +-------------------------------------+  +------------------------------------+  |
 |  | index.php / app.js                  |  | admin.php                          |  |
-|  | - Student & Tutor Web Portals       |  | - Apex-Style Back-Office Portal    |  |
+|  | - Student & Tutor Web Portals       |  | - Back-Office Administrative Portal|  |
 |  | - Interactive Drawers & Workspace   |  | - Single-Canvas Tab Navigation     |  |
 |  | - GCash Checkout Integration        |  | - Real-time Analytics & Controls   |  |
 |  +-------------------------------------+  +------------------------------------+  |
@@ -26,7 +26,7 @@ The platform facilitates rule-based tutor matching recommendations, calendar boo
 |  +-----------------------------------------------------------------------------+  |
 |  | PHP PDO REST Endpoints (/api/*.php)                                         |  |
 |  |  - login.php & register.php   (Authentication & Password Hashing)           |  |
-|  |  - matches.php & tutors.php   (Automated Matching & Tutor Profiles)          |  |
+|  |  - matches.php & tutors.php   (Rule-based Matching & Tutor Profiles)          |  |
 |  |  - sessions.php & chat.php    (Session Management & Real-time Messaging)     |  |
 |  |  - payments.php & admin.php   (GCash Transactions & Back-Office Analytics)   |  |
 |  |  - notifications.php          (Targeted Role Notifications)                  |  |
@@ -79,59 +79,38 @@ The database consists of 11 relational tables configured with strict auto-migrat
 ### A. Authentication & Session Security
 - **Unified Login:** Accounts are looked up directly by email, automatically retrieving password hash and account role without requiring manual role dropdown selection.
 - **BCRYPT Hashing:** All password creations and updates utilize PHP's standard `password_hash(..., PASSWORD_BCRYPT)` and `password_verify()` routines.
-- **Isolated User Storage:** Newly registered accounts receive distinct SQL database records, preventing data crosstalk.
+- **PHP Server Sessions:** Authentication relies on secure server-side PHP sessions with HTTP-only cookies (`SameSite=Lax`).
 
-### B. Intelligent Tutor Matching & Scheduling
-- **Compatibility Scoring:** Calculates match fit percentage based on subject overlap, student grade level, and tutor learning style parameters.
-- **Match Requests:** Requests are submitted to tutors who can accept or decline them directly from their dashboard.
-- **Slot Reservation:** Students select available dates and time slots published by approved tutors.
+### B. Rule-Based Tutor Matching & Scheduling
+- **Rule-Based Compatibility Scoring:** Calculates match fit percentage in the browser based on subject match (50%), learning style match (20%), time slot availability (15%), and tutor rating (15%).
+- **Match Requests:** Requests are submitted to tutors who can accept or cancel them.
+- **Slot Reservation:** Students select available dates and time slots published by approved tutors or admin-created available slots.
 
-### C. GCash Direct e-Wallet Checkout
-- **Transparent Fee Structure:** System calculates Tutor Fee + Platform Commission Fee (e.g., ₱350 Tutor Fee + ₱50 Platform Fee = ₱400 Total).
-- **Instant Receipt Generation:** Generates valid GCash transaction reference numbers (`GC-XXXXXXXX`) stored in `payments` and `sessions` tables.
-- **SSL Trust Integration:** Checkout modal features security trust badges ("256-bit SSL Encrypted Direct Checkout").
+### C. Simulated GCash e-Wallet Checkout
+- **Fee Rule:** Student pays Hourly Rate + 10% Service Fee (e.g. ₱350 rate + ₱35 fee = ₱385 total). Tutor receives 100% of hourly rate (₱350), and the platform retains the 10% service fee (₱35).
+- **Instant Receipt Generation:** Generates valid simulated GCash transaction reference numbers (`GC-XXXXXXXX`) stored in `payments` and `sessions` tables.
 
 ### D. Live Virtual Workspace & Session Completion
 - **Collaborative Session Space:** Embedded canvas whiteboard/drawing tools and instant messaging (`chat_messages`).
 - **Controlled Completion:** Tutors finalize sessions within the Live Workspace where they record post-session notes/remarks.
-- **Student Reviews:** Students provide 1-5 star ratings and written feedback upon session completion, automatically updating the tutor's aggregate rating in the database.
+- **Student Reviews:** Students provide 1-5 star ratings and written feedback upon session completion, triggering server-side recomputation of the tutor's aggregate rating.
 
 ### E. Admin Back-Office Dashboard (`admin.php`)
-- **Apex-Style Interface:** Features a dark left sidebar (`#0f172a`), top breadcrumbs header, and single-canvas tab routing (`switchMainAdminTab`).
-- **Interactive Metric Morphing:** Dynamic chart pill buttons (`Revenue`, `Orders`, `Profit`) that smoothly morph SVG analytical vector line paths.
-- **System Administration:** Admin controls for tutor verification, user deactivation/reactivation, broadcast system announcements, and payout management.
+- **Single-Canvas Tab Interface:** Navigation across Overview KPIs, Students, Tutors, Tutor Matching, Schedules, Payments, Reports, and Broadcast Notifications.
+- **System Administration:** Admin controls for tutor verification, document audit (Diploma, TOR, ID), user deactivation/reactivation, broadcast announcements, payment confirmation, and payout processing.
 
 ---
 
-## 4. Strengths & Architectural Advantages
-
-1. **High Portability:** Runs seamlessly on standard XAMPP (Apache + MySQL) as well as standalone PHP CLI server environments using SQLite fallback.
-2. **Clean UI/UX Design System:** Custom responsive CSS layout avoiding heavy Javascript dependencies or slow external UI frameworks.
-3. **Data Integrity:** Explicit foreign key identifiers (`STU-XXX`, `TUT-XXX`, `ADM-XXX`, `SES-XXX`) maintaining clean audit trails across transactions.
-4. **Targeted Role Notifications:** System events trigger alerts filtered strictly by relevant role targets.
-
----
-
-## 5. Security & Edge Case Evaluation
+## 4. Security & Technical Architecture
 
 | Component | Assessment | Recommendation |
 | :--- | :--- | :--- |
 | **Password Storage** | **Secure:** BCRYPT hashing is enforced for all account creation and authentication calls. | Maintain current BCRYPT cost factor. |
 | **SQL Injection** | **Secure:** All API endpoints utilize PHP PDO prepared statements with parameter binding. | Continue strict usage of PDO bound variables. |
-| **Session Persistence** | **Functional:** Utilizes `localStorage` for client-side state maintenance across reloads. | For enterprise production, issue HTTP-only JWTs or PHP native server sessions. |
-| **CORS Policy** | **Permissive:** `Access-Control-Allow-Origin: *` in `config.php`. | Restrict CORS origin header to specific domain names in production deployments. |
-
----
-
-## 6. Verification & Quality Assurance
-
-The system underwent automated Playwright testing across browser viewports, verifying:
-- Authentication & registration pipelines for Students and Tutors.
-- Admin dashboard tab navigation, dynamic chart toggles, and notification feeds.
-- Live workspace chat and drawing board operations.
-- GCash payment modal checkout flow and receipt generation.
+| **Session Security** | **Secure:** Native PHP server sessions with strict HttpOnly and SameSite cookie policies. | Clear session cookies on logout. |
+| **Role Authorization** | **Secure:** Server-side `requireRole()` checks on all protected API routes. | Enforce ID-only and role-scoped access. |
 
 ---
 
 ## Conclusion
-The TutorLink codebase provides a clean, functional web application for managing tutor-student sessions with rule-based matching recommendations and simulated GCash checkout workflows.
+The TutorLink codebase provides a complete web system for managing tutor-student sessions with rule-based matching recommendations and simulated GCash checkout workflows.

@@ -8,7 +8,7 @@ Welcome to the **TutorLink System Administrator Manual**. This guide provides sy
 
 To log in to the TutorLink Admin Dashboard:
 
-* **Access URL:** `http://localhost:3000/`
+* **Access URL:** `http://localhost/tutorlink/`
 * **Admin Email:** `admin@tutorlink.ph`
 * **Admin Password:** `admin123`
 
@@ -31,18 +31,18 @@ The Admin Dashboard manages 11 relational tables (`users`, `admins`, `students`,
 
 3. **Tutor Document & Credentials Verification:**
    - Audit diploma, transcript of records (TOR), and government ID upload statuses.
-   - Approve or decline tutor registrations.
+   - Approve or decline tutor registrations. Approval requires Diploma, TOR, and Government ID all set to Verified.
 
 4. **Tutor Matching Governance:**
-   - Review AI match compatibility scores.
-   - Approve or reassign tutors for student requests.
+   - Review rule-based match compatibility scores calculated in the browser.
+   - Approve or cancel tutors for student requests.
 
 5. **Schedule & Session Auditing:**
-   - Live session logs and status monitoring (Confirmed, Completed, Rescheduled).
+   - Live session logs and status monitoring (Confirmed, In Progress, Completed, Cancelled).
 
 6. **Financial Management & Tutor Payouts:**
    - Payment transaction ledger.
-   - Process net payout (90%) directly to tutors after session completion.
+   - Process full payout to tutors after session completion (tutor receives 100% of hourly rate, platform retains the 10% service fee paid by student).
 
 7. **Notification Broadcast:**
    - Broadcast platform announcements to Students, Tutors, or All Users simultaneously.

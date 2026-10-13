@@ -1,5 +1,6 @@
 <?php
 // api/me.php - Return Current User Session State
+require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/helpers.php';
 
 $user = requireLogin();
