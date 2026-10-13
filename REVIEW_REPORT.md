@@ -34,6 +34,11 @@ Tested by running the PHP API locally (SQLite) and calling every role's main flo
 - Rule-based fallback fixed: the old time-of-day check never matched, and tutors with no reviews were scored as 0 stars (now neutral 3.5).
 - Tested against a fake AI server (success, fenced JSON, garbage, unknown tutor id, HTTP 500, timeout, cache, privacy, permissions). Not tested against a real provider because no key or internet AI access was available here.
 
+## Added: browse tutors by subject
+- The student tutor directory now has subject buttons with a tutor count (All subjects, Calculus, Physics...), a "N tutors available" line, and subject tags on every card. The subject being browsed is filled in and listed first; other subjects are outlined. The search box still works together with the subject filter.
+- Cards show "Verified tutor" (approval requires diploma, TOR and ID to be verified) and "New tutor" when there are no reviews yet.
+- Original design using TutorLink's own colors. Tested at desktop and phone width.
+
 ## Verified working (no change needed)
 Login, registration, role checks on every endpoint, prepared statements everywhere, output escaping (XSS) in `app.js` and `admin.php`, server-side price and 10% commission, double-booking block, rating recalculation, chat access limited to session participants.
 

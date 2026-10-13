@@ -331,6 +331,8 @@ header('Content-Type: text/html; charset=utf-8');
               <input type="text" id="tutor-search-input" placeholder="Search subject or tutor name..." class="input-search">
             </div>
           </div>
+          <div id="subject-filter-bar" class="subject-filter-bar" role="group" aria-label="Browse tutors by subject"></div>
+          <p id="subject-filter-summary" class="sub-text subject-filter-summary" aria-live="polite"></p>
           <div id="tutors-directory-grid" class="tutor-grid">
             <!-- Dynamic tutor cards -->
           </div>

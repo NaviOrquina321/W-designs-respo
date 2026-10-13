@@ -58,6 +58,7 @@ const state = {
     paymentMethod: 'GCash'
   },
 
+  directorySubject: 'All',
   activeWorkspaceSession: null,
   activeReportFilter: 'all',
   lastChatId: 0
@@ -861,43 +862,92 @@ function renderAllViews() {
   updateNotificationBadge();
 }
 
-function renderTutorDirectory(searchTerm = '') {
+function renderTutorDirectory(searchTerm) {
   const grid = document.getElementById('tutors-directory-grid');
   if (!grid) return;
 
+  // Keep the current search text when the page re-renders by itself
+  if (typeof searchTerm !== 'string') {
+    searchTerm = (document.getElementById('tutor-search-input')?.value || '');
+  }
+  const term = searchTerm.toLowerCase();
+
   const approvedTutors = state.tutors.filter(t => t.approvalStatus === 'Approved' && !t.deactivated);
 
+  // Subject navigation: every subject taught by an approved tutor, with a tutor count
+  const subjectCounts = new Map();
+  approvedTutors.forEach(t => t.subjects.forEach(s => {
+    const key = s.trim();
+    if (key) subjectCounts.set(key, (subjectCounts.get(key) || 0) + 1);
+  }));
+  const subjectList = Array.from(subjectCounts.keys()).sort((a, b) => a.localeCompare(b));
+
+  // If the chosen subject no longer exists (tutor deactivated), go back to All
+  if (state.directorySubject !== 'All' && !subjectCounts.has(state.directorySubject)) {
+    state.directorySubject = 'All';
+  }
+  const activeSubject = state.directorySubject;
+
+  const bar = document.getElementById('subject-filter-bar');
+  if (bar) {
+    const chip = (label, count, value) => `
+      <button type="button" class="subject-chip${value === activeSubject ? ' active' : ''}" data-subject="${esc(value)}" aria-pressed="${value === activeSubject}">
+        ${esc(label)} <span class="subject-chip-count">${esc(count)}</span>
+      </button>`;
+    bar.innerHTML = chip('All subjects', approvedTutors.length, 'All') +
+      subjectList.map(s => chip(s, subjectCounts.get(s), s)).join('');
+    bar.querySelectorAll('.subject-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.directorySubject = btn.dataset.subject;
+        renderTutorDirectory();
+      });
+    });
+  }
+
   const filtered = approvedTutors.filter(t => {
-    const term = searchTerm.toLowerCase();
+    const subjectOk = activeSubject === 'All' || t.subjects.some(s => s.trim() === activeSubject);
     const nameMatch = t.name.toLowerCase().includes(term);
     const subMatch = t.subjects.some(s => s.toLowerCase().includes(term));
-    return nameMatch || subMatch;
+    return subjectOk && (nameMatch || subMatch);
   });
+
+  const summary = document.getElementById('subject-filter-summary');
+  if (summary) {
+    summary.textContent = activeSubject === 'All'
+      ? `${filtered.length} tutor${filtered.length === 1 ? '' : 's'} available`
+      : `${filtered.length} ${activeSubject} tutor${filtered.length === 1 ? '' : 's'} available`;
+  }
 
   if (filtered.length === 0) {
     grid.innerHTML = `<p class="sub-text center-text" style="grid-column: 1/-1; padding: 30px;">No available approved tutors match your search criteria.</p>`;
     return;
   }
 
-  grid.innerHTML = filtered.map(t => `
+  grid.innerHTML = filtered.map(t => {
+    // The subject being browsed is shown first and highlighted; the others are outlined
+    const subs = t.subjects.map(s => s.trim()).filter(Boolean)
+      .sort((a, b) => (b === activeSubject) - (a === activeSubject));
+    const tags = subs.map(s => `<span class="subject-tag${s === activeSubject ? ' is-selected' : ''}">${esc(s)}</span>`).join('');
+    return `
     <div class="tutor-card">
       <div class="tutor-card-head">
         <div class="tutor-avatar" onclick="viewTutorProfile('${esc(t.id)}')">${esc(t.initials)}</div>
         <div>
           <h4 onclick="viewTutorProfile('${esc(t.id)}')" style="cursor: pointer; text-decoration: underline;">${esc(t.name)}</h4>
-          <span class="sub-text">${esc(t.subjects.join(', '))}</span>
+          <span class="tutor-credential">&#10003; Verified tutor &middot; ${esc(t.learningStyles[0] || 'All learning styles')}</span>
         </div>
       </div>
+      <div class="subject-tags">${tags}</div>
       <p class="tutor-bio-snippet">${esc(t.bio)}</p>
       <div class="tutor-card-foot">
         <div>
           <strong class="price-text">₱${esc(t.hourlyRate)}</strong> <span class="sub-text">/ hr</span>
-          <div class="rating-text">★ ${esc(t.rating.toFixed(1))} (${esc(t.reviewsCount)})</div>
+          <div class="rating-text">${t.reviewsCount > 0 ? '★ ' + esc(t.rating.toFixed(1)) + ' (' + esc(t.reviewsCount) + ')' : 'New tutor'}</div>
         </div>
         <button class="btn btn-primary btn-small" onclick="openCalendarBooking('${esc(t.id)}')">Book Session</button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function renderStudentUpcoming() {
