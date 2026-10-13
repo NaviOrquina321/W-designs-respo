@@ -7,6 +7,14 @@
 CREATE DATABASE IF NOT EXISTS `tutorlink_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `tutorlink_db`;
 
+-- Schema Version Table
+CREATE TABLE IF NOT EXISTS `schema_version` (
+  `version` INT PRIMARY KEY,
+  `applied_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `schema_version` (`version`) VALUES (1) ON DUPLICATE KEY UPDATE `version`=`version`;
+
 -- 1. Table: users (Unified Authentication Table)
 CREATE TABLE IF NOT EXISTS `users` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,

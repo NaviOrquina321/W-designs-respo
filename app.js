@@ -101,7 +101,6 @@ function startAutoRefreshTimer() {
   autoRefreshTimer = setInterval(async () => {
     if (!state.currentUser || state.currentRole === 'guest') return;
 
-    // Do not re-render if user is actively typing or a modal/drawer is open
     const activeEl = document.activeElement;
     const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT');
     const hasOpenModal = document.querySelector('.modal-backdrop.active') !== null;
@@ -109,7 +108,6 @@ function startAutoRefreshTimer() {
 
     await syncWithDatabase();
 
-    // Poll workspace chat if workspace is active
     if (state.activeWorkspaceSession) {
       await pollWorkspaceChat();
     }
@@ -117,7 +115,7 @@ function startAutoRefreshTimer() {
     if (!isTyping && !hasOpenModal && !hasOpenDrawer) {
       renderAllViews();
     }
-  }, 8000);
+  }, 5000);
 }
 
 // Database Synchronization Engine
@@ -193,6 +191,10 @@ async function syncWithDatabase() {
       const resA = await fetch('api/admin.php');
       if (resA.ok) {
         const jsonA = await resA.json();
+        const warnBanner = document.getElementById('sqlite-warning-banner');
+        if (warnBanner) {
+          warnBanner.classList.toggle('hidden', !jsonA.sqlite_fallback);
+        }
         if (jsonA.data) {
           const d = jsonA.data;
           const elStu = document.getElementById('admin-stat-total-students');
@@ -1287,56 +1289,69 @@ function initAIMatching() {
   cancelBtn?.addEventListener('click', () => closeModal('modal-ai-matching'));
   closeBtn?.addEventListener('click', () => closeModal('modal-ai-matching'));
 
-  form?.addEventListener('submit', (e) => {
+  form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const subject = document.getElementById('match-subject').value;
+    const level = document.getElementById('match-level')?.value || 'Senior High';
     const style = document.getElementById('match-style').value;
     const time = document.getElementById('match-time').value;
-
-    // Filter approved and non-deactivated tutors teaching the chosen subject
-    const candidates = state.tutors.filter(t => t.approvalStatus === 'Approved' && !t.deactivated && t.subjects.some(s => s.toLowerCase() === subject.toLowerCase()));
 
     const resultsBox = document.getElementById('ai-match-results');
     const cardsList = document.getElementById('ai-match-cards-list');
 
-    if (candidates.length === 0) {
-      cardsList.innerHTML = `<p class="sub-text center-text" style="padding: 20px;">No matching tutors yet for ${esc(subject)}.</p>`;
-      resultsBox.classList.remove('hidden');
-      return;
-    }
+    if (cardsList) cardsList.innerHTML = `<p class="sub-text center-text" style="padding: 20px;">Finding tutors...</p>`;
+    resultsBox?.classList.remove('hidden');
 
-    // Rule-based Score Calculation
-    const scoredCandidates = candidates.map(t => {
-      let score = 50; // Subject match base
-      if (t.learningStyles.some(ls => style.toLowerCase().includes(ls.toLowerCase()))) score += 20;
-      if (t.availabilitySlots.some(s => time.toLowerCase().includes(s.toLowerCase()))) score += 15;
-      score += Math.round((t.rating / 5) * 15);
-      score = Math.min(100, score);
-      return { tutor: t, score };
-    });
+    try {
+      const res = await fetch('api/match.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject,
+          grade: level,
+          learning_style: style,
+          preferred_time: time
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'success') {
+        showToast(data.message || 'Matching request failed.', 'error');
+        return;
+      }
 
-    scoredCandidates.sort((a, b) => b.score - a.score);
+      const modeLabel = data.match_mode || 'Rule-based match';
+      const candidates = data.data || [];
 
-    cardsList.innerHTML = scoredCandidates.map(({ tutor, score }) => `
-      <div class="session-card" style="align-items: flex-start;">
-        <div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <strong style="font-size: 1.1rem; cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(tutor.id)}')">${esc(tutor.name)}</strong>
-            <span class="badge badge-match">${esc(score)}% AI Match Fit</span>
+      if (candidates.length === 0) {
+        cardsList.innerHTML = `<p class="sub-text center-text" style="padding: 20px;">No matching tutors yet for ${esc(subject)}.</p>`;
+        resultsBox.classList.remove('hidden');
+        return;
+      }
+
+      cardsList.innerHTML = candidates.map(t => `
+        <div class="session-card" style="align-items: flex-start;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <strong style="font-size: 1.1rem; cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(t.id)}')">${esc(t.name)}</strong>
+              <span class="badge badge-match">${esc(t.score)}% ${esc(modeLabel)}</span>
+            </div>
+            <div class="sub-text margin-top-xs">Subject: <strong>${esc(subject)}</strong></div>
+            <div class="sub-text">Teaching Style: ${esc(Array.isArray(t.learningStyles) ? t.learningStyles.join(', ') : t.learningStyles)}</div>
+            <div class="sub-text">Rating: ★ ${esc(parseFloat(t.rating).toFixed(1))} (${esc(t.reviewsCount)} reviews)</div>
+            <p class="sub-text" style="margin-top: 6px;">${esc(t.matchReason || t.bio)}</p>
           </div>
-          <div class="sub-text margin-top-xs">Subject: <strong>${esc(subject)}</strong></div>
-          <div class="sub-text">Teaching Style: ${esc(tutor.learningStyles.join(', '))}</div>
-          <div class="sub-text">Rating: ★ ${esc(tutor.rating.toFixed(1))} (${esc(tutor.reviewsCount)} reviews)</div>
-          <p class="sub-text" style="margin-top: 6px;">${esc(tutor.bio)}</p>
+          <div>
+            <button class="btn btn-primary btn-small" onclick="selectMatchedTutor('${esc(t.id)}', '${esc(subject)}', ${t.score})">Choose Tutor & Book</button>
+          </div>
         </div>
-        <div>
-          <button class="btn btn-primary btn-small" onclick="selectMatchedTutor('${esc(tutor.id)}', '${esc(subject)}', ${score})">Choose Tutor & Book</button>
-        </div>
-      </div>
-    `).join('');
+      `).join('');
 
-    resultsBox.classList.remove('hidden');
-    resultsBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      resultsBox.classList.remove('hidden');
+      resultsBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      showToast(`${modeLabel} recommendation generated!`);
+    } catch (err) {
+      showToast('Matching failed. Could not connect to server.', 'error');
+    }
   });
 }
 
@@ -1599,13 +1614,29 @@ function renderNotifDrawer() {
   }
 
   list.innerHTML = filtered.map(n => `
-    <div class="notif-item ${n.read ? '' : 'unread'}">
+    <div class="notif-item ${n.read ? '' : 'unread'}" style="cursor: pointer;" onclick="markSingleNotificationRead('${esc(n.id)}')">
       <strong>${esc(n.title)}</strong>
       <p>${esc(n.message)}</p>
       <div class="notif-time">${esc(n.time)}</div>
     </div>
   `).join('');
 }
+
+window.markSingleNotificationRead = async function(notifId) {
+  const n = state.notifications.find(x => x.id === notifId);
+  if (n) n.read = true;
+
+  const userId = state.currentUser ? state.currentUser.id : 'guest';
+  const readStorage = state.notifications.filter(x => x.read).map(x => x.id);
+  localStorage.setItem(`tutorlink_read_${userId}`, JSON.stringify(readStorage));
+
+  try {
+    await fetch(`api/notifications.php?id=${encodeURIComponent(notifId)}`, { method: 'PUT' });
+  } catch (e) {}
+
+  renderNotifDrawer();
+  updateNotificationBadge();
+};
 
 function updateNotificationBadge() {
   const badge = document.getElementById('notif-badge-count');
@@ -1782,14 +1813,31 @@ window.joinLiveWorkspace = async function(sessionId) {
   const titleEl = document.getElementById('workspace-session-title');
   const partEl = document.getElementById('workspace-participants');
   const notesEl = document.getElementById('session-shared-notes');
+  const chatInput = document.getElementById('chat-input');
+  const chatSubmitBtn = document.querySelector('#chat-form button[type="submit"]');
 
-  if (titleEl) titleEl.textContent = `Live Session Workspace: ${esc(session.subject)}`;
-  if (partEl) partEl.textContent = `${esc(session.studentName)} (Student) & ${esc(session.tutorName)} (Tutor)`;
-  if (notesEl) notesEl.value = session.notes || '';
+  const isReadOnly = (session.status === 'Completed' || session.status === 'Cancelled');
+
+  if (titleEl) titleEl.textContent = `${isReadOnly ? 'Workspace Archive' : 'Live Workspace'}: ${esc(session.subject)}`;
+  if (partEl) partEl.textContent = `${esc(session.studentName)} (Student) & ${esc(session.tutorName)} (Tutor) - ${esc(session.status)}`;
+
+  if (notesEl) {
+    notesEl.value = session.notes || '';
+    notesEl.disabled = isReadOnly;
+  }
+
+  if (chatInput) {
+    chatInput.disabled = isReadOnly;
+    chatInput.placeholder = isReadOnly ? "Session is completed or cancelled. Workspace is read-only." : "Type a message...";
+  }
+
+  if (chatSubmitBtn) {
+    chatSubmitBtn.disabled = isReadOnly;
+  }
 
   const chatContainer = document.getElementById('chat-messages-container');
   if (chatContainer) {
-    chatContainer.innerHTML = `<div class="chat-msg system">Live Virtual Workspace connected.</div>`;
+    chatContainer.innerHTML = `<div class="chat-msg system">${isReadOnly ? 'Session read-only archive.' : 'Live Virtual Workspace connected.'}</div>`;
   }
 
   openModal('modal-session-workspace');

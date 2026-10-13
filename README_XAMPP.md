@@ -22,21 +22,18 @@ Copy or move the `tutorlink` project folder into your XAMPP `htdocs` directory:
 
 ### Step 3: Import Database (phpMyAdmin)
 1. Open your browser and go to `http://localhost/phpmyadmin/`
-2. Click on the **Import** tab at the top.
-3. Drop `tutorlink_db` if it exists, then click **Import** and select `database.sql` from the project folder.
-4. Click **Import** (or **Go**).
+2. Import `database.sql` from the project folder.
 
-*Note: `api/config.php` automatically creates the `tutorlink_db` database and schema if it does not already exist, with a fallback to SQLite (`tutorlink.db`) if MySQL is offline.*
+*Note: `api/config.php` automatically performs one-time schema migration using `schema_version`, with fallback to SQLite (`tutorlink.db`) if MySQL is offline.*
 
 ---
 
 ## Access the Web Application
-Open your browser and navigate to:
-```
-http://localhost/tutorlink/
-```
 
-### Test User Accounts (Log In)
+- **Student & Tutor Portal:** `http://localhost/tutorlink/`
+- **Admin Portal Entry:** `http://localhost/tutorlink/admin-login.php`
+
+### Test User Accounts
 - **Student Role:** Maria Santos (`maria@tutorlink.ph` / `student123`)
 - **Tutor Role:** Prof. Alex Rivera (`alex@tutorlink.ph` / `tutor123`)
 - **Admin Role:** System Admin (`admin@tutorlink.ph` / `admin123`)

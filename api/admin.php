@@ -24,11 +24,12 @@ try {
 
     echo json_encode([
         'status' => 'success',
+        'sqlite_fallback' => !empty($isSqliteFallback),
         'data' => [
             'total_students' => $totalStudents,
             'total_tutors' => $totalTutors,
             'total_volume' => $totalVolume,
-            'platform_commission' => $totalCommission
+            'net_commission' => $totalCommission
         ]
     ]);
 } catch (PDOException $e) {

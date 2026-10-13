@@ -9,6 +9,7 @@ header('Content-Type: text/html; charset=utf-8');
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TutorLink - An Intelligent Tutor-Student Matching System</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
   <meta name="description" content="TutorLink matches students with tutors suited to their learning needs, and handles scheduling, notifications, and payment in one place.">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -964,8 +965,8 @@ header('Content-Type: text/html; charset=utf-8');
   <div class="modal-backdrop" id="modal-gcash">
     <div class="modal-card gcash-theme">
       <div class="gcash-banner">
-        <div class="gcash-logo" id="payment-method-header-title">GCash Payment</div>
-        <div class="gcash-subtext">Secure Online Payment</div>
+        <div class="gcash-logo" id="payment-method-header-title">Demo GCash Payment</div>
+        <div class="gcash-subtext">Simulated Online Payment Processing</div>
         <button class="close-btn white" id="close-gcash-modal">&times;</button>
       </div>
 

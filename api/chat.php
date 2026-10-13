@@ -56,12 +56,16 @@ if ($method === 'GET') {
         jsonError(400, 'Message exceeds 1000 characters limit.');
     }
 
-    $st = $pdo->prepare("SELECT student_id, student_name, tutor_id, tutor_name FROM sessions WHERE id = ?");
+    $st = $pdo->prepare("SELECT student_id, student_name, tutor_id, tutor_name, status FROM sessions WHERE id = ?");
     $st->execute([$sessionId]);
     $session = $st->fetch();
 
     if (!$session) {
         jsonError(404, 'Session not found.');
+    }
+
+    if ($session['status'] === 'Completed' || $session['status'] === 'Cancelled') {
+        jsonError(400, 'Session is completed or cancelled. Workspace is read-only.');
     }
 
     $isStudent = ($session['student_id'] === $user['id']);

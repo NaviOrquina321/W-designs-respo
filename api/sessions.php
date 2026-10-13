@@ -2,6 +2,7 @@
 // api/sessions.php - Session Management & Booking REST API
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/payment_provider.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -43,6 +44,12 @@ if ($method === 'GET') {
     $today = date('Y-m-d');
     if ($sessionDate < $today) {
         jsonError(400, 'Cannot book a session for a past date.');
+    }
+    if ($sessionDate === $today) {
+        $slotStart = parseSlotStartTime($sessionDate, $timeSlot);
+        if ($slotStart > 0 && $slotStart < time()) {
+            jsonError(400, 'Cannot book a time slot earlier today that has already passed.');
+        }
     }
     $maxDate = date('Y-m-d', strtotime('+1 year'));
     if ($sessionDate > $maxDate) {
@@ -109,76 +116,16 @@ if ($method === 'GET') {
     $tutorName = $tutorRecord['name'];
 
     try {
-        $pdo->beginTransaction();
-
-        // Concurrency Guard: Reject double booking
-        $stChk = $pdo->prepare("SELECT COUNT(*) as cnt FROM sessions WHERE tutor_id = ? AND session_date = ? AND time_slot = ? AND status != 'Cancelled'");
-        $stChk->execute([$tutorRecord['id'], $sessionDate, $timeSlot]);
-        if ($stChk->fetch()['cnt'] > 0) {
-            $pdo->rollBack();
-            jsonError(400, 'This tutor is already booked for the selected date and time slot.');
-        }
-
-        // 1. Insert session row
-        $stmtSes = $pdo->prepare("INSERT INTO sessions (id, student_id, student_name, tutor_id, tutor_name, subject, session_date, time_slot, hourly_rate, commission_fee, total_paid, gcash_ref, status, payout_status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed', 'Unpaid', 'Booked via GCash e-Wallet.')");
-        $stmtSes->execute([
-            $sessionId,
-            $studentRecord['id'],
-            $studentName,
-            $tutorRecord['id'],
-            $tutorName,
-            $subject,
-            $sessionDate,
-            $timeSlot,
-            $hourlyRate,
-            $commissionFee,
-            $totalPaid,
-            $gcashRef
-        ]);
-
-        // 2. Insert payment row with status 'Pending' and payout_status 'Unpaid'
-        $paymentId = newId('PAY-');
-        $stmtPay = $pdo->prepare("INSERT INTO payments (id, student_id, student_name, tutor_id, tutor_name, method, ref_no, amount, status, payout_status) VALUES (?, ?, ?, ?, ?, 'GCash', ?, ?, 'Pending', 'Unpaid')");
-        $stmtPay->execute([
-            $paymentId,
-            $studentRecord['id'],
-            $studentName,
-            $tutorRecord['id'],
-            $tutorName,
-            $gcashRef,
-            $totalPaid
-        ]);
-
-        // 3. Connect schedules: insert or update schedule row with status 'Booked'
-        if ($matchingScheduleRow) {
-            $stSchUpd = $pdo->prepare("UPDATE schedules SET student_id = ?, student_name = ?, subject = ?, status = 'Booked' WHERE id = ?");
-            $stSchUpd->execute([$studentRecord['id'], $studentName, $subject, $matchingScheduleRow['id']]);
-        } else {
-            $schId = newId('SCH-');
-            $stSchIns = $pdo->prepare("INSERT INTO schedules (id, tutor_id, tutor_name, student_id, student_name, date_slot, subject, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'Booked')");
-            $stSchIns->execute([$schId, $tutorRecord['id'], $tutorName, $studentRecord['id'], $studentName, "$sessionDate $timeSlot", $subject]);
-        }
-
-        // 4. Server notifications
-        notify($pdo, 'student', $studentName, 'Session Booked', 'Session booked. Payment awaiting admin confirmation.');
-        notify($pdo, 'tutor', $tutorName, 'New Match/Session Request', "$studentName booked a $subject tutoring session for $sessionDate at $timeSlot.");
-        notify($pdo, 'admin', 'System Admin', 'New Session & Payment', "New session booked by $studentName with $tutorName ($sessionDate $timeSlot). Payment pending confirmation.");
-
-        $pdo->commit();
-
-        $stNew = $pdo->prepare("SELECT * FROM sessions WHERE id = ?");
-        $stNew->execute([$sessionId]);
-        $row = $stNew->fetch();
+        $createdSession = processDemoGCashPayment($pdo, $studentRecord, $tutorRecord, $subject, $sessionDate, $timeSlot);
 
         echo json_encode([
             'status' => 'success',
-            'message' => 'Session booked successfully.',
-            'session' => toCamelArray($row)
+            'message' => 'Demo GCash payment processed and session confirmed.',
+            'session' => toCamelArray($createdSession)
         ]);
-    } catch (PDOException $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
+    } catch (Exception $e) {
         error_log("Session booking DB error: " . $e->getMessage());
-        jsonError(500, 'Database transaction failed during booking.');
+        jsonError(500, 'Transaction failed during booking: ' . $e->getMessage());
     }
 } elseif ($method === 'PUT') {
     $user = requireLogin();
@@ -210,8 +157,18 @@ if ($method === 'GET') {
             $newStatus = trim($input['status']);
             if ($newStatus === 'In Progress') {
                 if ($session['status'] !== 'Confirmed') {
-                    jsonError(400, 'Can only start a session that is Confirmed.');
+                    jsonError(400, 'Can only start a session that is Confirmed and paid.');
                 }
+
+                // Check time window: 15 minutes before slot start until slot end
+                $now = time();
+                $slotStart = parseSlotStartTime($session['session_date'], $session['time_slot']);
+                $slotEnd = parseSlotEndTime($session['session_date'], $session['time_slot']);
+
+                if ($slotStart > 0 && ($now < ($slotStart - 900) || $now > $slotEnd)) {
+                    jsonError(400, 'Session can only be started during its scheduled time window (from 15 minutes before slot start until slot end).');
+                }
+
                 $fields[] = "`status` = 'In Progress'";
                 notify($pdo, 'student', $session['student_name'], 'Session Live', 'Your tutor started the session, join now.');
             } elseif ($newStatus === 'Completed') {
@@ -294,7 +251,70 @@ if ($method === 'GET') {
         echo json_encode(['status' => 'success', 'message' => 'Session updated by tutor.']);
     } elseif ($user['role'] === 'student') {
         if ($session['student_id'] !== $user['id']) {
-            jsonError(403, 'You can only rate your own sessions.');
+            jsonError(403, 'You can only manage your own sessions.');
+        }
+
+        // Student reschedule handler
+        if (isset($input['session_date']) || isset($input['time_slot'])) {
+            if ($session['status'] !== 'Confirmed') {
+                jsonError(400, 'Can only reschedule confirmed sessions.');
+            }
+
+            $currentSlotTs = parseSlotStartTime($session['session_date'], $session['time_slot']);
+            if (($currentSlotTs - time()) <= 86400) {
+                jsonError(400, 'Rescheduling is only allowed at least 24 hours prior to the session start time.');
+            }
+
+            $newDate = trim($input['session_date'] ?? $session['session_date']);
+            $newSlot = trim($input['time_slot'] ?? $session['time_slot']);
+
+            $d = DateTime::createFromFormat('Y-m-d', $newDate);
+            if (!$d || $d->format('Y-m-d') !== $newDate) {
+                jsonError(400, 'Invalid date format.');
+            }
+            if ($newDate < date('Y-m-d')) {
+                jsonError(400, 'Cannot reschedule to a past date.');
+            }
+            if ($newDate === date('Y-m-d')) {
+                $newStart = parseSlotStartTime($newDate, $newSlot);
+                if ($newStart > 0 && $newStart < time()) {
+                    jsonError(400, 'Cannot reschedule to a slot earlier today that has already passed.');
+                }
+            }
+
+            // Check tutor slots
+            $stT = $pdo->prepare("SELECT availability_slots FROM tutors WHERE id = ?");
+            $stT->execute([$session['tutor_id']]);
+            $tRec = $stT->fetch();
+            $tSlots = array_map('trim', explode(',', $tRec['availability_slots'] ?? ''));
+
+            $stSchCheck = $pdo->prepare("SELECT id FROM schedules WHERE tutor_id = ? AND date_slot = ? AND status = 'Available'");
+            $stSchCheck->execute([$session['tutor_id'], "$newDate $newSlot"]);
+            $mSch = $stSchCheck->fetch();
+
+            if (!in_array($newSlot, $tSlots, true) && !$mSch) {
+                jsonError(400, 'Proposed slot is not in tutor availability.');
+            }
+
+            // Check double booking
+            $stChk = $pdo->prepare("SELECT COUNT(*) as cnt FROM sessions WHERE tutor_id = ? AND session_date = ? AND time_slot = ? AND id != ? AND status != 'Cancelled'");
+            $stChk->execute([$session['tutor_id'], $newDate, $newSlot, $sessionId]);
+            if ($stChk->fetch()['cnt'] > 0) {
+                jsonError(400, 'Tutor is already booked for the proposed time slot.');
+            }
+
+            // Update schedules table entry
+            $oldSlot = $session['session_date'] . ' ' . $session['time_slot'];
+            $stSchUpd = $pdo->prepare("UPDATE schedules SET date_slot = ? WHERE tutor_id = ? AND date_slot = ? AND student_id = ?");
+            $stSchUpd->execute(["$newDate $newSlot", $session['tutor_id'], $oldSlot, $session['student_id']]);
+
+            $stmtUpd = $pdo->prepare("UPDATE sessions SET session_date = ?, time_slot = ? WHERE id = ?");
+            $stmtUpd->execute([$newDate, $newSlot, $sessionId]);
+
+            notify($pdo, 'tutor', $session['tutor_name'], 'Session Rescheduled by Student', "{$session['student_name']} rescheduled their session to $newDate at $newSlot.");
+
+            echo json_encode(['status' => 'success', 'message' => 'Session rescheduled successfully.']);
+            exit();
         }
 
         if ($session['status'] !== 'Completed') {

@@ -151,8 +151,19 @@ if ($method === 'GET') {
 
         if (isset($input['subjects'])) {
             $subj = is_array($input['subjects']) ? implode(', ', $input['subjects']) : trim($input['subjects']);
+            $chosenList = array_filter(array_map('trim', explode(',', $subj)));
+
+            $stCat = $pdo->query("SELECT name FROM subjects");
+            $catList = array_map('strtolower', array_column($stCat->fetchAll(), 'name'));
+
+            foreach ($chosenList as $cs) {
+                if (!in_array(strtolower($cs), $catList, true)) {
+                    jsonError(400, "Subject '$cs' is not in the subjects catalog.");
+                }
+            }
+
             $fields[] = "`subjects` = ?";
-            $params[] = $subj;
+            $params[] = implode(', ', $chosenList);
         }
         if (isset($input['learningStyles']) || isset($input['learning_styles'])) {
             $styles = $input['learningStyles'] ?? $input['learning_styles'];
