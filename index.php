@@ -270,6 +270,7 @@ header('Content-Type: text/html; charset=utf-8');
               <a href="#how-it-works">How It Works</a>
               <a href="#who-its-for">Who It's For</a>
               <a href="#">Contact</a>
+              <a href="admin-login.php" target="_blank" rel="noopener">Admin Portal</a>
             </div>
           </div>
           <p class="copyright">© 2026 TutorLink</p>

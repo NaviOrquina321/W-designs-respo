@@ -44,10 +44,14 @@ php -S localhost:8000 router.php
 ---
 
 ## Access the Web Application
-Open your browser and navigate to:
-```
-http://localhost/tutorlink/
-```
+TutorLink has two separate sites that share the same database. You can keep both open at the same time, in two tabs:
+
+| Site | URL | Who signs in |
+|------|-----|--------------|
+| Main site | `http://localhost/tutorlink/` | Students and tutors |
+| Admin Portal | `http://localhost/tutorlink/admin-login.php` | Administrators only |
+
+Each site has its own login session, so an admin and a student can be signed in together in the same browser. An admin account cannot sign in on the main site, and student or tutor accounts cannot sign in on the Admin Portal. The main site footer and the admin header both have a link to open the other site in a new tab.
 
 ### Test User Accounts (Log In)
 - **Student Role:** Maria Santos (`maria@tutorlink.ph` / `student123`)

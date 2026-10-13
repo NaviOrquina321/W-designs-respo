@@ -3,6 +3,24 @@
  * Application Logic & State Management
  */
 
+// Portal awareness: the admin site (admin.php) and the main site (index.php) use separate
+// login sessions. Every API call from the admin site is tagged so the server uses the admin session.
+function isAdminPortal() {
+  return !!(document.body && document.body.classList.contains('admin-body'));
+}
+(function installPortalFetch() {
+  const nativeFetch = window.fetch.bind(window);
+  window.fetch = function (input, init) {
+    init = init || {};
+    if (isAdminPortal()) {
+      const headers = new Headers(init.headers || {});
+      headers.set('X-TutorLink-Portal', 'admin');
+      init = Object.assign({}, init, { headers });
+    }
+    return nativeFetch(input, init);
+  };
+})();
+
 // XSS Sanitization Helper Routine
 function esc(str) {
   return String(str ?? '').replace(/[&<>"']/g, c => ({
@@ -426,9 +444,8 @@ function initNavigation() {
     }
   });
   document.getElementById('landing-audience-admin')?.addEventListener('click', () => {
-    openModal('modal-auth');
-    switchAuthTab('login');
-    showToast('Admins please sign in using administrator credentials.');
+    // Admins have their own separate site; open it in a new tab so both stay open together
+    window.open('admin-login.php', '_blank', 'noopener');
   });
 
   document.getElementById('tutor-search-input')?.addEventListener('input', (e) => {
@@ -473,6 +490,12 @@ function openFloatingCalendarModal() {
 // Role Switcher Logic
 function switchRole(role, customUser = null) {
   state.currentRole = role;
+
+  // Admin site has no guest view: an expired or missing admin session goes back to the admin login
+  if (isAdminPortal() && role === 'guest') {
+    window.location.href = 'admin-login.php';
+    return;
+  }
 
   document.querySelectorAll('.app-view').forEach(view => view.classList.remove('active'));
 
@@ -521,9 +544,11 @@ function switchRole(role, customUser = null) {
       document.getElementById('view-tutor-profile').classList.add('active');
       if (floatingCalBtn) floatingCalBtn.classList.add('hidden');
     } else if (role === 'admin') {
-      // Redirect to admin.php page
-      window.location.href = 'admin.php';
-      return;
+      // Admins never use the main site: send them to their own portal (already there = stay)
+      if (!isAdminPortal()) {
+        window.location.href = 'admin-login.php';
+        return;
+      }
     }
   }
 
@@ -561,7 +586,7 @@ function initAuthModalTabs() {
       await syncWithDatabase();
 
       if (data.user.role === 'admin') {
-        window.location.href = 'admin.php';
+        window.location.href = 'admin-login.php';
       } else {
         switchRole(data.user.role, data.user);
         showToast(`Logged in successfully as ${data.user.name}`);

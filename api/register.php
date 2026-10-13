@@ -9,6 +9,10 @@ if ($method !== 'POST') {
     jsonError(405, 'Method not allowed');
 }
 
+if (TUTORLINK_PORTAL !== 'main') {
+    jsonError(403, 'Registration is only available on the main TutorLink site.');
+}
+
 $input = getInput();
 $role = strtolower(trim($input['role'] ?? ''));
 $name = trim($input['name'] ?? '');

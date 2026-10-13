@@ -18,6 +18,13 @@ Tested by running the PHP API locally (SQLite) and calling every role's main flo
 | 10 | Session cookie lacked the Secure flag on HTTPS | Added |
 | 11 | Clutter in the repo | Removed `test-results/` and 4 unused ring-page images; added `.gitignore` |
 
+## Added: separate Admin Portal
+- New `admin-login.php`: its own sign-in page for administrators. `admin.php` is the dashboard.
+- Admin and main site use different session cookies (`TUTORLINK_ADMIN` and `TUTORLINK_MAIN`), so both can be open and signed in at the same time. They still use the same API and database.
+- Each portal only accepts its own users, and a session from one cannot be reused on the other.
+- Fixed `admin.php` reloading itself in a loop (the shared script redirected admins to the page they were already on).
+- Main site: the "Admins" card and the footer link open the Admin Portal in a new tab. Admin header has "Open Main Site".
+
 ## Verified working (no change needed)
 Login, registration, role checks on every endpoint, prepared statements everywhere, output escaping (XSS) in `app.js` and `admin.php`, server-side price and 10% commission, double-booking block, rating recalculation, chat access limited to session participants.
 

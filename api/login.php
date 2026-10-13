@@ -31,6 +31,14 @@ if (!password_verify($password, $user['password_hash'])) {
     jsonError(401, 'Invalid email or password.');
 }
 
+// Each portal only signs in its own kind of user
+if (TUTORLINK_PORTAL === 'admin' && $user['role'] !== 'admin') {
+    jsonError(403, 'This is the administrator portal. Students and tutors sign in on the main TutorLink site.');
+}
+if (TUTORLINK_PORTAL === 'main' && $user['role'] === 'admin') {
+    jsonError(403, 'Administrators sign in through the Admin Portal (admin-login.php).');
+}
+
 // Check deactivation status for students and tutors
 if ($user['role'] === 'student') {
     $st = $pdo->prepare("SELECT deactivated FROM students WHERE id = ? OR email = ?");

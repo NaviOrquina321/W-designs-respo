@@ -32,6 +32,11 @@ function requireLogin() {
     $userId = $_SESSION['user_id'];
     $role = $_SESSION['role'];
 
+    // The admin portal only accepts admins; the main site never accepts admins
+    if ((TUTORLINK_PORTAL === 'admin') !== ($role === 'admin')) {
+        jsonError(401, 'Unauthorized: Please log in.');
+    }
+
     // Dynamic account deactivation check
     if ($role === 'student' && isset($pdo)) {
         $st = $pdo->prepare("SELECT deactivated FROM students WHERE id = ?");

@@ -3,7 +3,24 @@
 ini_set('display_errors', '0');
 date_default_timezone_set('Asia/Manila');
 
+// Two portals share this backend and database but NOT their login session:
+//   main  -> index.php  (students and tutors)
+//   admin -> admin.php / admin-login.php (administrators only)
+// Each portal has its own session cookie, so an admin and a student can be signed in
+// at the same time in the same browser, in two tabs.
+$portal = 'main';
+$scriptPath = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+$isApiCall = (strpos($scriptPath, '/api/') !== false);   // api/admin.php is an API, not the admin page
+if ((!$isApiCall && in_array(basename($scriptPath), ['admin.php', 'admin-login.php'], true))
+    || strtolower($_SERVER['HTTP_X_TUTORLINK_PORTAL'] ?? '') === 'admin') {
+    $portal = 'admin';
+}
+if (!defined('TUTORLINK_PORTAL')) {
+    define('TUTORLINK_PORTAL', $portal);
+}
+
 if (session_status() === PHP_SESSION_NONE) {
+    session_name($portal === 'admin' ? 'TUTORLINK_ADMIN' : 'TUTORLINK_MAIN');
     session_set_cookie_params([
         'lifetime' => 0,
         'path' => '/',
