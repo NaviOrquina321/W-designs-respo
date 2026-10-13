@@ -1254,12 +1254,27 @@ function renderTutorEarnings() {
   if (earningsEl) earningsEl.textContent = `P${totalEarnings}`;
   if (studentsEl) studentsEl.textContent = uniqueStudents;
   if (sessionsEl) sessionsEl.textContent = tutorSessions.length;
+  const overallRatingEl = document.getElementById('tutor-overall-rating');
+  const totalReviewsEl = document.getElementById('tutor-total-reviews');
+  const completionRateEl = document.getElementById('tutor-completion-rate');
+
+  const activeRating = currentTutorObj && currentTutorObj.reviewsCount > 0 ? currentTutorObj.rating : '0.0';
+  const activeReviews = currentTutorObj ? (currentTutorObj.reviewsCount || 0) : 0;
+
+  const completedCount = tutorSessions.filter(s => s.status === 'Completed').length;
+  const completionPct = tutorSessions.length > 0 ? Math.round((completedCount / tutorSessions.length) * 100) : 100;
+
   if (tutorRatingEl) {
-    if (currentTutorObj && currentTutorObj.reviewsCount > 0) {
-      tutorRatingEl.textContent = `${currentTutorObj.rating} ★`;
-    } else {
-      tutorRatingEl.textContent = '0.0 ★';
-    }
+    tutorRatingEl.textContent = activeReviews > 0 ? `${activeRating} ★` : '0.0 ★';
+  }
+  if (overallRatingEl) {
+    overallRatingEl.textContent = `${activeRating} / 5.0 ★`;
+  }
+  if (totalReviewsEl) {
+    totalReviewsEl.textContent = `${activeReviews} Verified Reviews`;
+  }
+  if (completionRateEl) {
+    completionRateEl.textContent = `${completionPct}% On-Time Completion`;
   }
 
   const grossEl = document.getElementById('tutor-gross-earnings');

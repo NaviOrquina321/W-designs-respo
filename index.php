@@ -470,9 +470,9 @@ header('Content-Type: text/html; charset=utf-8');
           </div>
           <div class="detail-card">
             <div style="display: flex; gap: 24px; flex-wrap: wrap; padding-bottom: 14px; border-bottom: 1px solid var(--line);">
-              <div><strong>Overall Rating:</strong> <span style="font-size: 1.05rem; color: var(--ink); font-weight: 700;">4.9 / 5.0 ★</span></div>
-              <div><strong>Total Reviews:</strong> <span>38 Verified Reviews</span></div>
-              <div><strong>Completion Rate:</strong> <span>98% On-Time Completion</span></div>
+                <div><strong>Overall Rating:</strong> <span id="tutor-overall-rating" style="font-size: 1.05rem; color: var(--ink); font-weight: 700;">0.0 / 5.0 ★</span></div>
+                <div><strong>Total Reviews:</strong> <span id="tutor-total-reviews">0 Verified Reviews</span></div>
+                <div><strong>Completion Rate:</strong> <span id="tutor-completion-rate">100% On-Time Completion</span></div>
             </div>
             <h4 style="margin-top: 14px;">Recent Student Feedback</h4>
             <div id="tutor-reviews-list" class="cards-list margin-top">

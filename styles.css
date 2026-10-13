@@ -148,11 +148,12 @@ nav.wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ink);
+  color: #ffffff;
 }
 
 .icon-btn:hover {
-  background: var(--panel);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--warm-gold);
 }
 
 .notif-badge {
