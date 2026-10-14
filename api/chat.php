@@ -31,6 +31,8 @@ if ($method === 'GET') {
         }
     }
 
+    session_write_close();
+
     if ($afterId > 0) {
         $stmt = $pdo->prepare("SELECT id, session_id, sender_name, sender_role, message, timestamp, created_at FROM chat_messages WHERE session_id = ? AND id > ? ORDER BY id ASC");
         $stmt->execute([$sessionId, $afterId]);
@@ -98,4 +100,3 @@ if ($method === 'GET') {
 } else {
     jsonError(405, 'Method not allowed');
 }
-?>

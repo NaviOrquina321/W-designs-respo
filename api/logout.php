@@ -16,4 +16,3 @@ if (ini_get("session.use_cookies")) {
 session_destroy();
 
 echo json_encode(['status' => 'success', 'message' => 'Logged out successfully.']);
-?>

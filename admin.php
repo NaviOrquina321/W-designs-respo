@@ -1,487 +1,594 @@
 <?php
-// admin.php - Standalone Admin Monitoring Portal
-require_once __DIR__ . '/api/config.php';
-
-// Strictly enforce Admin Session Access
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header('Location: index.php');
+require_once __DIR__ . '/api/config.php';   // starts the TUTORLINK_ADMIN session
+if (($_SESSION['role'] ?? '') !== 'admin') {
+    header('Location: admin-login.php');
     exit;
 }
+$adminName = $_SESSION['name'] ?? 'Admin';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TutorLink Admin</title>
+  <title>TutorLink Admin Dashboard</title>
   <link rel="icon" type="image/png" href="assets/favicon.png">
-  <meta name="description" content="TutorLink Administrator Portal with Main Page Canvas Tabs for Management Modules.">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: var(--panel, #f8fafc);
+      color: var(--ink, #0b132a);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+    }
+    h1, h2, h3, h4 {
+      font-family: 'Cinzel', serif;
+    }
+    .admin-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    .admin-sidebar {
+      width: 250px;
+      background: var(--oxford-navy, #0b132a);
+      color: #ffffff;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(197, 160, 89, 0.25);
+    }
+    .sidebar-brand {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .sidebar-brand img {
+      height: 36px;
+      width: 36px;
+      border-radius: 50%;
+      object-fit: contain;
+    }
+    .sidebar-brand span {
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #ffffff;
+    }
+    .sidebar-menu {
+      list-style: none;
+      padding: 12px 0;
+      margin: 0;
+      flex: 1;
+    }
+    .sidebar-item a {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      border-left: 3px solid transparent;
+    }
+    .sidebar-item a:hover, .sidebar-item.active a {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--warm-gold, #c5a059);
+      border-left-color: var(--warm-gold, #c5a059);
+    }
+    .admin-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .admin-header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--line, #e2e8f0);
+      padding: 16px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .admin-header-title {
+      font-size: 1.25rem;
+      margin: 0;
+      color: var(--oxford-navy, #0b132a);
+    }
+    .admin-content {
+      padding: 28px;
+      flex: 1;
+    }
+    .alert-banner {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+      padding: 12px 18px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
+    .error-banner {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+      padding: 12px 18px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-weight: 500;
+      display: none;
+    }
+    .success-banner {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      padding: 12px 18px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-weight: 500;
+      display: none;
+    }
+    .admin-tab-view {
+      display: none;
+    }
+    .admin-tab-view.active {
+      display: block;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .kpi-card {
+      background: #ffffff;
+      border: 1px solid var(--line, #e2e8f0);
+      border-radius: 6px;
+      padding: 22px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .kpi-label {
+      font-size: 0.85rem;
+      color: var(--muted, #64748b);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .kpi-value {
+      font-family: 'Cinzel', serif;
+      font-size: 2.1rem;
+      font-weight: 700;
+      color: var(--oxford-navy, #0b132a);
+      margin-top: 6px;
+    }
+    .card-panel {
+      background: #ffffff;
+      border: 1px solid var(--line, #e2e8f0);
+      border-radius: 6px;
+      padding: 24px;
+      margin-bottom: 28px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .form-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .form-row .form-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(11, 19, 42, 0.7);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-backdrop.active {
+      display: flex;
+    }
+    .modal-card {
+      background: #ffffff;
+      border-radius: 6px;
+      max-width: 550px;
+      width: 100%;
+      padding: 28px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 1px solid var(--line, #e2e8f0);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line, #e2e8f0);
+    }
+    .chat-box {
+      max-height: 300px;
+      overflow-y: auto;
+      background: var(--panel, #f8fafc);
+      padding: 14px;
+      border-radius: 4px;
+      border: 1px solid var(--line, #e2e8f0);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .chat-item {
+      padding: 8px 12px;
+      border-radius: 4px;
+      background: #ffffff;
+      border: 1px solid var(--line, #e2e8f0);
+      font-size: 0.9rem;
+    }
+    @media (max-width: 768px) {
+      .admin-layout { flex-direction: column; }
+      .admin-sidebar { width: 100%; border-right: none; border-bottom: 1px solid rgba(197, 160, 89, 0.25); }
+      .sidebar-menu { display: flex; overflow-x: auto; padding: 6px; }
+      .sidebar-item a { padding: 8px 14px; white-space: nowrap; border-left: none; border-bottom: 3px solid transparent; }
+      .sidebar-item.active a { border-bottom-color: var(--warm-gold, #c5a059); }
+      .admin-header { padding: 14px 18px; }
+      .admin-content { padding: 18px; }
+    }
+    @media print {
+      .admin-sidebar, .admin-header, .btn, .no-print { display: none !important; }
+      .admin-main, .admin-content { padding: 0 !important; background: #ffffff !important; }
+      .data-table { width: 100% !important; border: 1px solid #000000 !important; }
+      .data-table th, .data-table td { border: 1px solid #000000 !important; color: #000000 !important; }
+    }
+  </style>
 </head>
-<body class="admin-body">
+<body>
 
   <div class="admin-layout">
-    <!-- Dark Left Sidebar Navigation -->
+    <!-- Left Sidebar -->
     <aside class="admin-sidebar">
-      <div class="sidebar-brand" style="display: flex; align-items: center; gap: 10px;">
-        <img src="assets/logo.png" alt="TutorLink Logo" style="height: 38px; width: 38px; object-fit: contain; border-radius: 50%;" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'38\' height=\'38\' viewBox=\'0 0 38 38\'><circle cx=\'19\' cy=\'19\' r=\'18\' fill=\'%2310b981\'/><text x=\'50%\' y=\'55%\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23ffffff\' font-family=\'sans-serif\' font-size=\'14\' font-weight=\'bold\'>TL</text></svg>';">
-        <div class="brand-text">
-          <span class="brand-title">TutorLink</span>
-          <span class="brand-subtitle">ADMIN PORTAL</span>
-        </div>
+      <div class="sidebar-brand">
+        <img src="assets/logo.png" alt="TutorLink Logo" onerror="this.style.display='none'">
+        <span>TutorLink Admin</span>
       </div>
-
-      <div class="sidebar-scroll">
-        <div class="nav-section-title">OVERVIEW</div>
-        <ul class="sidebar-menu">
-          <li class="menu-item active" data-admin-nav="dashboard">
-            <a href="javascript:void(0)" class="menu-link" onclick="switchMainAdminTab('dashboard')">
-              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-              <span>Dashboard Overview</span>
-            </a>
-          </li>
-          <li class="menu-item" data-admin-nav="tutors">
-            <a href="javascript:void(0)" class="menu-link" onclick="switchMainAdminTab('tutors')">
-              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <span>Tutors</span>
-            </a>
-          </li>
-          <li class="menu-item" data-admin-nav="students">
-            <a href="javascript:void(0)" class="menu-link" onclick="switchMainAdminTab('students')">
-              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              <span>Students</span>
-            </a>
-          </li>
-          <li class="menu-item" data-admin-nav="matching">
-            <a href="javascript:void(0)" class="menu-link" onclick="switchMainAdminTab('matching')">
-              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
-              <span>Tutor Matching</span>
-            </a>
-          </li>
-          <li class="menu-item" data-admin-nav="schedule">
-            <a href="javascript:void(0)" class="menu-link" onclick="switchMainAdminTab('schedule')">
-              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              <span>Schedule</span>
-            </a>
-          </li>
-        </ul>
-
-        <div class="nav-section-title">COMMERCE & FINANCE</div>
-        <ul class="sidebar-menu">
-          <li class="menu-item" data-admin-nav="payments">
-            <a href="javascript:void(0)" class="menu-link" onclick="switchMainAdminTab('payments')">
-              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-              <span>Payments</span>
-            </a>
-          </li>
-          <li class="menu-item" data-admin-nav="notifications">
-            <a href="javascript:void(0)" class="menu-link" onclick="switchMainAdminTab('notifications')">
-              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              <span>Notifications</span>
-            </a>
-          </li>
-          <li class="menu-item" data-admin-nav="reports">
-            <a href="javascript:void(0)" class="menu-link" onclick="switchMainAdminTab('reports')">
-              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-              <span>Reports</span>
-            </a>
-          </li>
-        </ul>
-
-      </div>
-
+      <ul class="sidebar-menu">
+        <li class="sidebar-item active" data-tab="dashboard"><a href="#" onclick="switchTab('dashboard', event)">Dashboard</a></li>
+        <li class="sidebar-item" data-tab="students"><a href="#" onclick="switchTab('students', event)">Students</a></li>
+        <li class="sidebar-item" data-tab="tutors"><a href="#" onclick="switchTab('tutors', event)">Tutors</a></li>
+        <li class="sidebar-item" data-tab="matches"><a href="#" onclick="switchTab('matches', event)">Matches</a></li>
+        <li class="sidebar-item" data-tab="sessions"><a href="#" onclick="switchTab('sessions', event)">Sessions</a></li>
+        <li class="sidebar-item" data-tab="payments"><a href="#" onclick="switchTab('payments', event)">Payments</a></li>
+        <li class="sidebar-item" data-tab="subjects"><a href="#" onclick="switchTab('subjects', event)">Subjects</a></li>
+        <li class="sidebar-item" data-tab="notifications"><a href="#" onclick="switchTab('notifications', event)">Notifications</a></li>
+        <li class="sidebar-item" data-tab="reports"><a href="#" onclick="switchTab('reports', event)">Reports</a></li>
+      </ul>
     </aside>
 
-    <!-- Main Content Canvas -->
+    <!-- Main Section -->
     <div class="admin-main">
-      <!-- Top Header Navigation -->
       <header class="admin-header">
-        <div class="header-left">
-          <button class="admin-mobile-toggle" onclick="toggleAdminSidebar()" aria-label="Toggle Sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </button>
-          <div class="header-breadcrumb">
-            <span class="breadcrumb-prefix">Admin Portal</span>
-            <span class="breadcrumb-separator">/</span>
-            <span id="current-admin-tab-title" class="breadcrumb-active">Dashboard</span>
-          </div>
-        </div>
-
-        <div class="header-actions" style="display: flex; align-items: center; gap: 12px;">
-          <button class="icon-btn relative" title="Notifications" onclick="switchMainAdminTab('notifications')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span class="notification-badge"></span>
-          </button>
-          <button id="admin-logout-btn" class="btn btn-secondary btn-small" style="display: flex; align-items: center; gap: 6px;">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            <span>Log Out</span>
-          </button>
+        <h2 class="admin-header-title" id="tab-header-title">Dashboard Overview</h2>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <span>Welcome, <strong><?= htmlspecialchars($adminName) ?></strong></span>
+          <button class="btn btn-secondary btn-small" onclick="handleLogout()">Log Out</button>
         </div>
       </header>
 
-      <!-- Dashboard View Content Area -->
-      <main class="content-container">
+      <main class="admin-content">
+        <!-- Error & Success Message Banners -->
+        <div id="error-banner" class="error-banner"></div>
+        <div id="success-banner" class="success-banner"></div>
 
-        <!-- SECTION 1: Dashboard Overview KPIs & Visual Analytics -->
-        <section id="admin-section-dashboard" class="admin-canvas-section active margin-bottom">
-          <div class="dashboard-title-area">
-            <div>
-              <h1 class="page-title">Dashboard Overview</h1>
-              <p class="page-subtitle">Welcome back, Admin. Here is your real-time platform overview.</p>
+        <?php if (!empty($isSqliteFallback)): ?>
+          <div class="alert-banner">MySQL is offline. Using SQLite fallback database.</div>
+        <?php endif; ?>
+
+        <!-- TAB 1: DASHBOARD -->
+        <div id="tab-dashboard" class="admin-tab-view active">
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">Total Registered Students</div>
+              <div class="kpi-value" id="kpi-students">0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Verified Approved Tutors</div>
+              <div class="kpi-value" id="kpi-tutors">0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Total Transaction Volume</div>
+              <div class="kpi-value" id="kpi-volume">₱0.00</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Platform Net Revenue (10%)</div>
+              <div class="kpi-value" id="kpi-commission">₱0.00</div>
             </div>
           </div>
+        </div>
 
-          <!-- SQLite Fallback Warning Banner -->
-          <div id="sqlite-warning-banner" class="hidden" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-weight: 600;">
-            ⚠️ DATABASE WARNING: MySQL server is unreachable. System is running on SQLite fallback storage (tutorlink.db).
-          </div>
-
-          <!-- Apex Style KPI Metric Cards -->
-          <div class="apex-kpi-grid">
-            <div class="apex-kpi-card" onclick="switchMainAdminTab('payments')">
-              <div class="kpi-header">
-                <span class="kpi-label">Total Revenue</span>
-                <div class="kpi-icon-wrapper green-light">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                </div>
-              </div>
-              <div class="kpi-value" id="admin-stat-total-volume">₱0</div>
-              <div class="kpi-trend positive">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                <span>+12.5%</span> <span class="trend-sub">vs last month</span>
-              </div>
-            </div>
-
-            <div class="apex-kpi-card" onclick="switchMainAdminTab('students')">
-              <div class="kpi-header">
-                <span class="kpi-label">Active Registered Students</span>
-                <div class="kpi-icon-wrapper cyan-light">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                </div>
-              </div>
-              <div class="kpi-value" id="admin-stat-total-students">0</div>
-              <div class="kpi-trend positive">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                <span>+8.2%</span> <span class="trend-sub">vs last month</span>
-              </div>
-            </div>
-
-            <div class="apex-kpi-card" onclick="switchMainAdminTab('tutors')">
-              <div class="kpi-header">
-                <span class="kpi-label">Verified Tutors</span>
-                <div class="kpi-icon-wrapper blue-light">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                </div>
-              </div>
-              <div class="kpi-value" id="admin-stat-total-tutors">0</div>
-              <div class="kpi-trend positive">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                <span>Active</span>
-              </div>
-            </div>
-
-            <div class="apex-kpi-card" onclick="switchMainAdminTab('reports')">
-              <div class="kpi-header">
-                <span class="kpi-label">Platform Commission (10%)</span>
-                <div class="kpi-icon-wrapper amber-light">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                </div>
-              </div>
-              <div class="kpi-value" id="admin-stat-platform-commission">₱0</div>
-              <div class="kpi-trend positive">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                <span>+24.7%</span> <span class="trend-sub">vs last month</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- SECTION 2: Tutors Management Module -->
-        <section id="admin-section-tutors" class="admin-canvas-section margin-bottom">
-          <div class="dashboard-title-area">
-            <div>
-              <h2 class="page-title">Tutor Management</h2>
-              <p class="page-subtitle">Verify documents, approve tutor registrations, and manage tutor account statuses.</p>
-            </div>
-          </div>
-
-          <div class="card-table-wrapper">
-            <div class="table-header-title">
-              <h3>Tutors Directory</h3>
-            </div>
+        <!-- TAB 2: STUDENTS -->
+        <div id="tab-students" class="admin-tab-view">
+          <div class="card-panel">
+            <h3 style="margin-top: 0; margin-bottom: 16px;">Students Management</h3>
             <div class="table-responsive">
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Tutor ID</th>
+                    <th>ID</th>
                     <th>Name</th>
-                    <th>Subjects</th>
-                    <th>Rate (₱)</th>
+                    <th>Email</th>
+                    <th>Grade</th>
+                    <th>Validation</th>
+                    <th>Status</th>
+                    <th>Completed</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="students-table-body">
+                  <tr><td colspan="9" style="text-align:center;">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: TUTORS -->
+        <div id="tab-tutors" class="admin-tab-view">
+          <div class="card-panel">
+            <h3 style="margin-top: 0; margin-bottom: 16px;">Tutors Management & Verification</h3>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Hourly Rate</th>
+                    <th>Rating</th>
+                    <th>Reviews</th>
                     <th>Diploma</th>
                     <th>TOR</th>
                     <th>Gov ID</th>
-                    <th>Approval Status</th>
-                    <th>Account Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-tutors-table-body">
-                  <!-- Dynamic tutor rows -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- SECTION 3: Students Module -->
-        <section id="admin-section-students" class="admin-canvas-section margin-bottom">
-          <div class="dashboard-title-area">
-            <div>
-              <h2 class="page-title">Students</h2>
-              <p class="page-subtitle">View registered student accounts and validate registrations.</p>
-            </div>
-          </div>
-
-          <div class="card-table-wrapper">
-            <div class="table-header-title">
-              <h3>Registered Students List</h3>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Student ID</th>
-                    <th>Full Name</th>
-                    <th>Email</th>
-                    <th>Grade Level</th>
-                    <th>Validation Status</th>
-                    <th>Account Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-students-table-body">
-                  <!-- Dynamic student rows -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- SECTION 4: Tutor Matching Module -->
-        <section id="admin-section-matching" class="admin-canvas-section margin-bottom">
-          <div class="dashboard-title-area">
-            <div>
-              <h2 class="page-title">Tutor Matching</h2>
-              <p class="page-subtitle">Review AI matching recommendations and approve tutoring sessions.</p>
-            </div>
-          </div>
-
-          <div class="card-table-wrapper">
-            <div class="table-header-title">
-              <h3>Tutor Match Requests</h3>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Match ID</th>
-                    <th>Student</th>
-                    <th>Matched Tutor</th>
-                    <th>Subject</th>
-                    <th>Compatibility</th>
+                    <th>Approval</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody id="admin-matching-table-body">
-                  <!-- Dynamic match rows -->
+                <tbody id="tutors-table-body">
+                  <tr><td colspan="11" style="text-align:center;">Loading...</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
-        </section>
+        </div>
 
-        <!-- SECTION 5: Schedule Module -->
-        <section id="admin-section-schedule" class="admin-canvas-section margin-bottom">
-          <div class="dashboard-title-area">
-            <div>
-              <h2 class="page-title">Schedule</h2>
-              <p class="page-subtitle">Modify scheduled sessions and create available calendar schedule slots.</p>
-            </div>
-          </div>
-
-          <div class="card-table-wrapper margin-bottom">
-            <div class="table-header-title">
-              <h3>Scheduled Sessions</h3>
-            </div>
+        <!-- TAB 4: MATCHES -->
+        <div id="tab-matches" class="admin-tab-view">
+          <div class="card-panel">
+            <h3 style="margin-top: 0; margin-bottom: 16px;">Tutor Match Requests</h3>
             <div class="table-responsive">
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Session ID</th>
                     <th>Student</th>
                     <th>Tutor</th>
                     <th>Subject</th>
-                    <th>Date & Slot</th>
+                    <th>Score</th>
                     <th>Status</th>
+                    <th>Reason</th>
+                    <th>Created</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody id="admin-scheduled-sessions-table-body">
-                  <!-- Dynamic scheduled sessions rows -->
+                <tbody id="matches-table-body">
+                  <tr><td colspan="8" style="text-align:center;">Loading...</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
+        </div>
 
-          <div class="card-table-wrapper margin-bottom">
-            <div class="table-header-title">
-              <h3>New Calendar Schedule Slot</h3>
+        <!-- TAB 5: SESSIONS -->
+        <div id="tab-sessions" class="admin-tab-view">
+          <div class="card-panel">
+            <h3 style="margin-top: 0; margin-bottom: 16px;">Scheduled Tutoring Sessions</h3>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Tutor</th>
+                    <th>Subject</th>
+                    <th>Date & Time</th>
+                    <th>Rate</th>
+                    <th>Commission</th>
+                    <th>Total Paid</th>
+                    <th>GCash Ref</th>
+                    <th>Status</th>
+                    <th>Payout</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="sessions-table-body">
+                  <tr><td colspan="11" style="text-align:center;">Loading...</td></tr>
+                </tbody>
+              </table>
             </div>
-            <form id="admin-add-schedule-form" style="padding: 20px;">
-              <div class="form-group margin-bottom">
-                <label>Select Tutor</label>
-                <select id="admin-sch-tutor-select" class="form-select"></select>
+          </div>
+        </div>
+
+        <!-- TAB 6: PAYMENTS -->
+        <div id="tab-payments" class="admin-tab-view">
+          <div class="card-panel">
+            <h3 style="margin-top: 0; margin-bottom: 16px;">Payment Transactions Log</h3>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Student</th>
+                    <th>Tutor</th>
+                    <th>Method</th>
+                    <th>GCash Ref #</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Payout</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="payments-table-body">
+                  <tr><td colspan="10" style="text-align:center;">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 7: SUBJECTS -->
+        <div id="tab-subjects" class="admin-tab-view">
+          <div class="card-panel">
+            <h3 style="margin-top: 0; margin-bottom: 16px;" id="subject-form-title">Add New Subject</h3>
+            <form id="subject-form" onsubmit="handleSaveSubject(event)">
+              <input type="hidden" id="subject-id" value="">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Subject Name</label>
+                  <input type="text" id="subject-name" class="form-input" required placeholder="e.g. Linear Algebra">
+                </div>
+                <div class="form-group">
+                  <label>Category</label>
+                  <select id="subject-category" class="form-select" required>
+                    <option value="STEM">STEM</option>
+                    <option value="Technology">Technology</option>
+                    <option value="Humanities">Humanities</option>
+                  </select>
+                </div>
               </div>
-              <div class="form-group margin-bottom">
-                <label>Subject</label>
-                <input type="text" id="admin-sch-subject" class="form-input" placeholder="e.g. Calculus II" required>
+              <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button type="submit" class="btn btn-primary btn-small">Save Subject</button>
+                <button type="button" class="btn btn-secondary btn-small" onclick="resetSubjectForm()">Cancel / Reset</button>
               </div>
-              <div class="form-group margin-bottom">
-                <label>Date & Time Slot</label>
-                <input type="text" id="admin-sch-dateslot" class="form-input" placeholder="e.g. 2026-03-20 (02:00 PM - 04:00 PM)" required>
-              </div>
-              <button type="submit" class="btn btn-emerald">Create Schedule Slot</button>
             </form>
           </div>
 
-          <div class="card-table-wrapper">
-            <div class="table-header-title">
-              <h3>Active Available Schedules</h3>
-            </div>
+          <div class="card-panel">
+            <h3 style="margin-top: 0; margin-bottom: 16px;">Subjects Catalog</h3>
             <div class="table-responsive">
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Schedule ID</th>
-                    <th>Tutor</th>
-                    <th>Date & Slot</th>
-                    <th>Subject</th>
-                    <th>Status</th>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Category</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody id="admin-schedule-table-body">
-                  <!-- Dynamic schedule rows -->
+                <tbody id="subjects-table-body">
+                  <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
-        </section>
+        </div>
 
-        <!-- SECTION 6: Payments Module -->
-        <section id="admin-section-payments" class="admin-canvas-section margin-bottom">
-          <div class="dashboard-title-area">
-            <div>
-              <h2 class="page-title">Payments & Fees</h2>
-              <p class="page-subtitle">Monitor GCash transactions, payment statuses, and tutor payouts.</p>
-            </div>
-          </div>
-
-          <div class="card-table-wrapper">
-            <div class="table-header-title">
-              <h3>Payment Transactions Log</h3>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Payment ID</th>
-                    <th>Payer (Student)</th>
-                    <th>Method</th>
-                    <th>GCash Ref #</th>
-                    <th>Amount (₱)</th>
-                    <th>Status</th>
-                    <th>Payout Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-payments-table-body">
-                  <!-- Dynamic payment rows -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- SECTION 7: Reports Module -->
-        <section id="admin-section-reports" class="admin-canvas-section margin-bottom">
-          <div class="dashboard-title-area">
-            <div>
-              <h2 class="page-title">Reports & Analytics</h2>
-              <p class="page-subtitle">Filter tutoring activity, monitor revenue, and export reports to CSV.</p>
-            </div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button class="btn btn-emerald" id="admin-export-sessions-csv-btn">Export Sessions CSV</button>
-              <button class="btn btn-emerald" id="admin-export-payments-csv-btn">Export Payments CSV</button>
-              <button class="btn btn-secondary" onclick="window.print()">Print Summary</button>
-            </div>
-          </div>
-
-          <!-- Report Filter Controls -->
-          <div class="card-table-wrapper margin-bottom" style="padding: 20px;">
-            <h4 style="margin-bottom: 12px;">Filter Activity Reports</h4>
-            <div class="form-row">
+        <!-- TAB 8: NOTIFICATIONS -->
+        <div id="tab-notifications" class="admin-tab-view">
+          <div class="card-panel">
+            <h3 style="margin-top: 0; margin-bottom: 16px;">Send Broadcast Announcement</h3>
+            <form onsubmit="handleSendNotification(event)">
               <div class="form-group">
-                <label>Start Date</label>
-                <input type="date" id="report-start-date" class="form-input">
-              </div>
-              <div class="form-group">
-                <label>End Date</label>
-                <input type="date" id="report-end-date" class="form-input">
-              </div>
-              <div class="form-group">
-                <label>Tutor Filter</label>
-                <select id="report-tutor-select" class="form-select">
-                  <option value="">All Tutors</option>
+                <label>Target Audience</label>
+                <select id="notif-target" class="form-select" required>
+                  <option value="all">All Users (Students & Tutors)</option>
+                  <option value="student">All Students</option>
+                  <option value="tutor">All Tutors</option>
                 </select>
               </div>
               <div class="form-group">
-                <label>Subject Filter</label>
-                <select id="report-subject-select" class="form-select">
-                  <option value="">All Subjects</option>
-                </select>
+                <label>Title</label>
+                <input type="text" id="notif-title" class="form-input" required placeholder="System Announcement">
               </div>
-            </div>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-              <button class="btn btn-primary btn-small" id="apply-report-filters-btn">Apply Filters</button>
-              <button class="btn btn-secondary btn-small" id="reset-report-filters-btn">Reset</button>
-            </div>
+              <div class="form-group">
+                <label>Message Content</label>
+                <textarea id="notif-message" class="form-input" rows="3" required placeholder="Type notification content..."></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary btn-small">Send Notification Broadcast</button>
+            </form>
           </div>
 
-          <!-- Revenue / Commission Summary Cards -->
-          <div class="apex-kpi-grid margin-bottom">
-            <div class="apex-kpi-card">
-              <div class="kpi-label">Filtered Total Revenue</div>
-              <div class="kpi-value" id="report-stat-revenue">₱0</div>
+          <div class="card-panel">
+            <h3 style="margin-top: 0; margin-bottom: 16px;">Notification History Log</h3>
+            <div id="notifications-log-list">
+              <p style="text-align:center; color: var(--muted);">Loading...</p>
             </div>
-            <div class="apex-kpi-card">
-              <div class="kpi-label">Filtered Net Commission (10%)</div>
-              <div class="kpi-value" id="report-stat-commission">₱0</div>
+          </div>
+        </div>
+
+        <!-- TAB 9: REPORTS -->
+        <div id="tab-reports" class="admin-tab-view">
+          <div class="card-panel">
+            <h3 style="margin-top: 0; margin-bottom: 16px;">Activity Reports & Filter</h3>
+            <form onsubmit="handleFilterReports(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Start Date</label>
+                  <input type="date" id="rep-start-date" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label>End Date</label>
+                  <input type="date" id="rep-end-date" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label>Tutor</label>
+                  <select id="rep-tutor-select" class="form-select">
+                    <option value="">All Tutors</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Subject</label>
+                  <select id="rep-subject-select" class="form-select">
+                    <option value="">All Subjects</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                <button type="submit" class="btn btn-primary btn-small">Apply Filters</button>
+                <button type="button" class="btn btn-secondary btn-small" onclick="resetReportFilters()">Reset Filters</button>
+                <button type="button" class="btn btn-outline btn-small" onclick="exportCSV('sessions')">Export Sessions CSV</button>
+                <button type="button" class="btn btn-outline btn-small" onclick="exportCSV('payments')">Export Payments CSV</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">Filtered Revenue</div>
+              <div class="kpi-value" id="rep-revenue">₱0.00</div>
             </div>
-            <div class="apex-kpi-card">
+            <div class="kpi-card">
+              <div class="kpi-label">Net Commission (10%)</div>
+              <div class="kpi-value" id="rep-commission">₱0.00</div>
+            </div>
+            <div class="kpi-card">
               <div class="kpi-label">Completed Sessions</div>
-              <div class="kpi-value" id="report-stat-completed">0</div>
+              <div class="kpi-value" id="rep-completed">0</div>
             </div>
           </div>
 
-          <div class="card-table-wrapper">
-            <div class="table-header-title">
-              <h3>Sessions Report Ledger</h3>
-            </div>
+          <div class="card-panel">
+            <h3 style="margin-top: 0; margin-bottom: 16px;">Sessions Activity Summary</h3>
             <div class="table-responsive">
               <table class="data-table">
                 <thead>
@@ -495,765 +602,781 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
                     <th>Status</th>
                   </tr>
                 </thead>
-                <tbody id="admin-reports-filtered-table-body">
-                  <!-- Dynamic report rows -->
+                <tbody id="reports-table-body">
+                  <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
-        </section>
-
-        <!-- SECTION 8: Notifications Module -->
-        <section id="admin-section-notifications" class="admin-canvas-section margin-bottom">
-          <div class="dashboard-title-area">
-            <div>
-              <h2 class="page-title">Notifications</h2>
-              <p class="page-subtitle">Send system broadcasts and view notification history log.</p>
-            </div>
-          </div>
-
-          <div class="card-table-wrapper margin-bottom" style="padding: 20px;">
-            <h3 class="margin-bottom">Send Broadcast Notification</h3>
-            <div class="form-group margin-bottom">
-              <label>Recipient Target</label>
-              <select id="admin-notif-target" class="form-select">
-                <option value="all">All Users (Students & Tutors)</option>
-                <option value="student">All Students</option>
-                <option value="tutor">All Tutors</option>
-              </select>
-            </div>
-            <div class="form-group margin-bottom">
-              <label>Message Content</label>
-              <input type="text" id="admin-notif-message" placeholder="Type notification broadcast message..." class="form-input">
-            </div>
-            <button class="btn btn-emerald full-width margin-top" id="admin-send-notif-btn">Send Notification Broadcast</button>
-          </div>
-
-          <div class="card-table-wrapper">
-            <div class="table-header-title">
-              <h3>Notification History Log</h3>
-            </div>
-            <div id="admin-notifications-log" class="cards-list" style="padding: 20px;">
-              <!-- Broadcast log -->
-            </div>
-          </div>
-        </section>
+        </div>
 
       </main>
     </div>
   </div>
 
-  <!-- Notification Toast Container -->
-  <div class="toast-container" id="toast-container"></div>
-
-  <!-- Reschedule Modal for Admin Schedule Modifying -->
-  <div class="modal-backdrop" id="modal-reschedule">
+  <!-- MODAL: View Profile -->
+  <div class="modal-backdrop" id="modal-view-profile">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Modify Session Schedule</h3>
-        <button class="close-btn" id="close-reschedule-modal">&times;</button>
+        <h3 id="profile-modal-title" style="margin: 0;">User Profile Details</h3>
+        <button class="close-btn" onclick="closeModal('modal-view-profile')">&times;</button>
       </div>
-      <div class="modal-body">
-        <form id="reschedule-session-form">
-          <input type="hidden" id="reschedule-session-id">
-          <div class="form-group">
-            <label>New Date</label>
-            <input type="date" id="reschedule-date-input" class="form-input" required>
-          </div>
-          <div class="form-group">
-            <label>New Time Slot</label>
-            <select id="reschedule-timeslot-select" class="form-select" required>
-              <!-- Populated dynamically -->
-            </select>
-          </div>
-          <div class="modal-actions margin-top">
-            <button type="button" class="btn btn-secondary" id="cancel-reschedule-btn">Cancel</button>
-            <button type="submit" class="btn btn-primary" id="confirm-reschedule-btn">Confirm Reschedule</button>
-          </div>
-        </form>
+      <div id="profile-modal-content"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Reschedule Session -->
+  <div class="modal-backdrop" id="modal-reschedule-session">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="margin: 0;">Reschedule Session</h3>
+        <button class="close-btn" onclick="closeModal('modal-reschedule-session')">&times;</button>
+      </div>
+      <form onsubmit="handleConfirmReschedule(event)">
+        <input type="hidden" id="resch-session-id" value="">
+        <div class="form-group">
+          <label>New Date</label>
+          <input type="date" id="resch-date" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label>New Time Slot</label>
+          <input type="text" id="resch-slot" class="form-input" required placeholder="e.g. 02:00 PM">
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 16px;">
+          <button type="submit" class="btn btn-primary btn-small">Confirm Reschedule</button>
+          <button type="button" class="btn btn-secondary btn-small" onclick="closeModal('modal-reschedule-session')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: View Chat Messages -->
+  <div class="modal-backdrop" id="modal-view-chat">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="margin: 0;">Session Workspace Chat (Read-Only)</h3>
+        <button class="close-btn" onclick="closeModal('modal-view-chat')">&times;</button>
+      </div>
+      <div class="chat-box" id="chat-messages-container">
+        <p style="text-align:center; color: var(--muted);">Loading chat history...</p>
       </div>
     </div>
   </div>
 
-  <script src="app.js"></script>
   <script>
-    const tabTitles = {
-      'dashboard': 'Dashboard Overview',
-      'tutors': 'Tutor Management',
-      'students': 'Student Management',
-      'matching': 'Tutor Matching',
-      'schedule': 'Schedules',
-      'payments': 'Payments & Fees',
-      'reports': 'System Reports',
-      'notifications': 'Notifications'
-    };
+    let currentTab = 'dashboard';
+    let allTutorsCache = [];
+    let allSubjectsCache = [];
 
-    function switchMainAdminTab(tabName) {
-      const sections = document.querySelectorAll('.admin-canvas-section');
-      sections.forEach(sec => sec.classList.remove('active'));
-
-      const targetSection = document.getElementById(`admin-section-${tabName}`);
-      if (targetSection) {
-        targetSection.classList.add('active');
-      }
-
-      const titleElem = document.getElementById('current-admin-tab-title');
-      if (titleElem && tabTitles[tabName]) {
-        titleElem.textContent = tabTitles[tabName];
-      }
-
-      document.querySelectorAll('.sidebar-menu .menu-item').forEach(item => {
-        item.classList.remove('active');
-        if (item.getAttribute('data-admin-nav') === tabName) {
-          item.classList.add('active');
-        }
+    // Helper: XSS Sanitization
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str).replace(/[&<>"']/g, function(c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
       });
+    }
 
-      const sidebar = document.querySelector('.admin-sidebar');
-      if (sidebar && sidebar.classList.contains('mobile-open')) {
-        sidebar.classList.remove('mobile-open');
+    // Helper: Currency Formatter
+    function formatMoney(amount) {
+      const val = parseFloat(amount || 0);
+      return '₱' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // Banner Messages
+    function showError(msg) {
+      const errEl = document.getElementById('error-banner');
+      if (errEl) {
+        errEl.textContent = msg;
+        errEl.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
 
-    function toggleAdminSidebar() {
-      const sidebar = document.querySelector('.admin-sidebar');
-      if (sidebar) {
-        sidebar.classList.toggle('mobile-open');
+    function clearError() {
+      const errEl = document.getElementById('error-banner');
+      if (errEl) errEl.style.display = 'none';
+    }
+
+    function showSuccess(msg) {
+      const succEl = document.getElementById('success-banner');
+      if (succEl) {
+        succEl.textContent = msg;
+        succEl.style.display = 'block';
+        setTimeout(() => { succEl.style.display = 'none'; }, 4000);
       }
     }
 
-    // Admin-specific rendering handlers
-    function renderAdminTutors() {
-      const tbody = document.getElementById('admin-tutors-table-body');
-      if (!tbody) return;
+    // Helper: Master API Fetcher
+    async function api(url, options = {}) {
+      clearError();
+      options.credentials = 'same-origin';
+      if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
+        options.headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
+        options.body = JSON.stringify(options.body);
+      }
 
-      if (state.tutors.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: var(--ink-soft); padding: 20px;">No tutors registered yet.</td></tr>`;
+      let res;
+      try {
+        res = await fetch(url, options);
+      } catch (err) {
+        showError('Network error: Could not connect to server.');
+        throw err;
+      }
+
+      if (res.status === 401) {
+        window.location.href = 'admin-login.php';
         return;
       }
 
-      tbody.innerHTML = state.tutors.map(t => {
-        const docsAllVerified = (t.diplomaStatus === 'Verified' && t.torStatus === 'Verified' && t.idStatus === 'Verified');
-        const isApproved = t.approvalStatus === 'Approved';
+      let text = await res.text();
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (e) {
+        showError('Server error: Invalid JSON response received.');
+        throw new Error('Invalid JSON response');
+      }
 
-        return `
+      if (!res.ok || json.status === 'error') {
+        const msg = json.message || 'Request failed';
+        showError(msg);
+        throw new Error(msg);
+      }
+
+      return json;
+    }
+
+    // Tab Navigation Switcher
+    function switchTab(tabName, event) {
+      if (event) event.preventDefault();
+      currentTab = tabName;
+
+      document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.toggle('active', item.getAttribute('data-tab') === tabName);
+      });
+
+      document.querySelectorAll('.admin-tab-view').forEach(view => {
+        view.classList.toggle('active', view.id === 'tab-' + tabName);
+      });
+
+      const tabTitles = {
+        'dashboard': 'Dashboard Overview',
+        'students': 'Students Management',
+        'tutors': 'Tutors Management & Verification',
+        'matches': 'Tutor Match Requests',
+        'sessions': 'Scheduled Tutoring Sessions',
+        'payments': 'Payment Transactions Log',
+        'subjects': 'Subjects Catalog',
+        'notifications': 'Broadcast Notifications',
+        'reports': 'Reports & Analytics'
+      };
+
+      const titleEl = document.getElementById('tab-header-title');
+      if (titleEl) titleEl.textContent = tabTitles[tabName] || 'Admin Dashboard';
+
+      loadTabData(tabName);
+    }
+
+    function loadTabData(tabName) {
+      if (tabName === 'dashboard') loadDashboard();
+      else if (tabName === 'students') loadStudents();
+      else if (tabName === 'tutors') loadTutors();
+      else if (tabName === 'matches') loadMatches();
+      else if (tabName === 'sessions') loadSessions();
+      else if (tabName === 'payments') loadPayments();
+      else if (tabName === 'subjects') loadSubjects();
+      else if (tabName === 'notifications') loadNotifications();
+      else if (tabName === 'reports') loadReports();
+    }
+
+    // Modal Operations
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('active');
+    }
+
+    // Logout
+    async function handleLogout() {
+      try {
+        await api('api/logout.php', { method: 'POST' });
+      } catch (e) {}
+      window.location.href = 'admin-login.php';
+    }
+
+    // 1. DASHBOARD
+    async function loadDashboard() {
+      try {
+        const json = await api('api/admin.php');
+        if (json && json.data) {
+          document.getElementById('kpi-students').textContent = json.data.total_students || 0;
+          document.getElementById('kpi-tutors').textContent = json.data.total_tutors || 0;
+          document.getElementById('kpi-volume').textContent = formatMoney(json.data.total_volume);
+          document.getElementById('kpi-commission').textContent = formatMoney(json.data.net_commission);
+        }
+      } catch (e) {}
+    }
+
+    // 2. STUDENTS
+    async function loadStudents() {
+      const tbody = document.getElementById('students-table-body');
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Loading students...</td></tr>';
+      try {
+        const json = await api('api/students.php');
+        const students = json.data || [];
+        if (students.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No registered students found.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = students.map(s => `
           <tr>
-            <td><code>${esc(t.id)}</code></td>
-            <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(t.id)}')">${esc(t.name)}</strong></td>
-            <td>${esc(t.subjects.join(', '))}</td>
-            <td>₱${esc(t.hourlyRate)}</td>
+            <td><code>${escapeHtml(s.id)}</code></td>
+            <td><strong>${escapeHtml(s.name)}</strong></td>
+            <td>${escapeHtml(s.email)}</td>
+            <td>${escapeHtml(s.grade)}</td>
+            <td><span class="badge ${s.validated ? 'badge-success' : 'badge-pending'}">${s.validated ? 'Validated' : 'Pending'}</span></td>
+            <td><span class="badge ${s.deactivated ? 'badge-danger' : 'badge-success'}">${s.deactivated ? 'Deactivated' : 'Active'}</span></td>
+            <td>${escapeHtml(s.sessionsCompleted || 0)}</td>
+            <td>${escapeHtml(s.createdAt || s.time || '')}</td>
             <td>
-              <span class="badge ${t.diplomaStatus === 'Verified' ? 'badge-success' : t.diplomaStatus === 'Rejected' ? 'badge-danger' : 'badge-info'}">${esc(t.diplomaStatus)}</span>
-              <div style="margin-top: 4px; display: flex; gap: 4px;">
-                <button class="btn btn-secondary btn-small" onclick="updateTutorDoc('${esc(t.id)}', 'diploma_status', 'Verified')">Verify</button>
-                <button class="btn btn-secondary btn-small" onclick="updateTutorDoc('${esc(t.id)}', 'diploma_status', 'Rejected')">Reject</button>
-              </div>
-            </td>
-            <td>
-              <span class="badge ${t.torStatus === 'Verified' ? 'badge-success' : t.torStatus === 'Rejected' ? 'badge-danger' : 'badge-info'}">${esc(t.torStatus)}</span>
-              <div style="margin-top: 4px; display: flex; gap: 4px;">
-                <button class="btn btn-secondary btn-small" onclick="updateTutorDoc('${esc(t.id)}', 'tor_status', 'Verified')">Verify</button>
-                <button class="btn btn-secondary btn-small" onclick="updateTutorDoc('${esc(t.id)}', 'tor_status', 'Rejected')">Reject</button>
-              </div>
-            </td>
-            <td>
-              <span class="badge ${t.idStatus === 'Verified' ? 'badge-success' : t.idStatus === 'Rejected' ? 'badge-danger' : 'badge-info'}">${esc(t.idStatus)}</span>
-              <div style="margin-top: 4px; display: flex; gap: 4px;">
-                <button class="btn btn-secondary btn-small" onclick="updateTutorDoc('${esc(t.id)}', 'id_status', 'Verified')">Verify</button>
-                <button class="btn btn-secondary btn-small" onclick="updateTutorDoc('${esc(t.id)}', 'id_status', 'Rejected')">Reject</button>
-              </div>
-            </td>
-            <td><span class="badge ${isApproved ? 'badge-success' : t.approvalStatus === 'Declined' ? 'badge-danger' : 'badge-info'}">${esc(t.approvalStatus)}</span></td>
-            <td><span class="badge ${t.deactivated ? 'badge-danger' : 'badge-success'}">${t.deactivated ? 'Deactivated' : 'Active'}</span></td>
-            <td>
-              ${!docsAllVerified && !isApproved ? `
-                <button class="btn btn-secondary btn-small" disabled title="Cannot approve tutor: Diploma, TOR, and ID status must all be Verified.">Approve</button>
-              ` : `
-                <button class="btn btn-primary btn-small" onclick="updateTutorApproval('${esc(t.id)}', 'Approved')">Approve</button>
-              `}
-              <button class="btn btn-secondary btn-small" onclick="updateTutorApproval('${esc(t.id)}', 'Declined')">Decline</button>
-              <button class="btn btn-secondary btn-small" onclick="toggleDeactivateTutor('${esc(t.id)}')">${t.deactivated ? 'Activate' : 'Deactivate'}</button>
+              <button class="btn btn-secondary btn-small" onclick="viewStudentProfile('${escapeHtml(s.id)}')">View Profile</button>
+              <button class="btn btn-secondary btn-small" onclick="toggleStudentValidate('${escapeHtml(s.id)}', ${!s.validated})">${s.validated ? 'Revoke' : 'Validate'}</button>
+              <button class="btn btn-secondary btn-small" onclick="toggleStudentDeactivate('${escapeHtml(s.id)}', ${!s.deactivated})">${s.deactivated ? 'Activate' : 'Deactivate'}</button>
             </td>
           </tr>
-        `;
-      }).join('');
-    }
-
-    window.updateTutorDoc = async function(tutorId, field, value) {
-      try {
-        const res = await fetch('api/tutors.php', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: tutorId, [field]: value })
-        });
-        const data = await res.json();
-        if (!res.ok || data.status !== 'success') {
-          showToast(data.message || 'Doc update failed.', 'error');
-          return;
-        }
-        await syncWithDatabase();
-        renderAdminTutors();
-        showToast('Document status updated.');
-      } catch (e) {
-        showToast('Could not connect to server.', 'error');
-      }
-    };
-
-    window.updateTutorApproval = async function(tutorId, statusVal) {
-      try {
-        const res = await fetch('api/tutors.php', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: tutorId, approval_status: statusVal })
-        });
-        const data = await res.json();
-        if (!res.ok || data.status !== 'success') {
-          showToast(data.message || 'Approval update failed.', 'error');
-          return;
-        }
-        await syncWithDatabase();
-        renderAdminTutors();
-        showToast(`Tutor approval status set to ${statusVal}.`);
-      } catch (e) {
-        showToast('Could not connect to server.', 'error');
-      }
-    };
-
-    window.toggleDeactivateTutor = async function(tutorId) {
-      const tutor = state.tutors.find(t => t.id === tutorId);
-      if (!tutor) return;
-      try {
-        const res = await fetch('api/tutors.php', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: tutorId, deactivated: !tutor.deactivated })
-        });
-        const data = await res.json();
-        if (!res.ok || data.status !== 'success') {
-          showToast(data.message || 'Deactivation update failed.', 'error');
-          return;
-        }
-        await syncWithDatabase();
-        renderAdminTutors();
-        showToast('Tutor account status updated.');
-      } catch (e) {
-        showToast('Could not connect to server.', 'error');
-      }
-    };
-
-    function renderAdminStudents() {
-      const tbody = document.getElementById('admin-students-table-body');
-      if (!tbody) return;
-
-      if (state.students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 20px;">No students registered yet.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = state.students.map(s => `
-        <tr>
-          <td><code>${esc(s.id)}</code></td>
-          <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${esc(s.id)}')">${esc(s.name)}</strong></td>
-          <td>${esc(s.email)}</td>
-          <td>${esc(s.grade)}</td>
-          <td><span class="badge ${s.validated ? 'badge-success' : 'badge-info'}">${s.validated ? 'Validated' : 'Pending Validation'}</span></td>
-          <td><span class="badge ${s.deactivated ? 'badge-danger' : 'badge-success'}">${s.deactivated ? 'Deactivated' : 'Active'}</span></td>
-          <td>
-            <button class="btn btn-secondary btn-small" onclick="viewStudentProfile('${esc(s.id)}')">Profile</button>
-            <button class="btn btn-secondary btn-small" onclick="toggleValidateStudent('${esc(s.id)}')">${s.validated ? 'Revoke' : 'Validate Account'}</button>
-            <button class="btn btn-secondary btn-small" onclick="toggleDeactivateStudent('${esc(s.id)}')">${s.deactivated ? 'Activate' : 'Deactivate'}</button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    window.toggleValidateStudent = async function(studentId) {
-      const student = state.students.find(s => s.id === studentId);
-      if (!student) return;
-      try {
-        const res = await fetch('api/students.php', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: studentId, validated: !student.validated })
-        });
-        const data = await res.json();
-        if (!res.ok || data.status !== 'success') {
-          showToast(data.message || 'Validation update failed.', 'error');
-          return;
-        }
-        await syncWithDatabase();
-        renderAdminStudents();
-        showToast('Student validation status updated.');
-      } catch (e) {
-        showToast('Could not connect to server.', 'error');
-      }
-    };
-
-    window.toggleDeactivateStudent = async function(studentId) {
-      const student = state.students.find(s => s.id === studentId);
-      if (!student) return;
-      try {
-        const res = await fetch('api/students.php', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: studentId, deactivated: !student.deactivated })
-        });
-        const data = await res.json();
-        if (!res.ok || data.status !== 'success') {
-          showToast(data.message || 'Deactivation update failed.', 'error');
-          return;
-        }
-        await syncWithDatabase();
-        renderAdminStudents();
-        showToast('Student account status updated.');
-      } catch (e) {
-        showToast('Could not connect to server.', 'error');
-      }
-    };
-
-    function renderAdminMatching() {
-      const tbody = document.getElementById('admin-matching-table-body');
-      if (!tbody) return;
-
-      if (state.matches.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 20px;">No match requests recorded yet.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = state.matches.map(m => `
-        <tr>
-          <td><code>${esc(m.id)}</code></td>
-          <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${esc(m.studentId || m.studentName)}')">${esc(m.studentName)}</span></td>
-          <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(m.tutorId || m.tutorName)}')">${esc(m.tutorName)}</strong></td>
-          <td>${esc(m.subject)}</td>
-          <td><span class="badge badge-match">${esc(m.score)}% Match</span></td>
-          <td><span class="badge ${m.status === 'Approved' ? 'badge-success' : m.status === 'Cancelled' ? 'badge-danger' : 'badge-info'}">${esc(m.status)}</span></td>
-          <td>
-            ${m.status === 'Pending Review' ? `
-              <button class="btn btn-primary btn-small" onclick="approveMatch('${esc(m.id)}')">Approve</button>
-              <button class="btn btn-secondary btn-small" onclick="cancelMatch('${esc(m.id)}')">Cancel</button>
-            ` : `<span class="sub-text">Processed</span>`}
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    window.approveMatch = async function(matchId) {
-      try {
-        const res = await fetch('api/matches.php', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: matchId, status: 'Approved' })
-        });
-        const data = await res.json();
-        if (!res.ok || data.status !== 'success') {
-          showToast(data.message || 'Match approval failed.', 'error');
-          return;
-        }
-        await syncWithDatabase();
-        renderAdminMatching();
-        showToast('Match request approved.');
-      } catch (e) {
-        showToast('Could not connect to server.', 'error');
-      }
-    };
-
-    window.cancelMatch = async function(matchId) {
-      try {
-        const res = await fetch('api/matches.php', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: matchId, status: 'Cancelled' })
-        });
-        const data = await res.json();
-        if (!res.ok || data.status !== 'success') {
-          showToast(data.message || 'Match cancel failed.', 'error');
-          return;
-        }
-        await syncWithDatabase();
-        renderAdminMatching();
-        showToast('Match request cancelled.');
-      } catch (e) {
-        showToast('Could not connect to server.', 'error');
-      }
-    };
-
-    function renderAdminSchedule() {
-      const tbodySch = document.getElementById('admin-schedule-table-body');
-      const tbodySes = document.getElementById('admin-scheduled-sessions-table-body');
-      const tutorSelect = document.getElementById('admin-sch-tutor-select');
-
-      if (tutorSelect) {
-        tutorSelect.innerHTML = state.tutors.filter(t => !t.deactivated).map(t => `
-          <option value="${esc(t.id)}">${esc(t.name)} (${esc(t.subjects.join(', '))})</option>
         `).join('');
-      }
-
-      if (tbodySes) {
-        if (state.sessions.length === 0) {
-          tbodySes.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 20px;">No scheduled tutoring sessions found.</td></tr>`;
-        } else {
-          tbodySes.innerHTML = state.sessions.map(s => `
-            <tr>
-              <td><code>${esc(s.id)}</code></td>
-              <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${esc(s.studentId)}')">${esc(s.studentName)}</span></td>
-              <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(s.tutorId)}')">${esc(s.tutorName)}</strong></td>
-              <td>${esc(s.subject)}</td>
-              <td>${esc(s.date || s.sessionDate)} (${esc(s.timeSlot)})</td>
-              <td><span class="badge ${s.status === 'Completed' ? 'badge-success' : s.status === 'Cancelled' ? 'badge-danger' : 'badge-info'}">${esc(s.status)}</span></td>
-              <td>
-                ${s.status === 'Confirmed' ? `
-                  <button class="btn btn-secondary btn-small" onclick="openRescheduleModal('${esc(s.id)}')">Modify</button>
-                  <button class="btn btn-secondary btn-small" onclick="cancelAdminSession('${esc(s.id)}')">Cancel Session</button>
-                ` : `<span class="sub-text">Processed</span>`}
-              </td>
-            </tr>
-          `).join('');
-        }
-      }
-
-      if (tbodySch) {
-        if (state.schedules.length === 0) {
-          tbodySch.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--ink-soft); padding: 20px;">No available schedule slots created yet.</td></tr>`;
-        } else {
-          tbodySch.innerHTML = state.schedules.map(sch => `
-            <tr>
-              <td><code>${esc(sch.id)}</code></td>
-              <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(sch.tutorId)}')">${esc(sch.tutorName)}</strong></td>
-              <td>${esc(sch.dateSlot)}</td>
-              <td>${esc(sch.subject)}</td>
-              <td><span class="badge ${sch.status === 'Available' ? 'badge-success' : 'badge-info'}">${esc(sch.status)}</span></td>
-              <td>
-                <button class="btn btn-secondary btn-small" onclick="deleteScheduleSlot('${esc(sch.id)}')">Remove Slot</button>
-              </td>
-            </tr>
-          `).join('');
-        }
-      }
+      } catch (e) {}
     }
 
-    window.cancelAdminSession = async function(sessionId) {
+    async function viewStudentProfile(id) {
       try {
-        const res = await fetch('api/sessions.php', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: sessionId, status: 'Cancelled' })
-        });
-        const data = await res.json();
-        if (!res.ok || data.status !== 'success') {
-          showToast(data.message || 'Session cancellation failed.', 'error');
-          return;
-        }
-        await syncWithDatabase();
-        renderAdminSchedule();
-        showToast('Session cancelled and schedule freed.');
-      } catch (e) {
-        showToast('Could not connect to server.', 'error');
-      }
-    };
-
-    window.deleteScheduleSlot = async function(schId) {
-      try {
-        const res = await fetch('api/schedules.php', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: schId })
-        });
-        const data = await res.json();
-        if (!res.ok || data.status !== 'success') {
-          showToast(data.message || 'Delete schedule failed.', 'error');
-          return;
-        }
-        await syncWithDatabase();
-        renderAdminSchedule();
-        showToast('Schedule slot removed.');
-      } catch (e) {
-        showToast('Could not connect to server.', 'error');
-      }
-    };
-
-    function renderAdminPayments() {
-      const tbody = document.getElementById('admin-payments-table-body');
-      if (!tbody) return;
-
-      if (state.payments.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--ink-soft); padding: 20px;">No payment records logged yet.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = state.payments.map(p => `
-        <tr>
-          <td><code>${esc(p.id)}</code></td>
-          <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${esc(p.studentId)}')">${esc(p.studentName)}</span></td>
-          <td>${esc(p.method)}</td>
-          <td><code>${esc(p.refNo)}</code></td>
-          <td>₱${esc(p.amount)}</td>
-          <td><span class="badge ${p.status === 'Confirmed' ? 'badge-success' : 'badge-info'}">${esc(p.status)}</span></td>
-          <td><span class="badge ${p.payoutStatus === 'Paid Out' ? 'badge-success' : 'badge-pending'}">${esc(p.payoutStatus || 'Unpaid')}</span></td>
-          <td>
-            ${p.status === 'Pending' ? `
-              <button class="btn btn-primary btn-small" onclick="confirmPayment('${esc(p.id)}')">Confirm Payment</button>
-            ` : ''}
-            ${p.status === 'Confirmed' && p.payoutStatus !== 'Paid Out' ? `
-              <button class="btn btn-secondary btn-small" onclick="processTutorPayout('${esc(p.id)}')">Process Payout</button>
-            ` : ''}
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    window.confirmPayment = async function(paymentId) {
-      try {
-        const res = await fetch('api/payments.php', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: paymentId, status: 'Confirmed' })
-        });
-        const data = await res.json();
-        if (!res.ok || data.status !== 'success') {
-          showToast(data.message || 'Confirm payment failed.', 'error');
-          return;
-        }
-        await syncWithDatabase();
-        renderAdminPayments();
-        showToast('Payment confirmed!');
-      } catch (e) {
-        showToast('Could not connect to server.', 'error');
-      }
-    };
-
-    window.processTutorPayout = async function(paymentId) {
-      try {
-        const res = await fetch('api/payments.php', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: paymentId, payout_status: 'Paid Out' })
-        });
-        const data = await res.json();
-        if (!res.ok || data.status !== 'success') {
-          showToast(data.message || 'Payout failed.', 'error');
-          return;
-        }
-        await syncWithDatabase();
-        renderAdminPayments();
-        showToast('Tutor payout processed successfully.');
-      } catch (e) {
-        showToast('Could not connect to server.', 'error');
-      }
-    };
-
-    async function renderAdminReports() {
-      const tutorSelect = document.getElementById('report-tutor-select');
-      const subjectSelect = document.getElementById('report-subject-select');
-
-      if (tutorSelect && state.tutors.length > 0) {
-        const cur = tutorSelect.value;
-        tutorSelect.innerHTML = `<option value="">All Tutors</option>` + state.tutors.map(t => `
-          <option value="${esc(t.id)}" ${t.id === cur ? 'selected' : ''}>${esc(t.name)}</option>
-        `).join('');
-      }
-
-      if (subjectSelect && state.subjects.length > 0) {
-        const curS = subjectSelect.value;
-        subjectSelect.innerHTML = `<option value="">All Subjects</option>` + state.subjects.map(s => `
-          <option value="${esc(s.name)}" ${s.name === curS ? 'selected' : ''}>${esc(s.name)}</option>
-        `).join('');
-      }
-
-      await fetchAndRenderReportData();
-    }
-
-    async function fetchAndRenderReportData() {
-      const startDate = document.getElementById('report-start-date')?.value || '';
-      const endDate = document.getElementById('report-end-date')?.value || '';
-      const tutorId = document.getElementById('report-tutor-select')?.value || '';
-      const subject = document.getElementById('report-subject-select')?.value || '';
-
-      const queryParams = new URLSearchParams();
-      if (startDate) queryParams.append('start_date', startDate);
-      if (endDate) queryParams.append('end_date', endDate);
-      if (tutorId) queryParams.append('tutor_id', tutorId);
-      if (subject) queryParams.append('subject', subject);
-
-      try {
-        const res = await fetch('api/reports.php?' + queryParams.toString());
-        if (res.ok) {
-          const data = await res.json();
-          if (data.status === 'success') {
-            const sum = data.summary || {};
-            const elRev = document.getElementById('report-stat-revenue');
-            const elCom = document.getElementById('report-stat-commission');
-            const elComp = document.getElementById('report-stat-completed');
-            const tbody = document.getElementById('admin-reports-filtered-table-body');
-
-            if (elRev) elRev.textContent = `₱${(sum.total_revenue || 0).toLocaleString()}`;
-            if (elCom) elCom.textContent = `₱${(sum.total_commission || 0).toLocaleString()}`;
-            if (elComp) elComp.textContent = sum.completed_sessions || 0;
-
-            const sessions = data.sessions || [];
-            if (tbody) {
-              if (sessions.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 20px;">No sessions found for the selected filters.</td></tr>`;
-              } else {
-                tbody.innerHTML = sessions.map(s => `
-                  <tr>
-                    <td><code>${esc(s.id)}</code></td>
-                    <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${esc(s.studentId)}')">${esc(s.studentName)}</span></td>
-                    <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(s.tutorId)}')">${esc(s.tutorName)}</strong></td>
-                    <td>${esc(s.subject)}</td>
-                    <td>${esc(s.date || s.sessionDate)} (${esc(s.timeSlot)})</td>
-                    <td>₱${esc(s.totalPaid)}</td>
-                    <td><span class="badge ${s.status === 'Completed' ? 'badge-success' : s.status === 'Cancelled' ? 'badge-danger' : 'badge-info'}">${esc(s.status)}</span></td>
-                  </tr>
-                `).join('');
-              }
-            }
-          }
-        }
-      } catch (e) {
-        showToast('Failed to fetch report data.', 'error');
-      }
-    }
-
-    function renderAdminNotifications() {
-      const log = document.getElementById('admin-notifications-log');
-      if (!log) return;
-
-      if (state.notifications.length === 0) {
-        log.innerHTML = `<p class="sub-text center-text" style="padding: 16px;">No broadcast notifications log recorded.</p>`;
-        return;
-      }
-
-      log.innerHTML = state.notifications.map(n => `
-        <div class="session-card" style="margin-bottom: 8px;">
-          <div>
-            <strong>${esc(n.title)}</strong> <span class="badge badge-info">Target: ${esc(n.targetRole || n.target)}</span>
-            <p class="sub-text" style="margin-top: 4px;">${esc(n.message)}</p>
-            <div class="sub-text" style="font-size: 0.78rem;">${esc(n.time)}</div>
+        const json = await api('api/students.php');
+        const s = (json.data || []).find(x => x.id === id);
+        if (!s) return;
+        document.getElementById('profile-modal-title').textContent = 'Student Profile: ' + s.name;
+        document.getElementById('profile-modal-content').innerHTML = `
+          <div class="card-panel" style="margin-bottom:0;">
+            <p><strong>Student ID:</strong> <code>${escapeHtml(s.id)}</code></p>
+            <p><strong>Name:</strong> ${escapeHtml(s.name)}</p>
+            <p><strong>Email:</strong> ${escapeHtml(s.email)}</p>
+            <p><strong>Grade Level:</strong> ${escapeHtml(s.grade)}</p>
+            <p><strong>Subjects Needed:</strong> ${escapeHtml(Array.isArray(s.subjectsNeeded) ? s.subjectsNeeded.join(', ') : s.subjectsNeeded)}</p>
+            <p><strong>Bio / Notes:</strong></p>
+            <p class="sub-text">${escapeHtml(s.bio || 'None provided.')}</p>
           </div>
-        </div>
-      `).join('');
+        `;
+        openModal('modal-view-profile');
+      } catch (e) {}
     }
 
-    // Override renderAllViews for admin page
-    function renderAllViews() {
-      renderAdminTutors();
-      renderAdminStudents();
-      renderAdminMatching();
-      renderAdminSchedule();
-      renderAdminPayments();
-      renderAdminReports();
-      renderAdminNotifications();
+    async function toggleStudentValidate(id, newVal) {
+      try {
+        await api('api/students.php', { method: 'PUT', body: { id, validated: newVal } });
+        showSuccess('Student validation status updated.');
+        loadStudents();
+      } catch (e) {}
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      switchMainAdminTab('dashboard');
+    async function toggleStudentDeactivate(id, newVal) {
+      if (!confirm('Are you sure you want to change this student account status?')) return;
+      try {
+        await api('api/students.php', { method: 'PUT', body: { id, deactivated: newVal } });
+        showSuccess('Student account status updated.');
+        loadStudents();
+      } catch (e) {}
+    }
 
-      document.getElementById('admin-add-schedule-form')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const tutorId = document.getElementById('admin-sch-tutor-select').value;
-        const subject = document.getElementById('admin-sch-subject').value;
-        const dateSlot = document.getElementById('admin-sch-dateslot').value;
-
-        try {
-          const res = await fetch('api/schedules.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              tutor_id: tutorId,
-              subject,
-              date_slot: dateSlot
-            })
-          });
-          const data = await res.json();
-          if (!res.ok || data.status !== 'success') {
-            showToast(data.message || 'Schedule creation failed.', 'error');
-            return;
-          }
-          await syncWithDatabase();
-          renderAdminSchedule();
-          showToast('New calendar schedule slot created!');
-          document.getElementById('admin-add-schedule-form').reset();
-        } catch (e) {
-          showToast('Could not connect to server.', 'error');
-        }
-      });
-
-      document.getElementById('admin-send-notif-btn')?.addEventListener('click', async () => {
-        const targetRole = document.getElementById('admin-notif-target').value;
-        const message = document.getElementById('admin-notif-message').value.trim();
-
-        if (!message) {
-          showToast('Please enter notification content.', 'error');
+    // 3. TUTORS
+    async function loadTutors() {
+      const tbody = document.getElementById('tutors-table-body');
+      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Loading tutors...</td></tr>';
+      try {
+        const json = await api('api/tutors.php');
+        allTutorsCache = json.data || [];
+        if (allTutorsCache.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">No tutors registered found.</td></tr>';
           return;
         }
 
-        try {
-          const res = await fetch('api/notifications.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              target_role: targetRole,
-              target: 'All Users',
-              title: 'System Broadcast',
-              message: message
-            })
-          });
-          const data = await res.json();
-          if (!res.ok || data.status !== 'success') {
-            showToast(data.message || 'Broadcast failed.', 'error');
-            return;
-          }
-          document.getElementById('admin-notif-message').value = '';
-          await syncWithDatabase();
-          renderAdminNotifications();
-          showToast('Notification broadcast sent!');
-        } catch (e) {
-          showToast('Could not connect to server.', 'error');
+        tbody.innerHTML = allTutorsCache.map(t => {
+          const allVerified = (t.diplomaStatus === 'Verified' && t.torStatus === 'Verified' && t.idStatus === 'Verified');
+          return `
+            <tr>
+              <td><strong>${escapeHtml(t.name)}</strong></td>
+              <td>${escapeHtml(t.email || 'N/A')}</td>
+              <td>₱${escapeHtml(t.hourlyRate)}</td>
+              <td>★ ${escapeHtml(parseFloat(t.rating || 0).toFixed(1))}</td>
+              <td>${escapeHtml(t.reviewsCount || 0)}</td>
+              <td>
+                <select class="form-select" onchange="updateTutorDoc('${escapeHtml(t.id)}', 'diploma_status', this.value)">
+                  <option value="Pending" ${t.diplomaStatus === 'Pending' ? 'selected' : ''}>Pending</option>
+                  <option value="Verified" ${t.diplomaStatus === 'Verified' ? 'selected' : ''}>Verified</option>
+                  <option value="Rejected" ${t.diplomaStatus === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                </select>
+              </td>
+              <td>
+                <select class="form-select" onchange="updateTutorDoc('${escapeHtml(t.id)}', 'tor_status', this.value)">
+                  <option value="Pending" ${t.torStatus === 'Pending' ? 'selected' : ''}>Pending</option>
+                  <option value="Verified" ${t.torStatus === 'Verified' ? 'selected' : ''}>Verified</option>
+                  <option value="Rejected" ${t.torStatus === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                </select>
+              </td>
+              <td>
+                <select class="form-select" onchange="updateTutorDoc('${escapeHtml(t.id)}', 'id_status', this.value)">
+                  <option value="Pending" ${t.idStatus === 'Pending' ? 'selected' : ''}>Pending</option>
+                  <option value="Verified" ${t.idStatus === 'Verified' ? 'selected' : ''}>Verified</option>
+                  <option value="Rejected" ${t.idStatus === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                </select>
+              </td>
+              <td><span class="badge ${t.approvalStatus === 'Approved' ? 'badge-success' : t.approvalStatus === 'Declined' ? 'badge-danger' : 'badge-pending'}">${escapeHtml(t.approvalStatus)}</span></td>
+              <td><span class="badge ${t.deactivated ? 'badge-danger' : 'badge-success'}">${t.deactivated ? 'Deactivated' : 'Active'}</span></td>
+              <td>
+                <button class="btn btn-secondary btn-small" onclick="viewTutorProfile('${escapeHtml(t.id)}')">Profile</button>
+                <button class="btn btn-primary btn-small" ${!allVerified && t.approvalStatus !== 'Approved' ? 'disabled title="All 3 documents must be Verified before approval."' : ''} onclick="updateTutorApproval('${escapeHtml(t.id)}', 'Approved')">Approve</button>
+                <button class="btn btn-secondary btn-small" onclick="updateTutorApproval('${escapeHtml(t.id)}', 'Declined')">Decline</button>
+                <button class="btn btn-secondary btn-small" onclick="toggleTutorDeactivate('${escapeHtml(t.id)}', ${!t.deactivated})">${t.deactivated ? 'Activate' : 'Deactivate'}</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (e) {}
+    }
+
+    async function updateTutorDoc(id, field, val) {
+      try {
+        await api('api/tutors.php', { method: 'PUT', body: { id, [field]: val } });
+        showSuccess('Document status updated.');
+        loadTutors();
+      } catch (e) {}
+    }
+
+    async function updateTutorApproval(id, statusVal) {
+      try {
+        await api('api/tutors.php', { method: 'PUT', body: { id, approval_status: statusVal } });
+        showSuccess('Tutor approval status set to ' + statusVal);
+        loadTutors();
+      } catch (e) {}
+    }
+
+    async function toggleTutorDeactivate(id, newVal) {
+      if (!confirm('Are you sure you want to change this tutor account status?')) return;
+      try {
+        await api('api/tutors.php', { method: 'PUT', body: { id, deactivated: newVal } });
+        showSuccess('Tutor account status updated.');
+        loadTutors();
+      } catch (e) {}
+    }
+
+    function viewTutorProfile(id) {
+      const t = allTutorsCache.find(x => x.id === id);
+      if (!t) return;
+      document.getElementById('profile-modal-title').textContent = 'Tutor Profile: ' + t.name;
+      document.getElementById('profile-modal-content').innerHTML = `
+        <div class="card-panel" style="margin-bottom:0;">
+          <p><strong>Tutor ID:</strong> <code>${escapeHtml(t.id)}</code></p>
+          <p><strong>Name:</strong> ${escapeHtml(t.name)}</p>
+          <p><strong>Email:</strong> ${escapeHtml(t.email || 'N/A')}</p>
+          <p><strong>Hourly Rate:</strong> ₱${escapeHtml(t.hourlyRate)}</p>
+          <p><strong>Subjects:</strong> ${escapeHtml(Array.isArray(t.subjects) ? t.subjects.join(', ') : t.subjects)}</p>
+          <p><strong>Learning Styles:</strong> ${escapeHtml(Array.isArray(t.learningStyles) ? t.learningStyles.join(', ') : t.learningStyles)}</p>
+          <p><strong>Available Days:</strong> ${escapeHtml(Array.isArray(t.availableDays) ? t.availableDays.join(', ') : t.availableDays)}</p>
+          <p><strong>Availability Slots:</strong> ${escapeHtml(Array.isArray(t.availabilitySlots) ? t.availabilitySlots.join(', ') : t.availabilitySlots)}</p>
+          <p><strong>Bio:</strong></p>
+          <p class="sub-text">${escapeHtml(t.bio || 'None provided.')}</p>
+        </div>
+      `;
+      openModal('modal-view-profile');
+    }
+
+    // 4. MATCHES
+    async function loadMatches() {
+      const tbody = document.getElementById('matches-table-body');
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Loading match requests...</td></tr>';
+      try {
+        const json = await api('api/matches.php');
+        const matches = json.data || [];
+        if (matches.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No match requests found.</td></tr>';
+          return;
         }
-      });
+        tbody.innerHTML = matches.map(m => `
+          <tr>
+            <td><strong>${escapeHtml(m.studentName)}</strong></td>
+            <td><strong>${escapeHtml(m.tutorName)}</strong></td>
+            <td>${escapeHtml(m.subject)}</td>
+            <td><span class="badge badge-match">${escapeHtml(m.score)}% Match</span></td>
+            <td><span class="badge ${m.status === 'Approved' ? 'badge-success' : m.status === 'Cancelled' ? 'badge-danger' : 'badge-pending'}">${escapeHtml(m.status)}</span></td>
+            <td>${escapeHtml(m.matchReason || '')}</td>
+            <td>${escapeHtml(m.createdAt || m.time || '')}</td>
+            <td>
+              <button class="btn btn-primary btn-small" onclick="updateMatchStatus('${escapeHtml(m.id)}', 'Approved')">Approve</button>
+              <button class="btn btn-secondary btn-small" onclick="updateMatchStatus('${escapeHtml(m.id)}', 'Cancelled')">Cancel</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {}
+    }
 
-      document.getElementById('apply-report-filters-btn')?.addEventListener('click', () => {
-        fetchAndRenderReportData();
-      });
+    async function updateMatchStatus(id, statusVal) {
+      try {
+        await api('api/matches.php', { method: 'PUT', body: { id, status: statusVal } });
+        showSuccess('Match status updated.');
+        loadMatches();
+      } catch (e) {}
+    }
 
-      document.getElementById('reset-report-filters-btn')?.addEventListener('click', () => {
-        if (document.getElementById('report-start-date')) document.getElementById('report-start-date').value = '';
-        if (document.getElementById('report-end-date')) document.getElementById('report-end-date').value = '';
-        if (document.getElementById('report-tutor-select')) document.getElementById('report-tutor-select').value = '';
-        if (document.getElementById('report-subject-select')) document.getElementById('report-subject-select').value = '';
-        fetchAndRenderReportData();
-      });
+    // 5. SESSIONS
+    async function loadSessions() {
+      const tbody = document.getElementById('sessions-table-body');
+      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Loading sessions...</td></tr>';
+      try {
+        const json = await api('api/sessions.php');
+        const sessions = json.data || [];
+        if (sessions.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">No sessions found.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = sessions.map(s => `
+          <tr>
+            <td><strong>${escapeHtml(s.studentName)}</strong></td>
+            <td><strong>${escapeHtml(s.tutorName)}</strong></td>
+            <td>${escapeHtml(s.subject)}</td>
+            <td>${escapeHtml(s.date || s.sessionDate)} (${escapeHtml(s.timeSlot)})</td>
+            <td>₱${escapeHtml(s.hourlyRate)}</td>
+            <td>₱${escapeHtml(s.commissionFee)}</td>
+            <td><strong>₱${escapeHtml(s.totalPaid)}</strong></td>
+            <td><code>${escapeHtml(s.gcashRef)}</code></td>
+            <td><span class="badge ${s.status === 'Completed' ? 'badge-success' : s.status === 'Cancelled' ? 'badge-danger' : 'badge-pending'}">${escapeHtml(s.status)}</span></td>
+            <td><span class="badge ${s.payoutStatus === 'Paid Out' ? 'badge-success' : 'badge-pending'}">${escapeHtml(s.payoutStatus || 'Unpaid')}</span></td>
+            <td>
+              <button class="btn btn-secondary btn-small" onclick="openRescheduleSession('${escapeHtml(s.id)}', '${escapeHtml(s.date || s.sessionDate)}', '${escapeHtml(s.timeSlot)}')">Reschedule</button>
+              ${s.status !== 'Cancelled' ? `<button class="btn btn-secondary btn-small" onclick="cancelAdminSession('${escapeHtml(s.id)}')">Cancel</button>` : ''}
+              <button class="btn btn-outline btn-small" onclick="viewSessionChat('${escapeHtml(s.id)}')">View Chat</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {}
+    }
 
-      document.getElementById('admin-export-sessions-csv-btn')?.addEventListener('click', () => {
-        const startDate = document.getElementById('report-start-date')?.value || '';
-        const endDate = document.getElementById('report-end-date')?.value || '';
-        const tutorId = document.getElementById('report-tutor-select')?.value || '';
-        const subject = document.getElementById('report-subject-select')?.value || '';
+    function openRescheduleSession(id, dateVal, slotVal) {
+      document.getElementById('resch-session-id').value = id;
+      document.getElementById('resch-date').value = dateVal || '';
+      document.getElementById('resch-slot').value = slotVal || '02:00 PM';
+      openModal('modal-reschedule-session');
+    }
 
-        const queryParams = new URLSearchParams({ export: 'sessions_csv' });
-        if (startDate) queryParams.append('start_date', startDate);
-        if (endDate) queryParams.append('end_date', endDate);
-        if (tutorId) queryParams.append('tutor_id', tutorId);
-        if (subject) queryParams.append('subject', subject);
+    async function handleConfirmReschedule(e) {
+      e.preventDefault();
+      const id = document.getElementById('resch-session-id').value;
+      const session_date = document.getElementById('resch-date').value;
+      const time_slot = document.getElementById('resch-slot').value;
 
-        window.location.href = 'api/reports.php?' + queryParams.toString();
-      });
+      try {
+        await api('api/sessions.php', { method: 'PUT', body: { id, session_date, time_slot } });
+        closeModal('modal-reschedule-session');
+        showSuccess('Session rescheduled successfully.');
+        loadSessions();
+      } catch (e) {}
+    }
 
-      document.getElementById('admin-export-payments-csv-btn')?.addEventListener('click', () => {
-        const tutorId = document.getElementById('report-tutor-select')?.value || '';
-        const queryParams = new URLSearchParams({ export: 'payments_csv' });
-        if (tutorId) queryParams.append('tutor_id', tutorId);
+    async function cancelAdminSession(id) {
+      if (!confirm('Are you sure you want to cancel this tutoring session?')) return;
+      try {
+        await api('api/sessions.php', { method: 'PUT', body: { id, status: 'Cancelled' } });
+        showSuccess('Session cancelled.');
+        loadSessions();
+      } catch (e) {}
+    }
 
-        window.location.href = 'api/reports.php?' + queryParams.toString();
-      });
+    async function viewSessionChat(sessionId) {
+      const container = document.getElementById('chat-messages-container');
+      container.innerHTML = '<p style="text-align:center; color: var(--muted);">Loading chat history...</p>';
+      openModal('modal-view-chat');
 
-      document.getElementById('admin-logout-btn')?.addEventListener('click', async () => {
+      try {
+        const json = await api('api/chat.php?session_id=' + encodeURIComponent(sessionId));
+        const msgs = json.data || [];
+        if (msgs.length === 0) {
+          container.innerHTML = '<p style="text-align:center; color: var(--muted);">No chat messages recorded for this session.</p>';
+          return;
+        }
+        container.innerHTML = msgs.map(m => `
+          <div class="chat-item">
+            <strong>${escapeHtml(m.senderName)} (${escapeHtml(m.senderRole)}):</strong>
+            <span>${escapeHtml(m.message)}</span>
+            <div style="font-size:0.75rem; color: var(--muted); text-align:right;">${escapeHtml(m.timestamp || m.createdAt || '')}</div>
+          </div>
+        `).join('');
+      } catch (e) {}
+    }
+
+    // 6. PAYMENTS
+    async function loadPayments() {
+      const tbody = document.getElementById('payments-table-body');
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Loading payments...</td></tr>';
+      try {
+        const json = await api('api/payments.php');
+        const payments = json.data || [];
+        if (payments.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">No payment transactions logged.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = payments.map(p => `
+          <tr>
+            <td><code>${escapeHtml(p.id)}</code></td>
+            <td><strong>${escapeHtml(p.studentName)}</strong></td>
+            <td>${escapeHtml(p.tutorName || 'N/A')}</td>
+            <td>${escapeHtml(p.method)}</td>
+            <td><code>${escapeHtml(p.refNo)}</code></td>
+            <td>₱${escapeHtml(p.amount)}</td>
+            <td><span class="badge ${p.status === 'Confirmed' ? 'badge-success' : 'badge-pending'}">${escapeHtml(p.status)}</span></td>
+            <td><span class="badge ${p.payoutStatus === 'Paid Out' ? 'badge-success' : 'badge-pending'}">${escapeHtml(p.payoutStatus || 'Unpaid')}</span></td>
+            <td>${escapeHtml(p.createdAt || p.time || '')}</td>
+            <td>
+              ${p.status === 'Pending' ? `<button class="btn btn-primary btn-small" onclick="updatePaymentStatus('${escapeHtml(p.id)}', 'Confirmed')">Confirm</button>` : ''}
+              <button class="btn btn-secondary btn-small" ${p.status !== 'Confirmed' || p.payoutStatus === 'Paid Out' ? 'disabled' : ''} onclick="processPayout('${escapeHtml(p.id)}')">Process Payout</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {}
+    }
+
+    async function updatePaymentStatus(id, statusVal) {
+      try {
+        await api('api/payments.php', { method: 'PUT', body: { id, status: statusVal } });
+        showSuccess('Payment status confirmed.');
+        loadPayments();
+      } catch (e) {}
+    }
+
+    async function processPayout(id) {
+      try {
+        await api('api/payments.php', { method: 'PUT', body: { id, payout_status: 'Paid Out' } });
+        showSuccess('Tutor payout processed successfully.');
+        loadPayments();
+      } catch (e) {}
+    }
+
+    // 7. SUBJECTS
+    async function loadSubjects() {
+      const tbody = document.getElementById('subjects-table-body');
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Loading subjects...</td></tr>';
+      try {
+        const json = await api('api/subjects.php');
+        allSubjectsCache = json.data || [];
+        if (allSubjectsCache.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No subjects in catalog.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = allSubjectsCache.map(s => `
+          <tr>
+            <td><code>${escapeHtml(s.id)}</code></td>
+            <td><strong>${escapeHtml(s.name)}</strong></td>
+            <td><span class="badge badge-match">${escapeHtml(s.category)}</span></td>
+            <td>
+              <button class="btn btn-secondary btn-small" onclick="editSubjectForm('${escapeHtml(s.id)}', '${escapeHtml(s.name)}', '${escapeHtml(s.category)}')">Edit</button>
+              <button class="btn btn-secondary btn-small" onclick="deleteSubject('${escapeHtml(s.id)}')">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {}
+    }
+
+    function editSubjectForm(id, name, category) {
+      document.getElementById('subject-id').value = id;
+      document.getElementById('subject-name').value = name;
+      document.getElementById('subject-category').value = category;
+      document.getElementById('subject-form-title').textContent = 'Edit Subject ID: ' + id;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetSubjectForm() {
+      document.getElementById('subject-id').value = '';
+      document.getElementById('subject-name').value = '';
+      document.getElementById('subject-category').value = 'STEM';
+      document.getElementById('subject-form-title').textContent = 'Add New Subject';
+    }
+
+    async function handleSaveSubject(e) {
+      e.preventDefault();
+      const id = document.getElementById('subject-id').value;
+      const name = document.getElementById('subject-name').value.trim();
+      const category = document.getElementById('subject-category').value;
+
+      try {
+        const body = id ? { id, name, category } : { name, category };
+        await api('api/subjects.php', { method: 'POST', body });
+        showSuccess(id ? 'Subject updated.' : 'Subject added to catalog.');
+        resetSubjectForm();
+        loadSubjects();
+      } catch (e) {}
+    }
+
+    async function deleteSubject(id) {
+      if (!confirm('Are you sure you want to delete this subject?')) return;
+      try {
+        await api('api/subjects.php', { method: 'DELETE', body: { id } });
+        showSuccess('Subject deleted.');
+        loadSubjects();
+      } catch (e) {}
+    }
+
+    // 8. NOTIFICATIONS
+    async function loadNotifications() {
+      const container = document.getElementById('notifications-log-list');
+      container.innerHTML = '<p style="text-align:center; color: var(--muted);">Loading history log...</p>';
+      try {
+        const json = await api('api/notifications.php');
+        const notifs = json.data || [];
+        if (notifs.length === 0) {
+          container.innerHTML = '<p style="text-align:center; color: var(--muted);">No broadcast or system notifications logged.</p>';
+          return;
+        }
+        container.innerHTML = notifs.map(n => `
+          <div class="card-panel" style="padding: 14px; margin-bottom: 10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong>${escapeHtml(n.title)}</strong>
+              <span class="badge badge-match">Target: ${escapeHtml(n.targetRole || n.target)}</span>
+            </div>
+            <p style="margin-top: 6px; font-size: 0.92rem;">${escapeHtml(n.message)}</p>
+            <div style="font-size: 0.78rem; color: var(--muted); text-align: right;">${escapeHtml(n.time || n.createdAt || '')}</div>
+          </div>
+        `).join('');
+      } catch (e) {}
+    }
+
+    async function handleSendNotification(e) {
+      e.preventDefault();
+      const target_role = document.getElementById('notif-target').value;
+      const title = document.getElementById('notif-title').value.trim();
+      const message = document.getElementById('notif-message').value.trim();
+
+      try {
+        await api('api/notifications.php', {
+          method: 'POST',
+          body: { target_role, target: 'All Users', title, message }
+        });
+        showSuccess('Notification broadcast sent successfully.');
+        document.getElementById('notif-title').value = '';
+        document.getElementById('notif-message').value = '';
+        loadNotifications();
+      } catch (e) {}
+    }
+
+    // 9. REPORTS
+    async function loadReports() {
+      // Populate select dropdowns if cache empty
+      if (allTutorsCache.length === 0) {
         try {
-          await fetch('api/logout.php', { method: 'POST' });
+          const jsonT = await api('api/tutors.php');
+          allTutorsCache = jsonT.data || [];
         } catch (e) {}
-        window.location.href = 'index.php';
-      });
+      }
+      if (allSubjectsCache.length === 0) {
+        try {
+          const jsonSub = await api('api/subjects.php');
+          allSubjectsCache = jsonSub.data || [];
+        } catch (e) {}
+      }
+
+      const tutorSelect = document.getElementById('rep-tutor-select');
+      if (tutorSelect && allTutorsCache.length > 0) {
+        const cur = tutorSelect.value;
+        tutorSelect.innerHTML = '<option value="">All Tutors</option>' + allTutorsCache.map(t => `
+          <option value="${escapeHtml(t.id)}" ${t.id === cur ? 'selected' : ''}>${escapeHtml(t.name)}</option>
+        `).join('');
+      }
+
+      const subjectSelect = document.getElementById('rep-subject-select');
+      if (subjectSelect && allSubjectsCache.length > 0) {
+        const curS = subjectSelect.value;
+        subjectSelect.innerHTML = '<option value="">All Subjects</option>' + allSubjectsCache.map(s => `
+          <option value="${escapeHtml(s.name)}" ${s.name === curS ? 'selected' : ''}>${escapeHtml(s.name)}</option>
+        `).join('');
+      }
+
+      fetchReportsData();
+    }
+
+    async function fetchReportsData() {
+      const startDate = document.getElementById('rep-start-date').value;
+      const endDate = document.getElementById('rep-end-date').value;
+      const tutorId = document.getElementById('rep-tutor-select').value;
+      const subject = document.getElementById('rep-subject-select').value;
+
+      const params = new URLSearchParams();
+      if (startDate) params.append('start_date', startDate);
+      if (endDate) params.append('end_date', endDate);
+      if (tutorId) params.append('tutor_id', tutorId);
+      if (subject) params.append('subject', subject);
+
+      const tbody = document.getElementById('reports-table-body');
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading report sessions...</td></tr>';
+
+      try {
+        const json = await api('api/reports.php?' + params.toString());
+        const sum = json.summary || {};
+        const sessions = json.sessions || [];
+
+        document.getElementById('rep-revenue').textContent = formatMoney(sum.total_revenue);
+        document.getElementById('rep-commission').textContent = formatMoney(sum.total_commission);
+        document.getElementById('rep-completed').textContent = sum.completed_sessions || 0;
+
+        if (sessions.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No sessions found for selected filters.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = sessions.map(s => `
+          <tr>
+            <td><code>${escapeHtml(s.id)}</code></td>
+            <td><strong>${escapeHtml(s.studentName)}</strong></td>
+            <td><strong>${escapeHtml(s.tutorName)}</strong></td>
+            <td>${escapeHtml(s.subject)}</td>
+            <td>${escapeHtml(s.date || s.sessionDate)} (${escapeHtml(s.timeSlot)})</td>
+            <td>₱${escapeHtml(s.totalPaid)}</td>
+            <td><span class="badge ${s.status === 'Completed' ? 'badge-success' : s.status === 'Cancelled' ? 'badge-danger' : 'badge-pending'}">${escapeHtml(s.status)}</span></td>
+          </tr>
+        `).join('');
+      } catch (e) {}
+    }
+
+    function handleFilterReports(e) {
+      e.preventDefault();
+      fetchReportsData();
+    }
+
+    function resetReportFilters() {
+      document.getElementById('rep-start-date').value = '';
+      document.getElementById('rep-end-date').value = '';
+      document.getElementById('rep-tutor-select').value = '';
+      document.getElementById('rep-subject-select').value = '';
+      fetchReportsData();
+    }
+
+    function exportCSV(type) {
+      const startDate = document.getElementById('rep-start-date').value;
+      const endDate = document.getElementById('rep-end-date').value;
+      const tutorId = document.getElementById('rep-tutor-select').value;
+      const subject = document.getElementById('rep-subject-select').value;
+
+      const params = new URLSearchParams();
+      params.append('export', type === 'sessions' ? 'sessions_csv' : 'payments_csv');
+      if (startDate) params.append('start_date', startDate);
+      if (endDate) params.append('end_date', endDate);
+      if (tutorId) params.append('tutor_id', tutorId);
+      if (subject) params.append('subject', subject);
+
+      window.location.href = 'api/reports.php?' + params.toString();
+    }
+
+    // Initialize Dashboard on DOM Load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDashboard();
     });
   </script>
 </body>

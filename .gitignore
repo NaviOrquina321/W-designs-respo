@@ -1,0 +1,4 @@
+config.local.php
+ai_config.php
+*.db
+test-results/

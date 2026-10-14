@@ -41,17 +41,25 @@ if ($method === 'GET') {
 
     $fields = [];
     $params = [];
+    $notifyConfirmed = false;
+    $notifyPayout = false;
 
     if (isset($input['status'])) {
         $statusVal = trim($input['status']);
         if (!in_array($statusVal, ['Pending', 'Confirmed'], true)) {
             jsonError(400, "Payment status must be 'Pending' or 'Confirmed'.");
         }
+
+        // Prevent reverting Confirmed -> Pending after payout
+        if ($payment['payout_status'] === 'Paid Out' && $statusVal === 'Pending') {
+            jsonError(400, 'Cannot revert payment status to Pending after payout has been processed.');
+        }
+
         $fields[] = "`status` = ?";
         $params[] = $statusVal;
 
         if ($statusVal === 'Confirmed' && $payment['status'] !== 'Confirmed') {
-            notify($pdo, 'student', $payment['student_name'], 'Payment Confirmed', "Your payment of ₱{$payment['amount']} (Ref: {$payment['ref_no']}) has been confirmed by Admin.");
+            $notifyConfirmed = true;
         }
     }
 
@@ -59,6 +67,11 @@ if ($method === 'GET') {
         $payoutVal = trim($input['payout_status'] ?? $input['payoutStatus']);
         if (!in_array($payoutVal, ['Unpaid', 'Paid Out'], true)) {
             jsonError(400, "Payout status must be 'Unpaid' or 'Paid Out'.");
+        }
+
+        // Prevent reverting Paid Out -> Unpaid
+        if ($payment['payout_status'] === 'Paid Out' && $payoutVal === 'Unpaid') {
+            jsonError(400, 'Cannot revert payout status once Paid Out.');
         }
 
         $currentStatus = isset($input['status']) ? trim($input['status']) : $payment['status'];
@@ -74,6 +87,7 @@ if ($method === 'GET') {
                 jsonError(400, 'Cannot process payout until the tutoring session is marked Completed.');
             }
         }
+
         $fields[] = "`payout_status` = ?";
         $params[] = $payoutVal;
 
@@ -82,7 +96,7 @@ if ($method === 'GET') {
         $stSes->execute([$payoutVal, $payment['ref_no']]);
 
         if ($payoutVal === 'Paid Out' && $payment['payout_status'] !== 'Paid Out') {
-            notify($pdo, 'tutor', $payment['tutor_name'], 'Payout Processed', "Your payout for Ref: {$payment['ref_no']} has been processed.");
+            $notifyPayout = true;
         }
     }
 
@@ -95,8 +109,15 @@ if ($method === 'GET') {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
 
+    // Call notify AFTER database update succeeds, using user IDs
+    if ($notifyConfirmed) {
+        notify($pdo, 'student', $payment['student_id'], 'Payment Confirmed', "Your payment of ₱{$payment['amount']} (Ref: {$payment['ref_no']}) has been confirmed by Admin.");
+    }
+    if ($notifyPayout) {
+        notify($pdo, 'tutor', $payment['tutor_id'], 'Payout Processed', "Your payout for Ref: {$payment['ref_no']} has been processed.");
+    }
+
     echo json_encode(['status' => 'success', 'message' => 'Payment updated by admin.']);
 } else {
     jsonError(405, 'Method not allowed');
 }
-?>

@@ -4,6 +4,11 @@ ini_set('display_errors', '0');
 date_default_timezone_set('Asia/Manila');
 
 // Dual Session Cookie setup (TUTORLINK_ADMIN vs TUTORLINK_MAIN)
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+
 if (session_status() === PHP_SESSION_NONE) {
     $script = basename($_SERVER['PHP_SELF'] ?? '');
     $ref = $_SERVER['HTTP_REFERER'] ?? '';
@@ -15,7 +20,8 @@ if (session_status() === PHP_SESSION_NONE) {
         'lifetime' => 0,
         'path' => '/',
         'httponly' => true,
-        'samesite' => 'Lax'
+        'samesite' => 'Lax',
+        'secure' => $isHttps
     ]);
     session_start();
 }
@@ -44,6 +50,7 @@ try {
 
     $pdo->exec("CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
     $pdo->exec("USE `" . DB_NAME . "`");
+    $pdo->exec("SET time_zone = '+08:00'");
 } catch (PDOException $e) {
     // 2. Fallback to SQLite if MySQL is offline
     try {
@@ -81,12 +88,14 @@ try {
 
     if ($currentVersion < 1) {
         // Run Table Schemas
+        $roleType = $isSQLite ? "VARCHAR(50) NOT NULL" : "ENUM('admin','student','tutor') NOT NULL";
+
         $pdo->exec("CREATE TABLE IF NOT EXISTS `users` (
           `id` $autoInc,
           `user_id` VARCHAR(20) NOT NULL UNIQUE,
           `email` VARCHAR(100) NOT NULL UNIQUE,
           `password_hash` VARCHAR(255) NOT NULL,
-          `role` VARCHAR(50) NOT NULL,
+          `role` $roleType,
           `name` VARCHAR(100) NOT NULL,
           `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );");
@@ -119,7 +128,7 @@ try {
           `initials` VARCHAR(10) NOT NULL,
           `rating` DECIMAL(3,1) DEFAULT 0.0,
           `reviews_count` INT DEFAULT 0,
-          `hourly_rate` INT NOT NULL,
+          `hourly_rate` DECIMAL(10,2) NOT NULL,
           `subjects` VARCHAR(255) NOT NULL,
           `learning_styles` VARCHAR(255) NOT NULL,
           `bio` TEXT,
@@ -180,7 +189,7 @@ try {
           `tutor_name` VARCHAR(100),
           `method` VARCHAR(50) NOT NULL,
           `ref_no` VARCHAR(100) NOT NULL,
-          `amount` INT NOT NULL,
+          `amount` DECIMAL(10,2) NOT NULL,
           `status` VARCHAR(50) DEFAULT 'Confirmed',
           `payout_status` VARCHAR(50) DEFAULT 'Unpaid',
           `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -197,19 +206,21 @@ try {
           `subject` VARCHAR(100) NOT NULL,
           `session_date` DATE NOT NULL,
           `time_slot` VARCHAR(50) NOT NULL,
-          `hourly_rate` INT NOT NULL,
-          `commission_fee` INT NOT NULL,
-          `total_paid` INT NOT NULL,
+          `hourly_rate` DECIMAL(10,2) NOT NULL,
+          `commission_fee` DECIMAL(10,2) NOT NULL,
+          `total_paid` DECIMAL(10,2) NOT NULL,
           `gcash_ref` VARCHAR(100) NOT NULL,
           `status` VARCHAR(50) DEFAULT 'Confirmed',
           `payout_status` VARCHAR(50) DEFAULT 'Unpaid',
           `notes` TEXT,
-          `rating` INT DEFAULT 0,
+          `rating` INT DEFAULT NULL,
           `feedback` TEXT,
           `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (`student_id`) REFERENCES `students`(`id`) ON DELETE RESTRICT,
           FOREIGN KEY (`tutor_id`) REFERENCES `tutors`(`id`) ON DELETE RESTRICT
         );");
+
+        $pdo->exec("CREATE INDEX IF NOT EXISTS idx_sessions_tutor_date ON sessions(tutor_id, session_date);");
 
         $pdo->exec("CREATE TABLE IF NOT EXISTS `notifications` (
           `id` VARCHAR(50) PRIMARY KEY,
@@ -221,6 +232,8 @@ try {
           `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );");
 
+        $pdo->exec("CREATE INDEX IF NOT EXISTS idx_notifications_role_target ON notifications(target_role, target, is_read);");
+
         $pdo->exec("CREATE TABLE IF NOT EXISTS `chat_messages` (
           `id` $autoInc,
           `session_id` VARCHAR(20) NOT NULL,
@@ -230,6 +243,20 @@ try {
           `timestamp` VARCHAR(50) NOT NULL,
           `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (`session_id`) REFERENCES `sessions`(`id`) ON DELETE CASCADE
+        );");
+
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `notification_reads` (
+          `notification_id` VARCHAR(50) NOT NULL,
+          `user_id` VARCHAR(20) NOT NULL,
+          `read_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (`notification_id`, `user_id`)
+        );");
+
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `failed_login_attempts` (
+          `id` $autoInc,
+          `email` VARCHAR(100) NOT NULL,
+          `ip_address` VARCHAR(45) NOT NULL,
+          `attempt_time` INT NOT NULL
         );");
 
         // Seed initial default users
@@ -272,5 +299,9 @@ try {
     }
 } catch (PDOException $e) {
     error_log("Schema migration error: " . $e->getMessage());
+    if (getenv('TEST_MODE') !== '1') {
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'message' => 'Schema migration failed: ' . $e->getMessage()]);
+        exit();
+    }
 }
-?>

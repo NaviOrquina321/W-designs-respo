@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `user_id` VARCHAR(20) NOT NULL UNIQUE,
   `email` VARCHAR(100) NOT NULL UNIQUE,
   `password_hash` VARCHAR(255) NOT NULL,
-  `role` VARCHAR(50) NOT NULL,
+  `role` ENUM('admin','student','tutor') NOT NULL,
   `name` VARCHAR(100) NOT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `tutors` (
   `initials` VARCHAR(10) NOT NULL,
   `rating` DECIMAL(3,1) DEFAULT 0.0,
   `reviews_count` INT DEFAULT 0,
-  `hourly_rate` INT NOT NULL,
+  `hourly_rate` DECIMAL(10,2) NOT NULL,
   `subjects` VARCHAR(255) NOT NULL,
   `learning_styles` VARCHAR(255) NOT NULL,
   `bio` TEXT,
@@ -121,9 +121,9 @@ CREATE TABLE IF NOT EXISTS `payments` (
   `tutor_id` VARCHAR(20),
   `tutor_name` VARCHAR(100),
   `method` VARCHAR(50) NOT NULL,
-  `ref_no` VARCHAR(100) NOT NULL,
-  `amount` INT NOT NULL,
-  `status` VARCHAR(50) DEFAULT 'Pending',
+  `ref_no` VARCHAR(100) NOT NULL UNIQUE,
+  `amount` DECIMAL(10,2) NOT NULL,
+  `status` VARCHAR(50) DEFAULT 'Confirmed',
   `payout_status` VARCHAR(50) DEFAULT 'Unpaid',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`student_id`) REFERENCES `students`(`id`) ON DELETE SET NULL,
@@ -140,18 +140,19 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   `subject` VARCHAR(100) NOT NULL,
   `session_date` DATE NOT NULL,
   `time_slot` VARCHAR(50) NOT NULL,
-  `hourly_rate` INT NOT NULL,
-  `commission_fee` INT NOT NULL,
-  `total_paid` INT NOT NULL,
+  `hourly_rate` DECIMAL(10,2) NOT NULL,
+  `commission_fee` DECIMAL(10,2) NOT NULL,
+  `total_paid` DECIMAL(10,2) NOT NULL,
   `gcash_ref` VARCHAR(100) NOT NULL,
   `status` VARCHAR(50) DEFAULT 'Confirmed',
   `payout_status` VARCHAR(50) DEFAULT 'Unpaid',
   `notes` TEXT,
-  `rating` INT DEFAULT 0,
+  `rating` INT DEFAULT NULL,
   `feedback` TEXT,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`student_id`) REFERENCES `students`(`id`) ON DELETE RESTRICT,
-  FOREIGN KEY (`tutor_id`) REFERENCES `tutors`(`id`) ON DELETE RESTRICT
+  FOREIGN KEY (`tutor_id`) REFERENCES `tutors`(`id`) ON DELETE RESTRICT,
+  INDEX `idx_sessions_tutor_date` (`tutor_id`, `session_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 10. Table: notifications
@@ -177,6 +178,14 @@ CREATE TABLE IF NOT EXISTS `chat_messages` (
   FOREIGN KEY (`session_id`) REFERENCES `sessions`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 12. Table: notification_reads
+CREATE TABLE IF NOT EXISTS `notification_reads` (
+  `notification_id` VARCHAR(50) NOT NULL,
+  `user_id` VARCHAR(20) NOT NULL,
+  `read_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`notification_id`, `user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Seed initial default users & subjects
 INSERT INTO `users` (`user_id`, `email`, `password_hash`, `role`, `name`) VALUES
 ('ADMIN-001', 'admin@tutorlink.ph', '$2y$10$4KtVRKjPTI1Etb2VYt0nVeQsv0tBnHxSEUIYUheMZ.NRFL63mXud.', 'admin', 'System Admin'),
@@ -193,7 +202,7 @@ INSERT INTO `students` (`id`, `name`, `email`, `grade`, `validated`, `deactivate
 ON DUPLICATE KEY UPDATE `email`=`email`;
 
 INSERT INTO `tutors` (`id`, `name`, `email`, `initials`, `rating`, `reviews_count`, `hourly_rate`, `subjects`, `learning_styles`, `bio`, `available`, `deactivated`, `diploma_status`, `tor_status`, `id_status`, `approval_status`, `available_days`, `available_time_slots`, `availability_slots`) VALUES
-('tut-1', 'Prof. Alex Rivera', 'alex@tutorlink.ph', 'AR', 5.0, 1, 350, 'Calculus, Physics, Mathematics', 'Step-by-Step Explanation, Visual Diagrams', 'Licensed High School & College Mathematics educator with 7+ years teaching STEM subjects.', 1, 0, 'Verified', 'Verified', 'Verified', 'Approved', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')
+('tut-1', 'Prof. Alex Rivera', 'alex@tutorlink.ph', 'AR', 5.0, 1, 350, 'Calculus, Physics, Mathematics', 'Visual & Diagrams, Step-by-Step Explanation', 'Licensed High School & College Mathematics educator with 7+ years teaching STEM subjects.', 1, 0, 'Verified', 'Verified', 'Verified', 'Approved', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')
 ON DUPLICATE KEY UPDATE `email`=`email`;
 
 INSERT INTO `subjects` (`id`, `name`, `category`) VALUES

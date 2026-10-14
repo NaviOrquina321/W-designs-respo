@@ -1,5 +1,5 @@
 <?php
-// api/schedules.php - Schedules REST API
+// api/schedules.php - Schedules REST API with Role-Filtered Access
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/helpers.php';
 
@@ -7,8 +7,28 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
     $user = requireLogin();
-    $stmt = $pdo->query("SELECT * FROM schedules ORDER BY created_at DESC");
-    $schedules = $stmt->fetchAll();
+    if ($user['role'] === 'admin') {
+        $stmt = $pdo->query("SELECT * FROM schedules ORDER BY created_at DESC");
+        $schedules = $stmt->fetchAll();
+    } elseif ($user['role'] === 'tutor') {
+        $stmt = $pdo->prepare("SELECT * FROM schedules WHERE tutor_id = ? ORDER BY created_at DESC");
+        $stmt->execute([$user['id']]);
+        $schedules = $stmt->fetchAll();
+    } else {
+        // Student sees Available slots OR slots booked by themselves
+        $stmt = $pdo->prepare("SELECT * FROM schedules WHERE status = 'Available' OR student_id = ? ORDER BY created_at DESC");
+        $stmt->execute([$user['id']]);
+        $rawSchedules = $stmt->fetchAll();
+
+        $schedules = [];
+        foreach ($rawSchedules as $sch) {
+            if ($sch['student_id'] !== $user['id']) {
+                $sch['student_id'] = null;
+                $sch['student_name'] = null;
+            }
+            $schedules[] = $sch;
+        }
+    }
     echo json_encode(['status' => 'success', 'data' => toCamelArray($schedules)]);
 } elseif ($method === 'POST') {
     $user = requireRole(['tutor', 'admin']);
@@ -71,6 +91,10 @@ if ($method === 'GET') {
         jsonError(404, 'Schedule record not found.');
     }
 
+    if ($sch['status'] === 'Booked') {
+        jsonError(400, 'Cannot modify booked slots.');
+    }
+
     if ($user['role'] === 'tutor' && $sch['tutor_id'] !== $user['id']) {
         jsonError(403, 'You can only modify your own schedule slots.');
     }
@@ -79,16 +103,22 @@ if ($method === 'GET') {
     $params = [];
 
     if (isset($input['date_slot']) || isset($input['dateSlot'])) {
+        $ds = trim($input['date_slot'] ?? $input['dateSlot']);
+        if (empty($ds)) jsonError(400, 'Date slot cannot be empty.');
         $fields[] = "`date_slot` = ?";
-        $params[] = trim($input['date_slot'] ?? $input['dateSlot']);
+        $params[] = $ds;
     }
     if (isset($input['subject'])) {
         $fields[] = "`subject` = ?";
         $params[] = trim($input['subject']);
     }
     if (isset($input['status'])) {
+        $statusVal = trim($input['status']);
+        if (!in_array($statusVal, ['Available', 'Blocked'], true)) {
+            jsonError(400, "Schedule status must be 'Available' or 'Blocked'.");
+        }
         $fields[] = "`status` = ?";
-        $params[] = trim($input['status']);
+        $params[] = $statusVal;
     }
 
     if (empty($fields)) {
@@ -118,6 +148,10 @@ if ($method === 'GET') {
         jsonError(404, 'Schedule slot not found.');
     }
 
+    if ($sch['status'] === 'Booked') {
+        jsonError(400, 'Cannot delete booked slots.');
+    }
+
     if ($user['role'] === 'tutor' && $sch['tutor_id'] !== $user['id']) {
         jsonError(403, 'You can only delete your own schedule slots.');
     }
@@ -129,4 +163,3 @@ if ($method === 'GET') {
 } else {
     jsonError(405, 'Method not allowed');
 }
-?>

@@ -18,12 +18,20 @@ function processDemoGCashPayment($pdo, $student, $tutorRecord, $subject, $sessio
     $pdo->beginTransaction();
 
     try {
-        // Double booking guard
+        // Double booking guard for tutor
         $stChk = $pdo->prepare("SELECT COUNT(*) as cnt FROM sessions WHERE tutor_id = ? AND session_date = ? AND time_slot = ? AND status != 'Cancelled'");
         $stChk->execute([$tutorRecord['id'], $sessionDate, $timeSlot]);
         if ($stChk->fetch()['cnt'] > 0) {
             $pdo->rollBack();
             jsonError(400, 'This tutor is already booked for the selected date and time slot.');
+        }
+
+        // Concurrent booking guard for student
+        $stStuChk = $pdo->prepare("SELECT COUNT(*) as cnt FROM sessions WHERE student_id = ? AND session_date = ? AND time_slot = ? AND status != 'Cancelled'");
+        $stStuChk->execute([$student['id'], $sessionDate, $timeSlot]);
+        if ($stStuChk->fetch()['cnt'] > 0) {
+            $pdo->rollBack();
+            jsonError(400, 'You already have another tutoring session scheduled at this date and time slot.');
         }
 
         // 1. Create session (status Confirmed)
@@ -85,4 +93,3 @@ function processDemoGCashPayment($pdo, $student, $tutorRecord, $subject, $sessio
         throw $e;
     }
 }
-?>

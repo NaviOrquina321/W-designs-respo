@@ -31,11 +31,11 @@ if ($method === 'GET') {
 
         if (isset($input['validated'])) {
             $fields[] = "`validated` = ?";
-            $params[] = $input['validated'] ? 1 : 0;
+            $params[] = filter_var($input['validated'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
         }
         if (isset($input['deactivated'])) {
             $fields[] = "`deactivated` = ?";
-            $params[] = $input['deactivated'] ? 1 : 0;
+            $params[] = filter_var($input['deactivated'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
         }
         if (isset($input['name'])) {
             $newName = trim($input['name']);
@@ -113,4 +113,3 @@ if ($method === 'GET') {
 } else {
     jsonError(405, 'Method not allowed');
 }
-?>

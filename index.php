@@ -852,6 +852,7 @@ header('Content-Type: text/html; charset=utf-8');
       </div>
       <div class="modal-body">
         <p class="sub-text margin-bottom">Tell us your subject and learning preferences, and our algorithm will pair you with the most compatible tutor.</p>
+        <p class="sub-text margin-bottom" style="font-size: 0.8rem; color: var(--muted);">🔒 <strong>Data Privacy Notice:</strong> In compliance with the Philippine Data Privacy Act of 2012 (RA 10173), your personal identifiers (name, email) are never shared with external AI services. Only academic preferences are used for tutor compatibility matching.</p>
 
         <form id="ai-matching-form">
           <div class="form-grid">

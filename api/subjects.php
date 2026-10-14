@@ -21,11 +21,54 @@ if ($method === 'GET') {
         jsonError(400, 'Subject name required.');
     }
 
+    // Check duplicate name
+    $stDup = $pdo->prepare("SELECT COUNT(*) as cnt FROM subjects WHERE LOWER(name) = ? AND id != ?");
+    $stDup->execute([strtolower($name), $subId]);
+    if ($stDup->fetch()['cnt'] > 0) {
+        jsonError(400, "A subject named '$name' already exists in the catalog.");
+    }
+
     if (!empty($subId)) {
-        // Edit subject
+        // Verify ID exists
+        $stEx = $pdo->prepare("SELECT * FROM subjects WHERE id = ?");
+        $stEx->execute([$subId]);
+        $existing = $stEx->fetch();
+        if (!$existing) {
+            jsonError(404, 'Subject record not found.');
+        }
+
+        $oldName = $existing['name'];
+
         $stmt = $pdo->prepare("UPDATE subjects SET name = ?, category = ? WHERE id = ?");
         $stmt->execute([$name, $category, $subId]);
-        echo json_encode(['status' => 'success', 'message' => 'Subject updated.']);
+
+        // Propagate name change to matches, sessions, and tutors
+        if (strtolower($oldName) !== strtolower($name)) {
+            $stM = $pdo->prepare("UPDATE matches SET subject = ? WHERE LOWER(subject) = ?");
+            $stM->execute([$name, strtolower($oldName)]);
+
+            $stS = $pdo->prepare("UPDATE sessions SET subject = ? WHERE LOWER(subject) = ?");
+            $stS->execute([$name, strtolower($oldName)]);
+
+            $stT = $pdo->query("SELECT id, subjects FROM tutors");
+            $allTuts = $stT->fetchAll();
+            $stUpdTut = $pdo->prepare("UPDATE tutors SET subjects = ? WHERE id = ?");
+            foreach ($allTuts as $t) {
+                $subs = array_map('trim', explode(',', $t['subjects']));
+                $changed = false;
+                for ($i = 0; $i < count($subs); $i++) {
+                    if (strtolower($subs[$i]) === strtolower($oldName)) {
+                        $subs[$i] = $name;
+                        $changed = true;
+                    }
+                }
+                if ($changed) {
+                    $stUpdTut->execute([implode(', ', $subs), $t['id']]);
+                }
+            }
+        }
+
+        echo json_encode(['status' => 'success', 'message' => 'Subject updated successfully.']);
     } else {
         // Add subject
         $newSubId = newId('SUB-');
@@ -56,11 +99,19 @@ if ($method === 'GET') {
 
     $subName = $subRow['name'];
 
-    // Check usage in tutors
-    $stT = $pdo->prepare("SELECT COUNT(*) as cnt FROM tutors WHERE LOWER(subjects) LIKE ?");
-    $stT->execute(['%' . strtolower($subName) . '%']);
-    if ($stT->fetch()['cnt'] > 0) {
-        jsonError(400, "Cannot delete subject '$subName' because it is referenced by existing tutors.");
+    // Exact matching in tutors subjects list
+    $stT = $pdo->query("SELECT subjects FROM tutors");
+    $tutorRows = $stT->fetchAll();
+    $usedInTutors = false;
+    foreach ($tutorRows as $tr) {
+        $subs = array_map('strtolower', array_map('trim', explode(',', $tr['subjects'])));
+        if (in_array(strtolower($subName), $subs, true)) {
+            $usedInTutors = true;
+            break;
+        }
+    }
+    if ($usedInTutors) {
+        jsonError(400, "Cannot delete subject '$subName' because it is offered by existing tutors.");
     }
 
     // Check usage in matches
@@ -84,4 +135,3 @@ if ($method === 'GET') {
 } else {
     jsonError(405, 'Method not allowed');
 }
-?>

@@ -12,6 +12,8 @@ To log in to the TutorLink Admin Dashboard:
 * **Admin Email:** `admin@tutorlink.ph`
 * **Admin Password:** `admin123`
 
+⚠️ **SECURITY NOTICE:** Change default administrator credentials (`admin123`) prior to production deployment.
+
 ---
 
 ## 2. Administrator Dashboard Capabilities

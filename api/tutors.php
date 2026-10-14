@@ -65,6 +65,7 @@ if ($method === 'GET') {
     if ($user['role'] === 'admin') {
         $fields = [];
         $params = [];
+        $notifyAppStatus = null;
 
         $newDiploma = isset($input['diploma_status']) ? trim($input['diploma_status']) : $existing['diploma_status'];
         $newTor = isset($input['tor_status']) ? trim($input['tor_status']) : $existing['tor_status'];
@@ -102,13 +103,13 @@ if ($method === 'GET') {
             $params[] = $appStatus;
 
             if ($appStatus !== $existing['approval_status']) {
-                notify($pdo, 'tutor', $existing['name'], 'Tutor Application Status Update', "Your application status has been updated to $appStatus.");
+                $notifyAppStatus = $appStatus;
             }
         }
 
         if (isset($input['deactivated'])) {
             $fields[] = "`deactivated` = ?";
-            $params[] = $input['deactivated'] ? 1 : 0;
+            $params[] = filter_var($input['deactivated'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
         }
 
         if (empty($fields)) {
@@ -119,6 +120,11 @@ if ($method === 'GET') {
         $sql = "UPDATE tutors SET " . implode(', ', $fields) . " WHERE id = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
+
+        // Call notify AFTER database update succeeds, using tutor ID
+        if ($notifyAppStatus) {
+            notify($pdo, 'tutor', $tutorId, 'Tutor Application Status Update', "Your application status has been updated to $notifyAppStatus.");
+        }
 
         echo json_encode(['status' => 'success', 'message' => 'Tutor updated by admin.']);
     } elseif ($user['role'] === 'tutor') {
@@ -177,7 +183,7 @@ if ($method === 'GET') {
         }
         if (isset($input['available'])) {
             $fields[] = "`available` = ?";
-            $params[] = $input['available'] ? 1 : 0;
+            $params[] = filter_var($input['available'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
         }
         if (isset($input['availableDays']) || isset($input['available_days'])) {
             $days = $input['availableDays'] ?? $input['available_days'];
@@ -218,4 +224,3 @@ if ($method === 'GET') {
 } else {
     jsonError(405, 'Method not allowed');
 }
-?>

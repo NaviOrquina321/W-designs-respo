@@ -165,4 +165,3 @@ function toCamelArray($data) {
 
     return $result;
 }
-?>

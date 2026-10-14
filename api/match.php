@@ -15,10 +15,20 @@ if (empty($subject)) {
     jsonError(400, 'Subject is required.');
 }
 
-// Check 10-minute cache per student + subject
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+// Validate subject against subjects catalog
+$stCat = $pdo->prepare("SELECT COUNT(*) as cnt FROM subjects WHERE LOWER(name) = ?");
+$stCat->execute([strtolower($subject)]);
+if ($stCat->fetch()['cnt'] == 0) {
+    jsonError(400, "Subject '$subject' is not in the subjects catalog.");
 }
+
+// Validate learning style against allow-list
+$allowedStyles = ['Visual & Diagrams', 'Hands-on Practice', 'Step-by-Step Explanation', 'Auditory & Discussion'];
+if (!in_array($learningStyle, $allowedStyles, true)) {
+    $learningStyle = 'Step-by-Step Explanation';
+}
+
+// Check 10-minute cache per student + subject
 $cacheKey = 'ai_match_' . $user['id'] . '_' . md5(strtolower($subject) . strtolower($learningStyle));
 if (isset($_SESSION[$cacheKey]) && (time() - $_SESSION[$cacheKey]['timestamp'] < 600)) {
     echo json_encode($_SESSION[$cacheKey]['response']);
@@ -65,7 +75,6 @@ $useAI = false;
 $aiResults = null;
 
 if (!empty($aiKey)) {
-    // Sanitize tutors payload (exclude sensitive fields)
     $safeTutors = array_map(function($t) {
         return [
             'id' => $t['id'],
@@ -74,13 +83,13 @@ if (!empty($aiKey)) {
             'reviewsCount' => (int)$t['reviews_count'],
             'hourlyRate' => (int)$t['hourly_rate'],
             'learningStyles' => $t['learning_styles'],
-            'bio' => $t['bio']
+            'bio' => mb_substr($t['bio'] ?? '', 0, 300)
         ];
     }, $eligibleTutors);
 
     $prompt = "You are an AI Tutor Matching engine for TutorLink. A student needs help with Subject: '$subject', Grade Level: '$grade', Learning Style: '$learningStyle', Preferred Time: '$preferredTime'.\n";
     $prompt .= "Here is the candidate tutors list: " . json_encode($safeTutors) . ".\n";
-    $prompt .= "Evaluate and rank all tutors for fit. Output strictly a JSON array of objects with keys: 'id' (string), 'score' (integer 0-100), 'reason' (one sentence string explaining match reason). Output valid JSON only, no markdown markdown formatting.";
+    $prompt .= "Evaluate and rank all tutors for fit. Output strictly a JSON array of objects with keys: 'id' (string), 'score' (integer 0-100), 'reason' (one sentence string explaining match reason). Output valid JSON only, no markdown formatting.";
 
     $ch = curl_init($aiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -156,7 +165,7 @@ if ($useAI && is_array($aiResults)) {
 
         // Tutor with 0 reviews is not penalized: use neutral rating 3.5
         $effectiveRating = (intval($t['reviews_count']) > 0) ? floatval($t['rating']) : 3.5;
-        $score += Math_round_val(($effectiveRating / 5.0) * 15);
+        $score += (int)round(($effectiveRating / 5.0) * 15);
         $score = min(100, max(0, $score));
 
         $tData = toCamelArray($t);
@@ -170,10 +179,6 @@ if ($useAI && is_array($aiResults)) {
 
     usort($rankedMatches, function($a, $b) { return $b['score'] - $a['score']; });
     $matchMode = 'Rule-based match';
-}
-
-function Math_round_val($val) {
-    return (int)round($val);
 }
 
 $responsePayload = [
@@ -190,4 +195,3 @@ $_SESSION[$cacheKey] = [
 ];
 
 echo json_encode($responsePayload);
-?>

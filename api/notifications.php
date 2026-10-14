@@ -1,5 +1,5 @@
 <?php
-// api/notifications.php - Notifications REST API with 24-Hour Reminders & Single Mark Read
+// api/notifications.php - Notifications REST API with Performance Optimizations
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/helpers.php';
 
@@ -7,47 +7,72 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
     $user = requireLogin();
+    $userId = $user['id'];
+    $userRole = $user['role'];
 
-    // Check & generate 24-hour session reminders (deduplicated)
-    if ($user['role'] === 'student' || $user['role'] === 'tutor') {
-        $roleCol = ($user['role'] === 'student') ? 'student_id' : 'tutor_id';
-        $stSes = $pdo->prepare("SELECT * FROM sessions WHERE $roleCol = ? AND (status = 'Confirmed' OR status = 'In Progress')");
-        $stSes->execute([$user['id']]);
-        $activeSessions = $stSes->fetchAll();
+    // Rate-limit 24-hour reminder check to once per minute per user
+    $lastCheck = $_SESSION['last_reminder_check'] ?? 0;
+    if (time() - $lastCheck >= 60) {
+        $_SESSION['last_reminder_check'] = time();
 
-        $now = time();
-        foreach ($activeSessions as $ses) {
-            $startTs = parseSlotStartTime($ses['session_date'], $ses['time_slot']);
-            $diff = $startTs - $now;
+        if ($userRole === 'student' || $userRole === 'tutor') {
+            $roleCol = ($userRole === 'student') ? 'student_id' : 'tutor_id';
+            $stSes = $pdo->prepare("SELECT * FROM sessions WHERE $roleCol = ? AND (status = 'Confirmed' OR status = 'In Progress')");
+            $stSes->execute([$userId]);
+            $activeSessions = $stSes->fetchAll();
 
-            // Session starting within 24 hours (0 < diff <= 86400)
-            if ($startTs > 0 && $diff > 0 && $diff <= 86400) {
-                $remTitle = 'Upcoming Session Reminder';
-                $targetName = ($user['role'] === 'student') ? $ses['student_name'] : $ses['tutor_name'];
-                $otherName = ($user['role'] === 'student') ? $ses['tutor_name'] : $ses['student_name'];
+            $now = time();
+            foreach ($activeSessions as $ses) {
+                $startTs = parseSlotStartTime($ses['session_date'], $ses['time_slot']);
+                $diff = $startTs - $now;
 
-                // Check if reminder already generated for this session & user
-                $chkStr = "%[Session: {$ses['id']}]%";
-                $stChk = $pdo->prepare("SELECT COUNT(*) as cnt FROM notifications WHERE target_role = ? AND target = ? AND title = ? AND message LIKE ?");
-                $stChk->execute([$user['role'], $targetName, $remTitle, $chkStr]);
+                if ($startTs > 0 && $diff > 0 && $diff <= 86400) {
+                    $remId = "rem-{$ses['id']}-$userRole";
+                    $stChk = $pdo->prepare("SELECT COUNT(*) as cnt FROM notifications WHERE id = ?");
+                    $stChk->execute([$remId]);
 
-                if ($stChk->fetch()['cnt'] == 0) {
-                    $remMsg = "Reminder: Your {$ses['subject']} session with $otherName starts on {$ses['session_date']} at {$ses['time_slot']}. [Session: {$ses['id']}]";
-                    notify($pdo, $user['role'], $targetName, $remTitle, $remMsg);
+                    if ($stChk->fetch()['cnt'] == 0) {
+                        $targetUserId = ($userRole === 'student') ? $ses['student_id'] : $ses['tutor_id'];
+                        $otherName = ($userRole === 'student') ? $ses['tutor_name'] : $ses['student_name'];
+                        $remMsg = "Reminder: Your {$ses['subject']} session with $otherName starts on {$ses['session_date']} at {$ses['time_slot']}.";
+
+                        $stIns = $pdo->prepare("INSERT INTO notifications (id, target_role, target, title, message, is_read) VALUES (?, ?, ?, ?, ?, 0)");
+                        $stIns->execute([$remId, $userRole, $targetUserId, 'Upcoming Session Reminder', $remMsg]);
+                    }
                 }
             }
         }
     }
 
-    if ($user['role'] === 'admin') {
-        $stmt = $pdo->query("SELECT id, target_role, target, title, message, is_read, created_at FROM notifications ORDER BY created_at DESC");
-        $notifications = $stmt->fetchAll();
+    // Release session lock for non-blocking read-only polling
+    session_write_close();
+
+    if ($userRole === 'admin') {
+        $sql = "SELECT n.id, n.target_role, n.target, n.title, n.message,
+                       CASE WHEN nr.user_id IS NOT NULL OR n.is_read = 1 THEN 1 ELSE 0 END as is_read,
+                       n.created_at
+                FROM notifications n
+                LEFT JOIN notification_reads nr ON n.id = nr.notification_id AND nr.user_id = ?
+                ORDER BY n.created_at DESC
+                LIMIT 50";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$userId]);
     } else {
-        $stmt = $pdo->prepare("SELECT id, target_role, target, title, message, is_read, created_at FROM notifications WHERE target_role = 'all' OR (target_role = ? AND target = ?) ORDER BY created_at DESC");
-        $stmt->execute([$user['role'], $user['name']]);
-        $notifications = $stmt->fetchAll();
+        $sql = "SELECT n.id, n.target_role, n.target, n.title, n.message,
+                       CASE WHEN nr.user_id IS NOT NULL OR n.is_read = 1 THEN 1 ELSE 0 END as is_read,
+                       n.created_at
+                FROM notifications n
+                LEFT JOIN notification_reads nr ON n.id = nr.notification_id AND nr.user_id = ?
+                WHERE n.target_role = 'all'
+                   OR n.target = 'All Users'
+                   OR (n.target_role = ? AND (n.target = ? OR n.target = 'All Users'))
+                ORDER BY n.created_at DESC
+                LIMIT 50";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$userId, $userRole, $userId]);
     }
 
+    $notifications = $stmt->fetchAll();
     echo json_encode(['status' => 'success', 'data' => toCamelArray($notifications)]);
 } elseif ($method === 'POST') {
     $user = requireRole(['admin']);
@@ -78,31 +103,38 @@ if ($method === 'GET') {
     ]);
 } elseif ($method === 'PUT') {
     $user = requireLogin();
+    $userId = $user['id'];
+    $userRole = $user['role'];
     $input = getInput();
     $notifId = trim($input['id'] ?? ($_GET['id'] ?? ''));
 
+    $isSQLite = ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite');
+    $insertIgnore = $isSQLite ? "INSERT OR IGNORE" : "INSERT IGNORE";
+
     if (!empty($notifId)) {
-        // Mark single notification as read
-        if ($user['role'] === 'admin') {
-            $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE id = ?");
-            $stmt->execute([$notifId]);
-        } else {
-            $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE id = ? AND (target_role = 'all' OR (target_role = ? AND target = ?))");
-            $stmt->execute([$notifId, $user['role'], $user['name']]);
-        }
+        $stRead = $pdo->prepare("$insertIgnore INTO notification_reads (notification_id, user_id) VALUES (?, ?)");
+        $stRead->execute([$notifId, $userId]);
+
+        $stUpd = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE id = ? AND target = ?");
+        $stUpd->execute([$notifId, $userId]);
+
         echo json_encode(['status' => 'success', 'message' => 'Notification marked as read.']);
     } else {
-        // Mark all as read
-        if ($user['role'] === 'admin') {
-            $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE target_role = 'admin'");
-            $stmt->execute();
+        if ($userRole === 'admin') {
+            $stNotifs = $pdo->query("SELECT id FROM notifications");
         } else {
-            $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE target_role = ? AND target = ?");
-            $stmt->execute([$user['role'], $user['name']]);
+            $stNotifs = $pdo->prepare("SELECT id FROM notifications WHERE target_role = 'all' OR target = 'All Users' OR (target_role = ? AND (target = ? OR target = 'All Users'))");
+            $stNotifs->execute([$userRole, $userId]);
         }
-        echo json_encode(['status' => 'success', 'message' => 'Notifications marked as read.']);
+
+        $allRows = $stNotifs->fetchAll();
+        $stIns = $pdo->prepare("$insertIgnore INTO notification_reads (notification_id, user_id) VALUES (?, ?)");
+        foreach ($allRows as $r) {
+            $stIns->execute([$r['id'], $userId]);
+        }
+
+        echo json_encode(['status' => 'success', 'message' => 'All notifications marked as read.']);
     }
 } else {
     jsonError(405, 'Method not allowed');
 }
-?>

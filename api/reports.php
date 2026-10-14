@@ -37,20 +37,12 @@ $stmtSes = $pdo->prepare($sesSql);
 $stmtSes->execute($sesParams);
 $filteredSessions = $stmtSes->fetchAll();
 
-// CSV Formula Sanitizer
-function sanitizeCsvCell($val) {
-    $str = strval($val ?? '');
-    if (strlen($str) > 0 && in_array($str[0], ['=', '+', '-', '@'], true)) {
-        return "'" . $str;
-    }
-    return $str;
-}
-
 if ($export === 'sessions_csv') {
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="tutorlink_sessions_export_' . date('Ymd_His') . '.csv"');
 
     $output = fopen('php://output', 'w');
+    fwrite($output, "\xEF\xBB\xBF"); // UTF-8 BOM
     fputcsv($output, ['Session ID', 'Student ID', 'Student Name', 'Tutor ID', 'Tutor Name', 'Subject', 'Date', 'Time Slot', 'Hourly Rate', 'Commission Fee', 'Total Paid', 'GCash Ref', 'Status', 'Payout Status']);
 
     foreach ($filteredSessions as $s) {
@@ -78,6 +70,15 @@ if ($export === 'sessions_csv') {
 if ($export === 'payments_csv') {
     $payWhere = ["1=1"];
     $payParams = [];
+
+    if (!empty($startDate)) {
+        $payWhere[] = "created_at >= ?";
+        $payParams[] = $startDate . " 00:00:00";
+    }
+    if (!empty($endDate)) {
+        $payWhere[] = "created_at <= ?";
+        $payParams[] = $endDate . " 23:59:59";
+    }
     if (!empty($tutorId)) {
         $payWhere[] = "tutor_id = ?";
         $payParams[] = $tutorId;
@@ -87,10 +88,22 @@ if ($export === 'payments_csv') {
     $stmtPay->execute($payParams);
     $filteredPayments = $stmtPay->fetchAll();
 
+    // Filter by subject if specified
+    if (!empty($subject)) {
+        $stSubRefs = $pdo->prepare("SELECT DISTINCT gcash_ref FROM sessions WHERE LOWER(subject) = ?");
+        $stSubRefs->execute([strtolower($subject)]);
+        $allowedRefs = array_column($stSubRefs->fetchAll(), 'gcash_ref');
+
+        $filteredPayments = array_values(array_filter($filteredPayments, function($p) use ($allowedRefs) {
+            return in_array($p['ref_no'], $allowedRefs, true);
+        }));
+    }
+
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="tutorlink_payments_export_' . date('Ymd_His') . '.csv"');
 
     $output = fopen('php://output', 'w');
+    fwrite($output, "\xEF\xBB\xBF"); // UTF-8 BOM
     fputcsv($output, ['Payment ID', 'Student ID', 'Student Name', 'Tutor ID', 'Tutor Name', 'Method', 'GCash Ref No', 'Amount', 'Status', 'Payout Status', 'Date']);
 
     foreach ($filteredPayments as $p) {
@@ -113,28 +126,31 @@ if ($export === 'payments_csv') {
 }
 
 // Return JSON summary
-$totalRevenue = 0;
+$bookedVolume = 0;
 $totalCommission = 0;
 $completedCount = 0;
+$completedRevenue = 0;
 
 foreach ($filteredSessions as $s) {
     if ($s['status'] !== 'Cancelled') {
-        $totalRevenue += intval($s['total_paid']);
+        $bookedVolume += intval($s['total_paid']);
         $totalCommission += intval($s['commission_fee']);
     }
     if ($s['status'] === 'Completed') {
         $completedCount++;
+        $completedRevenue += intval($s['total_paid']);
     }
 }
 
 echo json_encode([
     'status' => 'success',
     'summary' => [
-        'total_revenue' => $totalRevenue,
+        'booked_volume' => $bookedVolume,
+        'completed_revenue' => $completedRevenue,
+        'total_revenue' => $bookedVolume,
         'total_commission' => $totalCommission,
         'completed_sessions' => $completedCount,
         'total_sessions_count' => count($filteredSessions)
     ],
     'sessions' => toCamelArray($filteredSessions)
 ]);
-?>

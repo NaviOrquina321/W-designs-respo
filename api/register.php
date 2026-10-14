@@ -25,12 +25,25 @@ if (empty($name) || empty($email) || empty($password)) {
     jsonError(400, 'Please fill in all required fields.');
 }
 
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    jsonError(400, 'Please enter a valid email address.');
+if (mb_strlen($name) > 100) {
+    jsonError(400, 'Full name cannot exceed 100 characters.');
 }
 
-if (strlen($password) < 6) {
-    jsonError(400, 'Password must be at least 6 characters long.');
+if (mb_strlen($email) > 100 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    jsonError(400, 'Please enter a valid email address (max 100 characters).');
+}
+
+if (strlen($password) < 8) {
+    jsonError(400, 'Password must be at least 8 characters long.');
+}
+
+// Validate tutor subject against catalog
+if ($role === 'tutor') {
+    $stmtCat = $pdo->prepare("SELECT COUNT(*) as cnt FROM subjects WHERE LOWER(name) = ?");
+    $stmtCat->execute([strtolower($subject)]);
+    if ($stmtCat->fetch()['cnt'] == 0) {
+        jsonError(400, "Subject '$subject' is not in the subjects catalog.");
+    }
 }
 
 try {
@@ -42,6 +55,8 @@ try {
     }
 
     $passwordHash = password_hash($password, PASSWORD_BCRYPT);
+
+    $pdo->beginTransaction();
 
     if ($role === 'student') {
         $userId = newId('STU-');
@@ -59,9 +74,9 @@ try {
             $subject
         ]);
 
-        $notifId = newId('notif-');
-        $stmtNotif = $pdo->prepare("INSERT INTO notifications (id, target_role, target, title, message) VALUES (?, 'admin', 'System Admin', 'New Student Registered', ?)");
-        $stmtNotif->execute([$notifId, "New student registered: $name ($email)"]);
+        notify($pdo, 'admin', 'ADMIN-001', 'New Student Registered', "New student registered: $name ($email)");
+
+        $pdo->commit();
 
         session_regenerate_id(true);
         $_SESSION['user_id'] = $userId;
@@ -81,7 +96,8 @@ try {
         ]);
     } else {
         $userId = newId('tut-');
-        $initials = implode('', array_map(function($n) { return strtoupper($n[0] ?? ''); }, explode(' ', $name)));
+        $rawInitials = implode('', array_map(function($n) { return strtoupper($n[0] ?? ''); }, explode(' ', $name)));
+        $initials = mb_substr($rawInitials, 0, 3);
 
         $stmtUser = $pdo->prepare("INSERT INTO users (user_id, email, password_hash, role, name) VALUES (?, ?, ?, 'tutor', ?)");
         $stmtUser->execute([$userId, $email, $passwordHash, $name]);
@@ -96,7 +112,9 @@ try {
             "$grade Specialist Tutor in $subject. Dedicated to student growth."
         ]);
 
-        notify($pdo, 'admin', 'System Admin', 'New Tutor Registered', "New tutor registered: $name ($email) - Verification Pending.");
+        notify($pdo, 'admin', 'ADMIN-001', 'New Tutor Registered', "New tutor registered: $name ($email) - Verification Pending.");
+
+        $pdo->commit();
 
         session_regenerate_id(true);
         $_SESSION['user_id'] = $userId;
@@ -115,8 +133,10 @@ try {
             ]
         ]);
     }
-} catch (PDOException $e) {
-    error_log("Registration DB error: " . $e->getMessage());
-    jsonError(500, 'Database error during registration.');
+} catch (Exception $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    error_log("Registration error: " . $e->getMessage());
+    jsonError(500, 'Registration error: ' . $e->getMessage());
 }
-?>

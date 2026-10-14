@@ -115,7 +115,7 @@ function startAutoRefreshTimer() {
     if (!isTyping && !hasOpenModal && !hasOpenDrawer) {
       renderAllViews();
     }
-  }, 5000);
+  }, 10000);
 }
 
 // Database Synchronization Engine

@@ -36,4 +36,3 @@ try {
     error_log("Admin KPI computation error: " . $e->getMessage());
     jsonError(500, 'Error computing Admin SQL metrics.');
 }
-?>
