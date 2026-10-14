@@ -50,3 +50,12 @@ Login, registration, role checks on every endpoint, prepared statements everywhe
 5. **Demo accounts use known passwords** (`admin123`, `student123`, `tutor123`). Change them before any real use.
 6. **Silent SQLite fallback** when MySQL is off can hide data in a separate file.
 7. **The browser UI was not clicked through** in this review (no browser was available). The PHP API and JS syntax were tested, but the screens still need a manual pass.
+
+## Merge of Jules' commit e09e01f (admin audit)
+- Merged with all earlier review fixes kept (separate portals, AI match endpoint, subject browsing, security rules). Committed `tutorlink.db` removed from tracking.
+- Fixed: `api/reports.php` crashed with HTTP 500 (`sanitizeCsvCell` declared twice) so the whole admin Reports tab and CSV export failed.
+- Fixed: CSV export used page navigation, which does not carry the admin-portal header, so the download would be rejected. It now downloads via fetch.
+- Added to Reports (FDD): Completed Tutoring, Weekly Sessions and Monthly Sessions shortcuts, plus a Status filter (also applied to the CSV). Date and status inputs are validated server side.
+- Payments: demo GCash auto-confirms the payment; the admin Payments tab can still set Confirmed/Pending (FDD "Confirm Payment Status"). Tutors can only start/complete sessions whose payment is Confirmed.
+- Notifications and payment-provider notifications now carry the recipient id (`target_id`).
+- Verified on a clean SQLite DB: API flow (book, double-book guard, payment, admin confirm/cancel, reopen blocked, reports, broadcast) and admin UI in a browser (all tabs, report shortcuts, CSV download). MySQL and the real AI key are still untested.

@@ -437,6 +437,11 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
           <!-- Report Filter Controls -->
           <div class="card-table-wrapper margin-bottom" style="padding: 20px;">
             <h4 style="margin-bottom: 12px;">Filter Activity Reports</h4>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+              <button class="btn btn-secondary btn-small" data-report-preset="completed">Completed Tutoring</button>
+              <button class="btn btn-secondary btn-small" data-report-preset="week">Weekly Sessions</button>
+              <button class="btn btn-secondary btn-small" data-report-preset="month">Monthly Sessions</button>
+            </div>
             <div class="form-row">
               <div class="form-group">
                 <label>Start Date</label>
@@ -460,6 +465,16 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
               </div>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 10px;">
+              <div class="form-group">
+                <label>Status</label>
+                <select id="report-status-select" class="form-select">
+                  <option value="">All Statuses</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Confirmed">Confirmed</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
               <button class="btn btn-primary btn-small" id="apply-report-filters-btn">Apply Filters</button>
               <button class="btn btn-secondary btn-small" id="reset-report-filters-btn">Reset</button>
             </div>
@@ -1066,6 +1081,35 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
       await fetchAndRenderReportData();
     }
 
+    function localIso(d) {
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    function applyReportPreset(kind) {
+      const start = document.getElementById('report-start-date');
+      const end = document.getElementById('report-end-date');
+      const status = document.getElementById('report-status-select');
+      const now = new Date();
+      if (kind === 'completed') {
+        start.value = ''; end.value = ''; status.value = 'Completed';
+      } else if (kind === 'week') {
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        start.value = localIso(monday); end.value = localIso(sunday); status.value = '';
+      } else if (kind === 'month') {
+        start.value = localIso(new Date(now.getFullYear(), now.getMonth(), 1));
+        end.value = localIso(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+        status.value = '';
+      }
+      fetchAndRenderReportData();
+    }
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-report-preset]');
+      if (b) applyReportPreset(b.dataset.reportPreset);
+    });
+
     async function fetchAndRenderReportData() {
       const startDate = document.getElementById('report-start-date')?.value || '';
       const endDate = document.getElementById('report-end-date')?.value || '';
@@ -1077,6 +1121,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
       if (endDate) queryParams.append('end_date', endDate);
       if (tutorId) queryParams.append('tutor_id', tutorId);
       if (subject) queryParams.append('subject', subject);
+      const statusSel = document.getElementById('report-status-select')?.value || '';
+      if (statusSel) queryParams.append('status', statusSel);
 
       try {
         const res = await fetch('api/reports.php?' + queryParams.toString());
@@ -1225,30 +1271,50 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
         if (document.getElementById('report-end-date')) document.getElementById('report-end-date').value = '';
         if (document.getElementById('report-tutor-select')) document.getElementById('report-tutor-select').value = '';
         if (document.getElementById('report-subject-select')) document.getElementById('report-subject-select').value = '';
+        if (document.getElementById('report-status-select')) document.getElementById('report-status-select').value = '';
         fetchAndRenderReportData();
       });
 
+      // CSV downloads go through fetch so the admin portal header (and session cookie) is sent
+      async function downloadReportCsv(queryParams, fallbackName) {
+        try {
+          const res = await fetch('api/reports.php?' + queryParams.toString());
+          if (!res.ok) {
+            let msg = 'Export failed.';
+            try { msg = (await res.json()).message || msg; } catch (e) {}
+            showToast(msg, 'error');
+            return;
+          }
+          const blob = await res.blob();
+          const cd = res.headers.get('Content-Disposition') || '';
+          const m = cd.match(/filename="([^"]+)"/);
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = m ? m[1] : fallbackName;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        } catch (e) {
+          showToast('Could not connect to server.', 'error');
+        }
+      }
+
       document.getElementById('admin-export-sessions-csv-btn')?.addEventListener('click', () => {
-        const startDate = document.getElementById('report-start-date')?.value || '';
-        const endDate = document.getElementById('report-end-date')?.value || '';
-        const tutorId = document.getElementById('report-tutor-select')?.value || '';
-        const subject = document.getElementById('report-subject-select')?.value || '';
-
         const queryParams = new URLSearchParams({ export: 'sessions_csv' });
-        if (startDate) queryParams.append('start_date', startDate);
-        if (endDate) queryParams.append('end_date', endDate);
-        if (tutorId) queryParams.append('tutor_id', tutorId);
-        if (subject) queryParams.append('subject', subject);
-
-        window.location.href = 'api/reports.php?' + queryParams.toString();
+        [['start_date', 'report-start-date'], ['end_date', 'report-end-date'], ['tutor_id', 'report-tutor-select'],
+         ['subject', 'report-subject-select'], ['status', 'report-status-select']].forEach(([k, id]) => {
+          const v = document.getElementById(id)?.value || '';
+          if (v) queryParams.append(k, v);
+        });
+        downloadReportCsv(queryParams, 'tutorlink_sessions_export.csv');
       });
 
       document.getElementById('admin-export-payments-csv-btn')?.addEventListener('click', () => {
         const tutorId = document.getElementById('report-tutor-select')?.value || '';
         const queryParams = new URLSearchParams({ export: 'payments_csv' });
         if (tutorId) queryParams.append('tutor_id', tutorId);
-
-        window.location.href = 'api/reports.php?' + queryParams.toString();
+        downloadReportCsv(queryParams, 'tutorlink_payments_export.csv');
       });
 
       document.getElementById('admin-logout-btn')?.addEventListener('click', async () => {
