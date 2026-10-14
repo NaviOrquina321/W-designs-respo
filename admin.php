@@ -14,6 +14,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TutorLink Admin</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
   <meta name="description" content="TutorLink Administrator Portal with Main Page Canvas Tabs for Management Modules.">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -134,6 +135,11 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
               <h1 class="page-title">Dashboard Overview</h1>
               <p class="page-subtitle">Welcome back, Admin. Here is your real-time platform overview.</p>
             </div>
+          </div>
+
+          <!-- SQLite Fallback Warning Banner -->
+          <div id="sqlite-warning-banner" class="hidden" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-weight: 600;">
+            ⚠️ DATABASE WARNING: MySQL server is unreachable. System is running on SQLite fallback storage (tutorlink.db).
           </div>
 
           <!-- Apex Style KPI Metric Cards -->
@@ -418,65 +424,66 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
         <section id="admin-section-reports" class="admin-canvas-section margin-bottom">
           <div class="dashboard-title-area">
             <div>
-              <h2 class="page-title">Reports</h2>
-              <p class="page-subtitle">View completed tutoring sessions and print activity summaries.</p>
+              <h2 class="page-title">Reports & Analytics</h2>
+              <p class="page-subtitle">Filter tutoring activity, monitor revenue, and export reports to CSV.</p>
             </div>
-            <div style="display: flex; gap: 8px;">
-              <button class="btn btn-emerald" onclick="window.print()">Print Activity Summary</button>
-            </div>
-          </div>
-
-          <div class="card-table-wrapper margin-bottom">
-            <div class="table-header-title">
-              <h3>All Completed Tutoring Sessions</h3>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Session ID</th>
-                    <th>Student</th>
-                    <th>Tutor</th>
-                    <th>Subject</th>
-                    <th>Date</th>
-                    <th>Fee</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-reports-completed-table-body">
-                  <!-- Dynamic completed report rows -->
-                </tbody>
-              </table>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-emerald" id="admin-export-sessions-csv-btn">Export Sessions CSV</button>
+              <button class="btn btn-emerald" id="admin-export-payments-csv-btn">Export Payments CSV</button>
+              <button class="btn btn-secondary" onclick="window.print()">Print Summary</button>
             </div>
           </div>
 
-          <div class="card-table-wrapper margin-bottom">
-            <div class="table-header-title">
-              <h3>Weekly Sessions (Last 7 Days)</h3>
+          <!-- Report Filter Controls -->
+          <div class="card-table-wrapper margin-bottom" style="padding: 20px;">
+            <h4 style="margin-bottom: 12px;">Filter Activity Reports</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Start Date</label>
+                <input type="date" id="report-start-date" class="form-input">
+              </div>
+              <div class="form-group">
+                <label>End Date</label>
+                <input type="date" id="report-end-date" class="form-input">
+              </div>
+              <div class="form-group">
+                <label>Tutor Filter</label>
+                <select id="report-tutor-select" class="form-select">
+                  <option value="">All Tutors</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Subject Filter</label>
+                <select id="report-subject-select" class="form-select">
+                  <option value="">All Subjects</option>
+                </select>
+              </div>
             </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Session ID</th>
-                    <th>Student</th>
-                    <th>Tutor</th>
-                    <th>Subject</th>
-                    <th>Date</th>
-                    <th>Fee</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-reports-weekly-table-body">
-                  <!-- Dynamic weekly report rows -->
-                </tbody>
-              </table>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+              <button class="btn btn-primary btn-small" id="apply-report-filters-btn">Apply Filters</button>
+              <button class="btn btn-secondary btn-small" id="reset-report-filters-btn">Reset</button>
+            </div>
+          </div>
+
+          <!-- Revenue / Commission Summary Cards -->
+          <div class="apex-kpi-grid margin-bottom">
+            <div class="apex-kpi-card">
+              <div class="kpi-label">Filtered Total Revenue</div>
+              <div class="kpi-value" id="report-stat-revenue">₱0</div>
+            </div>
+            <div class="apex-kpi-card">
+              <div class="kpi-label">Filtered Net Commission (10%)</div>
+              <div class="kpi-value" id="report-stat-commission">₱0</div>
+            </div>
+            <div class="apex-kpi-card">
+              <div class="kpi-label">Completed Sessions</div>
+              <div class="kpi-value" id="report-stat-completed">0</div>
             </div>
           </div>
 
           <div class="card-table-wrapper">
             <div class="table-header-title">
-              <h3>Monthly Sessions (Last 30 Days)</h3>
+              <h3>Sessions Report Ledger</h3>
             </div>
             <div class="table-responsive">
               <table class="data-table">
@@ -486,13 +493,13 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
                     <th>Student</th>
                     <th>Tutor</th>
                     <th>Subject</th>
-                    <th>Date</th>
-                    <th>Fee</th>
+                    <th>Date & Slot</th>
+                    <th>Total Fee</th>
                     <th>Status</th>
                   </tr>
                 </thead>
-                <tbody id="admin-reports-monthly-table-body">
-                  <!-- Dynamic monthly report rows -->
+                <tbody id="admin-reports-filtered-table-body">
+                  <!-- Dynamic report rows -->
                 </tbody>
               </table>
             </div>
@@ -1038,39 +1045,77 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
       }
     };
 
-    function renderAdminReports() {
-      const tbodyComp = document.getElementById('admin-reports-completed-table-body');
-      const tbodyWk = document.getElementById('admin-reports-weekly-table-body');
-      const tbodyMo = document.getElementById('admin-reports-monthly-table-body');
+    async function renderAdminReports() {
+      const tutorSelect = document.getElementById('report-tutor-select');
+      const subjectSelect = document.getElementById('report-subject-select');
 
-      const completed = state.sessions.filter(s => s.status === 'Completed');
-      const today = new Date();
-      const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-      const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      if (tutorSelect && state.tutors.length > 0) {
+        const cur = tutorSelect.value;
+        tutorSelect.innerHTML = `<option value="">All Tutors</option>` + state.tutors.map(t => `
+          <option value="${esc(t.id)}" ${t.id === cur ? 'selected' : ''}>${esc(t.name)}</option>
+        `).join('');
+      }
 
-      const weekly = state.sessions.filter(s => (s.date || s.sessionDate) >= sevenDaysAgo);
-      const monthly = state.sessions.filter(s => (s.date || s.sessionDate) >= thirtyDaysAgo);
+      if (subjectSelect && state.subjects.length > 0) {
+        const curS = subjectSelect.value;
+        subjectSelect.innerHTML = `<option value="">All Subjects</option>` + state.subjects.map(s => `
+          <option value="${esc(s.name)}" ${s.name === curS ? 'selected' : ''}>${esc(s.name)}</option>
+        `).join('');
+      }
 
-      if (tbodyComp) tbodyComp.innerHTML = renderReportRows(completed);
-      if (tbodyWk) tbodyWk.innerHTML = renderReportRows(weekly);
-      if (tbodyMo) tbodyMo.innerHTML = renderReportRows(monthly);
+      await fetchAndRenderReportData();
     }
 
-    function renderReportRows(list) {
-      if (list.length === 0) {
-        return `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 16px;">No sessions found for this report filter.</td></tr>`;
+    async function fetchAndRenderReportData() {
+      const startDate = document.getElementById('report-start-date')?.value || '';
+      const endDate = document.getElementById('report-end-date')?.value || '';
+      const tutorId = document.getElementById('report-tutor-select')?.value || '';
+      const subject = document.getElementById('report-subject-select')?.value || '';
+
+      const queryParams = new URLSearchParams();
+      if (startDate) queryParams.append('start_date', startDate);
+      if (endDate) queryParams.append('end_date', endDate);
+      if (tutorId) queryParams.append('tutor_id', tutorId);
+      if (subject) queryParams.append('subject', subject);
+
+      try {
+        const res = await fetch('api/reports.php?' + queryParams.toString());
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === 'success') {
+            const sum = data.summary || {};
+            const elRev = document.getElementById('report-stat-revenue');
+            const elCom = document.getElementById('report-stat-commission');
+            const elComp = document.getElementById('report-stat-completed');
+            const tbody = document.getElementById('admin-reports-filtered-table-body');
+
+            if (elRev) elRev.textContent = `₱${(sum.total_revenue || 0).toLocaleString()}`;
+            if (elCom) elCom.textContent = `₱${(sum.total_commission || 0).toLocaleString()}`;
+            if (elComp) elComp.textContent = sum.completed_sessions || 0;
+
+            const sessions = data.sessions || [];
+            if (tbody) {
+              if (sessions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--ink-soft); padding: 20px;">No sessions found for the selected filters.</td></tr>`;
+              } else {
+                tbody.innerHTML = sessions.map(s => `
+                  <tr>
+                    <td><code>${esc(s.id)}</code></td>
+                    <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${esc(s.studentId)}')">${esc(s.studentName)}</span></td>
+                    <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(s.tutorId)}')">${esc(s.tutorName)}</strong></td>
+                    <td>${esc(s.subject)}</td>
+                    <td>${esc(s.date || s.sessionDate)} (${esc(s.timeSlot)})</td>
+                    <td>₱${esc(s.totalPaid)}</td>
+                    <td><span class="badge ${s.status === 'Completed' ? 'badge-success' : s.status === 'Cancelled' ? 'badge-danger' : 'badge-info'}">${esc(s.status)}</span></td>
+                  </tr>
+                `).join('');
+              }
+            }
+          }
+        }
+      } catch (e) {
+        showToast('Failed to fetch report data.', 'error');
       }
-      return list.map(s => `
-        <tr>
-          <td><code>${esc(s.id)}</code></td>
-          <td><span style="cursor: pointer; text-decoration: underline;" onclick="viewStudentProfile('${esc(s.studentId)}')">${esc(s.studentName)}</span></td>
-          <td><strong style="cursor: pointer; text-decoration: underline;" onclick="viewTutorProfile('${esc(s.tutorId)}')">${esc(s.tutorName)}</strong></td>
-          <td>${esc(s.subject)}</td>
-          <td>${esc(s.date || s.sessionDate)}</td>
-          <td>₱${esc(s.totalPaid)}</td>
-          <td><span class="badge ${s.status === 'Completed' ? 'badge-success' : 'badge-info'}">${esc(s.status)}</span></td>
-        </tr>
-      `).join('');
     }
 
     function renderAdminNotifications() {
@@ -1169,6 +1214,41 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
         } catch (e) {
           showToast('Could not connect to server.', 'error');
         }
+      });
+
+      document.getElementById('apply-report-filters-btn')?.addEventListener('click', () => {
+        fetchAndRenderReportData();
+      });
+
+      document.getElementById('reset-report-filters-btn')?.addEventListener('click', () => {
+        if (document.getElementById('report-start-date')) document.getElementById('report-start-date').value = '';
+        if (document.getElementById('report-end-date')) document.getElementById('report-end-date').value = '';
+        if (document.getElementById('report-tutor-select')) document.getElementById('report-tutor-select').value = '';
+        if (document.getElementById('report-subject-select')) document.getElementById('report-subject-select').value = '';
+        fetchAndRenderReportData();
+      });
+
+      document.getElementById('admin-export-sessions-csv-btn')?.addEventListener('click', () => {
+        const startDate = document.getElementById('report-start-date')?.value || '';
+        const endDate = document.getElementById('report-end-date')?.value || '';
+        const tutorId = document.getElementById('report-tutor-select')?.value || '';
+        const subject = document.getElementById('report-subject-select')?.value || '';
+
+        const queryParams = new URLSearchParams({ export: 'sessions_csv' });
+        if (startDate) queryParams.append('start_date', startDate);
+        if (endDate) queryParams.append('end_date', endDate);
+        if (tutorId) queryParams.append('tutor_id', tutorId);
+        if (subject) queryParams.append('subject', subject);
+
+        window.location.href = 'api/reports.php?' + queryParams.toString();
+      });
+
+      document.getElementById('admin-export-payments-csv-btn')?.addEventListener('click', () => {
+        const tutorId = document.getElementById('report-tutor-select')?.value || '';
+        const queryParams = new URLSearchParams({ export: 'payments_csv' });
+        if (tutorId) queryParams.append('tutor_id', tutorId);
+
+        window.location.href = 'api/reports.php?' + queryParams.toString();
       });
 
       document.getElementById('admin-logout-btn')?.addEventListener('click', async () => {

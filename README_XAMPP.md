@@ -22,9 +22,7 @@ Copy or move the `tutorlink` project folder into your XAMPP `htdocs` directory:
 
 ### Step 3: Import Database (phpMyAdmin)
 1. Open your browser and go to `http://localhost/phpmyadmin/`
-2. Click on the **Import** tab at the top.
-3. Drop `tutorlink_db` if it exists, then click **Import** and select `database.sql` from the project folder.
-4. Click **Import** (or **Go**).
+2. Import `database.sql` from the project folder.
 
 *Note: `api/config.php` automatically creates the `tutorlink_db` database and schema if it does not already exist. If MySQL is offline it silently falls back to a SQLite file at `data/tutorlink.db`, so always start MySQL in XAMPP or your data will go into that separate file.*
 
@@ -37,8 +35,8 @@ php -S localhost:8000 router.php
 `router.php` applies the same download protection that `.htaccess` gives on Apache.
 
 ### Session rules to know when testing
-- A booked session starts out as *Confirmed* but its GCash payment is *Pending*.
-- The admin must confirm the payment (Payments tab) before the tutor can start or complete the session.
+- Booking uses a demo GCash flow: the session is *Confirmed* and the payment is recorded as *Confirmed* automatically.
+- The admin can still change a payment's status in the Payments tab. A tutor can only start or complete a session whose payment is Confirmed.
 - Completed and Cancelled sessions cannot be reopened.
 
 ---
@@ -53,7 +51,10 @@ TutorLink has two separate sites that share the same database. You can keep both
 
 Each site has its own login session, so an admin and a student can be signed in together in the same browser. An admin account cannot sign in on the main site, and student or tutor accounts cannot sign in on the Admin Portal. The main site footer and the admin header both have a link to open the other site in a new tab.
 
-### Test User Accounts (Log In)
+- **Student & Tutor Portal:** `http://localhost/tutorlink/`
+- **Admin Portal Entry:** `http://localhost/tutorlink/admin-login.php`
+
+### Test User Accounts
 - **Student Role:** Maria Santos (`maria@tutorlink.ph` / `student123`)
 - **Tutor Role:** Prof. Alex Rivera (`alex@tutorlink.ph` / `tutor123`)
 - **Admin Role:** System Admin (`admin@tutorlink.ph` / `admin123`)

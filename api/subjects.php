@@ -46,6 +46,37 @@ if ($method === 'GET') {
         jsonError(400, 'Subject ID required.');
     }
 
+    $stmtFetch = $pdo->prepare("SELECT name FROM subjects WHERE id = ?");
+    $stmtFetch->execute([$subId]);
+    $subRow = $stmtFetch->fetch();
+
+    if (!$subRow) {
+        jsonError(404, 'Subject not found.');
+    }
+
+    $subName = $subRow['name'];
+
+    // Check usage in tutors
+    $stT = $pdo->prepare("SELECT COUNT(*) as cnt FROM tutors WHERE LOWER(subjects) LIKE ?");
+    $stT->execute(['%' . strtolower($subName) . '%']);
+    if ($stT->fetch()['cnt'] > 0) {
+        jsonError(400, "Cannot delete subject '$subName' because it is referenced by existing tutors.");
+    }
+
+    // Check usage in matches
+    $stM = $pdo->prepare("SELECT COUNT(*) as cnt FROM matches WHERE LOWER(subject) = ?");
+    $stM->execute([strtolower($subName)]);
+    if ($stM->fetch()['cnt'] > 0) {
+        jsonError(400, "Cannot delete subject '$subName' because it is referenced in match requests.");
+    }
+
+    // Check usage in sessions
+    $stS = $pdo->prepare("SELECT COUNT(*) as cnt FROM sessions WHERE LOWER(subject) = ?");
+    $stS->execute([strtolower($subName)]);
+    if ($stS->fetch()['cnt'] > 0) {
+        jsonError(400, "Cannot delete subject '$subName' because it is referenced in tutoring sessions.");
+    }
+
     $stmt = $pdo->prepare("DELETE FROM subjects WHERE id = ?");
     $stmt->execute([$subId]);
 

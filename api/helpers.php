@@ -13,6 +13,9 @@ set_exception_handler(function ($e) {
 });
 
 function jsonError($code, $message) {
+    if (getenv('TEST_MODE') === '1' || defined('TEST_MODE')) {
+        throw new Exception($message, $code);
+    }
     http_response_code($code);
     echo json_encode(['status' => 'error', 'message' => $message]);
     exit();
@@ -74,6 +77,39 @@ function requireRole($allowedRoles) {
 
 function newId($prefix = '') {
     return $prefix . bin2hex(random_bytes(6));
+}
+
+function parseSlotStartTime($dateStr, $slotStr) {
+    $parts = explode('-', $slotStr);
+    $timePart = trim($parts[0]);
+    $dt = DateTime::createFromFormat('Y-m-d h:i A', "$dateStr $timePart", new DateTimeZone('Asia/Manila'));
+    if (!$dt) {
+        $dt = DateTime::createFromFormat('Y-m-d H:i', "$dateStr $timePart", new DateTimeZone('Asia/Manila'));
+    }
+    return $dt ? $dt->getTimestamp() : 0;
+}
+
+function parseSlotEndTime($dateStr, $slotStr) {
+    $parts = explode('-', $slotStr);
+    $timePart = isset($parts[1]) ? trim($parts[1]) : trim($parts[0]);
+    $dt = DateTime::createFromFormat('Y-m-d h:i A', "$dateStr $timePart", new DateTimeZone('Asia/Manila'));
+    if (!$dt) {
+        $dt = DateTime::createFromFormat('Y-m-d H:i', "$dateStr $timePart", new DateTimeZone('Asia/Manila'));
+    }
+    // If no end time given, default to 1 hour after start
+    if (!$dt) {
+        $startTs = parseSlotStartTime($dateStr, $slotStr);
+        return $startTs > 0 ? $startTs + 3600 : 0;
+    }
+    return $dt->getTimestamp();
+}
+
+function sanitizeCsvCell($val) {
+    $str = strval($val ?? '');
+    if (strlen($str) > 0 && in_array($str[0], ['=', '+', '-', '@'], true)) {
+        return "'" . $str;
+    }
+    return $str;
 }
 
 function snakeToCamel($string) {

@@ -1,9 +1,9 @@
 # TutorLink System Architecture & Technical Analysis Report
 
 ## Executive Summary
-**TutorLink** is a full-stack tutor-student matching and learning management web application built using a minimalist monochrome UI aesthetic backed by PHP REST APIs and relational database persistence (supporting MySQL with zero-config SQLite fallback).
+**TutorLink** is a full-stack tutor-student matching and learning management web application built using PHP REST APIs and relational database persistence (supporting MySQL with zero-config SQLite fallback).
 
-The platform facilitates rule-based tutor matching recommendations, calendar booking scheduling, simulated GCash e-Wallet payments with platform service fee calculations, live virtual workspace collaboration with embedded chat and notes, post-session evaluations, and admin back-office management.
+The platform facilitates AI and rule-based tutor matching recommendations (`api/match.php`), calendar booking scheduling with 24-hour reschedule enforcement, simulated GCash e-Wallet payments with platform service fee calculations (`api/payment_provider.php`), live virtual workspace collaboration with embedded chat and notes, post-session evaluations, and admin back-office management (`admin-login.php` -> `admin.php`).
 
 ---
 
@@ -13,10 +13,10 @@ The platform facilitates rule-based tutor matching recommendations, calendar boo
 +-----------------------------------------------------------------------------------+
 |                                  FRONTEND LAYER                                   |
 |  +-------------------------------------+  +------------------------------------+  |
-|  | index.php / app.js                  |  | admin.php                          |  |
+|  | index.php / app.js                  |  | admin-login.php -> admin.php       |  |
 |  | - Student & Tutor Web Portals       |  | - Back-Office Administrative Portal|  |
 |  | - Interactive Drawers & Workspace   |  | - Single-Canvas Tab Navigation     |  |
-|  | - GCash Checkout Integration        |  | - Real-time Analytics & Controls   |  |
+|  | - Demo GCash Checkout               |  | - Reports & CSV Export             |  |
 |  +-------------------------------------+  +------------------------------------+  |
 |                                    |                                              |
 |                           HTTP REST Requests (JSON)                               |
@@ -25,11 +25,12 @@ The platform facilitates rule-based tutor matching recommendations, calendar boo
 |                                 BACKEND API LAYER                                 |
 |  +-----------------------------------------------------------------------------+  |
 |  | PHP PDO REST Endpoints (/api/*.php)                                         |  |
-|  |  - login.php & register.php   (Authentication & Password Hashing)           |  |
-|  |  - matches.php & tutors.php   (Rule-based Matching & Tutor Profiles)          |  |
-|  |  - sessions.php & chat.php    (Session Management & Real-time Messaging)     |  |
-|  |  - payments.php & admin.php   (GCash Transactions & Back-Office Analytics)   |  |
-|  |  - notifications.php          (Targeted Role Notifications)                  |  |
+|  |  - login.php & register.php   (Authentication & Dual Session Cookies)       |  |
+|  |  - match.php & tutors.php     (AI Matching Engine & Tutor Profiles)          |  |
+|  |  - payment_provider.php       (Auto-confirm Demo GCash Checkout)             |  |
+|  |  - sessions.php & chat.php    (Session Management & Workspace Messaging)     |  |
+|  |  - notifications.php          (5s Polling & 24h Session Reminders)           |  |
+|  |  - reports.php                (Filtered Analytics & Formula-safe CSV Export) |  |
 |  +-----------------------------------------------------------------------------+  |
 |                                    |                                              |
 |                         Database Abstraction (PDO Driver)                         |
@@ -38,33 +39,31 @@ The platform facilitates rule-based tutor matching recommendations, calendar boo
 |                                 PERSISTENCE LAYER                                 |
 |  +------------------------------------+   +------------------------------------+  |
 |  | Primary: MySQL (tutorlink_db)      |   | Fallback: SQLite (tutorlink.db)    |  |
-|  | - Auto-schema Migration            |   | - File-based Portable Storage      |  |
+|  | - One-time schema_version Migration |   | - File-based Portable Storage      |  |
 |  +------------------------------------+   +------------------------------------+  |
 +-----------------------------------------------------------------------------------+
 ```
 
 ### Key Architectural Highlights:
-1. **Decoupled REST API Architecture:** All frontend UI components communicate asynchronously with PHP endpoints via `fetch()` API calls, passing and receiving structured JSON payloads.
-2. **Dual-Database Resilience:** The `api/config.php` bootstrap automatically attempts a connection to a local MySQL instance (`tutorlink_db`). If MySQL is offline, it seamlessly falls back to file-backed SQLite (`tutorlink.db`), ensuring zero-downtime execution in any host environment.
-3. **Monochrome Design System:** Built with custom CSS variables (`--ink`, `--paper`, `--panel`, `--line`, `--muted`), providing a high-contrast, professional, accessibility-compliant user experience without heavy external framework bloat.
-4. **Role Isolation:** Dynamic view switching based on active session credentials for three primary user roles:
-   - **Students:** Browse tutors, request matching, book sessions, submit GCash payments, join virtual workspaces, and leave feedback.
-   - **Tutors:** Manage schedule slots, accept/reject match requests, conduct live virtual workspace sessions, and track earnings/payouts.
-   - **Admins:** High-level platform metrics, user validation, payment verification, session oversight, broadcast notifications, and detailed system analytics.
+1. **Decoupled REST API Architecture:** Frontend UI components communicate asynchronously with PHP endpoints via `fetch()` API calls.
+2. **Dual Session Cookie Security:** `TUTORLINK_MAIN` manages student/tutor sessions on `index.php`, while `TUTORLINK_ADMIN` strictly manages administrator sessions on `admin.php`.
+3. **AI & Rule-Based Fallback Matching:** `api/match.php` executes cURL requests to AI completions API (with 10-second timeout, 10-min session cache, and sanitization). On missing key or failure, it seamlessly falls back to server-side rule-based matching with neutral 3.5 rating for unrated tutors.
+4. **Auto-Confirming Payment Provider:** `api/payment_provider.php` creates session and payment records in a single transaction, auto-confirming payments for immediate workspace access during scheduled session windows.
 
 ---
 
 ## 2. Relational Database Schema & Data Models
 
-The database consists of 11 relational tables configured with strict auto-migration and auto-seeding.
+The database consists of 11 relational tables managed via `schema_version`.
 
 | Table Name | Primary Key | Description & Key Columns |
 | :--- | :--- | :--- |
+| `schema_version` | `version` (INT) | Migration version tracker executing database DDL scripts only once. |
 | `users` | `id` (Auto-Inc) | Central authentication repository storing `user_id`, `email`, `password_hash` (BCRYPT), `role`, and `name`. |
 | `students` | `id` (VARCHAR) | Student profile data including `grade`, `validated`, `deactivated`, `subjects_needed`, and `sessions_completed`. |
-| `tutors` | `id` (VARCHAR) | Comprehensive tutor profiles: `rating`, `hourly_rate`, `subjects`, `learning_styles`, `approval_status`, and availability settings. |
+| `tutors` | `id` (VARCHAR) | Tutor profiles: `rating`, `hourly_rate`, `subjects`, `learning_styles`, `diploma_status`, `tor_status`, `id_status`, `approval_status`, and availability slots. |
 | `admins` | `id` (VARCHAR) | Administrative staff accounts. |
-| `subjects` | `id` (VARCHAR) | Catalog of academic subjects categorized by STEM, Humanities, and Technology. |
+| `subjects` | `id` (VARCHAR) | Academic subject catalog categorized by STEM, Humanities, and Technology. |
 | `matches` | `id` (VARCHAR) | Matching requests generated between students and tutors with match compatibility `score` and `status`. |
 | `schedules` | `id` (VARCHAR) | Individual tutor time slots and calendar availability. |
 | `payments` | `id` (VARCHAR) | Financial records detailing GCash transactions, transaction reference numbers (`ref_no`), amounts, and payout status. |
@@ -74,43 +73,5 @@ The database consists of 11 relational tables configured with strict auto-migrat
 
 ---
 
-## 3. End-to-End System Workflow & Features
-
-### A. Authentication & Session Security
-- **Unified Login:** Accounts are looked up directly by email, automatically retrieving password hash and account role without requiring manual role dropdown selection.
-- **BCRYPT Hashing:** All password creations and updates utilize PHP's standard `password_hash(..., PASSWORD_BCRYPT)` and `password_verify()` routines.
-- **PHP Server Sessions:** Authentication relies on secure server-side PHP sessions with HTTP-only cookies (`SameSite=Lax`).
-
-### B. Rule-Based Tutor Matching & Scheduling
-- **Rule-Based Compatibility Scoring:** Calculates match fit percentage in the browser based on subject match (50%), learning style match (20%), time slot availability (15%), and tutor rating (15%).
-- **Match Requests:** Requests are submitted to tutors who can accept or cancel them.
-- **Slot Reservation:** Students select available dates and time slots published by approved tutors or admin-created available slots.
-
-### C. Simulated GCash e-Wallet Checkout
-- **Fee Rule:** Student pays Hourly Rate + 10% Service Fee (e.g. ₱350 rate + ₱35 fee = ₱385 total). Tutor receives 100% of hourly rate (₱350), and the platform retains the 10% service fee (₱35).
-- **Instant Receipt Generation:** Generates valid simulated GCash transaction reference numbers (`GC-XXXXXXXX`) stored in `payments` and `sessions` tables.
-
-### D. Live Virtual Workspace & Session Completion
-- **Collaborative Session Space:** Embedded canvas whiteboard/drawing tools and instant messaging (`chat_messages`).
-- **Controlled Completion:** Tutors finalize sessions within the Live Workspace where they record post-session notes/remarks.
-- **Student Reviews:** Students provide 1-5 star ratings and written feedback upon session completion, triggering server-side recomputation of the tutor's aggregate rating.
-
-### E. Admin Back-Office Dashboard (`admin.php`)
-- **Single-Canvas Tab Interface:** Navigation across Overview KPIs, Students, Tutors, Tutor Matching, Schedules, Payments, Reports, and Broadcast Notifications.
-- **System Administration:** Admin controls for tutor verification, document audit (Diploma, TOR, ID), user deactivation/reactivation, broadcast announcements, payment confirmation, and payout processing.
-
----
-
-## 4. Security & Technical Architecture
-
-| Component | Assessment | Recommendation |
-| :--- | :--- | :--- |
-| **Password Storage** | **Secure:** BCRYPT hashing is enforced for all account creation and authentication calls. | Maintain current BCRYPT cost factor. |
-| **SQL Injection** | **Secure:** All API endpoints utilize PHP PDO prepared statements with parameter binding. | Continue strict usage of PDO bound variables. |
-| **Session Security** | **Secure:** Native PHP server sessions with strict HttpOnly and SameSite cookie policies. | Clear session cookies on logout. |
-| **Role Authorization** | **Secure:** Server-side `requireRole()` checks on all protected API routes. | Enforce ID-only and role-scoped access. |
-
----
-
 ## Conclusion
-The TutorLink codebase provides a complete web system for managing tutor-student sessions with rule-based matching recommendations and simulated GCash checkout workflows.
+The TutorLink codebase provides a complete web system for managing tutor-student matching, calendar scheduling, demo GCash payments, live session workspaces, and back-office administration.

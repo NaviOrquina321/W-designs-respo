@@ -8,7 +8,7 @@ Welcome to the **TutorLink System Administrator Manual**. This guide provides sy
 
 To log in to the TutorLink Admin Dashboard:
 
-* **Access URL:** `http://localhost/tutorlink/`
+* **Admin Portal Login URL:** `http://localhost/tutorlink/admin-login.php`
 * **Admin Email:** `admin@tutorlink.ph`
 * **Admin Password:** `admin123`
 
@@ -22,9 +22,9 @@ The Admin Dashboard manages 11 relational tables (`users`, `admins`, `students`,
    - **Total Registered Students:** Real-time count of registered students.
    - **Verified Tutors Count:** Real-time count of active tutors.
    - **Total Transaction Volume:** Aggregate gross value of session payments (₱).
-   - **Platform Net Revenue:** 10% platform commission auto-calculated from completed sessions.
+   - **Platform Net Revenue:** 10% platform commission auto-calculated from non-cancelled sessions.
 
-2. **Student & Tutor Account Governance:**
+2. **Student & Tutor Governance:**
    - Account Validation & Document Status verification.
    - One-click **Deactivate / Reactivate** user toggle.
    - Full student profile and tutor profile detailed view modals.
@@ -34,29 +34,28 @@ The Admin Dashboard manages 11 relational tables (`users`, `admins`, `students`,
    - Approve or decline tutor registrations. Approval requires Diploma, TOR, and Government ID all set to Verified.
 
 4. **Tutor Matching Governance:**
-   - Review rule-based match compatibility scores calculated in the browser.
+   - Review AI / Rule-based matching recommendations.
    - Approve or cancel tutors for student requests.
 
 5. **Schedule & Session Auditing:**
    - Live session logs and status monitoring (Confirmed, In Progress, Completed, Cancelled).
+   - Cancel sessions and reschedule confirmed sessions.
 
 6. **Financial Management & Tutor Payouts:**
    - Payment transaction ledger.
-   - Process full payout to tutors after session completion (tutor receives 100% of hourly rate, platform retains the 10% service fee paid by student).
+   - Process payouts to tutors after session completion (tutor receives 100% of hourly rate, platform retains the 10% service fee paid by student).
 
 7. **Notification Broadcast:**
    - Broadcast platform announcements to Students, Tutors, or All Users simultaneously.
 
-8. **Printable Performance & Audit Reports:**
-   - Generate printable performance reports with financial volume breakdowns and audit trails (`window.print()`).
+8. **Monitoring Reports & CSV Export:**
+   - Date-range filter, tutor filter, subject filter, revenue summary, and admin-only CSV export for sessions and payments.
 
 ---
 
-## 3. Database Architecture & XAMPP Setup Instructions
+## 3. Database Architecture & Setup Instructions
 
-TutorLink is designed for zero-configuration integration with **MySQL / MariaDB** (via XAMPP or standalone MySQL server).
-
-### Database Credentials (`api/config.php`):
+### Database Credentials (`config.local.php` or `config.sample.php`):
 * **Host:** `localhost`
 * **Database Name:** `tutorlink_db`
 * **Username:** `root`
@@ -65,14 +64,3 @@ TutorLink is designed for zero-configuration integration with **MySQL / MariaDB*
 ### Manual Database Import (phpMyAdmin):
 1. Open `http://localhost/phpmyadmin/`
 2. Import `database.sql` located at the root of the project.
-3. The SQL script creates all required relational tables (`users`, `admins`, `students`, `tutors`, `subjects`, `matches`, `schedules`, `payments`, `sessions`, `notifications`, `chat_messages`) and seeds default accounts.
-
-*Note: The backend API includes an auto-installer in `api/config.php` that will automatically create the `tutorlink_db` database and its tables if MySQL is running!*
-
----
-
-## 4. Fresh System Operating State
-
-To ensure isolated data for all new user registrations, the initial database schema starts in a clean state:
-* All total volume, earnings, and completed session reports start at **0 / ₱0**.
-* New students and tutors receive isolated accounts upon registration with zero initial sessions or transaction history.

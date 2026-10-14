@@ -120,7 +120,6 @@ function startAutoRefreshTimer() {
   autoRefreshTimer = setInterval(async () => {
     if (!state.currentUser || state.currentRole === 'guest') return;
 
-    // Do not re-render if user is actively typing or a modal/drawer is open
     const activeEl = document.activeElement;
     const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT');
     const hasOpenModal = document.querySelector('.modal-backdrop.active') !== null;
@@ -128,7 +127,6 @@ function startAutoRefreshTimer() {
 
     await syncWithDatabase();
 
-    // Poll workspace chat if workspace is active
     if (state.activeWorkspaceSession) {
       await pollWorkspaceChat();
     }
@@ -136,7 +134,7 @@ function startAutoRefreshTimer() {
     if (!isTyping && !hasOpenModal && !hasOpenDrawer) {
       renderAllViews();
     }
-  }, 8000);
+  }, 5000);
 }
 
 // Database Synchronization Engine
@@ -212,6 +210,10 @@ async function syncWithDatabase() {
       const resA = await fetch('api/admin.php');
       if (resA.ok) {
         const jsonA = await resA.json();
+        const warnBanner = document.getElementById('sqlite-warning-banner');
+        if (warnBanner) {
+          warnBanner.classList.toggle('hidden', !jsonA.sqlite_fallback);
+        }
         if (jsonA.data) {
           const d = jsonA.data;
           const elStu = document.getElementById('admin-stat-total-students');
@@ -1365,6 +1367,7 @@ function initAIMatching() {
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const subject = document.getElementById('match-subject').value;
+    const level = document.getElementById('match-level')?.value || 'Senior High';
     const style = document.getElementById('match-style').value;
     const time = document.getElementById('match-time').value;
 
@@ -1702,13 +1705,29 @@ function renderNotifDrawer() {
   }
 
   list.innerHTML = filtered.map(n => `
-    <div class="notif-item ${n.read ? '' : 'unread'}">
+    <div class="notif-item ${n.read ? '' : 'unread'}" style="cursor: pointer;" onclick="markSingleNotificationRead('${esc(n.id)}')">
       <strong>${esc(n.title)}</strong>
       <p>${esc(n.message)}</p>
       <div class="notif-time">${esc(n.time)}</div>
     </div>
   `).join('');
 }
+
+window.markSingleNotificationRead = async function(notifId) {
+  const n = state.notifications.find(x => x.id === notifId);
+  if (n) n.read = true;
+
+  const userId = state.currentUser ? state.currentUser.id : 'guest';
+  const readStorage = state.notifications.filter(x => x.read).map(x => x.id);
+  localStorage.setItem(`tutorlink_read_${userId}`, JSON.stringify(readStorage));
+
+  try {
+    await fetch(`api/notifications.php?id=${encodeURIComponent(notifId)}`, { method: 'PUT' });
+  } catch (e) {}
+
+  renderNotifDrawer();
+  updateNotificationBadge();
+};
 
 function updateNotificationBadge() {
   const badge = document.getElementById('notif-badge-count');
@@ -1885,14 +1904,31 @@ window.joinLiveWorkspace = async function(sessionId) {
   const titleEl = document.getElementById('workspace-session-title');
   const partEl = document.getElementById('workspace-participants');
   const notesEl = document.getElementById('session-shared-notes');
+  const chatInput = document.getElementById('chat-input');
+  const chatSubmitBtn = document.querySelector('#chat-form button[type="submit"]');
 
-  if (titleEl) titleEl.textContent = `Live Session Workspace: ${esc(session.subject)}`;
-  if (partEl) partEl.textContent = `${esc(session.studentName)} (Student) & ${esc(session.tutorName)} (Tutor)`;
-  if (notesEl) notesEl.value = session.notes || '';
+  const isReadOnly = (session.status === 'Completed' || session.status === 'Cancelled');
+
+  if (titleEl) titleEl.textContent = `${isReadOnly ? 'Workspace Archive' : 'Live Workspace'}: ${esc(session.subject)}`;
+  if (partEl) partEl.textContent = `${esc(session.studentName)} (Student) & ${esc(session.tutorName)} (Tutor) - ${esc(session.status)}`;
+
+  if (notesEl) {
+    notesEl.value = session.notes || '';
+    notesEl.disabled = isReadOnly;
+  }
+
+  if (chatInput) {
+    chatInput.disabled = isReadOnly;
+    chatInput.placeholder = isReadOnly ? "Session is completed or cancelled. Workspace is read-only." : "Type a message...";
+  }
+
+  if (chatSubmitBtn) {
+    chatSubmitBtn.disabled = isReadOnly;
+  }
 
   const chatContainer = document.getElementById('chat-messages-container');
   if (chatContainer) {
-    chatContainer.innerHTML = `<div class="chat-msg system">Live Virtual Workspace connected.</div>`;
+    chatContainer.innerHTML = `<div class="chat-msg system">${isReadOnly ? 'Session read-only archive.' : 'Live Virtual Workspace connected.'}</div>`;
   }
 
   openModal('modal-session-workspace');
