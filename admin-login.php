@@ -30,13 +30,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $now = time();
             $cutoff = $now - 900; // 15 min lock
 
-            $pdo->exec("CREATE TABLE IF NOT EXISTS `failed_login_attempts` (
-              `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-              `email` VARCHAR(100) NOT NULL,
-              `ip_address` VARCHAR(45) NOT NULL,
-              `attempt_time` INT NOT NULL
-            );");
-
             // Check rate limit
             $stLock = $pdo->prepare("SELECT COUNT(*) as cnt FROM failed_login_attempts WHERE email = ? AND ip_address = ? AND attempt_time > ?");
             $stLock->execute([$email, $ip, $cutoff]);

@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `students` (
   `name` VARCHAR(100) NOT NULL,
   `email` VARCHAR(100) NOT NULL UNIQUE,
   `grade` VARCHAR(50) NOT NULL,
-  `validated` TINYINT(1) DEFAULT 0,
+  `validated` TINYINT(1) DEFAULT 1,
   `deactivated` TINYINT(1) DEFAULT 0,
   `bio` TEXT,
   `subjects_needed` VARCHAR(255),
@@ -63,10 +63,6 @@ CREATE TABLE IF NOT EXISTS `tutors` (
   `bio` TEXT,
   `available` TINYINT(1) DEFAULT 1,
   `deactivated` TINYINT(1) DEFAULT 0,
-  `diploma_status` VARCHAR(50) DEFAULT 'Pending',
-  `tor_status` VARCHAR(50) DEFAULT 'Pending',
-  `id_status` VARCHAR(50) DEFAULT 'Pending',
-  `approval_status` VARCHAR(50) DEFAULT 'Pending Review',
   `available_days` VARCHAR(255) DEFAULT 'Mon,Tue,Wed,Thu,Fri',
   `available_time_slots` VARCHAR(255) DEFAULT '09:00 AM - 05:00 PM',
   `blocked_dates` TEXT,
@@ -163,7 +159,8 @@ CREATE TABLE IF NOT EXISTS `notifications` (
   `title` VARCHAR(150) NOT NULL,
   `message` TEXT NOT NULL,
   `is_read` TINYINT(1) DEFAULT 0,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_notifications_role_target` (`target_role`, `target`, `is_read`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 11. Table: chat_messages
@@ -186,6 +183,14 @@ CREATE TABLE IF NOT EXISTS `notification_reads` (
   PRIMARY KEY (`notification_id`, `user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 13. Table: failed_login_attempts
+CREATE TABLE IF NOT EXISTS `failed_login_attempts` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `email` VARCHAR(100) NOT NULL,
+  `ip_address` VARCHAR(45) NOT NULL,
+  `attempt_time` INT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Seed initial default users & subjects
 INSERT INTO `users` (`user_id`, `email`, `password_hash`, `role`, `name`) VALUES
 ('ADMIN-001', 'admin@tutorlink.ph', '$2y$10$4KtVRKjPTI1Etb2VYt0nVeQsv0tBnHxSEUIYUheMZ.NRFL63mXud.', 'admin', 'System Admin'),
@@ -201,8 +206,8 @@ INSERT INTO `students` (`id`, `name`, `email`, `grade`, `validated`, `deactivate
 ('STU-101', 'Maria Santos', 'maria@tutorlink.ph', 'Senior High', 1, 0, 'Grade 12 STEM Student focusing on Advanced Calculus and College Entrance Exam preparation.', 'Calculus, Physics', 0)
 ON DUPLICATE KEY UPDATE `email`=`email`;
 
-INSERT INTO `tutors` (`id`, `name`, `email`, `initials`, `rating`, `reviews_count`, `hourly_rate`, `subjects`, `learning_styles`, `bio`, `available`, `deactivated`, `diploma_status`, `tor_status`, `id_status`, `approval_status`, `available_days`, `available_time_slots`, `availability_slots`) VALUES
-('tut-1', 'Prof. Alex Rivera', 'alex@tutorlink.ph', 'AR', 5.0, 1, 350, 'Calculus, Physics, Mathematics', 'Visual & Diagrams, Step-by-Step Explanation', 'Licensed High School & College Mathematics educator with 7+ years teaching STEM subjects.', 1, 0, 'Verified', 'Verified', 'Verified', 'Approved', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')
+INSERT INTO `tutors` (`id`, `name`, `email`, `initials`, `rating`, `reviews_count`, `hourly_rate`, `subjects`, `learning_styles`, `bio`, `available`, `deactivated`, `available_days`, `available_time_slots`, `availability_slots`) VALUES
+('tut-1', 'Prof. Alex Rivera', 'alex@tutorlink.ph', 'AR', 5.0, 1, 350, 'Calculus, Physics, Mathematics', 'Visual & Diagrams, Step-by-Step Explanation', 'Licensed High School & College Mathematics educator with 7+ years teaching STEM subjects.', 1, 0, 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')
 ON DUPLICATE KEY UPDATE `email`=`email`;
 
 INSERT INTO `subjects` (`id`, `name`, `category`) VALUES

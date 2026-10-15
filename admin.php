@@ -303,7 +303,7 @@ $adminName = $_SESSION['name'] ?? 'Admin';
               <div class="kpi-value" id="kpi-students">0</div>
             </div>
             <div class="kpi-card">
-              <div class="kpi-label">Verified Approved Tutors</div>
+              <div class="kpi-label">Total Tutors</div>
               <div class="kpi-value" id="kpi-tutors">0</div>
             </div>
             <div class="kpi-card">
@@ -329,7 +329,6 @@ $adminName = $_SESSION['name'] ?? 'Admin';
                     <th>Name</th>
                     <th>Email</th>
                     <th>Grade</th>
-                    <th>Validation</th>
                     <th>Status</th>
                     <th>Completed</th>
                     <th>Created</th>
@@ -337,7 +336,7 @@ $adminName = $_SESSION['name'] ?? 'Admin';
                   </tr>
                 </thead>
                 <tbody id="students-table-body">
-                  <tr><td colspan="9" style="text-align:center;">Loading...</td></tr>
+                  <tr><td colspan="8" style="text-align:center;">Loading...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -347,7 +346,7 @@ $adminName = $_SESSION['name'] ?? 'Admin';
         <!-- TAB 3: TUTORS -->
         <div id="tab-tutors" class="admin-tab-view">
           <div class="card-panel">
-            <h3 style="margin-top: 0; margin-bottom: 16px;">Tutors Management & Verification</h3>
+            <h3 style="margin-top: 0; margin-bottom: 16px;">Tutors Management</h3>
             <div class="table-responsive">
               <table class="data-table">
                 <thead>
@@ -357,16 +356,12 @@ $adminName = $_SESSION['name'] ?? 'Admin';
                     <th>Hourly Rate</th>
                     <th>Rating</th>
                     <th>Reviews</th>
-                    <th>Diploma</th>
-                    <th>TOR</th>
-                    <th>Gov ID</th>
-                    <th>Approval</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody id="tutors-table-body">
-                  <tr><td colspan="11" style="text-align:center;">Loading...</td></tr>
+                  <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -763,7 +758,7 @@ $adminName = $_SESSION['name'] ?? 'Admin';
       const tabTitles = {
         'dashboard': 'Dashboard Overview',
         'students': 'Students Management',
-        'tutors': 'Tutors Management & Verification',
+        'tutors': 'Tutors Management',
         'matches': 'Tutor Match Requests',
         'sessions': 'Scheduled Tutoring Sessions',
         'payments': 'Payment Transactions Log',
@@ -825,12 +820,12 @@ $adminName = $_SESSION['name'] ?? 'Admin';
     // 2. STUDENTS
     async function loadStudents() {
       const tbody = document.getElementById('students-table-body');
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Loading students...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Loading students...</td></tr>';
       try {
         const json = await api('api/students.php');
         const students = json.data || [];
         if (students.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No registered students found.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No registered students found.</td></tr>';
           return;
         }
         tbody.innerHTML = students.map(s => `
@@ -839,13 +834,11 @@ $adminName = $_SESSION['name'] ?? 'Admin';
             <td><strong>${escapeHtml(s.name)}</strong></td>
             <td>${escapeHtml(s.email)}</td>
             <td>${escapeHtml(s.grade)}</td>
-            <td><span class="badge ${s.validated ? 'badge-success' : 'badge-pending'}">${s.validated ? 'Validated' : 'Pending'}</span></td>
             <td><span class="badge ${s.deactivated ? 'badge-danger' : 'badge-success'}">${s.deactivated ? 'Deactivated' : 'Active'}</span></td>
             <td>${escapeHtml(s.sessionsCompleted || 0)}</td>
             <td>${escapeHtml(s.createdAt || s.time || '')}</td>
             <td>
               <button class="btn btn-secondary btn-small" onclick="viewStudentProfile('${escapeHtml(s.id)}')">View Profile</button>
-              <button class="btn btn-secondary btn-small" onclick="toggleStudentValidate('${escapeHtml(s.id)}', ${!s.validated})">${s.validated ? 'Revoke' : 'Validate'}</button>
               <button class="btn btn-secondary btn-small" onclick="toggleStudentDeactivate('${escapeHtml(s.id)}', ${!s.deactivated})">${s.deactivated ? 'Activate' : 'Deactivate'}</button>
             </td>
           </tr>
@@ -874,14 +867,6 @@ $adminName = $_SESSION['name'] ?? 'Admin';
       } catch (e) {}
     }
 
-    async function toggleStudentValidate(id, newVal) {
-      try {
-        await api('api/students.php', { method: 'PUT', body: { id, validated: newVal } });
-        showSuccess('Student validation status updated.');
-        loadStudents();
-      } catch (e) {}
-    }
-
     async function toggleStudentDeactivate(id, newVal) {
       if (!confirm('Are you sure you want to change this student account status?')) return;
       try {
@@ -894,17 +879,16 @@ $adminName = $_SESSION['name'] ?? 'Admin';
     // 3. TUTORS
     async function loadTutors() {
       const tbody = document.getElementById('tutors-table-body');
-      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Loading tutors...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading tutors...</td></tr>';
       try {
         const json = await api('api/tutors.php');
         allTutorsCache = json.data || [];
         if (allTutorsCache.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">No tutors registered found.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No tutors registered found.</td></tr>';
           return;
         }
 
         tbody.innerHTML = allTutorsCache.map(t => {
-          const allVerified = (t.diplomaStatus === 'Verified' && t.torStatus === 'Verified' && t.idStatus === 'Verified');
           return `
             <tr>
               <td><strong>${escapeHtml(t.name)}</strong></td>
@@ -912,54 +896,14 @@ $adminName = $_SESSION['name'] ?? 'Admin';
               <td>₱${escapeHtml(t.hourlyRate)}</td>
               <td>★ ${escapeHtml(parseFloat(t.rating || 0).toFixed(1))}</td>
               <td>${escapeHtml(t.reviewsCount || 0)}</td>
-              <td>
-                <select class="form-select" onchange="updateTutorDoc('${escapeHtml(t.id)}', 'diploma_status', this.value)">
-                  <option value="Pending" ${t.diplomaStatus === 'Pending' ? 'selected' : ''}>Pending</option>
-                  <option value="Verified" ${t.diplomaStatus === 'Verified' ? 'selected' : ''}>Verified</option>
-                  <option value="Rejected" ${t.diplomaStatus === 'Rejected' ? 'selected' : ''}>Rejected</option>
-                </select>
-              </td>
-              <td>
-                <select class="form-select" onchange="updateTutorDoc('${escapeHtml(t.id)}', 'tor_status', this.value)">
-                  <option value="Pending" ${t.torStatus === 'Pending' ? 'selected' : ''}>Pending</option>
-                  <option value="Verified" ${t.torStatus === 'Verified' ? 'selected' : ''}>Verified</option>
-                  <option value="Rejected" ${t.torStatus === 'Rejected' ? 'selected' : ''}>Rejected</option>
-                </select>
-              </td>
-              <td>
-                <select class="form-select" onchange="updateTutorDoc('${escapeHtml(t.id)}', 'id_status', this.value)">
-                  <option value="Pending" ${t.idStatus === 'Pending' ? 'selected' : ''}>Pending</option>
-                  <option value="Verified" ${t.idStatus === 'Verified' ? 'selected' : ''}>Verified</option>
-                  <option value="Rejected" ${t.idStatus === 'Rejected' ? 'selected' : ''}>Rejected</option>
-                </select>
-              </td>
-              <td><span class="badge ${t.approvalStatus === 'Approved' ? 'badge-success' : t.approvalStatus === 'Declined' ? 'badge-danger' : 'badge-pending'}">${escapeHtml(t.approvalStatus)}</span></td>
               <td><span class="badge ${t.deactivated ? 'badge-danger' : 'badge-success'}">${t.deactivated ? 'Deactivated' : 'Active'}</span></td>
               <td>
                 <button class="btn btn-secondary btn-small" onclick="viewTutorProfile('${escapeHtml(t.id)}')">Profile</button>
-                <button class="btn btn-primary btn-small" ${!allVerified && t.approvalStatus !== 'Approved' ? 'disabled title="All 3 documents must be Verified before approval."' : ''} onclick="updateTutorApproval('${escapeHtml(t.id)}', 'Approved')">Approve</button>
-                <button class="btn btn-secondary btn-small" onclick="updateTutorApproval('${escapeHtml(t.id)}', 'Declined')">Decline</button>
                 <button class="btn btn-secondary btn-small" onclick="toggleTutorDeactivate('${escapeHtml(t.id)}', ${!t.deactivated})">${t.deactivated ? 'Activate' : 'Deactivate'}</button>
               </td>
             </tr>
           `;
         }).join('');
-      } catch (e) {}
-    }
-
-    async function updateTutorDoc(id, field, val) {
-      try {
-        await api('api/tutors.php', { method: 'PUT', body: { id, [field]: val } });
-        showSuccess('Document status updated.');
-        loadTutors();
-      } catch (e) {}
-    }
-
-    async function updateTutorApproval(id, statusVal) {
-      try {
-        await api('api/tutors.php', { method: 'PUT', body: { id, approval_status: statusVal } });
-        showSuccess('Tutor approval status set to ' + statusVal);
-        loadTutors();
       } catch (e) {}
     }
 

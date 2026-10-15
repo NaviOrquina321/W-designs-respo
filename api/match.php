@@ -35,8 +35,8 @@ if (isset($_SESSION[$cacheKey]) && (time() - $_SESSION[$cacheKey]['timestamp'] <
     exit();
 }
 
-// Fetch approved and non-deactivated tutors teaching the subject
-$stmt = $pdo->prepare("SELECT id, name, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, availability_slots FROM tutors WHERE approval_status = 'Approved' AND deactivated = 0");
+// Fetch active tutors teaching the subject
+$stmt = $pdo->prepare("SELECT id, name, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, availability_slots FROM tutors WHERE deactivated = 0");
 $stmt->execute();
 $allTutors = $stmt->fetchAll();
 

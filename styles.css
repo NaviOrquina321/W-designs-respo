@@ -425,9 +425,6 @@ section .wrap { padding-top: 64px; padding-bottom: 64px; }
   top: 0; left: 0; right: 0; height: 3px;
   background: var(--warm-gold);
 }
-.feature-card:hover { border-color: var(--warm-gold); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(11,19,42,0.08); }
-.feature-card-interactive { cursor: pointer; }
-.feature-card-interactive:focus { outline: 2px solid var(--warm-gold); outline-offset: 2px; }
 .feature-card h3 { font-size: 1.25rem; margin-bottom: 10px; color: var(--oxford-navy); }
 .feature-card p { color: var(--ink-soft); font-size: 0.98rem; line-height: 1.6; }
 

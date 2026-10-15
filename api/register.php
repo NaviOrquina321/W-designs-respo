@@ -64,7 +64,7 @@ try {
         $stmtUser = $pdo->prepare("INSERT INTO users (user_id, email, password_hash, role, name) VALUES (?, ?, ?, 'student', ?)");
         $stmtUser->execute([$userId, $email, $passwordHash, $name]);
 
-        $stmtStu = $pdo->prepare("INSERT INTO students (id, name, email, grade, validated, deactivated, bio, subjects_needed, sessions_completed) VALUES (?, ?, ?, ?, 0, 0, ?, ?, 0)");
+        $stmtStu = $pdo->prepare("INSERT INTO students (id, name, email, grade, validated, deactivated, bio, subjects_needed, sessions_completed) VALUES (?, ?, ?, ?, 1, 0, ?, ?, 0)");
         $stmtStu->execute([
             $userId,
             $name,
@@ -102,7 +102,7 @@ try {
         $stmtUser = $pdo->prepare("INSERT INTO users (user_id, email, password_hash, role, name) VALUES (?, ?, ?, 'tutor', ?)");
         $stmtUser->execute([$userId, $email, $passwordHash, $name]);
 
-        $stmtTut = $pdo->prepare("INSERT INTO tutors (id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, diploma_status, tor_status, id_status, approval_status, available_days, available_time_slots, availability_slots) VALUES (?, ?, ?, ?, 0.0, 0, 350, ?, 'Step-by-Step Explanation', ?, 1, 0, 'Pending', 'Pending', 'Pending', 'Pending Review', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')");
+        $stmtTut = $pdo->prepare("INSERT INTO tutors (id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, available_days, available_time_slots, availability_slots) VALUES (?, ?, ?, ?, 0.0, 0, 350, ?, 'Step-by-Step Explanation', ?, 1, 0, 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')");
         $stmtTut->execute([
             $userId,
             $name,
@@ -112,7 +112,7 @@ try {
             "$grade Specialist Tutor in $subject. Dedicated to student growth."
         ]);
 
-        notify($pdo, 'admin', 'ADMIN-001', 'New Tutor Registered', "New tutor registered: $name ($email) - Verification Pending.");
+        notify($pdo, 'admin', 'ADMIN-001', 'New Tutor Registered', "New tutor registered: $name ($email).");
 
         $pdo->commit();
 
@@ -124,7 +124,7 @@ try {
 
         echo json_encode([
             'status' => 'success',
-            'message' => 'Tutor registration complete! Your application is pending review.',
+            'message' => 'Tutor registration complete! Welcome to TutorLink.',
             'user' => [
                 'id' => $userId,
                 'name' => $name,
@@ -138,5 +138,5 @@ try {
         $pdo->rollBack();
     }
     error_log("Registration error: " . $e->getMessage());
-    jsonError(500, 'Registration error: ' . $e->getMessage());
+    jsonError(500, 'Registration failed. Please try again later.');
 }

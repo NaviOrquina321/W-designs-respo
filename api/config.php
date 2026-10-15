@@ -126,7 +126,7 @@ try {
           `name` VARCHAR(100) NOT NULL,
           `email` VARCHAR(100) NOT NULL UNIQUE,
           `grade` VARCHAR(50) NOT NULL,
-          `validated` TINYINT(1) DEFAULT 0,
+          `validated` TINYINT(1) DEFAULT 1,
           `deactivated` TINYINT(1) DEFAULT 0,
           `bio` TEXT,
           `subjects_needed` VARCHAR(255),
@@ -147,10 +147,6 @@ try {
           `bio` TEXT,
           `available` TINYINT(1) DEFAULT 1,
           `deactivated` TINYINT(1) DEFAULT 0,
-          `diploma_status` VARCHAR(50) DEFAULT 'Pending',
-          `tor_status` VARCHAR(50) DEFAULT 'Pending',
-          `id_status` VARCHAR(50) DEFAULT 'Pending',
-          `approval_status` VARCHAR(50) DEFAULT 'Pending Review',
           `available_days` VARCHAR(255) DEFAULT 'Mon,Tue,Wed,Thu,Fri',
           `available_time_slots` VARCHAR(255) DEFAULT '09:00 AM - 05:00 PM',
           `blocked_dates` TEXT,
@@ -290,7 +286,7 @@ try {
             $stmtStu->execute(['STU-101', 'Maria Santos', 'maria@tutorlink.ph', 'Senior High', 'Grade 12 STEM Student focusing on Advanced Calculus.', 'Calculus, Physics']);
 
             $stmt->execute(['tut-1', 'alex@tutorlink.ph', $tutorHash, 'tutor', 'Prof. Alex Rivera']);
-            $stmtTut = $pdo->prepare("INSERT INTO `tutors` (`id`, `name`, `email`, `initials`, `rating`, `reviews_count`, `hourly_rate`, `subjects`, `learning_styles`, `bio`, `available`, `deactivated`, `diploma_status`, `tor_status`, `id_status`, `approval_status`, `available_days`, `available_time_slots`, `availability_slots`) VALUES (?, ?, ?, ?, 5.0, 1, 350, ?, ?, ?, 1, 0, 'Verified', 'Verified', 'Verified', 'Approved', 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')");
+            $stmtTut = $pdo->prepare("INSERT INTO `tutors` (`id`, `name`, `email`, `initials`, `rating`, `reviews_count`, `hourly_rate`, `subjects`, `learning_styles`, `bio`, `available`, `deactivated`, `available_days`, `available_time_slots`, `availability_slots`) VALUES (?, ?, ?, ?, 5.0, 1, 350, ?, ?, ?, 1, 0, 'Mon,Tue,Wed,Thu,Fri', '09:00 AM - 05:00 PM', '09:00 AM, 02:00 PM, 04:00 PM')");
             $stmtTut->execute(['tut-1', 'Prof. Alex Rivera', 'alex@tutorlink.ph', 'AR', 'Calculus, Physics, Mathematics', 'Visual & Diagrams, Step-by-Step Explanation', 'Licensed High School & College Educator with 7+ years teaching STEM.']);
 
             $stmtSub = $pdo->prepare("INSERT INTO `subjects` (`id`, `name`, `category`) VALUES (?, ?, ?)");
@@ -314,7 +310,7 @@ try {
     error_log("Schema migration error: " . $e->getMessage());
     if (getenv('TEST_MODE') !== '1') {
         http_response_code(500);
-        echo json_encode(['status' => 'error', 'message' => 'Schema migration failed: ' . $e->getMessage()]);
+        echo json_encode(['status' => 'error', 'message' => 'Schema migration error occurred. Please check server logs.']);
         exit();
     }
 }

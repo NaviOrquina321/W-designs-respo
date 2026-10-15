@@ -9,14 +9,14 @@ if ($method === 'GET') {
     $user = isset($_SESSION['role']) ? ['id' => $_SESSION['user_id'] ?? '', 'role' => $_SESSION['role']] : null;
 
     if ($user && $user['role'] === 'admin') {
-        $stmt = $pdo->query("SELECT id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, diploma_status, tor_status, id_status, approval_status, available_days, available_time_slots, blocked_dates, availability_slots, created_at FROM tutors ORDER BY created_at DESC");
+        $stmt = $pdo->query("SELECT id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, available_days, available_time_slots, blocked_dates, availability_slots, created_at FROM tutors ORDER BY created_at DESC");
         $rawTutors = $stmt->fetchAll();
     } elseif ($user && $user['role'] === 'tutor') {
-        $stmt = $pdo->prepare("SELECT id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, diploma_status, tor_status, id_status, approval_status, available_days, available_time_slots, blocked_dates, availability_slots, created_at FROM tutors WHERE (approval_status = 'Approved' AND deactivated = 0) OR id = ? ORDER BY created_at DESC");
+        $stmt = $pdo->prepare("SELECT id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, available_days, available_time_slots, blocked_dates, availability_slots, created_at FROM tutors WHERE deactivated = 0 OR id = ? ORDER BY created_at DESC");
         $stmt->execute([$user['id']]);
         $rawTutors = $stmt->fetchAll();
     } else {
-        $stmt = $pdo->query("SELECT id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, diploma_status, tor_status, id_status, approval_status, available_days, available_time_slots, blocked_dates, availability_slots, created_at FROM tutors WHERE approval_status = 'Approved' AND deactivated = 0 ORDER BY created_at DESC");
+        $stmt = $pdo->query("SELECT id, name, email, initials, rating, reviews_count, hourly_rate, subjects, learning_styles, bio, available, deactivated, available_days, available_time_slots, blocked_dates, availability_slots, created_at FROM tutors WHERE deactivated = 0 ORDER BY created_at DESC");
         $rawTutors = $stmt->fetchAll();
     }
 
@@ -24,7 +24,7 @@ if ($method === 'GET') {
     foreach ($rawTutors as $t) {
         $isOwnerOrAdmin = ($user && ($user['role'] === 'admin' || $user['id'] === $t['id']));
         if (!$isOwnerOrAdmin) {
-            unset($t['email'], $t['diploma_status'], $t['tor_status'], $t['id_status']);
+            unset($t['email']);
         }
 
         $camel = toCamelArray($t);
@@ -65,47 +65,6 @@ if ($method === 'GET') {
     if ($user['role'] === 'admin') {
         $fields = [];
         $params = [];
-        $notifyAppStatus = null;
-
-        $newDiploma = isset($input['diploma_status']) ? trim($input['diploma_status']) : $existing['diploma_status'];
-        $newTor = isset($input['tor_status']) ? trim($input['tor_status']) : $existing['tor_status'];
-        $newId = isset($input['id_status']) ? trim($input['id_status']) : $existing['id_status'];
-        $validDocs = ['Verified', 'Pending', 'Rejected'];
-
-        if (isset($input['diploma_status'])) {
-            if (!in_array($newDiploma, $validDocs, true)) jsonError(400, 'Invalid diploma_status.');
-            $fields[] = "`diploma_status` = ?";
-            $params[] = $newDiploma;
-        }
-        if (isset($input['tor_status'])) {
-            if (!in_array($newTor, $validDocs, true)) jsonError(400, 'Invalid tor_status.');
-            $fields[] = "`tor_status` = ?";
-            $params[] = $newTor;
-        }
-        if (isset($input['id_status'])) {
-            if (!in_array($newId, $validDocs, true)) jsonError(400, 'Invalid id_status.');
-            $fields[] = "`id_status` = ?";
-            $params[] = $newId;
-        }
-
-        if (isset($input['approval_status']) || isset($input['approvalStatus'])) {
-            $appStatus = trim($input['approval_status'] ?? $input['approvalStatus']);
-            $validApp = ['Approved', 'Pending Review', 'Declined'];
-            if (!in_array($appStatus, $validApp, true)) {
-                jsonError(400, 'Invalid approval_status.');
-            }
-            if ($appStatus === 'Approved') {
-                if ($newDiploma !== 'Verified' || $newTor !== 'Verified' || $newId !== 'Verified') {
-                    jsonError(400, 'Cannot approve tutor: Diploma, TOR, and ID status must all be Verified.');
-                }
-            }
-            $fields[] = "`approval_status` = ?";
-            $params[] = $appStatus;
-
-            if ($appStatus !== $existing['approval_status']) {
-                $notifyAppStatus = $appStatus;
-            }
-        }
 
         if (isset($input['deactivated'])) {
             $fields[] = "`deactivated` = ?";
@@ -120,11 +79,6 @@ if ($method === 'GET') {
         $sql = "UPDATE tutors SET " . implode(', ', $fields) . " WHERE id = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
-
-        // Call notify AFTER database update succeeds, using tutor ID
-        if ($notifyAppStatus) {
-            notify($pdo, 'tutor', $tutorId, 'Tutor Application Status Update', "Your application status has been updated to $notifyAppStatus.");
-        }
 
         echo json_encode(['status' => 'success', 'message' => 'Tutor updated by admin.']);
     } elseif ($user['role'] === 'tutor') {

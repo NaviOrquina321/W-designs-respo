@@ -1,60 +1,47 @@
 # TutorLink - Review Notes & System Status Report (`REVIEW_NOTES.md`)
 
 ## Executive Summary
-All requested project requirements and FDD features have been polished, verified, and tested across TutorLink. The application runs seamlessly on XAMPP (Apache + MySQL / MariaDB) with zero-config SQLite fallback resilience.
+TutorLink has been polished against the project Functional Design Document (FDD). The application runs seamlessly on XAMPP (Apache + MySQL / MariaDB) with zero-config SQLite fallback resilience.
 
 ---
 
-## Polished FDD Features & Specific Improvements
+## FDD Alignment & Summary of Changes
 
-### 1. Landing Page Feature Teaser Boxes (`index.php`, `styles.css`, `app.js`)
-- **Teaser Behavior:** The 5 feature teaser cards (AI Tutor Matching, Calendar Scheduling, Real-Time Notifications, Online Payment, Matching Session) serve exclusively as teasers.
-- **Unauthenticated Flow:** Clicking any card opens the Sign In modal (`modal-auth` on the login tab) and displays a short contextual toast. No unauthenticated navigation or API calls take place.
-- **Authenticated Flow:** If a user is already signed in, clicking a teaser card immediately navigates them to their active dashboard (`switchRole()`).
-- **Accessibility & Styling:** Replaced inline `style="cursor:pointer"` with CSS class `.feature-card-interactive`. Added `role="button"`, `tabindex="0"`, and `Enter`/`Space` keydown event handlers for full keyboard accessibility.
+### Part A - Tutor Document Verification & Approval Removal
+- Removed `diploma_status`, `tor_status`, `id_status`, and `approval_status` from `database.sql`, `api/config.php`, `api/register.php`, `api/tutors.php`, `api/match.php`, `api/matches.php`, `api/sessions.php`, `api/admin.php`, `admin.php`, `app.js`, and `index.php`.
+- Tutors become visible and bookable immediately upon registration as long as `deactivated = 0`.
+- Created `migration.sql` for existing MySQL databases.
 
-### 2. Admin Payment Status Safeguards (`api/payments.php`)
-- **Confirmed Payment Guard:** Reverting a `Confirmed` payment back to `Pending` is strictly blocked if the associated payout status is `Paid Out` OR if the linked tutoring session status is `In Progress` or `Completed`.
+### Part B - API Bug Fixes
+- **MySQL Login Fix:** Created `failed_login_attempts` in `database.sql` and `migration.sql` using MySQL `INT AUTO_INCREMENT PRIMARY KEY` and removed inline SQLite `CREATE TABLE` from `api/login.php` and `admin-login.php`.
+- **Notification User IDs:** Updated `notify()` calls in `api/payment_provider.php` and `api/sessions.php` to pass User IDs (`$student['id']`, `$tutorRecord['id']`, `$session['student_id']`, `$session['tutor_id']`, `'ADMIN-001'`) so alerts correctly reach target user accounts.
+- **Schema Alignment:** Synchronized `database.sql` and `api/config.php` definitions (`payments.ref_no` UNIQUE, `idx_notifications_role_target` index).
+- **Error Privacy:** Masked detailed SQL migration errors in `api/config.php` and `api/register.php` with safe user response messages.
 
-### 3. Student Account Validation & Notifications (`api/students.php`, `admin.php`)
-- **Status Display:** Student validation status is clearly displayed in the Admin Students table via color-coded badges (`Validated` vs `Pending`).
-- **Student Alert:** When an admin validates a student account, an automated notification ("Account Validated") is sent directly to the student to inform them that they can begin booking sessions.
+### Part C - Landing Page Non-Clickable Info Boxes
+- Removed button role, tabindex, `.feature-card-interactive` class, and click/keydown event handlers from feature cards and audience cards in `index.php` and `app.js`.
+- Removed hover lift/gold border from `.feature-card` in `styles.css`.
+- Added "Admin Login" link in `index.php` footer.
 
-### 4. Admin Reports Filters & Empty State (`admin.php`, `api/reports.php`)
-- **Active Filter Summary:** Displays a prominent active filter indicator badge above the report table (e.g., `Active Filter: 12 Oct - 18 Oct | Tutor: Prof. Alex Rivera`).
-- **Visible Empty State:** When no sessions match the selected filter criteria, a clear empty state block is rendered ("No sessions in this period").
-
-### 5. Admin Notifications Read Tracking (`admin.php`, `api/notifications.php`)
-- **Read/Unread Indicators:** The Admin Notifications log renders individual status badges (`Read` / `Unread`) for logged notification broadcasts based on database read receipts (`notification_reads`).
-
-### 6. Real API Automated Smoke Test Suite (`tests/smoke_test.php`)
-- **Real Schema Boot:** Rewrote `tests/smoke_test.php` to boot the actual `api/config.php` database bootstrap engine against a temporary SQLite database (`data/test.db`).
-- **End-to-End Coverage:** Tests real admin/student authentication, session booking, double-booking rejection, 24-hour reschedule lock, session cancellation, reports queries, and notifications read tracking.
-- **Clean Cleanup:** Automatically deletes `data/test.db` upon test completion. All test artifacts are properly ignored in `.gitignore`.
-
-### 7. Helper Function Centralization (`api/helpers.php`)
-- **Single Source of Truth:** All shared API helper functions (`jsonError`, `getInput`, `requireLogin`, `requireRole`, `newId`, `parseSlotStartTime`, `parseSlotEndTime`, `sanitizeCsvCell`, `notify`, `toCamelArray`) are defined strictly in `api/helpers.php` to prevent duplicate function declaration conflicts.
-
----
-
-## Code Cleanup & Removed Legacy Code
-
-1. **Duplicate Declarations Removed:** Removed duplicate `sanitizeCsvCell` function declaration from `api/reports.php`.
-2. **Obsolete Files:** Removed legacy `index.html` and unneeded root `.db` test artifacts.
-3. **Closing PHP Tags:** Removed trailing closing `?>` tags across all pure API files in `api/` to prevent accidental whitespace injection in JSON responses.
-4. **Git Cleanup:** Updated `.gitignore` to prevent committing generated `.db` files, `test-results/`, and `logs/`.
+### Part D - Student Auto-Validation
+- Set student default `validated = 1` on registration in `api/register.php`.
+- Removed student validation check from `api/sessions.php`.
+- Removed validation column and buttons from `admin.php` while preserving account deactivation features.
 
 ---
 
 ## File Changes Summary
 
-- **`index.php`**: Added keyboard-accessible attributes (`role="button"`, `tabindex="0"`, `.feature-card-interactive`) to landing teaser cards.
-- **`styles.css`**: Added `.feature-card-interactive` cursor and focus outline styles.
-- **`app.js`**: Implemented `handleFeatureTeaserClick()` handling login prompt vs dashboard navigation for teaser cards.
-- **`admin.php`**: Added active filter summary indicator and empty state in Reports view, and Read/Unread status badges in Notifications log.
-- **`api/config.php`**: Added `TEST_MODE=1` environment switch for testing real schema migrations against `data/test.db`.
-- **`api/helpers.php`**: Centralized all shared utility and notification helper functions.
-- **`api/payments.php`**: Added linked session status check blocking payment status reversion.
-- **`api/students.php`**: Added student notification trigger upon account validation.
-- **`tests/smoke_test.php`**: Rewrote CLI integration test runner executing 11 passing checks against a temporary test database.
-- **`.gitignore`**: Added `data/*.db` and log file exclusion rules.
+- **`database.sql`**: Streamlined schema removing document status columns and adding `failed_login_attempts` table.
+- **`migration.sql`**: Created ALTER script for existing MySQL databases.
+- **`api/config.php`**: Streamlined tutor schema setup and seed data.
+- **`api/register.php`**: Auto-validates registered students and simplifies tutor registration.
+- **`api/tutors.php`**: Streamlined tutor endpoints removing approval checks.
+- **`api/match.php` & `api/matches.php`**: Simplified tutor availability filters to `deactivated = 0`.
+- **`api/sessions.php`**: Removed student validation check and updated notification recipient User IDs.
+- **`api/payment_provider.php`**: Updated notification recipient User IDs.
+- **`api/admin.php` & `admin.php`**: Streamlined Admin Dashboard Tutors and Students views.
+- **`app.js`**: Removed teaser handlers and document status mappings.
+- **`index.php`**: Updated teaser boxes and footer links.
+- **`styles.css`**: Removed feature card hover styling.
+- **`tests/smoke_test.php`**: Integration test suite verifying real API endpoints (11 passing tests).

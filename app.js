@@ -236,10 +236,6 @@ function mapTutorsData(data) {
     blockedDates: t.blockedDates || '',
     available: Boolean(t.available),
     deactivated: Boolean(t.deactivated),
-    approvalStatus: t.approvalStatus || 'Pending Review',
-    diplomaStatus: t.diplomaStatus || 'Pending',
-    torStatus: t.torStatus || 'Pending',
-    idStatus: t.idStatus || 'Pending',
     availabilitySlots: Array.isArray(t.availabilitySlots) ? t.availabilitySlots : ['09:00 AM', '02:00 PM', '04:00 PM']
   }));
 }
@@ -382,66 +378,6 @@ function initNavigation() {
   document.getElementById('cta-become-tutor-btn')?.addEventListener('click', () => { openModal('modal-auth'); switchAuthTab('register'); });
   document.getElementById('start-ai-match-btn')?.addEventListener('click', () => openModal('modal-ai-matching'));
 
-  // Landing feature card prompts
-  function handleFeatureTeaserClick(toastMsg) {
-    if (state.currentUser && state.currentRole && state.currentRole !== 'guest') {
-      if (state.currentRole === 'admin') {
-        window.location.href = 'admin.php';
-      } else {
-        switchRole(state.currentRole);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    } else {
-      openModal('modal-auth');
-      switchAuthTab('login');
-      if (toastMsg) showToast(toastMsg);
-    }
-  }
-
-  const featureTeasers = [
-    { id: 'landing-ai-card', msg: 'Please sign in to access AI Tutor Matching.' },
-    { id: 'landing-calendar-card', msg: 'Please sign in to view calendar scheduling.' },
-    { id: 'landing-notif-card', msg: 'Please sign in to access real-time notifications.' },
-    { id: 'landing-payment-card', msg: 'Please sign in to manage GCash payments.' },
-    { id: 'landing-session-card', msg: 'Please sign in to join virtual session workspaces.' }
-  ];
-
-  featureTeasers.forEach(item => {
-    const el = document.getElementById(item.id);
-    if (el) {
-      el.addEventListener('click', () => handleFeatureTeaserClick(item.msg));
-      el.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handleFeatureTeaserClick(item.msg);
-        }
-      });
-    }
-  });
-
-  document.getElementById('landing-audience-student')?.addEventListener('click', () => {
-    openModal('modal-auth');
-    switchAuthTab('register');
-    const regRoleSelect = document.getElementById('reg-role');
-    if (regRoleSelect) {
-      regRoleSelect.value = 'student';
-      regRoleSelect.dispatchEvent(new Event('change'));
-    }
-  });
-  document.getElementById('landing-audience-tutor')?.addEventListener('click', () => {
-    openModal('modal-auth');
-    switchAuthTab('register');
-    const regRoleSelect = document.getElementById('reg-role');
-    if (regRoleSelect) {
-      regRoleSelect.value = 'tutor';
-      regRoleSelect.dispatchEvent(new Event('change'));
-    }
-  });
-  document.getElementById('landing-audience-admin')?.addEventListener('click', () => {
-    openModal('modal-auth');
-    switchAuthTab('login');
-    showToast('Admins please sign in using administrator credentials.');
-  });
 
   document.getElementById('tutor-search-input')?.addEventListener('input', (e) => {
     renderTutorDirectory(e.target.value.toLowerCase());
@@ -803,7 +739,6 @@ window.viewTutorProfile = function(tutorIdOrName) {
         <div class="detail-row"><span class="detail-label">Hourly Rate:</span> <strong class="text-emerald">₱${esc(tutor.hourlyRate)} / hr</strong></div>
         <div class="detail-row"><span class="detail-label">Rating:</span> <span>${esc(tutor.rating.toFixed(1))} / 5.0 ★ (${esc(tutor.reviewsCount)} reviews)</span></div>
         <div class="detail-row"><span class="detail-label">Subjects Taught:</span> <span>${esc(tutor.subjects.join(', '))}</span></div>
-        <div class="detail-row"><span class="detail-label">Approval Status:</span> <span class="badge ${tutor.approvalStatus === 'Approved' ? 'badge-success' : 'badge-info'}">${esc(tutor.approvalStatus)}</span></div>
         <hr class="divider margin-top margin-bottom">
         <h4>Professional Biography</h4>
         <p class="sub-text">${esc(tutor.bio)}</p>
@@ -852,7 +787,7 @@ function renderTutorDirectory(searchTerm = '') {
   const grid = document.getElementById('tutors-directory-grid');
   if (!grid) return;
 
-  const approvedTutors = state.tutors.filter(t => t.approvalStatus === 'Approved' && !t.deactivated);
+  const approvedTutors = state.tutors.filter(t => !t.deactivated);
 
   const filtered = approvedTutors.filter(t => {
     const term = searchTerm.toLowerCase();

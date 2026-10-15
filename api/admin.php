@@ -10,8 +10,8 @@ try {
     $stmtStudents = $pdo->query("SELECT COUNT(*) AS total_students FROM students");
     $totalStudents = intval($stmtStudents->fetch()['total_students']);
 
-    // 2. Verified Approved Tutors
-    $stmtTutors = $pdo->query("SELECT COUNT(*) AS total_tutors FROM tutors WHERE approval_status = 'Approved'");
+    // 2. Total Tutors
+    $stmtTutors = $pdo->query("SELECT COUNT(*) AS total_tutors FROM tutors WHERE deactivated = 0");
     $totalTutors = intval($stmtTutors->fetch()['total_tutors']);
 
     // 3. Total Tutoring Volume (Sessions not cancelled)

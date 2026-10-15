@@ -21,14 +21,6 @@ $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
 $now = time();
 $cutoff = $now - 900; // 15 minutes window
 
-// Ensure failed_login_attempts table exists
-$pdo->exec("CREATE TABLE IF NOT EXISTS `failed_login_attempts` (
-  `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-  `email` VARCHAR(100) NOT NULL,
-  `ip_address` VARCHAR(45) NOT NULL,
-  `attempt_time` INT NOT NULL
-);");
-
 // Rate limit check: 5 failed attempts per 15 minutes
 $stLock = $pdo->prepare("SELECT COUNT(*) as cnt FROM failed_login_attempts WHERE email = ? AND ip_address = ? AND attempt_time > ?");
 $stLock->execute([$email, $ip, $cutoff]);

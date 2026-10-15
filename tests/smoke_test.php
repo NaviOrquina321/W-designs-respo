@@ -129,7 +129,7 @@ try {
 
     // 7. Notifications Log & Read Tracking
     notify($pdo, 'student', 'STU-101', 'Test Notification', 'Smoke test notification message.');
-    $stNotif = $pdo->prepare("SELECT * FROM notifications WHERE target = 'STU-101' ORDER BY created_at DESC LIMIT 1");
+    $stNotif = $pdo->prepare("SELECT * FROM notifications WHERE target = 'STU-101' AND title = 'Test Notification'");
     $stNotif->execute();
     $notifRow = $stNotif->fetch();
     assertTest(!empty($notifRow) && $notifRow['title'] === 'Test Notification', "Notifications API: Targeted notification persisted.");

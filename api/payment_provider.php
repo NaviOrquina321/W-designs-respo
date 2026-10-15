@@ -79,9 +79,9 @@ function processDemoGCashPayment($pdo, $student, $tutorRecord, $subject, $sessio
         }
 
         // 4. Notifications
-        notify($pdo, 'student', $studentName, 'Demo Payment Confirmed', "Session booked & Demo GCash payment confirmed for $subject on $sessionDate ($timeSlot). Ref: $gcashRef");
-        notify($pdo, 'tutor', $tutorName, 'New Paid Session Booked', "$studentName booked a paid $subject tutoring session for $sessionDate ($timeSlot).");
-        notify($pdo, 'admin', 'System Admin', 'New Session Payment Confirmed', "Demo GCash payment confirmed for $studentName with $tutorName ($sessionDate $timeSlot).");
+        notify($pdo, 'student', $student['id'], 'Demo Payment Confirmed', "Session booked & Demo GCash payment confirmed for $subject on $sessionDate ($timeSlot). Ref: $gcashRef");
+        notify($pdo, 'tutor', $tutorRecord['id'], 'New Paid Session Booked', "$studentName booked a paid $subject tutoring session for $sessionDate ($timeSlot).");
+        notify($pdo, 'admin', 'ADMIN-001', 'New Session Payment Confirmed', "Demo GCash payment confirmed for $studentName with $tutorName ($sessionDate $timeSlot).");
 
         $pdo->commit();
 

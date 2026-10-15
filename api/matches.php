@@ -35,15 +35,15 @@ if ($method === 'GET') {
         jsonError(400, 'Tutor ID required.');
     }
 
-    $stT = $pdo->prepare("SELECT id, name, approval_status, deactivated FROM tutors WHERE id = ?");
+    $stT = $pdo->prepare("SELECT id, name, deactivated FROM tutors WHERE id = ?");
     $stT->execute([$tutorId]);
     $tutor = $stT->fetch();
 
     if (!$tutor) {
         jsonError(404, 'Tutor not found.');
     }
-    if ($tutor['approval_status'] !== 'Approved' || !empty($tutor['deactivated'])) {
-        jsonError(400, 'Selected tutor is not approved or is inactive.');
+    if (!empty($tutor['deactivated'])) {
+        jsonError(400, 'Selected tutor is inactive.');
     }
 
     $tutorName = $tutor['name'];

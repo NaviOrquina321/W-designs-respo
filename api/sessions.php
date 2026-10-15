@@ -56,26 +56,23 @@ if ($method === 'GET') {
         jsonError(400, 'Cannot book more than 1 year in advance.');
     }
 
-    // Verify student is validated and not deactivated
+    // Verify student is active
     $stStu = $pdo->prepare("SELECT id, name, validated, deactivated FROM students WHERE id = ? OR LOWER(email) = ?");
     $stStu->execute([$user['id'], strtolower($user['email'])]);
     $studentRecord = $stStu->fetch();
     if (!$studentRecord || !empty($studentRecord['deactivated'])) {
         jsonError(403, 'Your student account is inactive or not found.');
     }
-    if (empty($studentRecord['validated'])) {
-        jsonError(403, 'Your student account is pending validation by an administrator.');
-    }
 
-    // Verify tutor exists, is approved, and not deactivated
-    $stTut = $pdo->prepare("SELECT id, name, hourly_rate, approval_status, deactivated, available_days, blocked_dates, subjects, availability_slots FROM tutors WHERE id = ?");
+    // Verify tutor exists and is not deactivated
+    $stTut = $pdo->prepare("SELECT id, name, hourly_rate, deactivated, available_days, blocked_dates, subjects, availability_slots FROM tutors WHERE id = ?");
     $stTut->execute([$tutorId]);
     $tutorRecord = $stTut->fetch();
     if (!$tutorRecord) {
         jsonError(404, 'Selected tutor not found.');
     }
-    if ($tutorRecord['approval_status'] !== 'Approved' || !empty($tutorRecord['deactivated'])) {
-        jsonError(400, 'Selected tutor is currently not available for booking.');
+    if (!empty($tutorRecord['deactivated'])) {
+        jsonError(400, 'Selected tutor is inactive or currently not available for booking.');
     }
 
     // Subject case-insensitive check
@@ -170,7 +167,7 @@ if ($method === 'GET') {
                 }
 
                 $fields[] = "`status` = 'In Progress'";
-                notify($pdo, 'student', $session['student_name'], 'Session Live', 'Your tutor started the session, join now.');
+                notify($pdo, 'student', $session['student_id'], 'Session Live', 'Your tutor started the session, join now.');
             } elseif ($newStatus === 'Completed') {
                 if ($session['status'] !== 'Confirmed' && $session['status'] !== 'In Progress') {
                     jsonError(400, 'Can only complete a Confirmed or In Progress session.');
@@ -179,7 +176,7 @@ if ($method === 'GET') {
                 // sessions_completed rises once
                 $stInc = $pdo->prepare("UPDATE students SET sessions_completed = sessions_completed + 1 WHERE id = ?");
                 $stInc->execute([$session['student_id']]);
-                notify($pdo, 'student', $session['student_name'], 'Session Completed', 'Your session has been completed by the tutor.');
+                notify($pdo, 'student', $session['student_id'], 'Session Completed', 'Your session has been completed by the tutor.');
             } else {
                 jsonError(400, 'Invalid status transition for tutor.');
             }
@@ -238,7 +235,7 @@ if ($method === 'GET') {
             $fields[] = "`time_slot` = ?";
             $params[] = $newSlot;
 
-            notify($pdo, 'student', $session['student_name'], 'Session Rescheduled', "Your session with {$session['tutor_name']} has been rescheduled to $newDate at $newSlot.");
+            notify($pdo, 'student', $session['student_id'], 'Session Rescheduled', "Your session with {$session['tutor_name']} has been rescheduled to $newDate at $newSlot.");
         }
 
         if (!empty($fields)) {
@@ -311,7 +308,7 @@ if ($method === 'GET') {
             $stmtUpd = $pdo->prepare("UPDATE sessions SET session_date = ?, time_slot = ? WHERE id = ?");
             $stmtUpd->execute([$newDate, $newSlot, $sessionId]);
 
-            notify($pdo, 'tutor', $session['tutor_name'], 'Session Rescheduled by Student', "{$session['student_name']} rescheduled their session to $newDate at $newSlot.");
+            notify($pdo, 'tutor', $session['tutor_id'], 'Session Rescheduled by Student', "{$session['student_name']} rescheduled their session to $newDate at $newSlot.");
 
             echo json_encode(['status' => 'success', 'message' => 'Session rescheduled successfully.']);
             exit();
@@ -368,8 +365,8 @@ if ($method === 'GET') {
                 $stSchDel = $pdo->prepare("DELETE FROM schedules WHERE tutor_id = ? AND date_slot = ? AND student_id = ?");
                 $stSchDel->execute([$session['tutor_id'], $oldSlot, $session['student_id']]);
 
-                notify($pdo, 'student', $session['student_name'], 'Session Cancelled', "Your session with {$session['tutor_name']} on {$session['session_date']} was cancelled by Admin.");
-                notify($pdo, 'tutor', $session['tutor_name'], 'Session Cancelled', "Your session with {$session['student_name']} on {$session['session_date']} was cancelled by Admin.");
+                notify($pdo, 'student', $session['student_id'], 'Session Cancelled', "Your session with {$session['tutor_name']} on {$session['session_date']} was cancelled by Admin.");
+                notify($pdo, 'tutor', $session['tutor_id'], 'Session Cancelled', "Your session with {$session['student_name']} on {$session['session_date']} was cancelled by Admin.");
             }
         }
 
@@ -405,8 +402,8 @@ if ($method === 'GET') {
             $fields[] = "`time_slot` = ?";
             $params[] = $newSlot;
 
-            notify($pdo, 'student', $session['student_name'], 'Session Rescheduled', "Your session with {$session['tutor_name']} was rescheduled to $newDate at $newSlot.");
-            notify($pdo, 'tutor', $session['tutor_name'], 'Session Rescheduled', "Your session with {$session['student_name']} was rescheduled to $newDate at $newSlot.");
+            notify($pdo, 'student', $session['student_id'], 'Session Rescheduled', "Your session with {$session['tutor_name']} was rescheduled to $newDate at $newSlot.");
+            notify($pdo, 'tutor', $session['tutor_id'], 'Session Rescheduled', "Your session with {$session['student_name']} was rescheduled to $newDate at $newSlot.");
         }
 
         if (isset($input['payout_status'])) {

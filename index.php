@@ -102,7 +102,7 @@ header('Content-Type: text/html; charset=utf-8');
             </div>
             <div class="metric-item">
               <span class="metric-num">200+</span>
-              <span class="metric-label">Elite Verified Tutors</span>
+              <span class="metric-label">Tutors</span>
             </div>
             <div class="metric-item">
               <span class="metric-num">98%</span>
@@ -151,23 +151,23 @@ header('Content-Type: text/html; charset=utf-8');
             <p>Five features cover the full process, from finding a tutor to finishing a session.</p>
           </div>
           <div class="feature-grid">
-            <div class="feature-card feature-card-interactive" id="landing-ai-card" role="button" tabindex="0">
+            <div class="feature-card" id="landing-ai-card">
               <h3>AI Tutor Matching</h3>
               <p>Tell us your subject and how you learn best. We match you with tutors suited to your needs, not just a list to scroll through.</p>
             </div>
-            <div class="feature-card feature-card-interactive" id="landing-calendar-card" role="button" tabindex="0">
+            <div class="feature-card" id="landing-calendar-card">
               <h3>Calendar Scheduling</h3>
               <p>See real tutor availability and book a time that works, without the back-and-forth messages.</p>
             </div>
-            <div class="feature-card feature-card-interactive" id="landing-notif-card" role="button" tabindex="0">
+            <div class="feature-card" id="landing-notif-card">
               <h3>Real-Time Notifications</h3>
               <p>Know the moment a session is confirmed, rescheduled, or about to start.</p>
             </div>
-            <div class="feature-card feature-card-interactive" id="landing-payment-card" role="button" tabindex="0">
+            <div class="feature-card" id="landing-payment-card">
               <h3>Online Payment</h3>
               <p>Pay securely through GCash as soon as a session is booked. No chasing receipts.</p>
             </div>
-            <div class="feature-card feature-card-interactive" id="landing-session-card" role="button" tabindex="0">
+            <div class="feature-card" id="landing-session-card">
               <h3>Matching Session</h3>
               <p>Once you're matched, connect with your tutor directly and get started.</p>
             </div>
@@ -213,15 +213,15 @@ header('Content-Type: text/html; charset=utf-8');
             <p>Students, tutors, and administrators each get what they need from the same system.</p>
           </div>
           <div class="audience-grid">
-            <div class="audience-card" id="landing-audience-student" style="cursor: pointer;">
+            <div class="audience-card" id="landing-audience-student">
               <h3>Students</h3>
               <p>Find a tutor who matches how you learn, book sessions, and pay - all from one dashboard.</p>
             </div>
-            <div class="audience-card" id="landing-audience-tutor" style="cursor: pointer;">
+            <div class="audience-card" id="landing-audience-tutor">
               <h3>Tutors</h3>
               <p>Set your availability, get matched with students, and get paid on time for every session.</p>
             </div>
-            <div class="audience-card" id="landing-audience-admin" style="cursor: pointer;">
+            <div class="audience-card" id="landing-audience-admin">
               <h3>Admins</h3>
               <p>Monitor tutoring activity, keep records organized, and generate reports when you need them.</p>
             </div>
@@ -270,7 +270,7 @@ header('Content-Type: text/html; charset=utf-8');
               <a href="#features">Features</a>
               <a href="#how-it-works">How It Works</a>
               <a href="#who-its-for">Who It's For</a>
-              <a href="#">Contact</a>
+              <a href="admin-login.php">Admin Login</a>
             </div>
           </div>
           <p class="copyright">© 2026 TutorLink</p>
@@ -509,7 +509,7 @@ header('Content-Type: text/html; charset=utf-8');
           <div class="detail-card">
             <div style="display: flex; gap: 24px; flex-wrap: wrap; padding-bottom: 14px; border-bottom: 1px solid var(--line);">
                 <div><strong>Overall Rating:</strong> <span id="tutor-overall-rating" style="font-size: 1.05rem; color: var(--ink); font-weight: 700;">0.0 / 5.0 ★</span></div>
-                <div><strong>Total Reviews:</strong> <span id="tutor-total-reviews">0 Verified Reviews</span></div>
+                <div><strong>Total Reviews:</strong> <span id="tutor-total-reviews">0 Reviews</span></div>
                 <div><strong>Completion Rate:</strong> <span id="tutor-completion-rate">100% On-Time Completion</span></div>
             </div>
             <h4 style="margin-top: 14px;">Recent Student Feedback</h4>
