@@ -438,19 +438,42 @@ $adminName = $_SESSION['name'] ?? 'Admin';
           <!-- Primary Overview KPIs -->
           <div class="kpi-grid">
             <div class="kpi-card">
-              <div class="kpi-label">Total Registered Students</div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="kpi-label">Registered Students</div>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                </div>
+              </div>
               <div class="kpi-value" id="kpi-students">0</div>
             </div>
+
             <div class="kpi-card">
-              <div class="kpi-label">Total Tutors</div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="kpi-label">Active Tutors</div>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                </div>
+              </div>
               <div class="kpi-value" id="kpi-tutors">0</div>
             </div>
+
             <div class="kpi-card">
-              <div class="kpi-label">Total Transaction Volume</div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="kpi-label">Tutoring Volume</div>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #d1fae5; color: #059669; display: flex; align-items: center; justify-content: center;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                </div>
+              </div>
               <div class="kpi-value" id="kpi-volume">₱0.00</div>
             </div>
+
             <div class="kpi-card">
-              <div class="kpi-label">Platform Net Revenue (10%)</div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="kpi-label">Platform Revenue (10%)</div>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #f3e8ff; color: #7c3aed; display: flex; align-items: center; justify-content: center;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+              </div>
               <div class="kpi-value" id="kpi-commission">₱0.00</div>
             </div>
           </div>
