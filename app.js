@@ -1322,15 +1322,16 @@ window.selectMatchedTutor = async function(tutorId, subject, score) {
 
 // Calendar Booking Engine
 function initCalendarBooking() {
+  const closeBtn = document.getElementById('close-calendar-modal');
   const cancelBtn = document.getElementById('cancel-booking-btn');
   const proceedBtn = document.getElementById('proceed-to-payment-btn');
 
+  closeBtn?.addEventListener('click', () => closeModal('modal-calendar'));
   cancelBtn?.addEventListener('click', () => closeModal('modal-calendar'));
 
   proceedBtn?.addEventListener('click', () => {
     if (!state.activeBooking.timeSlot) {
-      showToast('Please select an available time slot before proceeding.', 'error');
-      return;
+      state.activeBooking.timeSlot = '09:00 AM';
     }
     closeModal('modal-calendar');
     openGCashPayment();
@@ -1360,12 +1361,14 @@ window.openCalendarBooking = function(tutorId, preferredSubject = null) {
   const todayStr = new Date().toISOString().split('T')[0];
   const activePickerVal = document.getElementById('booking-date-picker')?.value || todayStr;
 
+  const slots = (tutor.availabilitySlots && tutor.availabilitySlots.length > 0) ? tutor.availabilitySlots : ['09:00 AM', '02:00 PM', '04:00 PM'];
+
   state.activeBooking = {
     tutorId: tutor.id,
     tutorName: tutor.name,
     subject: subject,
     date: activePickerVal,
-    timeSlot: null,
+    timeSlot: slots[0] || '09:00 AM',
     hourlyRate: hourlyRate,
     serviceFee: serviceFee,
     total: total,
@@ -1386,10 +1389,9 @@ window.openCalendarBooking = function(tutorId, preferredSubject = null) {
   }
 
   const slotsContainer = document.getElementById('time-slots-container');
-  const slots = (tutor.availabilitySlots && tutor.availabilitySlots.length > 0) ? tutor.availabilitySlots : ['09:00 AM', '02:00 PM', '04:00 PM'];
   if (slotsContainer) {
-    slotsContainer.innerHTML = slots.map(slot => `
-      <div class="slot-chip" onclick="selectTimeSlot(this, '${esc(slot)}')">${esc(slot)}</div>
+    slotsContainer.innerHTML = slots.map((slot, idx) => `
+      <div class="slot-chip ${idx === 0 ? 'selected' : ''}" onclick="selectTimeSlot(this, '${esc(slot)}')">${esc(slot)}</div>
     `).join('');
   }
 

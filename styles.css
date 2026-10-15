@@ -604,6 +604,35 @@ footer .wrap { padding-top: 56px; padding-bottom: 56px; }
 .session-card { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; transition: border-color 0.15s ease; }
 .session-card:hover { border-color: var(--warm-gold); }
 
+/* Time Slot Chips */
+.slots-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.slot-chip {
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--oxford-navy);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.slot-chip:hover {
+  border-color: var(--warm-gold);
+  background: var(--warm-cream);
+}
+.slot-chip.selected {
+  background: var(--oxford-navy);
+  color: #ffffff;
+  border-color: var(--oxford-navy);
+  box-shadow: 0 2px 8px rgba(11, 19, 42, 0.2);
+}
+
 /* Data Tables */
 .data-table { width: 100%; min-width: 1000px; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
 .data-table th, .data-table td { padding: 12px 16px; border-bottom: 1px solid var(--line); white-space: nowrap; vertical-align: middle; }
