@@ -1390,7 +1390,7 @@ function initTutorScheduleManager() {
   });
 }
 
-// AI Matching Wizard Engine
+// AI Matching Engine
 function initAIMatching() {
   const cancelBtn = document.getElementById('cancel-ai-btn');
   const closeBtn = document.getElementById('close-ai-modal');

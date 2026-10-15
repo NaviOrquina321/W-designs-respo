@@ -846,11 +846,11 @@ header('Content-Type: text/html; charset=utf-8');
     </div>
   </div>
 
-  <!-- Modal 2: AI Tutor Matching Wizard -->
+  <!-- Modal 2: AI Tutor Matching -->
   <div class="modal-backdrop" id="modal-ai-matching">
     <div class="modal-card modal-large">
       <div class="modal-header">
-        <h3>AI Tutor Matching Wizard</h3>
+        <h3>AI Tutor Matching</h3>
         <button class="close-btn" id="close-ai-modal">&times;</button>
       </div>
       <div class="modal-body">
