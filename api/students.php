@@ -29,6 +29,11 @@ if ($method === 'GET') {
         $fields = [];
         $params = [];
 
+        if (isset($input['validated'])) {
+            $isVal = filter_var($input['validated'], FILTER_VALIDATE_BOOLEAN);
+            $fields[] = "`validated` = ?";
+            $params[] = $isVal ? 1 : 0;
+        }
         if (isset($input['deactivated'])) {
             $fields[] = "`deactivated` = ?";
             $params[] = filter_var($input['deactivated'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0;

@@ -66,6 +66,47 @@ if ($method === 'GET') {
         $fields = [];
         $params = [];
 
+        if (isset($input['name'])) {
+            $newName = trim($input['name']);
+            if (empty($newName)) jsonError(400, 'Name cannot be empty.');
+            $fields[] = "`name` = ?";
+            $params[] = $newName;
+
+            $stmtU = $pdo->prepare("UPDATE users SET name = ? WHERE user_id = ?");
+            $stmtU->execute([$newName, $tutorId]);
+        }
+
+        if (isset($input['hourlyRate']) || isset($input['hourly_rate'])) {
+            $rate = intval($input['hourlyRate'] ?? $input['hourly_rate']);
+            if ($rate < 1 || $rate > 10000) {
+                jsonError(400, 'Hourly rate must be between 1 and 10000.');
+            }
+            $fields[] = "`hourly_rate` = ?";
+            $params[] = $rate;
+        }
+
+        if (isset($input['subjects'])) {
+            $subj = is_array($input['subjects']) ? implode(', ', $input['subjects']) : trim($input['subjects']);
+            $chosenList = array_filter(array_map('trim', explode(',', $subj)));
+
+            $stCat = $pdo->query("SELECT name FROM subjects");
+            $catList = array_map('strtolower', array_column($stCat->fetchAll(), 'name'));
+
+            foreach ($chosenList as $cs) {
+                if (!in_array(strtolower($cs), $catList, true)) {
+                    jsonError(400, "Subject '$cs' is not in the subjects catalog.");
+                }
+            }
+
+            $fields[] = "`subjects` = ?";
+            $params[] = implode(', ', $chosenList);
+        }
+
+        if (isset($input['bio'])) {
+            $fields[] = "`bio` = ?";
+            $params[] = trim($input['bio']);
+        }
+
         if (isset($input['deactivated'])) {
             $fields[] = "`deactivated` = ?";
             $params[] = filter_var($input['deactivated'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0;

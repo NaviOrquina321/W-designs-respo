@@ -625,69 +625,6 @@ header('Content-Type: text/html; charset=utf-8');
 
   <!-- ================= SLIDE-OUT DRAWERS ================= -->
 
-  <!-- Drawer 1: Slide-out GCash Checkout Drawer -->
-  <div id="drawer-gcash-checkout" class="drawer-backdrop hidden">
-    <div class="drawer-panel drawer-medium">
-      <div class="drawer-header gcash-theme">
-        <div class="drawer-header-brand">
-          <svg class="drawer-icon text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          <div>
-            <h2 class="drawer-title text-white">GCash Secure Checkout</h2>
-            <p class="drawer-subtitle text-white-soft">Online Session Payment Processing</p>
-          </div>
-        </div>
-        <button class="drawer-close-btn text-white" onclick="closeAppDrawer('gcash-checkout')">&times;</button>
-      </div>
-      <div class="drawer-body">
-        <div id="drawer-gcash-step-1">
-          <div class="receipt-preview-box margin-bottom">
-            <div class="summary-line"><span>Merchant:</span> <strong>TutorLink Inc.</strong></div>
-            <div class="summary-line"><span>Tutoring Amount:</span> <strong id="drawer-gcash-modal-amount" class="text-emerald">₱385.00</strong></div>
-            <div class="trust-badge-line margin-top-xs text-xs text-muted" style="display: flex; align-items: center; gap: 6px;">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-              <span>256-bit SSL Encrypted Direct Checkout</span>
-            </div>
-          </div>
-          <div class="form-group margin-top">
-            <label>Select Payment Method</label>
-            <select id="drawer-payment-method-select" class="form-select">
-              <option value="GCash">GCash e-Wallet</option>
-            </select>
-          </div>
-          <div class="form-group margin-top">
-            <label>Account / Mobile Number</label>
-            <div class="phone-input-group">
-              <span class="prefix">+63</span>
-              <input type="tel" id="drawer-gcash-mobile" class="form-input" value="9175550192" maxlength="10">
-            </div>
-          </div>
-          <button class="btn btn-emerald full-width margin-top" onclick="advanceDrawerGCashStep(2)">Proceed to MPIN</button>
-        </div>
-
-        <div id="drawer-gcash-step-2" class="hidden text-center">
-          <p class="margin-bottom">Enter 4-Digit Security PIN</p>
-          <div class="pin-input-group margin-bottom">
-            <input type="password" maxlength="1" class="pin-digit" value="1">
-            <input type="password" maxlength="1" class="pin-digit" value="2">
-            <input type="password" maxlength="1" class="pin-digit" value="3">
-            <input type="password" maxlength="1" class="pin-digit" value="4">
-          </div>
-          <button class="btn btn-emerald full-width margin-top" onclick="confirmDrawerGCashPayment()">Confirm Payment</button>
-        </div>
-
-        <div id="drawer-gcash-step-3" class="hidden text-center">
-          <div class="success-icon margin-bottom">✓</div>
-          <h3>Payment Confirmed!</h3>
-          <p class="sub-text margin-bottom">Your session payment has been processed successfully.</p>
-          <div class="receipt-preview-box text-left margin-bottom">
-            <div class="summary-line"><span>GCash Ref No.:</span> <strong id="drawer-gcash-ref">109283748291</strong></div>
-            <div class="summary-line"><span>Total Paid:</span> <strong id="drawer-gcash-paid">₱385.00</strong></div>
-          </div>
-          <button class="btn btn-primary full-width" onclick="closeAppDrawer('gcash-checkout')">Done</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- Drawer 2: Slide-out Tutor Profile & Match Request Drawer -->
   <div id="drawer-tutor-booking" class="drawer-backdrop hidden">
@@ -962,79 +899,98 @@ header('Content-Type: text/html; charset=utf-8');
     </div>
   </div>
 
-  <!-- Modal 4: Online Payment Modal -->
+  <!-- Modal 4: Online Payment Modal (GCash Demo) -->
   <div class="modal-backdrop" id="modal-gcash">
-    <div class="modal-card gcash-theme">
-      <div class="gcash-banner">
-        <div class="gcash-logo" id="payment-method-header-title">Demo GCash Payment</div>
-        <div class="gcash-subtext">Simulated Online Payment Processing</div>
+    <div class="modal-card gcash-theme" style="max-width: 480px;">
+      <div class="gcash-banner" style="background: #005ce6; color: #ffffff; padding: 18px 20px; border-top-left-radius: 8px; border-top-right-radius: 8px; position: relative;">
+        <div class="gcash-logo" style="font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em;">GCash</div>
+        <div class="gcash-subtext" style="font-size: 0.8rem; opacity: 0.9; margin-top: 2px;">Demo payment - no real money is charged.</div>
         <button class="close-btn white" id="close-gcash-modal">&times;</button>
       </div>
 
-      <div class="modal-body">
+      <div class="modal-body" style="padding: 20px;">
+        <!-- Step 1: Payment Details -->
         <div id="gcash-step-1">
-          <div class="gcash-merchant-info">
-            <span>Merchant: <strong>TutorLink Inc.</strong></span>
-            <span>Amount: <strong id="gcash-modal-amount" class="highlight-text">₱385.00</strong></span>
-          </div>
-
-          <div id="gcash-booking-summary-preview"></div>
-
-          <div class="form-group margin-top">
-            <label>Select Payment Method</label>
-            <select id="payment-method-select" class="form-select">
-              <option value="GCash">GCash e-Wallet</option>
-            </select>
-          </div>
-
-          <div class="form-group margin-top">
-            <label>Account / Mobile Number</label>
-            <div class="phone-input-group">
-              <span class="prefix">+63</span>
-              <input type="tel" id="gcash-mobile" class="form-input" placeholder="9171234567" maxlength="10" value="9175550192">
+          <div style="background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.9rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="color: var(--muted);">Merchant:</span>
+              <strong>TutorLink Inc.</strong>
+            </div>
+            <div id="gcash-booking-summary-preview" style="margin-bottom: 8px; border-top: 1px dashed var(--line); padding-top: 8px;"></div>
+            <div style="border-top: 1px solid var(--line); padding-top: 8px; display: flex; justify-content: space-between; font-size: 1rem; font-weight: 700; color: var(--oxford-navy);">
+              <span>Amount Due:</span>
+              <span id="gcash-modal-amount" style="color: var(--emerald);">₱0.00</span>
             </div>
           </div>
 
-          <button class="btn btn-gcash full-width" id="gcash-step1-next-btn">Next</button>
+          <div class="form-group">
+            <label style="font-weight: 600; font-size: 0.88rem;">GCash Mobile Number</label>
+            <div class="phone-input-group" style="display: flex; align-items: center; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #ffffff;">
+              <span class="prefix" style="padding: 10px 12px; background: var(--paper); border-right: 1px solid var(--line); font-weight: 600; color: var(--oxford-navy);">+63</span>
+              <input type="tel" id="gcash-mobile" class="form-input" style="border: none; border-radius: 0; box-shadow: none;" placeholder="9XXXXXXXXX" maxlength="10" value="">
+            </div>
+            <div id="gcash-mobile-error" class="text-danger margin-top-xs" style="font-size: 0.82rem; display: none;"></div>
+          </div>
+
+          <button class="btn btn-gcash full-width margin-top" id="gcash-step1-next-btn" style="background: #005ce6; color: #ffffff; font-weight: 600;">Next</button>
         </div>
 
+        <!-- Step 2: Verification Code (OTP) -->
         <div id="gcash-step-2" class="hidden">
-          <p class="center-text">Enter 4-Digit Security PIN</p>
-          <div class="pin-input-group">
-            <input type="password" maxlength="1" class="pin-digit" value="1">
-            <input type="password" maxlength="1" class="pin-digit" value="2">
-            <input type="password" maxlength="1" class="pin-digit" value="3">
-            <input type="password" maxlength="1" class="pin-digit" value="4">
+          <div style="text-align: center; margin-bottom: 16px;">
+            <h4 style="margin: 0 0 6px 0;">Authentication Code</h4>
+            <p class="sub-text" style="font-size: 0.88rem; margin: 0;">We sent a 6-digit authentication code to <strong id="gcash-masked-mobile">+63 9XX XXX XXXX</strong></p>
           </div>
 
-          <button class="btn btn-gcash full-width margin-top" id="gcash-confirm-pay-btn">Confirm Payment</button>
+          <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 12px;">
+            <input type="text" maxlength="1" class="otp-digit form-input" style="width: 44px; height: 48px; text-align: center; font-size: 1.2rem; font-weight: 700;">
+            <input type="text" maxlength="1" class="otp-digit form-input" style="width: 44px; height: 48px; text-align: center; font-size: 1.2rem; font-weight: 700;">
+            <input type="text" maxlength="1" class="otp-digit form-input" style="width: 44px; height: 48px; text-align: center; font-size: 1.2rem; font-weight: 700;">
+            <input type="text" maxlength="1" class="otp-digit form-input" style="width: 44px; height: 48px; text-align: center; font-size: 1.2rem; font-weight: 700;">
+            <input type="text" maxlength="1" class="otp-digit form-input" style="width: 44px; height: 48px; text-align: center; font-size: 1.2rem; font-weight: 700;">
+            <input type="text" maxlength="1" class="otp-digit form-input" style="width: 44px; height: 48px; text-align: center; font-size: 1.2rem; font-weight: 700;">
+          </div>
+
+          <p style="text-align: center; font-size: 0.82rem; color: var(--muted); margin-bottom: 12px;">Demo code: <strong>123456</strong></p>
+          <div id="gcash-otp-error" class="text-danger center-text margin-bottom-xs" style="font-size: 0.82rem; display: none;"></div>
+
+          <button class="btn btn-gcash full-width margin-top" id="gcash-step2-next-btn" style="background: #005ce6; color: #ffffff; font-weight: 600;">Verify Code</button>
+          <div style="text-align: center; margin-top: 10px;">
+            <a href="#" style="font-size: 0.85rem; color: var(--muted);" id="gcash-back-to-step1">← Back to Mobile Number</a>
+          </div>
         </div>
 
-        <div id="gcash-step-3" class="hidden center-text">
-          <div class="success-icon">✓</div>
-          <h3>Payment Status: Confirmed</h3>
-          <p class="sub-text">Your session has been successfully booked and confirmed.</p>
-
-          <div class="receipt-box">
-            <div class="summary-line">
-              <span>Payment Ref No.:</span>
-              <strong id="gcash-receipt-ref">109283748291</strong>
-            </div>
-            <div class="summary-line">
-              <span>Payment Method:</span>
-              <strong id="gcash-receipt-method">GCash</strong>
-            </div>
-            <div class="summary-line">
-              <span>Date & Time:</span>
-              <span id="gcash-receipt-date">Today, 2:30 PM</span>
-            </div>
-            <div class="summary-line">
-              <span>Amount Paid:</span>
-              <strong id="gcash-receipt-amount">₱385.00</strong>
-            </div>
+        <!-- Step 3: Confirm Payment (MPIN) -->
+        <div id="gcash-step-3" class="hidden">
+          <div style="text-align: center; margin-bottom: 16px;">
+            <h4 style="margin: 0 0 4px 0;">Enter 4-Digit MPIN</h4>
+            <p class="sub-text" style="font-size: 0.88rem; margin: 0;">Pay to: <strong>TutorLink</strong></p>
           </div>
 
-          <button class="btn btn-primary full-width margin-top" id="gcash-done-btn">Back to Dashboard</button>
+          <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 16px;">
+            <input type="password" maxlength="1" class="pin-digit form-input" style="width: 48px; height: 50px; text-align: center; font-size: 1.3rem;">
+            <input type="password" maxlength="1" class="pin-digit form-input" style="width: 48px; height: 50px; text-align: center; font-size: 1.3rem;">
+            <input type="password" maxlength="1" class="pin-digit form-input" style="width: 48px; height: 50px; text-align: center; font-size: 1.3rem;">
+            <input type="password" maxlength="1" class="pin-digit form-input" style="width: 48px; height: 50px; text-align: center; font-size: 1.3rem;">
+          </div>
+
+          <div id="gcash-mpin-error" class="text-danger center-text margin-bottom" style="font-size: 0.82rem; display: none;"></div>
+
+          <button class="btn btn-gcash full-width margin-top" id="gcash-confirm-pay-btn" style="background: #005ce6; color: #ffffff; font-weight: 600;">Confirm Payment</button>
+        </div>
+
+        <!-- Step 4: Success & Receipt -->
+        <div id="gcash-step-4" class="hidden text-center">
+          <div style="width: 56px; height: 56px; border-radius: 50%; background: #e6f4ea; color: var(--emerald); font-size: 1.8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">✓</div>
+          <h3 style="margin: 0 0 4px 0; color: var(--oxford-navy);">Payment Successful</h3>
+          <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 16px;">Your session booking has been confirmed.</p>
+
+          <div id="gcash-receipt-container" style="margin-bottom: 16px;"></div>
+
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-secondary full-width" id="gcash-print-btn" onclick="window.print()">Print / Save as PDF</button>
+            <button class="btn btn-primary full-width" id="gcash-done-btn">Done</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1163,30 +1119,17 @@ header('Content-Type: text/html; charset=utf-8');
 
   <!-- Modal 11: View Payment Receipt Modal -->
   <div class="modal-backdrop" id="modal-view-receipt">
-    <div class="modal-card">
+    <div class="modal-card" style="max-width: 520px;">
       <div class="modal-header">
-        <h3>Official Payment Receipt</h3>
+        <h3 style="margin: 0;">Official Payment Receipt</h3>
         <button class="close-btn" id="close-receipt-view-modal">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="receipt-preview-box text-left margin-bottom">
-          <div class="receipt-header">
-            <div>
-              <strong style="font-size: 1.1rem; color: #0f172a;">TutorLink Official Receipt</strong>
-              <div class="sub-text">GCash Direct e-Wallet Checkout</div>
-            </div>
-            <span class="gcash-badge">GCash Confirmed</span>
-          </div>
-          <div class="summary-line margin-top"><span>Transaction Ref No.:</span> <strong id="view-receipt-ref" style="font-family: monospace;">GC-9920182341</strong></div>
-          <div class="summary-line"><span>Student Name:</span> <strong id="view-receipt-student">Maria Santos</strong></div>
-          <div class="summary-line"><span>Tutor Name:</span> <strong id="view-receipt-tutor">Prof. Alex Rivera</strong></div>
-          <div class="summary-line"><span>Subject / Course:</span> <strong id="view-receipt-subject">Calculus II</strong></div>
-          <div class="summary-line"><span>Session Schedule:</span> <span id="view-receipt-date">2026-03-16 (02:00 PM)</span></div>
-          <hr class="divider" style="margin: 12px 0;">
-          <div class="summary-line"><span style="font-size: 1.1rem; font-weight: 700;">Total Amount Paid:</span> <strong id="view-receipt-amount" class="receipt-amount text-emerald">₱385.00</strong></div>
-          <div id="view-receipt-tutor-feedback" class="sub-text margin-top" style="display: none; background: #ffffff; padding: 10px; border-radius: 6px; border: 1px solid var(--line);"></div>
+        <div id="view-receipt-body" style="margin-bottom: 16px;"></div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-secondary full-width" id="view-receipt-print-btn" onclick="window.print()">Print / Save as PDF</button>
+          <button class="btn btn-primary full-width" id="done-receipt-view-btn">Close Receipt</button>
         </div>
-        <button class="btn btn-primary full-width" id="done-receipt-view-btn">Close Receipt</button>
       </div>
     </div>
   </div>

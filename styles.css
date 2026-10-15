@@ -862,9 +862,9 @@ footer .wrap { padding-top: 56px; padding-bottom: 56px; }
   .apex-kpi-grid { grid-template-columns: 1fr; }
 }
 
-/* Print Media Styles for Clean Reports Printing */
+/* Print Media Styles for Clean Reports & Receipt Printing */
 @media print {
-  header, .admin-sidebar, .admin-header, .btn, .icon-btn, .floating-btn, .toast-container, .modal-backdrop, .drawer {
+  header, .admin-sidebar, .admin-header, .btn, .icon-btn, .floating-btn, .toast-container, .modal-backdrop:not(:has(.receipt-print-area)), .drawer, .no-print {
     display: none !important;
   }
   body, .admin-layout, .admin-main, .content-container {
@@ -880,5 +880,16 @@ footer .wrap { padding-top: 56px; padding-bottom: 56px; }
   .data-table th, .data-table td {
     border: 1px solid #000000 !important;
     color: #000000 !important;
+  }
+  .receipt-print-area {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 }

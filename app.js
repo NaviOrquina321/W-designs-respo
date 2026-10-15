@@ -1410,26 +1410,191 @@ window.selectTimeSlot = function(element, slot) {
   state.activeBooking.timeSlot = slot;
 };
 
-// Simulated GCash Payment Integration
-function initGCashPayment() {
-  const step1Next = document.getElementById('gcash-step1-next-btn');
-  const step2Pay = document.getElementById('gcash-confirm-pay-btn');
-  const step3Done = document.getElementById('gcash-done-btn');
-  const closeBtn = document.getElementById('close-gcash-modal');
+// Shared Receipt Generator Function
+function renderPaymentReceipt(session, maskedMobile = '') {
+  const hourlyRate = parseFloat(session.hourlyRate || session.hourly_rate || 0);
+  const commissionFee = parseFloat(session.commissionFee || session.commission_fee || (hourlyRate * 0.10));
+  const totalPaid = parseFloat(session.totalPaid || session.total_paid || (hourlyRate + commissionFee));
+  const isCancelled = (session.status === 'Cancelled');
+  const dateFormatted = (session.createdAt || session.created_at) ? new Date(session.createdAt || session.created_at).toLocaleString('en-US', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
 
+  return `
+    <div class="receipt-preview-box receipt-print-area text-left" style="background: #ffffff; border: 1px solid var(--line); border-radius: 8px; padding: 20px; color: #0b132a;">
+      <div class="receipt-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--oxford-navy); padding-bottom: 12px; margin-bottom: 16px;">
+        <div>
+          <strong style="font-size: 1.15rem; color: var(--oxford-navy); font-family: 'Cinzel', serif;">TutorLink - Payment Receipt</strong>
+          <div style="font-size: 0.85rem; color: var(--ink-soft); margin-top: 2px;">Paid via GCash (Demo)</div>
+        </div>
+        <span class="badge ${isCancelled ? 'badge-danger' : 'badge-success'}" style="font-weight: 600;">${isCancelled ? 'Cancelled' : 'Paid'}</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; margin-bottom: 14px;">
+        <div><span style="color: var(--muted);">Reference No.:</span> <strong style="font-family: monospace;">${esc(session.gcashRef || session.gcash_ref || 'N/A')}</strong></div>
+        <div><span style="color: var(--muted);">Date & Time Paid:</span> <span>${esc(dateFormatted)}</span></div>
+        <div><span style="color: var(--muted);">Payment Method:</span> <strong>GCash (Demo)</strong></div>
+        ${maskedMobile ? `<div><span style="color: var(--muted);">Account Mobile:</span> <span>${esc(maskedMobile)}</span></div>` : ''}
+      </div>
+
+      <div style="background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 12px; font-size: 0.9rem; margin-bottom: 14px;">
+        <div style="margin-bottom: 4px;"><strong>Student Name:</strong> ${esc(session.studentName || session.student_name || 'N/A')}</div>
+        <div style="margin-bottom: 4px;"><strong>Tutor Name:</strong> ${esc(session.tutorName || session.tutor_name || 'N/A')}</div>
+        <div style="margin-bottom: 4px;"><strong>Subject:</strong> ${esc(session.subject || 'N/A')}</div>
+        <div><strong>Schedule:</strong> ${esc(session.sessionDate || session.session_date || '')} (${esc(session.timeSlot || session.time_slot || '')})</div>
+      </div>
+
+      <div style="border-top: 1px dashed var(--line); padding-top: 10px; font-size: 0.9rem;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Tutoring Fee:</span> <span>${formatMoney(hourlyRate)}</span></div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Service Fee (10%):</span> <span>${formatMoney(commissionFee)}</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 700; color: var(--oxford-navy); border-top: 1px solid var(--line); padding-top: 8px; margin-top: 6px;">
+          <span>Total Paid:</span>
+          <span style="color: var(--emerald);">${formatMoney(totalPaid)}</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px; font-size: 0.78rem; color: var(--muted); text-align: center; border-top: 1px solid var(--line); padding-top: 10px;">
+        This is a system-generated receipt. Demo payment - no real money was charged.
+      </div>
+    </div>
+  `;
+}
+
+let gcashMaskedMobile = '';
+
+function switchGCashStep(stepNum) {
+  document.getElementById('gcash-step-1')?.classList.toggle('hidden', stepNum !== 1);
+  document.getElementById('gcash-step-2')?.classList.toggle('hidden', stepNum !== 2);
+  document.getElementById('gcash-step-3')?.classList.toggle('hidden', stepNum !== 3);
+  document.getElementById('gcash-step-4')?.classList.toggle('hidden', stepNum !== 4);
+}
+
+// Simulated GCash Payment Integration (4 Steps)
+function initGCashPayment() {
+  const closeBtn = document.getElementById('close-gcash-modal');
   closeBtn?.addEventListener('click', () => closeModal('modal-gcash'));
 
-  step1Next?.addEventListener('click', () => {
-    const phone = document.getElementById('gcash-mobile').value;
-    if (phone.length < 10) {
-      showToast('Please enter a valid mobile number.', 'error');
-      return;
-    }
-    document.getElementById('gcash-step-1').classList.add('hidden');
-    document.getElementById('gcash-step-2').classList.remove('hidden');
+  document.getElementById('gcash-back-to-step1')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    switchGCashStep(1);
   });
 
-  step2Pay?.addEventListener('click', async () => {
+  // Step 1 -> Step 2 (Mobile Validation)
+  document.getElementById('gcash-step1-next-btn')?.addEventListener('click', () => {
+    const mobileInput = document.getElementById('gcash-mobile');
+    const mobileErr = document.getElementById('gcash-mobile-error');
+    const val = (mobileInput?.value || '').trim();
+
+    if (!/^9\d{9}$/.test(val)) {
+      if (mobileErr) {
+        mobileErr.textContent = 'Please enter a valid 10-digit mobile number starting with 9 (e.g. 9171234567).';
+        mobileErr.style.display = 'block';
+      }
+      return;
+    }
+
+    if (mobileErr) mobileErr.style.display = 'none';
+
+    gcashMaskedMobile = `+63 9•• ••• ${val.slice(-4)}`;
+    const maskedEl = document.getElementById('gcash-masked-mobile');
+    if (maskedEl) maskedEl.textContent = gcashMaskedMobile;
+
+    // Reset OTP boxes
+    const otpInputs = document.querySelectorAll('.otp-digit');
+    otpInputs.forEach(i => i.value = '');
+    const otpErr = document.getElementById('gcash-otp-error');
+    if (otpErr) otpErr.style.display = 'none';
+
+    switchGCashStep(2);
+    if (otpInputs[0]) otpInputs[0].focus();
+  });
+
+  // OTP Auto-focus logic
+  const otpInputs = document.querySelectorAll('.otp-digit');
+  otpInputs.forEach((input, index) => {
+    input.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+      if (e.target.value && index < otpInputs.length - 1) {
+        otpInputs[index + 1].focus();
+      }
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !e.target.value && index > 0) {
+        otpInputs[index - 1].focus();
+      }
+    });
+  });
+
+  // Step 2 -> Step 3 (OTP Verification)
+  document.getElementById('gcash-step2-next-btn')?.addEventListener('click', () => {
+    const otpVal = Array.from(otpInputs).map(i => i.value).join('');
+    const otpErr = document.getElementById('gcash-otp-error');
+
+    if (otpVal !== '123456') {
+      if (otpErr) {
+        otpErr.textContent = 'Invalid authentication code. Demo code is 123456.';
+        otpErr.style.display = 'block';
+      }
+      return;
+    }
+
+    if (otpErr) otpErr.style.display = 'none';
+
+    // Reset MPIN boxes
+    const pinInputs = document.querySelectorAll('.pin-digit');
+    pinInputs.forEach(i => i.value = '');
+    const mpinErr = document.getElementById('gcash-mpin-error');
+    if (mpinErr) mpinErr.style.display = 'none';
+
+    const b = state.activeBooking;
+    const confirmBtn = document.getElementById('gcash-confirm-pay-btn');
+    if (confirmBtn) {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = `Pay ${formatMoney(b.total)}`;
+    }
+
+    switchGCashStep(3);
+    if (pinInputs[0]) pinInputs[0].focus();
+  });
+
+  // MPIN Auto-focus logic
+  const pinInputs = document.querySelectorAll('.pin-digit');
+  pinInputs.forEach((input, index) => {
+    input.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+      if (e.target.value && index < pinInputs.length - 1) {
+        pinInputs[index + 1].focus();
+      }
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !e.target.value && index > 0) {
+        pinInputs[index - 1].focus();
+      }
+    });
+  });
+
+  // Step 3 -> Step 4 (Confirm Payment / API Call)
+  document.getElementById('gcash-confirm-pay-btn')?.addEventListener('click', async () => {
+    const mpinVal = Array.from(pinInputs).map(i => i.value).join('');
+    const mpinErr = document.getElementById('gcash-mpin-error');
+    const confirmBtn = document.getElementById('gcash-confirm-pay-btn');
+
+    if (mpinVal.length < 4) {
+      if (mpinErr) {
+        mpinErr.textContent = 'Please enter your 4-digit MPIN.';
+        mpinErr.style.display = 'block';
+      }
+      return;
+    }
+
+    if (mpinErr) mpinErr.style.display = 'none';
+
+    if (confirmBtn) {
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Processing payment...';
+    }
+
+    // Simulated 1.5 second processing delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
     const b = state.activeBooking;
 
     try {
@@ -1444,61 +1609,95 @@ function initGCashPayment() {
         })
       });
       const data = await res.json();
+
       if (!res.ok || data.status !== 'success') {
-        showToast(data.message || 'Booking failed. Please try again.', 'error');
+        if (confirmBtn) {
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = `Pay ${formatMoney(b.total)}`;
+        }
+        if (mpinErr) {
+          mpinErr.textContent = data.message || 'Booking failed. Please try again.';
+          mpinErr.style.display = 'block';
+        }
         return;
       }
 
       await syncWithDatabase();
 
       const createdSession = data.session || {};
-      const randomRef = createdSession.gcashRef || createdSession.gcash_ref || 'GC-Confirmed';
+      const receiptContainer = document.getElementById('gcash-receipt-container');
+      if (receiptContainer) {
+        receiptContainer.innerHTML = renderPaymentReceipt(createdSession, gcashMaskedMobile);
+      }
 
-      document.getElementById('gcash-receipt-ref').textContent = randomRef;
-      document.getElementById('gcash-receipt-method').textContent = 'GCash';
-      document.getElementById('gcash-receipt-date').textContent = `${b.date}, ${b.timeSlot}`;
-      document.getElementById('gcash-receipt-amount').textContent = `₱${createdSession.totalPaid || b.total}.00`;
-
-      document.getElementById('gcash-step-2').classList.add('hidden');
-      document.getElementById('gcash-step-3').classList.remove('hidden');
-
+      switchGCashStep(4);
       renderAllViews();
-      showToast('Payment submitted - awaiting admin confirmation.');
+      showToast('Payment confirmed & session booked!');
     } catch (e) {
-      showToast('Booking failed. Could not connect to server.', 'error');
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = `Pay ${formatMoney(b.total)}`;
+      }
+      if (mpinErr) {
+        mpinErr.textContent = 'Booking failed. Could not connect to server.';
+        mpinErr.style.display = 'block';
+      }
     }
   });
 
-  step3Done?.addEventListener('click', () => {
+  // Step 4 Done button
+  document.getElementById('gcash-done-btn')?.addEventListener('click', () => {
     closeModal('modal-gcash');
-    document.getElementById('gcash-step-1').classList.remove('hidden');
-    document.getElementById('gcash-step-2').classList.add('hidden');
-    document.getElementById('gcash-step-3').classList.add('hidden');
+    switchGCashStep(1);
+    const mobileInput = document.getElementById('gcash-mobile');
+    if (mobileInput) mobileInput.value = '';
+    refreshStudentData();
   });
 }
 
 function openGCashPayment() {
   const b = state.activeBooking;
 
-  const headerTitle = document.getElementById('payment-method-header-title');
+  const hourlyRate = parseFloat(b.hourlyRate || 350);
+  const serviceFee = parseFloat(b.serviceFee || Math.round(hourlyRate * 0.10));
+  const total = parseFloat(b.total || (hourlyRate + serviceFee));
+
+  b.hourlyRate = hourlyRate;
+  b.serviceFee = serviceFee;
+  b.total = total;
+
   const modalAmt = document.getElementById('gcash-modal-amount');
-  const confirmBtn = document.getElementById('gcash-confirm-pay-btn');
+  if (modalAmt) modalAmt.textContent = formatMoney(total);
 
-  if (headerTitle) headerTitle.textContent = `Simulated GCash Checkout`;
-  if (modalAmt) modalAmt.textContent = `₱${b.total}.00`;
-  if (confirmBtn) confirmBtn.textContent = `Confirm & Pay ₱${b.total}.00`;
-
-  const detailsContainer = document.getElementById('gcash-booking-summary-preview');
-  if (detailsContainer) {
-    detailsContainer.innerHTML = `
-      <div class="receipt-box" style="margin-top: 10px; font-size: 0.88rem; text-align: left; background: rgba(255,255,255,0.9); border: 1px solid var(--line); padding: 10px; border-radius: 4px;">
-        <div><strong>Tutor:</strong> ${esc(b.tutorName)}</div>
-        <div><strong>Subject:</strong> ${esc(b.subject)}</div>
-        <div><strong>Schedule:</strong> ${esc(b.date)} (${esc(b.timeSlot || '02:00 PM')})</div>
+  const preview = document.getElementById('gcash-booking-summary-preview');
+  if (preview) {
+    preview.innerHTML = `
+      <div style="background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; text-align: left;">
+        <div style="margin-bottom: 4px;"><strong>Tutor:</strong> ${esc(b.tutorName)}</div>
+        <div style="margin-bottom: 4px;"><strong>Subject:</strong> ${esc(b.subject)}</div>
+        <div style="margin-bottom: 6px;"><strong>Selected Schedule:</strong> <span class="badge badge-match" style="display: inline-block; margin-top: 2px;">${esc(b.date)} (${esc(b.timeSlot || '09:00 AM - 10:00 AM')})</span></div>
+        <div style="font-size: 0.85rem; border-top: 1px dashed var(--line); padding-top: 6px; margin-top: 6px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 2px;"><span>Tutoring Fee:</span> <span>${formatMoney(hourlyRate)}</span></div>
+          <div style="display: flex; justify-content: space-between;"><span>Platform Service Fee (10%):</span> <span>${formatMoney(serviceFee)}</span></div>
+        </div>
       </div>
     `;
   }
 
+  // Reset inputs & error banners
+  const mobileInput = document.getElementById('gcash-mobile');
+  if (mobileInput) mobileInput.value = '';
+
+  const mobileErr = document.getElementById('gcash-mobile-error');
+  if (mobileErr) mobileErr.style.display = 'none';
+
+  const otpErr = document.getElementById('gcash-otp-error');
+  if (otpErr) otpErr.style.display = 'none';
+
+  const mpinErr = document.getElementById('gcash-mpin-error');
+  if (mpinErr) mpinErr.style.display = 'none';
+
+  switchGCashStep(1);
   openModal('modal-gcash');
 }
 
@@ -1873,30 +2072,10 @@ window.viewSessionReceipt = function(sessionId) {
   const session = state.sessions.find(s => s.id === sessionId);
   if (!session) return;
 
-  const refEl = document.getElementById('view-receipt-ref');
-  const studentEl = document.getElementById('view-receipt-student');
-  const tutorEl = document.getElementById('view-receipt-tutor');
-  const subjectEl = document.getElementById('view-receipt-subject');
-  const dateEl = document.getElementById('view-receipt-date');
-  const amountEl = document.getElementById('view-receipt-amount');
-  const feedbackEl = document.getElementById('view-receipt-tutor-feedback');
-
-  if (refEl) refEl.textContent = session.gcashRef;
-  if (studentEl) studentEl.textContent = session.studentName;
-  if (tutorEl) tutorEl.textContent = session.tutorName;
-  if (subjectEl) subjectEl.textContent = session.subject;
-  if (dateEl) dateEl.textContent = `${session.date || session.sessionDate} (${session.timeSlot})`;
-  if (amountEl) amountEl.textContent = `₱${session.totalPaid}.00`;
-
-  if (feedbackEl) {
-    if (session.notes) {
-      feedbackEl.style.display = 'block';
-      feedbackEl.innerHTML = `<strong>Tutor Session Remarks:</strong> ${esc(session.notes)}`;
-    } else {
-      feedbackEl.style.display = 'none';
-    }
+  const receiptBody = document.getElementById('view-receipt-body');
+  if (receiptBody) {
+    receiptBody.innerHTML = renderPaymentReceipt(session);
   }
-
   openModal('modal-view-receipt');
 };
 
