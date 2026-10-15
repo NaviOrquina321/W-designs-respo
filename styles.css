@@ -220,8 +220,49 @@ nav.wrap {
 .btn-small, .btn-sm { padding: 6px 14px; font-size: 0.85rem; border-radius: 4px; height: 32px; }
 .btn-danger { background: var(--danger-red); color: white; border-color: var(--danger-red); }
 .btn-danger:hover { background: #dc2626; }
-.btn-gcash { background: var(--gcash-blue); color: white; border-color: var(--gcash-blue); font-size: 0.95rem; font-weight: bold; }
-.btn-gcash:hover { background: #0043d1; }
+.gcash-theme {
+  border: 1px solid #0052FF;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 82, 255, 0.2);
+  background: #ffffff;
+}
+.gcash-banner {
+  background: linear-gradient(135deg, #0052FF 0%, #003ebd 100%);
+  color: #ffffff;
+  padding: 20px 24px;
+  position: relative;
+}
+.gcash-logo {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+.gcash-subtext {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 2px;
+}
+.btn-gcash { background: #0052FF; color: white; border: none; font-size: 0.98rem; font-weight: 700; border-radius: 8px; padding: 12px; transition: all 0.2s ease; }
+.btn-gcash:hover { background: #0043d1; box-shadow: 0 4px 12px rgba(0, 82, 255, 0.3); }
+.otp-digit, .pin-digit {
+  width: 44px;
+  height: 48px;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--oxford-navy);
+}
+.otp-digit:focus, .pin-digit:focus {
+  border-color: #0052FF;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.15);
+}
 .btn-emerald { background: var(--oxford-navy); color: white; border: 1px solid var(--oxford-navy); }
 .btn-emerald:hover { background: var(--oxford-navy-hover); border-color: var(--oxford-navy-hover); }
 .full-width { width: 100%; display: flex; }

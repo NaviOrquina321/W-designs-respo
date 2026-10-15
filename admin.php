@@ -18,237 +18,334 @@ $adminName = $_SESSION['name'] ?? 'Admin';
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --sf-sidebar-bg: #0f172a;
+      --sf-sidebar-text: #94a3b8;
+      --sf-sidebar-active-bg: rgba(255, 255, 255, 0.08);
+      --sf-sidebar-active-text: #ffffff;
+      --sf-accent-gold: #c5a059;
+      --sf-canvas-bg: #f1f5f9;
+      --sf-card-bg: #ffffff;
+      --sf-card-border: #e2e8f0;
+      --sf-ink-primary: #0f172a;
+      --sf-ink-muted: #64748b;
+    }
+
     body {
-      background: var(--panel, #f8fafc);
-      color: var(--ink, #0b132a);
+      background: var(--sf-canvas-bg);
+      color: var(--sf-ink-primary);
       font-family: 'Plus Jakarta Sans', sans-serif;
       margin: 0;
     }
+
     h1, h2, h3, h4 {
       font-family: 'Cinzel', serif;
     }
+
     .admin-layout {
       display: flex;
       min-height: 100vh;
     }
+
+    /* SvelteForge DashboardPack Sidebar */
     .admin-sidebar {
-      width: 250px;
-      background: var(--oxford-navy, #0b132a);
+      width: 260px;
+      background: var(--sf-sidebar-bg);
       color: #ffffff;
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      border-right: 1px solid rgba(197, 160, 89, 0.25);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
+
     .sidebar-brand {
-      padding: 20px;
+      padding: 22px 24px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
+
     .sidebar-brand img {
-      height: 36px;
-      width: 36px;
+      height: 38px;
+      width: 38px;
       border-radius: 50%;
       object-fit: contain;
+      box-shadow: 0 0 10px rgba(197, 160, 89, 0.3);
     }
+
     .sidebar-brand span {
       font-family: 'Cinzel', serif;
       font-weight: 700;
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       color: #ffffff;
+      letter-spacing: -0.01em;
     }
+
     .sidebar-menu {
       list-style: none;
-      padding: 12px 0;
+      padding: 16px 12px;
       margin: 0;
       flex: 1;
     }
+
+    .sidebar-item {
+      margin-bottom: 4px;
+    }
+
     .sidebar-item a {
       display: flex;
       align-items: center;
-      padding: 12px 20px;
-      color: #cbd5e1;
+      gap: 12px;
+      padding: 11px 16px;
+      color: var(--sf-sidebar-text);
       text-decoration: none;
       font-size: 0.92rem;
       font-weight: 500;
-      transition: all 0.15s ease;
-      border-left: 3px solid transparent;
+      border-radius: 8px;
+      transition: all 0.2s ease;
     }
-    .sidebar-item a:hover, .sidebar-item.active a {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--warm-gold, #c5a059);
-      border-left-color: var(--warm-gold, #c5a059);
+
+    .sidebar-item a svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--sf-sidebar-text);
+      transition: stroke 0.2s ease;
     }
+
+    .sidebar-item a:hover {
+      background: var(--sf-sidebar-active-bg);
+      color: #ffffff;
+    }
+
+    .sidebar-item a:hover svg {
+      stroke: #ffffff;
+    }
+
+    .sidebar-item.active a {
+      background: var(--sf-sidebar-active-bg);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: inset 3px 0 0 var(--sf-accent-gold);
+    }
+
+    .sidebar-item.active a svg {
+      stroke: var(--sf-accent-gold);
+    }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.82rem;
+      color: var(--sf-sidebar-text);
+    }
+
+    /* Main Section */
     .admin-main {
       flex: 1;
       display: flex;
       flex-direction: column;
       min-width: 0;
     }
+
     .admin-header {
       background: #ffffff;
-      border-bottom: 1px solid var(--line, #e2e8f0);
-      padding: 16px 28px;
+      border-bottom: 1px solid var(--sf-card-border);
+      padding: 16px 32px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       position: sticky;
       top: 0;
       z-index: 10;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
     }
+
     .admin-header-title {
-      font-size: 1.25rem;
+      font-size: 1.3rem;
       margin: 0;
-      color: var(--oxford-navy, #0b132a);
+      color: var(--sf-ink-primary);
     }
+
     .admin-content {
-      padding: 28px;
+      padding: 32px;
       flex: 1;
     }
+
+    /* Banners & Cards */
     .alert-banner {
       background: #fef3c7;
       color: #92400e;
       border: 1px solid #fde68a;
       padding: 12px 18px;
-      border-radius: 6px;
+      border-radius: 8px;
       margin-bottom: 24px;
       font-weight: 600;
     }
+
     .error-banner {
       background: #fee2e2;
       color: #991b1b;
       border: 1px solid #fca5a5;
       padding: 12px 18px;
-      border-radius: 6px;
+      border-radius: 8px;
       margin-bottom: 20px;
       font-weight: 500;
       display: none;
     }
+
     .success-banner {
       background: #d1fae5;
       color: #065f46;
       border: 1px solid #a7f3d0;
       padding: 12px 18px;
-      border-radius: 6px;
+      border-radius: 8px;
       margin-bottom: 20px;
       font-weight: 500;
       display: none;
     }
+
     .admin-tab-view {
       display: none;
     }
+
     .admin-tab-view.active {
       display: block;
     }
+
+    /* SvelteForge KPI Cards */
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
     }
+
     .kpi-card {
-      background: #ffffff;
-      border: 1px solid var(--line, #e2e8f0);
-      border-radius: 6px;
-      padding: 18px 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      background: var(--sf-card-bg);
+      border: 1px solid var(--sf-card-border);
+      border-radius: 12px;
+      padding: 22px 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    }
+
     .kpi-label {
-      font-size: 0.82rem;
-      color: var(--muted, #64748b);
+      font-size: 0.8rem;
+      color: var(--sf-ink-muted);
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
     }
+
     .kpi-value {
       font-family: 'Cinzel', serif;
-      font-size: 1.8rem;
+      font-size: 1.95rem;
       font-weight: 700;
-      color: var(--oxford-navy, #0b132a);
-      margin-top: 4px;
+      color: var(--sf-ink-primary);
+      margin-top: 6px;
     }
+
     .card-panel {
-      background: #ffffff;
-      border: 1px solid var(--line, #e2e8f0);
-      border-radius: 6px;
-      padding: 24px;
+      background: var(--sf-card-bg);
+      border: 1px solid var(--sf-card-border);
+      border-radius: 12px;
+      padding: 26px;
       margin-bottom: 28px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
-    .form-row {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
+
+    /* Modern Table Styling */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
     }
-    .form-row .form-group {
-      flex: 1;
-      min-width: 200px;
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
     }
+
+    .data-table th {
+      background: #f8fafc;
+      color: var(--sf-ink-primary);
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--sf-card-border);
+    }
+
+    .data-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--sf-card-border);
+      color: var(--sf-ink-primary);
+      vertical-align: middle;
+    }
+
+    .data-table tr:hover td {
+      background: #f8fafc;
+    }
+
+    /* Modals */
     .modal-backdrop {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(11, 19, 42, 0.7);
-      backdrop-filter: blur(2px);
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(3px);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 1000;
       padding: 20px;
     }
+
     .modal-backdrop.active {
       display: flex;
     }
+
     .modal-card {
       background: #ffffff;
-      border-radius: 6px;
-      max-width: 550px;
+      border-radius: 12px;
+      max-width: 560px;
       width: 100%;
       padding: 28px;
       max-height: 90vh;
       overflow-y: auto;
-      border: 1px solid var(--line, #e2e8f0);
-      box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+      border: 1px solid var(--sf-card-border);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
     }
+
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
       padding-bottom: 12px;
-      border-bottom: 1px solid var(--line, #e2e8f0);
+      border-bottom: 1px solid var(--sf-card-border);
     }
-    .chat-box {
-      max-height: 300px;
-      overflow-y: auto;
-      background: var(--panel, #f8fafc);
-      padding: 14px;
-      border-radius: 4px;
-      border: 1px solid var(--line, #e2e8f0);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .chat-item {
-      padding: 8px 12px;
-      border-radius: 4px;
-      background: #ffffff;
-      border: 1px solid var(--line, #e2e8f0);
-      font-size: 0.9rem;
-    }
+
     .print-only {
       display: none;
     }
+
     @media (max-width: 768px) {
       .admin-layout { flex-direction: column; }
-      .admin-sidebar { width: 100%; border-right: none; border-bottom: 1px solid rgba(197, 160, 89, 0.25); }
-      .sidebar-menu { display: flex; overflow-x: auto; padding: 6px; }
-      .sidebar-item a { padding: 8px 14px; white-space: nowrap; border-left: none; border-bottom: 3px solid transparent; }
-      .sidebar-item.active a { border-bottom-color: var(--warm-gold, #c5a059); }
-      .admin-header { padding: 14px 18px; }
-      .admin-content { padding: 18px; }
+      .admin-sidebar { width: 100%; }
+      .sidebar-menu { display: flex; overflow-x: auto; padding: 8px; }
+      .sidebar-item a { white-space: nowrap; padding: 8px 12px; }
+      .admin-header { padding: 14px 20px; }
+      .admin-content { padding: 20px; }
     }
+
     @media print {
       .admin-sidebar, .admin-header, .btn, .no-print { display: none !important; }
       .admin-main, .admin-content { padding: 0 !important; background: #ffffff !important; }
@@ -261,21 +358,60 @@ $adminName = $_SESSION['name'] ?? 'Admin';
 <body>
 
   <div class="admin-layout">
-    <!-- Left Sidebar (7 Streamlined Tabs) -->
+    <!-- Left Sidebar (SvelteForge DashboardPack Style) -->
     <aside class="admin-sidebar">
       <div class="sidebar-brand">
         <img src="assets/logo.png" alt="TutorLink Logo" onerror="this.style.display='none'">
         <span>TutorLink Admin</span>
       </div>
       <ul class="sidebar-menu">
-        <li class="sidebar-item active" data-tab="dashboard"><a href="#" onclick="switchTab('dashboard', event)">Dashboard</a></li>
-        <li class="sidebar-item" data-tab="students"><a href="#" onclick="switchTab('students', event)">Students</a></li>
-        <li class="sidebar-item" data-tab="tutors"><a href="#" onclick="switchTab('tutors', event)">Tutors</a></li>
-        <li class="sidebar-item" data-tab="schedules"><a href="#" onclick="switchTab('schedules', event)">Schedules</a></li>
-        <li class="sidebar-item" data-tab="payments"><a href="#" onclick="switchTab('payments', event)">Payments</a></li>
-        <li class="sidebar-item" data-tab="notifications"><a href="#" onclick="switchTab('notifications', event)">Notifications</a></li>
-        <li class="sidebar-item" data-tab="reports"><a href="#" onclick="switchTab('reports', event)">Manage Reports</a></li>
+        <li class="sidebar-item active" data-tab="dashboard">
+          <a href="#" onclick="switchTab('dashboard', event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Dashboard
+          </a>
+        </li>
+        <li class="sidebar-item" data-tab="students">
+          <a href="#" onclick="switchTab('students', event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Students
+          </a>
+        </li>
+        <li class="sidebar-item" data-tab="tutors">
+          <a href="#" onclick="switchTab('tutors', event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+            Tutors
+          </a>
+        </li>
+        <li class="sidebar-item" data-tab="schedules">
+          <a href="#" onclick="switchTab('schedules', event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Schedules
+          </a>
+        </li>
+        <li class="sidebar-item" data-tab="payments">
+          <a href="#" onclick="switchTab('payments', event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            Payments
+          </a>
+        </li>
+        <li class="sidebar-item" data-tab="notifications">
+          <a href="#" onclick="switchTab('notifications', event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Notifications
+          </a>
+        </li>
+        <li class="sidebar-item" data-tab="reports">
+          <a href="#" onclick="switchTab('reports', event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Manage Reports
+          </a>
+        </li>
       </ul>
+      <div class="sidebar-footer">
+        <div>Control Room Active</div>
+        <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">TutorLink v2.0</div>
+      </div>
     </aside>
 
     <!-- Main Section -->
@@ -630,7 +766,7 @@ $adminName = $_SESSION['name'] ?? 'Admin';
           <div class="card-panel">
             <h3 style="margin-top: 0; margin-bottom: 16px;">View Notifications History Log</h3>
             <div id="notifications-log-list">
-              <p style="text-align:center; color: var(--muted);">Loading...</p>
+              <p style="text-align:center; color: var(--sf-ink-muted);">Loading...</p>
             </div>
           </div>
         </div>
@@ -895,7 +1031,7 @@ $adminName = $_SESSION['name'] ?? 'Admin';
         <button class="close-btn" onclick="closeModal('modal-view-chat')">&times;</button>
       </div>
       <div class="chat-box" id="chat-messages-container">
-        <p style="text-align:center; color: var(--muted);">Loading chat history...</p>
+        <p style="text-align:center; color: var(--sf-ink-muted);">Loading chat history...</p>
       </div>
     </div>
   </div>
@@ -1581,21 +1717,21 @@ $adminName = $_SESSION['name'] ?? 'Admin';
 
     async function viewSessionChat(sessionId) {
       const container = document.getElementById('chat-messages-container');
-      container.innerHTML = '<p style="text-align:center; color: var(--muted);">Loading chat history...</p>';
+      container.innerHTML = '<p style="text-align:center; color: var(--sf-ink-muted);">Loading chat history...</p>';
       openModal('modal-view-chat');
 
       try {
         const json = await api(`api/chat.php?session_id=${encodeURIComponent(sessionId)}`);
         const msgs = json.data || [];
         if (msgs.length === 0) {
-          container.innerHTML = '<p style="text-align:center; color: var(--muted);">No chat messages logged for this session.</p>';
+          container.innerHTML = '<p style="text-align:center; color: var(--sf-ink-muted);">No chat messages logged for this session.</p>';
           return;
         }
         container.innerHTML = msgs.map(m => `
           <div class="chat-item">
             <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
               <strong>${escapeHtml(m.senderName)} (${escapeHtml(m.senderRole)})</strong>
-              <span style="font-size:0.75rem; color:var(--muted);">${escapeHtml(m.timestamp)}</span>
+              <span style="font-size:0.75rem; color:var(--sf-ink-muted);">${escapeHtml(m.timestamp)}</span>
             </div>
             <div>${escapeHtml(m.message)}</div>
           </div>
@@ -1692,9 +1828,9 @@ $adminName = $_SESSION['name'] ?? 'Admin';
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; margin-bottom: 14px;">
-              <div><span style="color: var(--muted);">Reference No.:</span> <strong style="font-family: monospace;">${escapeHtml(matchSes.gcashRef)}</strong></div>
-              <div><span style="color: var(--muted);">Date & Time Paid:</span> <span>${escapeHtml(dateFormatted)}</span></div>
-              <div><span style="color: var(--muted);">Payment Method:</span> <strong>GCash (Demo)</strong></div>
+              <div><span style="color: var(--sf-ink-muted);">Reference No.:</span> <strong style="font-family: monospace;">${escapeHtml(matchSes.gcashRef)}</strong></div>
+              <div><span style="color: var(--sf-ink-muted);">Date & Time Paid:</span> <span>${escapeHtml(dateFormatted)}</span></div>
+              <div><span style="color: var(--sf-ink-muted);">Payment Method:</span> <strong>GCash (Demo)</strong></div>
             </div>
 
             <div style="background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px; font-size: 0.9rem; margin-bottom: 14px;">
@@ -1713,7 +1849,7 @@ $adminName = $_SESSION['name'] ?? 'Admin';
               </div>
             </div>
 
-            <div style="margin-top: 16px; font-size: 0.78rem; color: var(--muted); text-align: center; border-top: 1px solid var(--line); padding-top: 10px;">
+            <div style="margin-top: 16px; font-size: 0.78rem; color: var(--sf-ink-muted); text-align: center; border-top: 1px solid var(--line); padding-top: 10px;">
               This is a system-generated receipt. Demo payment - no real money was charged.
             </div>
           </div>
@@ -1726,12 +1862,12 @@ $adminName = $_SESSION['name'] ?? 'Admin';
     // 6. NOTIFICATIONS
     async function loadNotifications() {
       const container = document.getElementById('notifications-log-list');
-      container.innerHTML = '<p style="text-align:center; color: var(--muted);">Loading history log...</p>';
+      container.innerHTML = '<p style="text-align:center; color: var(--sf-ink-muted);">Loading history log...</p>';
       try {
         const json = await api('api/notifications.php');
         const notifs = json.data || [];
         if (notifs.length === 0) {
-          container.innerHTML = '<p style="text-align:center; color: var(--muted);">No broadcast or system notifications logged.</p>';
+          container.innerHTML = '<p style="text-align:center; color: var(--sf-ink-muted);">No broadcast or system notifications logged.</p>';
           return;
         }
         container.innerHTML = notifs.map(n => `
@@ -1744,7 +1880,7 @@ $adminName = $_SESSION['name'] ?? 'Admin';
               </div>
             </div>
             <p style="margin-top: 6px; font-size: 0.92rem;">${escapeHtml(n.message)}</p>
-            <div style="font-size: 0.78rem; color: var(--muted); text-align: right;">${escapeHtml(n.time || n.createdAt || '')}</div>
+            <div style="font-size: 0.78rem; color: var(--sf-ink-muted); text-align: right;">${escapeHtml(n.time || n.createdAt || '')}</div>
           </div>
         `).join('');
       } catch (e) {}
@@ -1895,7 +2031,7 @@ $adminName = $_SESSION['name'] ?? 'Admin';
         }
 
         if (sessions.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 24px; color: var(--muted);"><div style="font-size: 1.1rem; font-weight: 600;">No sessions in this period</div><div style="font-size: 0.88rem; margin-top: 4px;">Try adjusting your date range or filter criteria.</div></td></tr>';
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 24px; color: var(--sf-ink-muted);"><div style="font-size: 1.1rem; font-weight: 600;">No sessions in this period</div><div style="font-size: 0.88rem; margin-top: 4px;">Try adjusting your date range or filter criteria.</div></td></tr>';
           return;
         }
 
