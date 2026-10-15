@@ -383,30 +383,40 @@ function initNavigation() {
   document.getElementById('start-ai-match-btn')?.addEventListener('click', () => openModal('modal-ai-matching'));
 
   // Landing feature card prompts
-  document.getElementById('landing-ai-card')?.addEventListener('click', () => {
-    openModal('modal-auth');
-    switchAuthTab('login');
-    showToast('Please sign in to access AI Tutor Matching.');
-  });
-  document.getElementById('landing-calendar-card')?.addEventListener('click', () => {
-    openModal('modal-auth');
-    switchAuthTab('login');
-    showToast('Please sign in to view calendar scheduling.');
-  });
-  document.getElementById('landing-notif-card')?.addEventListener('click', () => {
-    openModal('modal-auth');
-    switchAuthTab('login');
-    showToast('Please sign in to access real-time notifications.');
-  });
-  document.getElementById('landing-payment-card')?.addEventListener('click', () => {
-    openModal('modal-auth');
-    switchAuthTab('login');
-    showToast('Please sign in to manage GCash payments.');
-  });
-  document.getElementById('landing-session-card')?.addEventListener('click', () => {
-    openModal('modal-auth');
-    switchAuthTab('login');
-    showToast('Please sign in to join virtual session workspaces.');
+  function handleFeatureTeaserClick(toastMsg) {
+    if (state.currentUser && state.currentRole && state.currentRole !== 'guest') {
+      if (state.currentRole === 'admin') {
+        window.location.href = 'admin.php';
+      } else {
+        switchRole(state.currentRole);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } else {
+      openModal('modal-auth');
+      switchAuthTab('login');
+      if (toastMsg) showToast(toastMsg);
+    }
+  }
+
+  const featureTeasers = [
+    { id: 'landing-ai-card', msg: 'Please sign in to access AI Tutor Matching.' },
+    { id: 'landing-calendar-card', msg: 'Please sign in to view calendar scheduling.' },
+    { id: 'landing-notif-card', msg: 'Please sign in to access real-time notifications.' },
+    { id: 'landing-payment-card', msg: 'Please sign in to manage GCash payments.' },
+    { id: 'landing-session-card', msg: 'Please sign in to join virtual session workspaces.' }
+  ];
+
+  featureTeasers.forEach(item => {
+    const el = document.getElementById(item.id);
+    if (el) {
+      el.addEventListener('click', () => handleFeatureTeaserClick(item.msg));
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleFeatureTeaserClick(item.msg);
+        }
+      });
+    }
   });
 
   document.getElementById('landing-audience-student')?.addEventListener('click', () => {

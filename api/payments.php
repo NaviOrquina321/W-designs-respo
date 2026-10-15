@@ -50,9 +50,17 @@ if ($method === 'GET') {
             jsonError(400, "Payment status must be 'Pending' or 'Confirmed'.");
         }
 
-        // Prevent reverting Confirmed -> Pending after payout
-        if ($payment['payout_status'] === 'Paid Out' && $statusVal === 'Pending') {
-            jsonError(400, 'Cannot revert payment status to Pending after payout has been processed.');
+        // Prevent reverting Confirmed -> Pending if payout is Paid Out OR linked session is In Progress / Completed
+        if ($payment['status'] === 'Confirmed' && $statusVal === 'Pending') {
+            if ($payment['payout_status'] === 'Paid Out') {
+                jsonError(400, 'Cannot revert payment status to Pending after payout has been processed.');
+            }
+            $stSes = $pdo->prepare("SELECT status FROM sessions WHERE gcash_ref = ?");
+            $stSes->execute([$payment['ref_no']]);
+            $linkedSes = $stSes->fetch();
+            if ($linkedSes && in_array($linkedSes['status'], ['In Progress', 'Completed'], true)) {
+                jsonError(400, "Cannot revert payment status to Pending when linked session is '{$linkedSes['status']}'.");
+            }
         }
 
         $fields[] = "`status` = ?";

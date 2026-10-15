@@ -588,7 +588,8 @@ $adminName = $_SESSION['name'] ?? 'Admin';
           </div>
 
           <div class="card-panel">
-            <h3 style="margin-top: 0; margin-bottom: 16px;">Sessions Activity Summary</h3>
+            <h3 style="margin-top: 0; margin-bottom: 12px;">Sessions Activity Summary</h3>
+            <div id="rep-active-filter" style="margin-bottom: 14px; font-weight: 600; font-size: 0.95rem; color: var(--oxford-navy);">Active Filter: All Time</div>
             <div class="table-responsive">
               <table class="data-table">
                 <thead>
@@ -1238,9 +1239,12 @@ $adminName = $_SESSION['name'] ?? 'Admin';
         }
         container.innerHTML = notifs.map(n => `
           <div class="card-panel" style="padding: 14px; margin-bottom: 10px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
               <strong>${escapeHtml(n.title)}</strong>
-              <span class="badge badge-match">Target: ${escapeHtml(n.targetRole || n.target)}</span>
+              <div style="display:flex; gap: 8px; align-items:center;">
+                <span class="badge badge-match">Target: ${escapeHtml(n.targetRole || n.target)}</span>
+                <span class="badge ${n.isRead ? 'badge-success' : 'badge-pending'}">${n.isRead ? 'Read' : 'Unread'}</span>
+              </div>
             </div>
             <p style="margin-top: 6px; font-size: 0.92rem;">${escapeHtml(n.message)}</p>
             <div style="font-size: 0.78rem; color: var(--muted); text-align: right;">${escapeHtml(n.time || n.createdAt || '')}</div>
@@ -1326,8 +1330,34 @@ $adminName = $_SESSION['name'] ?? 'Admin';
         document.getElementById('rep-commission').textContent = formatMoney(sum.total_commission);
         document.getElementById('rep-completed').textContent = sum.completed_sessions || 0;
 
+        // Update Active Filter summary
+        const filterParts = [];
+        if (startDate && endDate) {
+          filterParts.push(`${startDate} - ${endDate}`);
+        } else if (startDate) {
+          filterParts.push(`From ${startDate}`);
+        } else if (endDate) {
+          filterParts.push(`Until ${endDate}`);
+        } else {
+          filterParts.push('All Time');
+        }
+
+        if (tutorId) {
+          const tutorSel = document.getElementById('rep-tutor-select');
+          const tutorText = (tutorSel && tutorSel.options[tutorSel.selectedIndex]) ? tutorSel.options[tutorSel.selectedIndex].text : tutorId;
+          filterParts.push(`Tutor: ${tutorText}`);
+        }
+        if (subject) {
+          filterParts.push(`Subject: ${subject}`);
+        }
+
+        const filterSummaryEl = document.getElementById('rep-active-filter');
+        if (filterSummaryEl) {
+          filterSummaryEl.textContent = 'Active Filter: ' + filterParts.join(' | ');
+        }
+
         if (sessions.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No sessions found for selected filters.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 24px; color: var(--muted);"><div style="font-size: 1.1rem; font-weight: 600;">No sessions in this period</div><div style="font-size: 0.88rem; margin-top: 4px;">Try adjusting your date range or filter criteria.</div></td></tr>';
           return;
         }
 

@@ -1,4 +1,8 @@
 config.local.php
 ai_config.php
 *.db
+data/*.db
+data/test.db
 test-results/
+*.log
+logs/

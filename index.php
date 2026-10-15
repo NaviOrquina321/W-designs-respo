@@ -151,23 +151,23 @@ header('Content-Type: text/html; charset=utf-8');
             <p>Five features cover the full process, from finding a tutor to finishing a session.</p>
           </div>
           <div class="feature-grid">
-            <div class="feature-card" id="landing-ai-card" style="cursor: pointer;">
+            <div class="feature-card feature-card-interactive" id="landing-ai-card" role="button" tabindex="0">
               <h3>AI Tutor Matching</h3>
               <p>Tell us your subject and how you learn best. We match you with tutors suited to your needs, not just a list to scroll through.</p>
             </div>
-            <div class="feature-card" id="landing-calendar-card" style="cursor: pointer;">
+            <div class="feature-card feature-card-interactive" id="landing-calendar-card" role="button" tabindex="0">
               <h3>Calendar Scheduling</h3>
               <p>See real tutor availability and book a time that works, without the back-and-forth messages.</p>
             </div>
-            <div class="feature-card" id="landing-notif-card" style="cursor: pointer;">
+            <div class="feature-card feature-card-interactive" id="landing-notif-card" role="button" tabindex="0">
               <h3>Real-Time Notifications</h3>
               <p>Know the moment a session is confirmed, rescheduled, or about to start.</p>
             </div>
-            <div class="feature-card" id="landing-payment-card" style="cursor: pointer;">
+            <div class="feature-card feature-card-interactive" id="landing-payment-card" role="button" tabindex="0">
               <h3>Online Payment</h3>
               <p>Pay securely through GCash as soon as a session is booked. No chasing receipts.</p>
             </div>
-            <div class="feature-card" id="landing-session-card" style="cursor: pointer;">
+            <div class="feature-card feature-card-interactive" id="landing-session-card" role="button" tabindex="0">
               <h3>Matching Session</h3>
               <p>Once you're matched, connect with your tutor directly and get started.</p>
             </div>

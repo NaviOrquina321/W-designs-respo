@@ -29,9 +29,14 @@ if ($method === 'GET') {
         $fields = [];
         $params = [];
 
+        $notifyValidated = false;
         if (isset($input['validated'])) {
+            $isVal = filter_var($input['validated'], FILTER_VALIDATE_BOOLEAN);
             $fields[] = "`validated` = ?";
-            $params[] = filter_var($input['validated'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
+            $params[] = $isVal ? 1 : 0;
+            if ($isVal) {
+                $notifyValidated = true;
+            }
         }
         if (isset($input['deactivated'])) {
             $fields[] = "`deactivated` = ?";
@@ -62,6 +67,10 @@ if ($method === 'GET') {
         $sql = "UPDATE students SET " . implode(', ', $fields) . " WHERE id = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
+
+        if ($notifyValidated) {
+            notify($pdo, 'student', $studentId, 'Account Validated', 'Your student account has been validated by Admin. You may now book sessions with tutors.');
+        }
 
         echo json_encode(['status' => 'success', 'message' => 'Student updated by admin.']);
     } elseif ($user['role'] === 'student') {

@@ -41,33 +41,46 @@ if (!defined('DB_NAME')) define('DB_NAME', 'tutorlink_db');
 $pdo = null;
 $isSqliteFallback = false;
 
-try {
-    // 1. Attempt MySQL Connection
-    $pdo = new PDO("mysql:host=" . DB_HOST, DB_USER, DB_PASS, [
+if (getenv('TEST_MODE') === '1' || defined('TEST_MODE')) {
+    $isSqliteFallback = true;
+    $dbPath = defined('SQLITE_TEST_DB') ? SQLITE_TEST_DB : (getenv('SQLITE_TEST_DB') ?: __DIR__ . '/../data/test.db');
+    if (!is_dir(dirname($dbPath))) {
+        @mkdir(dirname($dbPath), 0777, true);
+    }
+    $pdo = new PDO("sqlite:$dbPath", null, null, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     ]);
-
-    $pdo->exec("CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-    $pdo->exec("USE `" . DB_NAME . "`");
-    $pdo->exec("SET time_zone = '+08:00'");
-} catch (PDOException $e) {
-    // 2. Fallback to SQLite if MySQL is offline
+    $pdo->exec("PRAGMA foreign_keys = ON;");
+} else {
     try {
-        $isSqliteFallback = true;
-        error_log("DATABASE WARNING: MySQL connection failed (" . $e->getMessage() . "). Fallback to SQLite (tutorlink.db).");
-
-        $dbPath = __DIR__ . '/../tutorlink.db';
-        $pdo = new PDO("sqlite:$dbPath", null, null, [
+        // 1. Attempt MySQL Connection
+        $pdo = new PDO("mysql:host=" . DB_HOST, DB_USER, DB_PASS, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ]);
-        $pdo->exec("PRAGMA foreign_keys = ON;");
-    } catch (Exception $sqle) {
-        error_log("Database Connection Failed: " . $sqle->getMessage());
-        http_response_code(500);
-        echo json_encode(['status' => 'error', 'message' => 'Database Connection Failed']);
-        exit();
+
+        $pdo->exec("CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        $pdo->exec("USE `" . DB_NAME . "`");
+        $pdo->exec("SET time_zone = '+08:00'");
+    } catch (PDOException $e) {
+        // 2. Fallback to SQLite if MySQL is offline
+        try {
+            $isSqliteFallback = true;
+            error_log("DATABASE WARNING: MySQL connection failed (" . $e->getMessage() . "). Fallback to SQLite (tutorlink.db).");
+
+            $dbPath = __DIR__ . '/../tutorlink.db';
+            $pdo = new PDO("sqlite:$dbPath", null, null, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            ]);
+            $pdo->exec("PRAGMA foreign_keys = ON;");
+        } catch (Exception $sqle) {
+            error_log("Database Connection Failed: " . $sqle->getMessage());
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Database Connection Failed']);
+            exit();
+        }
     }
 }
 
