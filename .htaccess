@@ -1,0 +1,8 @@
+# Protect sensitive configuration, database, and documentation files
+<FilesMatch "\.(db|sql|md|json)$">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "^(config\.local\.php|ai_config\.php)$">
+    Require all denied
+</FilesMatch>
