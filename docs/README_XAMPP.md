@@ -24,7 +24,7 @@ Copy or move the `tutorlink` project folder into your XAMPP `htdocs` directory:
 1. Open your browser and go to `http://localhost/phpmyadmin/`
 2. Import `database.sql` from the project folder.
 
-*Note: `api/config.php` automatically performs one-time schema migration using `schema_version`, with fallback to SQLite (`tutorlink.db`) if MySQL is offline.*
+*Note: `api/config.php` automatically performs one-time schema migration using `schema_version`, with fallback to SQLite (`data/tutorlink.db`) if MySQL is offline.*
 
 ---
 

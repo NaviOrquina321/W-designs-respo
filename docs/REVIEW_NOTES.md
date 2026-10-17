@@ -45,3 +45,15 @@ TutorLink has been polished against the project Functional Design Document (FDD)
 - **`index.php`**: Updated teaser boxes and footer links.
 - **`styles.css`**: Removed feature card hover styling.
 - **`tests/smoke_test.php`**: Integration test suite verifying real API endpoints (11 passing tests).
+
+---
+
+## Claude review of commit 53e756c (fixes applied on branch `jules-reviewed`)
+- **Security:** the SQLite DB, `database.sql`, `docs/` and even `.git/config` could be downloaded when running with `php -S`. Added `router.php` (`php -S localhost:8000 router.php`), `.git`/docs/tests rules in `.htaccess`, and moved the SQLite fallback to `data/tutorlink.db` (folder is access-denied).
+- **Sessions:** an admin could reopen or complete a Cancelled session. Status is now forward-only and Completed/Cancelled are final. A session can only be started or completed when its payment is Confirmed (also for admin completion).
+- **Login:** logging in loaded only guest data (no sessions or notifications) until a page refresh. The role is now set before the sync.
+- **Calendar:** "My Schedule" was hardcoded to March 2026. It is now a real month calendar with navigation.
+- **Styling:** added the missing CSS for the Matching Session workspace and the notifications panel.
+- **Reports API:** date and status filters are validated.
+- **Repo hygiene:** `test-results/.last-run.json` untracked.
+- Verified on a clean SQLite DB: API flow, security downloads blocked, admin 7 tabs, report shortcuts, CSV, student and admin signed in together in one browser. MySQL and a real AI key are still untested.

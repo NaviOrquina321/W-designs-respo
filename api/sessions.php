@@ -166,12 +166,14 @@ if ($method === 'GET') {
                     jsonError(400, 'Session can only be started during its scheduled time window (from 15 minutes before slot start until slot end).');
                 }
 
+                requirePaymentConfirmed($pdo, $session);
                 $fields[] = "`status` = 'In Progress'";
                 notify($pdo, 'student', $session['student_id'], 'Session Live', 'Your tutor started the session, join now.');
             } elseif ($newStatus === 'Completed') {
                 if ($session['status'] !== 'Confirmed' && $session['status'] !== 'In Progress') {
                     jsonError(400, 'Can only complete a Confirmed or In Progress session.');
                 }
+                requirePaymentConfirmed($pdo, $session);
                 $fields[] = "`status` = 'Completed'";
                 // sessions_completed rises once
                 $stInc = $pdo->prepare("UPDATE students SET sessions_completed = sessions_completed + 1 WHERE id = ?");
@@ -356,10 +358,23 @@ if ($method === 'GET') {
             if (!in_array($newStatus, $validAdminStatuses, true)) {
                 jsonError(400, 'Invalid status for admin update.');
             }
+            // Status only moves forward: Completed and Cancelled are final
+            $allowedNext = [
+                'Confirmed' => ['In Progress', 'Completed', 'Cancelled'],
+                'In Progress' => ['Completed', 'Cancelled'],
+                'Completed' => [],
+                'Cancelled' => [],
+            ];
+            if ($newStatus !== $session['status'] && !in_array($newStatus, $allowedNext[$session['status']] ?? [], true)) {
+                jsonError(400, "A {$session['status']} session cannot be changed to $newStatus.");
+            }
+            if ($newStatus === 'Completed' && $session['status'] !== 'Completed') {
+                requirePaymentConfirmed($pdo, $session);
+            }
             $fields[] = "`status` = ?";
             $params[] = $newStatus;
 
-            if ($newStatus === 'Cancelled') {
+            if ($newStatus === 'Cancelled' && $session['status'] !== 'Cancelled') {
                 // Free schedule slot
                 $oldSlot = $session['session_date'] . ' ' . $session['time_slot'];
                 $stSchDel = $pdo->prepare("DELETE FROM schedules WHERE tutor_id = ? AND date_slot = ? AND student_id = ?");

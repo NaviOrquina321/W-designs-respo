@@ -10,6 +10,15 @@ $endDate = trim($_GET['end_date'] ?? ($_GET['endDate'] ?? ''));
 $tutorId = trim($_GET['tutor_id'] ?? ($_GET['tutorId'] ?? ''));
 $subject = trim($_GET['subject'] ?? '');
 $export = trim($_GET['export'] ?? '');
+$statusFilter = trim($_GET['status'] ?? '');
+if ($statusFilter !== '' && !in_array($statusFilter, ['Confirmed', 'In Progress', 'Completed', 'Cancelled'], true)) {
+    jsonError(400, 'Invalid status filter.');
+}
+foreach (['start_date' => $startDate, 'end_date' => $endDate] as $k => $v) {
+    if ($v !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)) {
+        jsonError(400, "Invalid $k. Use YYYY-MM-DD.");
+    }
+}
 
 // Build session filter query
 $sesWhere = ["1=1"];
@@ -26,6 +35,10 @@ if (!empty($endDate)) {
 if (!empty($tutorId)) {
     $sesWhere[] = "tutor_id = ?";
     $sesParams[] = $tutorId;
+}
+if ($statusFilter !== '') {
+    $sesWhere[] = "status = ?";
+    $sesParams[] = $statusFilter;
 }
 if (!empty($subject)) {
     $sesWhere[] = "LOWER(subject) = ?";

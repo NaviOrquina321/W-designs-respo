@@ -165,3 +165,14 @@ function toCamelArray($data) {
 
     return $result;
 }
+
+// A session can only start or finish after its GCash payment is Confirmed.
+function requirePaymentConfirmed($pdo, $session) {
+    $st = $pdo->prepare("SELECT status FROM payments WHERE ref_no = ?");
+    $st->execute([$session['gcash_ref']]);
+    $pay = $st->fetch();
+    if (!$pay || $pay['status'] !== 'Confirmed') {
+        jsonError(400, 'The payment for this session is not confirmed yet.');
+    }
+}
+?>

@@ -69,7 +69,8 @@ if (getenv('TEST_MODE') === '1' || defined('TEST_MODE')) {
             $isSqliteFallback = true;
             error_log("DATABASE WARNING: MySQL connection failed (" . $e->getMessage() . "). Fallback to SQLite (tutorlink.db).");
 
-            $dbPath = __DIR__ . '/../tutorlink.db';
+            $dbPath = __DIR__ . '/../data/tutorlink.db';
+            if (!is_dir(dirname($dbPath))) { @mkdir(dirname($dbPath), 0777, true); }
             $pdo = new PDO("sqlite:$dbPath", null, null, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC

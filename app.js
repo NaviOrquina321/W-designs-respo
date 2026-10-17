@@ -505,6 +505,8 @@ function initAuthModalTabs() {
         return;
       }
       state.currentUser = data.user;
+      // Set the role first so the sync loads sessions, payments and notifications (not just the guest data)
+      state.currentRole = data.user.role;
       closeModal('modal-auth');
       await syncWithDatabase();
 
@@ -547,6 +549,8 @@ function initAuthModalTabs() {
         return;
       }
       state.currentUser = data.user;
+      // Set the role first so the sync loads sessions, payments and notifications (not just the guest data)
+      state.currentRole = data.user.role;
       closeModal('modal-auth');
       await syncWithDatabase();
 
@@ -904,15 +908,28 @@ function renderStudentHistory() {
   `).join('');
 }
 
+const calendarMonths = {};
+
 function renderSessionCalendar(containerId, sessionsList, userType) {
   const container = document.getElementById(containerId);
   if (!container) return;
 
-  const daysInMonth = 31;
+  if (!calendarMonths[containerId]) {
+    const now = new Date();
+    calendarMonths[containerId] = { year: now.getFullYear(), month: now.getMonth() };
+  }
+  const { year, month } = calendarMonths[containerId];
+  const monthName = new Date(year, month, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const firstWeekday = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const pad = n => (n < 10 ? '0' + n : '' + n);
+  const todayStr = (() => { const t = new Date(); return `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`; })();
+
   let cellsHTML = '';
+  for (let i = 0; i < firstWeekday; i++) cellsHTML += '<div></div>';
 
   for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `2026-03-${d < 10 ? '0' + d : d}`;
+    const dateStr = `${year}-${pad(month + 1)}-${pad(d)}`;
     const matchedSessions = sessionsList.filter(s => (s.date || s.sessionDate) === dateStr && s.status !== 'Cancelled');
 
     let badge = '';
@@ -921,21 +938,39 @@ function renderSessionCalendar(containerId, sessionsList, userType) {
     }
 
     cellsHTML += `
-      <div class="calendar-day-cell ${matchedSessions.length > 0 ? 'has-session' : ''}" onclick="selectCalendarDateCell('${dateStr}', '${containerId}')">
-        <div style="font-weight: 600; font-size: 0.88rem;">Mar ${d}</div>
+      <div class="calendar-day-cell ${matchedSessions.length > 0 ? 'has-session' : ''}" ${dateStr === todayStr ? 'style="border-color: var(--warm-gold);"' : ''} onclick="selectCalendarDateCell('${dateStr}', '${containerId}')">
+        <div style="font-weight: 600; font-size: 0.88rem;">${d}</div>
         ${badge}
       </div>
     `;
   }
 
+  const weekdayHeader = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    .map(w => `<div class="sub-text center-text" style="font-weight: 600;">${w}</div>`).join('');
+
   container.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <button type="button" class="btn btn-secondary btn-small" data-cal-nav="-1" aria-label="Previous month">&lsaquo;</button>
+      <strong>${monthName}</strong>
+      <button type="button" class="btn btn-secondary btn-small" data-cal-nav="1" aria-label="Next month">&rsaquo;</button>
+    </div>
     <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;">
+      ${weekdayHeader}
       ${cellsHTML}
     </div>
     <div id="${containerId}-details" class="margin-top detail-card sub-text center-text">
       Select a date cell above to view scheduled tutoring session details.
     </div>
   `;
+
+  container.querySelectorAll('[data-cal-nav]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const m = calendarMonths[containerId];
+      const next = new Date(m.year, m.month + Number(btn.dataset.calNav), 1);
+      calendarMonths[containerId] = { year: next.getFullYear(), month: next.getMonth() };
+      renderSessionCalendar(containerId, sessionsList, userType);
+    });
+  });
 }
 
 window.selectCalendarDateCell = function(dateStr, containerId) {
