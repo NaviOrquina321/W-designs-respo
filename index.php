@@ -626,81 +626,6 @@ header('Content-Type: text/html; charset=utf-8');
   <!-- ================= SLIDE-OUT DRAWERS ================= -->
 
 
-  <!-- Drawer 2: Slide-out Tutor Profile & Match Request Drawer -->
-  <div id="drawer-tutor-booking" class="drawer-backdrop hidden">
-    <div class="drawer-panel drawer-medium">
-      <div class="drawer-header">
-        <div class="drawer-header-brand">
-          <svg class="drawer-icon text-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <div>
-            <h2 class="drawer-title" id="drawer-tutor-name">Prof. Alex Rivera</h2>
-            <p class="drawer-subtitle" id="drawer-tutor-subject">Calculus & Mathematics Specialist</p>
-          </div>
-        </div>
-        <button class="drawer-close-btn" onclick="closeAppDrawer('tutor-booking')">&times;</button>
-      </div>
-      <div class="drawer-body">
-        <div class="detail-card margin-bottom">
-          <div class="detail-row"><span class="detail-label">Hourly Rate:</span> <strong id="drawer-tutor-rate" class="text-emerald">₱350 / hr</strong></div>
-          <div class="detail-row"><span class="detail-label">Teaching Style:</span> <span id="drawer-tutor-style">Visual & Step-by-Step</span></div>
-          <div class="detail-row"><span class="detail-label">Student Rating:</span> <span>4.9 / 5.0 ★</span></div>
-        </div>
-        <div class="form-group margin-top">
-          <label>Bio & Qualifications</label>
-          <p id="drawer-tutor-bio" class="sub-text">Licensed Mathematics Professor with 8+ years experience making complex algebra and calculus easy to grasp.</p>
-        </div>
-        <hr class="divider margin-top margin-bottom">
-        <div class="form-group">
-          <label>Select Preferred Schedule Slot</label>
-          <select id="drawer-booking-timeslot" class="form-select">
-            <option value="2026-03-20 09:00 AM">March 20, 2026 (09:00 AM - 10:00 AM)</option>
-            <option value="2026-03-20 02:00 PM">March 20, 2026 (02:00 PM - 03:00 PM)</option>
-            <option value="2026-03-21 10:00 AM">March 21, 2026 (10:00 AM - 11:00 AM)</option>
-          </select>
-        </div>
-      </div>
-      <div class="drawer-footer">
-        <button class="btn btn-emerald full-width" onclick="openAppDrawer('gcash-checkout')">Book Session & Pay</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Drawer 3: Slide-over Virtual Workspace Drawer -->
-  <div id="drawer-virtual-workspace" class="drawer-backdrop hidden">
-    <div class="drawer-panel drawer-large">
-      <div class="drawer-header">
-        <div class="drawer-header-brand">
-          <svg class="drawer-icon text-emerald" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          <div>
-            <h2 class="drawer-title" id="drawer-workspace-title">Virtual Session Workspace</h2>
-            <p class="drawer-subtitle" id="drawer-workspace-sub">Live Tutoring & Collaborative Notes</p>
-          </div>
-        </div>
-        <button class="drawer-close-btn" onclick="closeAppDrawer('virtual-workspace')">&times;</button>
-      </div>
-      <div class="drawer-body">
-        <div class="workspace-grid">
-          <div class="workspace-notes-panel">
-            <h4>Shared Collaborative Notes</h4>
-            <textarea id="drawer-session-notes" class="form-input" rows="12" placeholder="Type shared session notes, formulas, or study topics..."></textarea>
-          </div>
-          <div class="workspace-chat-panel">
-            <h4>Live Session Chat</h4>
-            <div id="drawer-chat-box" class="chat-messages" style="height: 220px; overflow-y: auto;">
-              <div class="chat-msg system">Session initialized. Real-time messaging active.</div>
-            </div>
-            <div class="chat-input-form margin-top">
-              <input type="text" id="drawer-chat-input" placeholder="Type message..." class="form-input">
-              <button class="btn btn-emerald btn-sm" onclick="sendDrawerChatMessage()">Send</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="drawer-footer">
-        <button class="btn btn-danger" onclick="closeAppDrawer('virtual-workspace')">End Virtual Session</button>
-      </div>
-    </div>
-  </div>
 
   <!-- ================= MODALS ================= -->
 
@@ -1222,35 +1147,5 @@ header('Content-Type: text/html; charset=utf-8');
   </div>
 
   <script src="app.js"></script>
-  <script>
-    function openAppDrawer(drawerName) {
-      const drawer = document.getElementById(`drawer-${drawerName}`);
-      if (drawer) drawer.classList.remove('hidden');
-    }
-    function closeAppDrawer(drawerName) {
-      const drawer = document.getElementById(`drawer-${drawerName}`);
-      if (drawer) drawer.classList.add('hidden');
-    }
-    function advanceDrawerGCashStep(stepNum) {
-      document.getElementById('drawer-gcash-step-1').classList.toggle('hidden', stepNum !== 1);
-      document.getElementById('drawer-gcash-step-2').classList.toggle('hidden', stepNum !== 2);
-      document.getElementById('drawer-gcash-step-3').classList.toggle('hidden', stepNum !== 3);
-    }
-    function confirmDrawerGCashPayment() {
-      advanceDrawerGCashStep(3);
-    }
-    function sendDrawerChatMessage() {
-      const input = document.getElementById('drawer-chat-input');
-      const chatBox = document.getElementById('drawer-chat-box');
-      if (input && input.value.trim() && chatBox) {
-        const msg = document.createElement('div');
-        msg.className = 'chat-msg student';
-        msg.innerHTML = `<strong>You:</strong> ${input.value.trim()}`;
-        chatBox.appendChild(msg);
-        input.value = '';
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }
-    }
-  </script>
 </body>
 </html>
