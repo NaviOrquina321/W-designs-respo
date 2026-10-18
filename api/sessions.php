@@ -157,15 +157,6 @@ if ($method === 'GET') {
                     jsonError(400, 'Can only start a session that is Confirmed and paid.');
                 }
 
-                // Check time window: 15 minutes before slot start until slot end
-                $now = time();
-                $slotStart = parseSlotStartTime($session['session_date'], $session['time_slot']);
-                $slotEnd = parseSlotEndTime($session['session_date'], $session['time_slot']);
-
-                if ($slotStart > 0 && ($now < ($slotStart - 900) || $now > $slotEnd)) {
-                    jsonError(400, 'Session can only be started during its scheduled time window (from 15 minutes before slot start until slot end).');
-                }
-
                 $nowFormatted = date('Y-m-d H:i:s');
                 $fields[] = "`status` = 'In Progress'";
                 $fields[] = "`started_at` = ?";

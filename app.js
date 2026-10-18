@@ -1345,6 +1345,63 @@ window.selectMatchedTutor = async function(tutorId, subject, score) {
   openCalendarBooking(tutorId, subject);
 };
 
+function isTutorAvailableOnDate(tutor, dateStr) {
+  if (!tutor) return false;
+  if (tutor.blockedDates) {
+    const blockedList = tutor.blockedDates.split(',').map(d => d.trim());
+    if (blockedList.includes(dateStr)) return false;
+  }
+  if (tutor.availableDays && Array.isArray(tutor.availableDays) && tutor.availableDays.length > 0) {
+    const dt = new Date(dateStr + 'T00:00:00');
+    if (!isNaN(dt.getTime())) {
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const dayOfWeek = dayNames[dt.getDay()];
+      if (!tutor.availableDays.includes(dayOfWeek)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function getTutorAvailableSlots(tutor) {
+  if (!tutor) return ['09:00 AM', '02:00 PM', '04:00 PM'];
+  if (tutor.availabilitySlots && Array.isArray(tutor.availabilitySlots) && tutor.availabilitySlots.length > 0) {
+    return tutor.availabilitySlots;
+  }
+  if (tutor.availableTimeSlots) {
+    if (tutor.availableTimeSlots.includes(',')) {
+      return tutor.availableTimeSlots.split(',').map(s => s.trim()).filter(Boolean);
+    } else if (tutor.availableTimeSlots.includes('-')) {
+      const parts = tutor.availableTimeSlots.split('-').map(s => s.trim());
+      if (parts.length === 2) {
+        return [parts[0], '02:00 PM', parts[1]];
+      }
+    } else {
+      return [tutor.availableTimeSlots];
+    }
+  }
+  return ['09:00 AM', '02:00 PM', '04:00 PM'];
+}
+
+function renderBookingSlotsForSelectedDate(tutor, selectedDate) {
+  const slotsContainer = document.getElementById('time-slots-container');
+  if (!slotsContainer) return;
+
+  const isAvail = isTutorAvailableOnDate(tutor, selectedDate);
+  if (!isAvail) {
+    slotsContainer.innerHTML = `<div class="sub-text text-danger" style="padding: 10px 14px; background: #fff5f5; border: 1px solid #fed7d7; border-radius: 6px; color: #c53030; font-size: 0.88rem; width: 100%;">Tutor is not available on this date or day of the week. Please select another date.</div>`;
+    state.activeBooking.timeSlot = null;
+    return;
+  }
+
+  const slots = getTutorAvailableSlots(tutor);
+  state.activeBooking.timeSlot = slots[0] || '09:00 AM';
+  slotsContainer.innerHTML = slots.map((slot, idx) => `
+    <div class="slot-chip ${idx === 0 ? 'selected' : ''}" onclick="selectTimeSlot(this, '${esc(slot)}')">${esc(slot)}</div>
+  `).join('');
+}
+
 // Calendar Booking Engine
 function initCalendarBooking() {
   const closeBtn = document.getElementById('close-calendar-modal');
@@ -1356,7 +1413,8 @@ function initCalendarBooking() {
 
   proceedBtn?.addEventListener('click', () => {
     if (!state.activeBooking.timeSlot) {
-      state.activeBooking.timeSlot = '09:00 AM';
+      showToast('Please select an available date and time slot first.', 'error');
+      return;
     }
     closeModal('modal-calendar');
     openGCashPayment();
@@ -1370,6 +1428,10 @@ function initCalendarBooking() {
     state.activeBooking.date = picker.value;
     picker.addEventListener('change', (e) => {
       state.activeBooking.date = e.target.value;
+      const currentTutor = state.tutors.find(t => t.id === state.activeBooking.tutorId);
+      if (currentTutor) {
+        renderBookingSlotsForSelectedDate(currentTutor, e.target.value);
+      }
     });
   }
 }
@@ -1384,16 +1446,15 @@ window.openCalendarBooking = function(tutorId, preferredSubject = null) {
   const total = hourlyRate + serviceFee;
 
   const todayStr = new Date().toISOString().split('T')[0];
-  const activePickerVal = document.getElementById('booking-date-picker')?.value || todayStr;
-
-  const slots = (tutor.availabilitySlots && tutor.availabilitySlots.length > 0) ? tutor.availabilitySlots : ['09:00 AM', '02:00 PM', '04:00 PM'];
+  const pickerEl = document.getElementById('booking-date-picker');
+  const activePickerVal = pickerEl?.value || todayStr;
 
   state.activeBooking = {
     tutorId: tutor.id,
     tutorName: tutor.name,
     subject: subject,
     date: activePickerVal,
-    timeSlot: slots[0] || '09:00 AM',
+    timeSlot: null,
     hourlyRate: hourlyRate,
     serviceFee: serviceFee,
     total: total,
@@ -1413,12 +1474,7 @@ window.openCalendarBooking = function(tutorId, preferredSubject = null) {
     `;
   }
 
-  const slotsContainer = document.getElementById('time-slots-container');
-  if (slotsContainer) {
-    slotsContainer.innerHTML = slots.map((slot, idx) => `
-      <div class="slot-chip ${idx === 0 ? 'selected' : ''}" onclick="selectTimeSlot(this, '${esc(slot)}')">${esc(slot)}</div>
-    `).join('');
-  }
+  renderBookingSlotsForSelectedDate(tutor, activePickerVal);
 
   const hFee = document.getElementById('summary-hourly-fee');
   const sFee = document.getElementById('summary-service-fee');
