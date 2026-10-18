@@ -6,3 +6,8 @@
 <FilesMatch "^(config\.local\.php|ai_config\.php)$">
     Require all denied
 </FilesMatch>
+
+# Never serve version-control, docs or test folders
+RedirectMatch 403 ^/.*/?\.git(/|$)
+RedirectMatch 403 /(docs|tests|test-results)(/|$)
+Options -Indexes

@@ -109,6 +109,9 @@ if ($method === 'GET') {
     $totalPaid = $hourlyRate + $commissionFee;
 
     $customGcashRef = trim($input['gcash_ref'] ?? ($input['gcashRef'] ?? ''));
+    if ($customGcashRef !== '' && !preg_match('/^[A-Za-z0-9\-]{6,30}$/', $customGcashRef)) {
+        jsonError(400, 'GCash reference must be 6-30 letters, numbers or dashes.');
+    }
     $studentName = $studentRecord['name'];
     $tutorName = $tutorRecord['name'];
 
