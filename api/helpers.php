@@ -111,11 +111,63 @@ function snakeToCamel($string) {
     return lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $string))));
 }
 
-function notify($pdo, $role, $target, $title, $message) {
-    if (!$pdo) return;
+function notify($pdo, $role, $target, $title, $message, $meta = []) {
+    if (!$pdo) return false;
     $id = 'notif-' . bin2hex(random_bytes(6));
-    $stmt = $pdo->prepare("INSERT INTO notifications (id, target_role, target, title, message, is_read) VALUES (?, ?, ?, ?, ?, 0)");
-    $stmt->execute([$id, $role, $target, $title, $message]);
+
+    $type = $meta['type'] ?? 'general';
+    $recipientUserId = $meta['recipient_user_id'] ?? ($role === 'all' || $target === 'all' ? null : $target);
+    $recipientRole = $meta['recipient_role'] ?? ($role === 'all' ? null : $role);
+    $relatedSessionId = $meta['related_session_id'] ?? null;
+    $relatedPaymentId = $meta['related_payment_id'] ?? null;
+    $relatedUserId = $meta['related_user_id'] ?? null;
+    $actionUrl = $meta['action_url'] ?? null;
+    $priority = $meta['priority'] ?? 'normal';
+    $dedupeKey = $meta['dedupe_key'] ?? null;
+
+    if ($dedupeKey) {
+        $chk = $pdo->prepare("SELECT id FROM notifications WHERE dedupe_key = ?");
+        $chk->execute([$dedupeKey]);
+        if ($chk->fetch()) {
+            return false;
+        }
+    }
+
+    try {
+        $stmt = $pdo->prepare("INSERT INTO notifications (
+            id, recipient_user_id, recipient_role, target_role, target, type, title, message,
+            related_session_id, related_payment_id, related_user_id, action_url, priority, dedupe_key, is_read
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)");
+
+        $stmt->execute([
+            $id, $recipientUserId, $recipientRole, $role, $target, $type, $title, $message,
+            $relatedSessionId, $relatedPaymentId, $relatedUserId, $actionUrl, $priority, $dedupeKey
+        ]);
+        return $id;
+    } catch (Exception $e) {
+        error_log("notify() error: " . $e->getMessage());
+        return false;
+    }
+}
+
+function notifyMany($pdo, $recipients, $type, $title, $message, $meta = []) {
+    if (!$pdo || empty($recipients)) return [];
+    $ids = [];
+    foreach ($recipients as $rec) {
+        $rRole = is_array($rec) ? ($rec['role'] ?? 'all') : 'all';
+        $rTarget = is_array($rec) ? ($rec['id'] ?? $rec['target'] ?? 'all') : $rec;
+        $m = array_merge($meta, [
+            'recipient_user_id' => $rTarget !== 'all' ? $rTarget : null,
+            'recipient_role' => $rRole !== 'all' ? $rRole : null,
+            'type' => $type
+        ]);
+        if (isset($meta['dedupe_prefix'])) {
+            $m['dedupe_key'] = $meta['dedupe_prefix'] . '-' . $rTarget;
+        }
+        $res = notify($pdo, $rRole, $rTarget, $title, $message, $m);
+        if ($res) $ids[] = $res;
+    }
+    return $ids;
 }
 
 function toCamelArray($data) {

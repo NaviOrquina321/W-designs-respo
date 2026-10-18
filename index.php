@@ -68,6 +68,10 @@ header('Content-Type: text/html; charset=utf-8');
       <h3>Notifications</h3>
       <button class="close-btn" id="close-notif-drawer">&times;</button>
     </div>
+    <div class="notif-filter-tabs" style="display: flex; border-bottom: 1px solid var(--line); padding: 8px 16px; gap: 12px; background: var(--paper);">
+      <button class="auth-tab-btn active" id="notif-filter-all" style="padding: 4px 12px; font-size: 0.82rem;">All</button>
+      <button class="auth-tab-btn" id="notif-filter-unread" style="padding: 4px 12px; font-size: 0.82rem;">Unread</button>
+    </div>
     <div class="drawer-body" id="notif-list">
       <!-- Notification items generated dynamically -->
     </div>

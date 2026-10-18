@@ -233,11 +233,21 @@ try {
 
         $pdo->exec("CREATE TABLE IF NOT EXISTS `notifications` (
           `id` VARCHAR(50) PRIMARY KEY,
+          `recipient_user_id` VARCHAR(50) DEFAULT NULL,
+          `recipient_role` VARCHAR(50) DEFAULT NULL,
           `target_role` VARCHAR(50) DEFAULT 'all',
           `target` VARCHAR(100) NOT NULL,
+          `type` VARCHAR(100) DEFAULT 'general',
           `title` VARCHAR(150) NOT NULL,
           `message` TEXT NOT NULL,
+          `related_session_id` VARCHAR(50) DEFAULT NULL,
+          `related_payment_id` VARCHAR(50) DEFAULT NULL,
+          `related_user_id` VARCHAR(50) DEFAULT NULL,
+          `action_url` VARCHAR(255) DEFAULT NULL,
+          `priority` VARCHAR(20) DEFAULT 'normal',
           `is_read` TINYINT(1) DEFAULT 0,
+          `read_at` TIMESTAMP NULL DEFAULT NULL,
+          `dedupe_key` VARCHAR(150) DEFAULT NULL,
           `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );");
 
@@ -305,6 +315,38 @@ try {
         }
 
         $pdo->exec("INSERT INTO `schema_version` (`version`) VALUES (1);");
+    }
+
+    if ($currentVersion < 2) {
+        $cols = [
+            "recipient_user_id VARCHAR(50) DEFAULT NULL",
+            "recipient_role VARCHAR(50) DEFAULT NULL",
+            "type VARCHAR(100) DEFAULT 'general'",
+            "related_session_id VARCHAR(50) DEFAULT NULL",
+            "related_payment_id VARCHAR(50) DEFAULT NULL",
+            "related_user_id VARCHAR(50) DEFAULT NULL",
+            "action_url VARCHAR(255) DEFAULT NULL",
+            "priority VARCHAR(20) DEFAULT 'normal'",
+            "read_at TIMESTAMP NULL DEFAULT NULL",
+            "dedupe_key VARCHAR(150) DEFAULT NULL"
+        ];
+        foreach ($cols as $col) {
+            $colName = explode(' ', $col)[0];
+            try {
+                if ($isSQLite) {
+                    $pdo->exec("ALTER TABLE `notifications` ADD COLUMN $col;");
+                } else {
+                    $pdo->exec("ALTER TABLE `notifications` ADD COLUMN `$colName` " . substr($col, strlen($colName) + 1) . ";");
+                }
+            } catch (Exception $ex) {
+                // Column may already exist
+            }
+        }
+        try {
+            $pdo->exec("CREATE INDEX IF NOT EXISTS idx_notifications_recipient ON notifications(recipient_user_id, is_read);");
+        } catch (Exception $ex) {}
+
+        $pdo->exec("INSERT INTO `schema_version` (`version`) VALUES (2);");
     }
 } catch (PDOException $e) {
     error_log("Schema migration error: " . $e->getMessage());

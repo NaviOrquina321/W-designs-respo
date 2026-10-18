@@ -154,13 +154,24 @@ CREATE TABLE IF NOT EXISTS `sessions` (
 -- 10. Table: notifications
 CREATE TABLE IF NOT EXISTS `notifications` (
   `id` VARCHAR(50) PRIMARY KEY,
+  `recipient_user_id` VARCHAR(50) DEFAULT NULL,
+  `recipient_role` VARCHAR(50) DEFAULT NULL,
   `target_role` VARCHAR(50) DEFAULT 'all',
   `target` VARCHAR(100) NOT NULL,
+  `type` VARCHAR(100) DEFAULT 'general',
   `title` VARCHAR(150) NOT NULL,
   `message` TEXT NOT NULL,
+  `related_session_id` VARCHAR(50) DEFAULT NULL,
+  `related_payment_id` VARCHAR(50) DEFAULT NULL,
+  `related_user_id` VARCHAR(50) DEFAULT NULL,
+  `action_url` VARCHAR(255) DEFAULT NULL,
+  `priority` VARCHAR(20) DEFAULT 'normal',
   `is_read` TINYINT(1) DEFAULT 0,
+  `read_at` TIMESTAMP NULL DEFAULT NULL,
+  `dedupe_key` VARCHAR(150) UNIQUE DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  INDEX `idx_notifications_role_target` (`target_role`, `target`, `is_read`)
+  INDEX `idx_notifications_role_target` (`target_role`, `target`, `is_read`),
+  INDEX `idx_notifications_recipient` (`recipient_user_id`, `is_read`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 11. Table: chat_messages

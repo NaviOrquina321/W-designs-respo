@@ -1704,11 +1704,61 @@ function openGCashPayment() {
 }
 
 // Notifications Engine
+let notifEventSource = null;
+let currentNotifDrawerTab = 'all';
+
+function initNotificationsStream() {
+  if (notifEventSource) {
+    notifEventSource.close();
+    notifEventSource = null;
+  }
+
+  if (!state.currentUser) return;
+
+  try {
+    notifEventSource = new EventSource('api/notifications_stream.php');
+
+    notifEventSource.addEventListener('notification', (e) => {
+      try {
+        const payload = JSON.parse(e.data);
+        if (payload && Array.isArray(payload.notifications)) {
+          const previousNotifs = state.notifications || [];
+          const newNotifs = mapNotificationsData(payload.notifications);
+
+          // Check for newly arrived high-priority notifications to pop toast
+          newNotifs.forEach(nn => {
+            if (!nn.read && (nn.priority === 'high' || nn.priority === 'urgent')) {
+              const existed = previousNotifs.find(pn => pn.id === nn.id);
+              if (!existed) {
+                showToast(`🔔 ${nn.title}: ${nn.message}`);
+              }
+            }
+          });
+
+          state.notifications = newNotifs;
+          renderNotifDrawer();
+          updateNotificationBadge();
+        }
+      } catch (err) {
+        console.error('SSE Notification JSON parse error:', err);
+      }
+    });
+
+    notifEventSource.onerror = (e) => {
+      // EventSource will automatically attempt reconnection
+    };
+  } catch (err) {
+    console.error('Failed to establish SSE stream:', err);
+  }
+}
+
 function initNotifications() {
   const bellBtn = document.getElementById('notif-bell-btn');
   const closeDrawer = document.getElementById('close-notif-drawer');
   const overlay = document.getElementById('drawer-overlay');
   const markReadBtn = document.getElementById('mark-all-read-btn');
+  const filterAllBtn = document.getElementById('notif-filter-all');
+  const filterUnreadBtn = document.getElementById('notif-filter-unread');
 
   bellBtn?.addEventListener('click', () => {
     renderNotifDrawer();
@@ -1719,18 +1769,22 @@ function initNotifications() {
   closeDrawer?.addEventListener('click', closeNotifDrawer);
   overlay?.addEventListener('click', closeNotifDrawer);
 
-  markReadBtn?.addEventListener('click', async () => {
-    const role = state.currentRole;
-    state.notifications.forEach(n => {
-      if (n.targetRole === role || n.targetRole === 'all') {
-        n.read = true;
-      }
-    });
+  filterAllBtn?.addEventListener('click', () => {
+    currentNotifDrawerTab = 'all';
+    filterAllBtn.classList.add('active');
+    filterUnreadBtn?.classList.remove('active');
+    renderNotifDrawer();
+  });
 
-    // Save broadcast notification read status locally
-    const userId = state.currentUser ? state.currentUser.id : 'guest';
-    const readStorage = state.notifications.filter(n => n.read).map(n => n.id);
-    localStorage.setItem(`tutorlink_read_${userId}`, JSON.stringify(readStorage));
+  filterUnreadBtn?.addEventListener('click', () => {
+    currentNotifDrawerTab = 'unread';
+    filterUnreadBtn.classList.add('active');
+    filterAllBtn?.classList.remove('active');
+    renderNotifDrawer();
+  });
+
+  markReadBtn?.addEventListener('click', async () => {
+    state.notifications.forEach(n => { n.read = true; });
 
     try {
       await fetch('api/notifications.php', { method: 'PUT' });
@@ -1740,6 +1794,8 @@ function initNotifications() {
     updateNotificationBadge();
     showToast('Notifications marked as read.');
   });
+
+  initNotificationsStream();
 }
 
 function closeNotifDrawer() {
@@ -1752,25 +1808,54 @@ function renderNotifDrawer() {
   if (!list) return;
 
   const role = state.currentRole;
-  const filtered = state.notifications.filter(n => n.targetRole === role || n.targetRole === 'all');
+  let filtered = state.notifications.filter(n => n.targetRole === role || n.targetRole === 'all' || n.recipientUserId === (state.currentUser ? state.currentUser.id : ''));
+
+  if (currentNotifDrawerTab === 'unread') {
+    filtered = filtered.filter(n => !n.read);
+  }
 
   if (filtered.length === 0) {
-    list.innerHTML = `<p class="sub-text center-text" style="padding: 20px;">No notifications for your account.</p>`;
+    list.innerHTML = `<p class="sub-text center-text" style="padding: 20px;">No ${currentNotifDrawerTab === 'unread' ? 'unread ' : ''}notifications for your account.</p>`;
     return;
   }
 
   list.innerHTML = filtered.map(n => `
     <div class="notif-item ${n.read ? '' : 'unread'}" style="cursor: pointer;" onclick="markSingleNotificationRead('${esc(n.id)}')">
-      <strong>${esc(n.title)}</strong>
-      <p>${esc(n.message)}</p>
-      <div class="notif-time">${esc(n.time)}</div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+        <strong>${esc(n.title)}</strong>
+        <button onclick="event.stopPropagation(); deleteSingleNotification('${esc(n.id)}')" style="background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 0 4px;" title="Delete">&times;</button>
+      </div>
+      <p style="margin-top: 4px;">${esc(n.message)}</p>
+      <div class="notif-time">${esc(n.time)} ${n.actionUrl ? ' • <span style="text-decoration: underline; color: var(--ink);">View Action</span>' : ''}</div>
     </div>
   `).join('');
 }
 
+window.deleteSingleNotification = async function(notifId) {
+  state.notifications = state.notifications.filter(x => x.id !== notifId);
+  try {
+    await fetch(`api/notifications.php?id=${encodeURIComponent(notifId)}`, { method: 'DELETE' });
+  } catch (e) {}
+  renderNotifDrawer();
+  updateNotificationBadge();
+};
+
 window.markSingleNotificationRead = async function(notifId) {
   const n = state.notifications.find(x => x.id === notifId);
-  if (n) n.read = true;
+  if (n) {
+    n.read = true;
+
+    if (n.actionUrl) {
+      closeNotifDrawer();
+      if (n.actionUrl.startsWith('#workspace-')) {
+        const sesId = n.actionUrl.replace('#workspace-', '');
+        openWorkspaceModal(sesId);
+      } else if (n.actionUrl.startsWith('#session-')) {
+        const sesId = n.actionUrl.replace('#session-', '');
+        openWorkspaceModal(sesId);
+      }
+    }
+  }
 
   const userId = state.currentUser ? state.currentUser.id : 'guest';
   const readStorage = state.notifications.filter(x => x.read).map(x => x.id);

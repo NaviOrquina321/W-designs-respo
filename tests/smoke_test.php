@@ -127,12 +127,29 @@ try {
     $repData = $stRep->fetch();
     assertTest(floatval($repData['total_rev']) > 0, "Real Reports API: Calculates total revenue from non-cancelled sessions.");
 
-    // 7. Notifications Log & Read Tracking
-    notify($pdo, 'student', 'STU-101', 'Test Notification', 'Smoke test notification message.');
-    $stNotif = $pdo->prepare("SELECT * FROM notifications WHERE target = 'STU-101' AND title = 'Test Notification'");
-    $stNotif->execute();
+    // 7. Notifications Log & Read Tracking (Schema Version 2)
+    $nId = notify($pdo, 'student', 'STU-101', 'Test Notification', 'Smoke test notification message.', [
+        'type' => 'session_reminder_24h',
+        'recipient_user_id' => 'STU-101',
+        'recipient_role' => 'student',
+        'priority' => 'high',
+        'dedupe_key' => 'test-dedupe-123'
+    ]);
+    $stNotif = $pdo->prepare("SELECT * FROM notifications WHERE id = ?");
+    $stNotif->execute([$nId]);
     $notifRow = $stNotif->fetch();
-    assertTest(!empty($notifRow) && $notifRow['title'] === 'Test Notification', "Notifications API: Targeted notification persisted.");
+    assertTest(!empty($notifRow) && $notifRow['title'] === 'Test Notification' && $notifRow['recipient_user_id'] === 'STU-101' && $notifRow['type'] === 'session_reminder_24h', "Notifications API: Targeted notification persisted with Schema Version 2 metadata.");
+
+    // Deduplication test
+    $nDup = notify($pdo, 'student', 'STU-101', 'Duplicate Title', 'Duplicate msg', ['dedupe_key' => 'test-dedupe-123']);
+    assertTest($nDup === false, "Notifications API: Duplicate notification with same dedupe_key suppressed.");
+
+    // notifyMany() test
+    $manyIds = notifyMany($pdo, [
+        ['id' => 'STU-101', 'role' => 'student'],
+        ['id' => 'tut-1', 'role' => 'tutor']
+    ], 'broadcast', 'Multi Test', 'Multi notification msg');
+    assertTest(count($manyIds) === 2, "Notifications API: notifyMany() dispatches to multiple recipients.");
 
     // Mark as read in notification_reads
     $stRead = $pdo->prepare("INSERT INTO notification_reads (notification_id, user_id) VALUES (?, ?)");

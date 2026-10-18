@@ -345,6 +345,16 @@ if ($method === 'GET') {
             $stUpd->execute([$newRat, $newCnt, $session['tutor_id']]);
         }
 
+        // Trigger notification to tutor
+        notify($pdo, 'tutor', $session['tutor_id'], "New $rating-Star Rating Received", "{$session['student_name']} rated your {$session['subject']} session $rating star(s)" . ($feedback ? ": \"$feedback\"" : "."), [
+            'type' => 'session_rated',
+            'recipient_user_id' => $session['tutor_id'],
+            'recipient_role' => 'tutor',
+            'related_session_id' => $sessionId,
+            'action_url' => "#session-$sessionId",
+            'priority' => 'normal'
+        ]);
+
         echo json_encode(['status' => 'success', 'message' => 'Rating submitted successfully.']);
     } elseif ($user['role'] === 'admin') {
         $fields = [];

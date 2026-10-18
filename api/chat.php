@@ -85,6 +85,20 @@ if ($method === 'GET') {
     $stmt->execute([$sessionId, $senderName, $senderRole, $message, $timestamp]);
     $msgId = $pdo->lastInsertId();
 
+    // Trigger chat message notification for recipient
+    $recipientId = $isStudent ? $session['tutor_id'] : $session['student_id'];
+    $recipientRole = $isStudent ? 'tutor' : 'student';
+    $msgSnippet = mb_strlen($message) > 60 ? mb_substr($message, 0, 57) . '...' : $message;
+
+    notify($pdo, $recipientRole, $recipientId, "New Message from $senderName", "$senderName: \"$msgSnippet\"", [
+        'type' => 'chat_message',
+        'recipient_user_id' => $recipientId,
+        'recipient_role' => $recipientRole,
+        'related_session_id' => $sessionId,
+        'action_url' => "#workspace-$sessionId",
+        'priority' => 'normal'
+    ]);
+
     echo json_encode([
         'status' => 'success',
         'message' => 'Message sent.',

@@ -396,9 +396,10 @@ $adminName = $_SESSION['name'] ?? 'Admin';
           </a>
         </li>
         <li class="sidebar-item" data-tab="notifications">
-          <a href="#" onclick="switchTab('notifications', event)">
+          <a href="#" onclick="switchTab('notifications', event)" style="position: relative;">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             Notifications
+            <span id="admin-notif-badge" class="badge badge-pending" style="display: none; position: absolute; right: 12px; font-size: 0.72rem; padding: 2px 6px;">0</span>
           </a>
         </li>
         <li class="sidebar-item" data-tab="reports">
@@ -2110,9 +2111,50 @@ $adminName = $_SESSION['name'] ?? 'Admin';
       window.print();
     }
 
-    // Initialize Dashboard on DOM Load
+    // Real-Time Notification SSE Stream
+    let adminNotifSSE = null;
+
+    function initAdminSSE() {
+      if (adminNotifSSE) {
+        adminNotifSSE.close();
+        adminNotifSSE = null;
+      }
+
+      try {
+        adminNotifSSE = new EventSource('api/notifications_stream.php');
+
+        adminNotifSSE.addEventListener('notification', (e) => {
+          try {
+            const payload = JSON.parse(e.data);
+            if (payload) {
+              const count = payload.unreadCount || 0;
+              const badge = document.getElementById('admin-notif-badge');
+              if (badge) {
+                badge.textContent = count;
+                badge.style.display = count > 0 ? 'inline-block' : 'none';
+              }
+
+              if (currentTab === 'notifications') {
+                loadNotifications();
+              }
+
+              if (Array.isArray(payload.notifications)) {
+                payload.notifications.forEach(nn => {
+                  if (!nn.read && (nn.priority === 'high' || nn.priority === 'urgent')) {
+                    showSuccess('🔔 High Priority Notice: ' + nn.title + ' - ' + nn.message);
+                  }
+                });
+              }
+            }
+          } catch (err) {}
+        });
+      } catch (err) {}
+    }
+
+    // Initialize Dashboard & SSE Stream on DOM Load
     document.addEventListener('DOMContentLoaded', () => {
       loadDashboard();
+      initAdminSSE();
     });
   </script>
 </body>

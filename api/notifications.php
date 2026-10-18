@@ -27,18 +27,28 @@ if ($method === 'GET') {
                 $diff = $startTs - $now;
 
                 if ($startTs > 0 && $diff > 0 && $diff <= 86400) {
-                    $remId = "rem-{$ses['id']}-$userRole";
-                    $stChk = $pdo->prepare("SELECT COUNT(*) as cnt FROM notifications WHERE id = ?");
-                    $stChk->execute([$remId]);
+                    $targetUserId = ($userRole === 'student') ? $ses['student_id'] : $ses['tutor_id'];
+                    $otherName = ($userRole === 'student') ? $ses['tutor_name'] : $ses['student_name'];
 
-                    if ($stChk->fetch()['cnt'] == 0) {
-                        $targetUserId = ($userRole === 'student') ? $ses['student_id'] : $ses['tutor_id'];
-                        $otherName = ($userRole === 'student') ? $ses['tutor_name'] : $ses['student_name'];
-                        $remMsg = "Reminder: Your {$ses['subject']} session with $otherName starts on {$ses['session_date']} at {$ses['time_slot']}.";
-
-                        $stIns = $pdo->prepare("INSERT INTO notifications (id, target_role, target, title, message, is_read) VALUES (?, ?, ?, ?, ?, 0)");
-                        $stIns->execute([$remId, $userRole, $targetUserId, 'Upcoming Session Reminder', $remMsg]);
+                    if ($diff <= 3600) {
+                        $remType = 'session_reminder_1h';
+                        $remTitle = 'Session Starting Soon (1 Hour)';
+                        $remMsg = "Urgent: Your {$ses['subject']} session with $otherName starts in less than an hour at {$ses['time_slot']}.";
+                    } else {
+                        $remType = 'session_reminder_24h';
+                        $remTitle = 'Upcoming Session Reminder (24 Hours)';
+                        $remMsg = "Reminder: Your {$ses['subject']} session with $otherName is tomorrow on {$ses['session_date']} at {$ses['time_slot']}.";
                     }
+
+                    $dedupeKey = "rem-{$ses['id']}-$userRole-$remType";
+                    notify($pdo, $userRole, $targetUserId, $remTitle, $remMsg, [
+                        'type' => $remType,
+                        'recipient_user_id' => $targetUserId,
+                        'recipient_role' => $userRole,
+                        'related_session_id' => $ses['id'],
+                        'priority' => 'high',
+                        'dedupe_key' => $dedupeKey
+                    ]);
                 }
             }
         }
@@ -48,28 +58,41 @@ if ($method === 'GET') {
     session_write_close();
 
     if ($userRole === 'admin') {
-        $sql = "SELECT n.id, n.target_role, n.target, n.title, n.message,
+        $sql = "SELECT n.id, n.recipient_user_id, n.recipient_role, n.target_role, n.target, n.type, n.title, n.message,
+                       n.related_session_id, n.related_payment_id, n.related_user_id, n.action_url, n.priority, n.dedupe_key,
                        CASE WHEN nr.user_id IS NOT NULL OR n.is_read = 1 THEN 1 ELSE 0 END as is_read,
+                       COALESCE(nr.read_at, n.read_at) as read_at,
                        n.created_at
                 FROM notifications n
                 LEFT JOIN notification_reads nr ON n.id = nr.notification_id AND nr.user_id = ?
-                ORDER BY n.created_at DESC
-                LIMIT 50";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$userId]);
-    } else {
-        $sql = "SELECT n.id, n.target_role, n.target, n.title, n.message,
-                       CASE WHEN nr.user_id IS NOT NULL OR n.is_read = 1 THEN 1 ELSE 0 END as is_read,
-                       n.created_at
-                FROM notifications n
-                LEFT JOIN notification_reads nr ON n.id = nr.notification_id AND nr.user_id = ?
-                WHERE n.target_role = 'all'
+                WHERE n.recipient_user_id = ?
+                   OR n.target = ?
+                   OR n.recipient_role = 'admin'
+                   OR n.target_role = 'admin'
+                   OR n.target_role = 'all'
                    OR n.target = 'All Users'
-                   OR (n.target_role = ? AND (n.target = ? OR n.target = 'All Users'))
                 ORDER BY n.created_at DESC
                 LIMIT 50";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$userId, $userRole, $userId]);
+        $stmt->execute([$userId, $userId, $userId]);
+    } else {
+        $sql = "SELECT n.id, n.recipient_user_id, n.recipient_role, n.target_role, n.target, n.type, n.title, n.message,
+                       n.related_session_id, n.related_payment_id, n.related_user_id, n.action_url, n.priority, n.dedupe_key,
+                       CASE WHEN nr.user_id IS NOT NULL OR n.is_read = 1 THEN 1 ELSE 0 END as is_read,
+                       COALESCE(nr.read_at, n.read_at) as read_at,
+                       n.created_at
+                FROM notifications n
+                LEFT JOIN notification_reads nr ON n.id = nr.notification_id AND nr.user_id = ?
+                WHERE n.recipient_user_id = ?
+                   OR n.target = ?
+                   OR n.recipient_role = ?
+                   OR (n.target_role = ? AND (n.target = ? OR n.target = 'All Users'))
+                   OR n.target_role = 'all'
+                   OR n.target = 'All Users'
+                ORDER BY n.created_at DESC
+                LIMIT 50";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$userId, $userId, $userId, $userRole, $userRole, $userId]);
     }
 
     $notifications = $stmt->fetchAll();
@@ -101,6 +124,25 @@ if ($method === 'GET') {
         'message' => 'Notification broadcast sent successfully.',
         'data' => toCamelArray($row)
     ]);
+} elseif ($method === 'DELETE') {
+    $user = requireLogin();
+    $userId = $user['id'];
+    $userRole = $user['role'];
+    $notifId = trim($_GET['id'] ?? '');
+
+    if (empty($notifId)) {
+        jsonError(400, 'Notification ID is required for deletion.');
+    }
+
+    if ($userRole === 'admin') {
+        $stDel = $pdo->prepare("DELETE FROM notifications WHERE id = ?");
+        $stDel->execute([$notifId]);
+    } else {
+        $stDel = $pdo->prepare("DELETE FROM notifications WHERE id = ? AND (recipient_user_id = ? OR target = ?)");
+        $stDel->execute([$notifId, $userId, $userId]);
+    }
+
+    echo json_encode(['status' => 'success', 'message' => 'Notification deleted successfully.']);
 } elseif ($method === 'PUT') {
     $user = requireLogin();
     $userId = $user['id'];
