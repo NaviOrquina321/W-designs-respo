@@ -159,6 +159,36 @@ try {
     $stReadChk->execute([$notifRow['id'], 'STU-101']);
     assertTest($stReadChk->fetch()['cnt'] == 1, "Notifications API: Read state tracked in notification_reads table.");
 
+    // 8. Session Timer & Start Logic
+    $timerSessionDate = date('Y-m-d');
+    $timerSlot = '02:00 PM - 03:00 PM';
+    $timerSession = processDemoGCashPayment($pdo, [
+        'id' => 'STU-101',
+        'name' => 'Maria Santos',
+        'email' => 'maria@tutorlink.ph'
+    ], $tutorRecord, 'Physics', $timerSessionDate, $timerSlot);
+
+    $tsId = $timerSession['id'];
+    $nowStr = date('Y-m-d H:i:s');
+    $stStart = $pdo->prepare("UPDATE sessions SET status = 'In Progress', started_at = ? WHERE id = ?");
+    $stStart->execute([$nowStr, $tsId]);
+
+    $stFetchTs = $pdo->prepare("SELECT * FROM sessions WHERE id = ?");
+    $stFetchTs->execute([$tsId]);
+    $tsRow = $stFetchTs->fetch();
+
+    $camelTs = toCamelArray($tsRow);
+    assertTest(!empty($camelTs['startedAt']) && $camelTs['status'] === 'In Progress', "Session Timer: startedAt timestamp stored upon starting session.");
+    assertTest($camelTs['durationMinutes'] === 60, "Session Timer: durationMinutes calculated correctly from slot length.");
+    assertTest(!empty($camelTs['serverNow']), "Session Timer: serverNow field returned in toCamelArray output.");
+
+    // 9. Timer Threshold Notification Triggers (simulate session started 56 mins ago = 4 mins remaining)
+    $tsRow['started_at'] = date('Y-m-d H:i:s', time() - 3360);
+    checkSessionTimerThresholds($pdo, [$tsRow]);
+    $stNotifWarn = $pdo->prepare("SELECT COUNT(*) as cnt FROM notifications WHERE related_session_id = ? AND type = 'session_timer_warn'");
+    $stNotifWarn->execute([$tsId]);
+    assertTest($stNotifWarn->fetch()['cnt'] >= 1, "Session Timer: 5-minute warning notification created on threshold.");
+
 } catch (Exception $e) {
     echo "\n[ERROR] Exception caught during smoke test: " . $e->getMessage() . "\n";
     $failed++;

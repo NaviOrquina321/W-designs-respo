@@ -1683,7 +1683,27 @@ $adminName = $_SESSION['name'] ?? 'Admin';
           return;
         }
 
-        tbody.innerHTML = filtered.map(s => `
+        tbody.innerHTML = filtered.map(s => {
+          let statusText = escapeHtml(s.status);
+          if (s.status === 'In Progress' && s.startedAt) {
+            const serverNowMs = s.serverNow ? new Date(s.serverNow).getTime() : Date.now();
+            const startedAtMs = new Date(s.startedAt).getTime();
+            const durationSecs = (parseInt(s.durationMinutes, 10) || 60) * 60;
+            const elapsedSecs = Math.floor((serverNowMs - startedAtMs) / 1000);
+            const remSecs = durationSecs - elapsedSecs;
+            if (remSecs > 0) {
+              const m = Math.floor(remSecs / 60);
+              const sec = Math.floor(remSecs % 60);
+              statusText += ` (${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')} left)`;
+            } else {
+              const overSec = Math.abs(remSecs);
+              const m = Math.floor(overSec / 60);
+              const sec = Math.floor(overSec % 60);
+              statusText += ` (+${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')})`;
+            }
+          }
+
+          return `
           <tr>
             <td><strong>${escapeHtml(s.studentName)}</strong></td>
             <td><strong>${escapeHtml(s.tutorName)}</strong></td>
@@ -1693,8 +1713,10 @@ $adminName = $_SESSION['name'] ?? 'Admin';
             <td>${formatMoney(s.commissionFee)}</td>
             <td><strong>${formatMoney(s.totalPaid)}</strong></td>
             <td><code>${escapeHtml(s.gcashRef)}</code></td>
-            <td><span class="badge ${s.status === 'Completed' ? 'badge-success' : s.status === 'Cancelled' ? 'badge-danger' : 'badge-pending'}">${escapeHtml(s.status)}</span></td>
+            <td><span class="badge ${s.status === 'Completed' ? 'badge-success' : s.status === 'Cancelled' ? 'badge-danger' : 'badge-pending'}">${statusText}</span></td>
             <td><span class="badge ${s.payoutStatus === 'Paid Out' ? 'badge-success' : 'badge-pending'}">${escapeHtml(s.payoutStatus)}</span></td>
+          `;
+        }).join('');
             <td>
               <button class="btn btn-secondary btn-small" onclick="openRescheduleModal('${escapeHtml(s.id)}')">Reschedule</button>
               <button class="btn btn-secondary btn-small" onclick="cancelSession('${escapeHtml(s.id)}')">Cancel</button>

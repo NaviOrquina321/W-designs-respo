@@ -36,7 +36,8 @@ function processDemoGCashPayment($pdo, $student, $tutorRecord, $subject, $sessio
         }
 
         // 1. Create session (status Confirmed)
-        $stmtSes = $pdo->prepare("INSERT INTO sessions (id, student_id, student_name, tutor_id, tutor_name, subject, session_date, time_slot, hourly_rate, commission_fee, total_paid, gcash_ref, status, payout_status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed', 'Unpaid', 'Booked via Demo GCash e-Wallet.')");
+        $durationMinutes = parseSlotDurationMinutes($timeSlot);
+        $stmtSes = $pdo->prepare("INSERT INTO sessions (id, student_id, student_name, tutor_id, tutor_name, subject, session_date, time_slot, duration_minutes, hourly_rate, commission_fee, total_paid, gcash_ref, status, payout_status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed', 'Unpaid', 'Booked via Demo GCash e-Wallet.')");
         $stmtSes->execute([
             $sessionId,
             $student['id'],
@@ -46,6 +47,7 @@ function processDemoGCashPayment($pdo, $student, $tutorRecord, $subject, $sessio
             $subject,
             $sessionDate,
             $timeSlot,
+            $durationMinutes,
             $hourlyRate,
             $commissionFee,
             $totalPaid,

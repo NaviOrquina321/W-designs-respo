@@ -136,6 +136,8 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   `subject` VARCHAR(100) NOT NULL,
   `session_date` DATE NOT NULL,
   `time_slot` VARCHAR(50) NOT NULL,
+  `duration_minutes` INT DEFAULT 60,
+  `started_at` DATETIME NULL DEFAULT NULL,
   `hourly_rate` DECIMAL(10,2) NOT NULL,
   `commission_fee` DECIMAL(10,2) NOT NULL,
   `total_paid` DECIMAL(10,2) NOT NULL,

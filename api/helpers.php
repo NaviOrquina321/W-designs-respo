@@ -99,6 +99,90 @@ function parseSlotEndTime($dateStr, $slotStr) {
     return $dt->getTimestamp();
 }
 
+function parseSlotDurationMinutes($slotStr) {
+    if (empty($slotStr)) return 60;
+    $parts = explode('-', $slotStr);
+    if (count($parts) < 2) return 60;
+    $startStr = trim($parts[0]);
+    $endStr = trim($parts[1]);
+    $dummyDate = '2026-01-01 ';
+    $dtStart = DateTime::createFromFormat('Y-m-d h:i A', $dummyDate . $startStr, new DateTimeZone('Asia/Manila'));
+    if (!$dtStart) $dtStart = DateTime::createFromFormat('Y-m-d H:i', $dummyDate . $startStr, new DateTimeZone('Asia/Manila'));
+
+    $dtEnd = DateTime::createFromFormat('Y-m-d h:i A', $dummyDate . $endStr, new DateTimeZone('Asia/Manila'));
+    if (!$dtEnd) $dtEnd = DateTime::createFromFormat('Y-m-d H:i', $dummyDate . $endStr, new DateTimeZone('Asia/Manila'));
+
+    if ($dtStart && $dtEnd) {
+        $diffSeconds = $dtEnd->getTimestamp() - $dtStart->getTimestamp();
+        if ($diffSeconds > 0) {
+            return (int)round($diffSeconds / 60);
+        }
+    }
+    return 60;
+}
+
+function checkSessionTimerThresholds($pdo, $sessions) {
+    if (!$pdo || empty($sessions)) return;
+    $now = time();
+
+    foreach ($sessions as $session) {
+        if (($session['status'] ?? '') !== 'In Progress' || empty($session['started_at'])) {
+            continue;
+        }
+
+        $startedTs = strtotime($session['started_at']);
+        if (!$startedTs) continue;
+
+        $durationMins = intval($session['duration_minutes'] ?? 60);
+        if ($durationMins <= 0) $durationMins = 60;
+        $durationSecs = $durationMins * 60;
+
+        $elapsedSecs = $now - $startedTs;
+        $remainingSecs = $durationSecs - $elapsedSecs;
+
+        $sessionId = $session['id'];
+        $subject = $session['subject'] ?? 'Tutoring';
+        $studentId = $session['student_id'] ?? null;
+        $tutorId = $session['tutor_id'] ?? null;
+
+        // 5 Minutes Left Threshold
+        if ($remainingSecs <= 300) {
+            if ($studentId) {
+                notify($pdo, 'student', $studentId, '5 Minutes Remaining', "Only 5 minutes remaining for your $subject session.", [
+                    'type' => 'session_timer_warn',
+                    'related_session_id' => $sessionId,
+                    'dedupe_key' => "timer-5min-$sessionId-$studentId"
+                ]);
+            }
+            if ($tutorId) {
+                notify($pdo, 'tutor', $tutorId, '5 Minutes Remaining', "Only 5 minutes remaining for your $subject session.", [
+                    'type' => 'session_timer_warn',
+                    'related_session_id' => $sessionId,
+                    'dedupe_key' => "timer-5min-$sessionId-$tutorId"
+                ]);
+            }
+        }
+
+        // 0 Minutes Left Threshold (Time is up)
+        if ($remainingSecs <= 0) {
+            if ($studentId) {
+                notify($pdo, 'student', $studentId, 'Session Time Is Up', "Time is up for your $subject session.", [
+                    'type' => 'session_timer_up',
+                    'related_session_id' => $sessionId,
+                    'dedupe_key' => "timer-0min-$sessionId-$studentId"
+                ]);
+            }
+            if ($tutorId) {
+                notify($pdo, 'tutor', $tutorId, 'Session Time Is Up', "Time is up for your $subject session. Please end the session when finished.", [
+                    'type' => 'session_timer_up',
+                    'related_session_id' => $sessionId,
+                    'dedupe_key' => "timer-0min-$sessionId-$tutorId"
+                ]);
+            }
+        }
+    }
+}
+
 function sanitizeCsvCell($val) {
     $str = strval($val ?? '');
     if (strlen($str) > 0 && in_array($str[0], ['=', '+', '-', '@'], true)) {
@@ -200,11 +284,15 @@ function toCamelArray($data) {
     }
 
     // Cast numeric fields
-    $numKeys = ['amount', 'rating', 'hourlyRate', 'totalPaid', 'commissionFee', 'score', 'reviewsCount', 'sessionsCompleted'];
+    $numKeys = ['amount', 'rating', 'hourlyRate', 'totalPaid', 'commissionFee', 'score', 'reviewsCount', 'sessionsCompleted', 'durationMinutes'];
     foreach ($numKeys as $nk) {
         if (isset($result[$nk]) && $result[$nk] !== null) {
             $result[$nk] = is_float($result[$nk] + 0) ? (float)$result[$nk] : (int)$result[$nk];
         }
+    }
+
+    if (!isset($result['serverNow'])) {
+        $result['serverNow'] = date('c');
     }
 
     // Add UI compatibility aliases if present in row assoc array

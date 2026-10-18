@@ -22,6 +22,7 @@ function formatMoney(amount) {
 const state = {
   currentRole: 'guest', // 'guest', 'student', 'tutor', 'admin', 'tutor-profile'
   currentUser: null,
+  serverOffset: 0,
 
   subjects: [],
   students: [],
@@ -160,7 +161,22 @@ async function syncWithDatabase() {
     const resSes = await fetch('api/sessions.php');
     if (resSes.ok) {
       const jsonSes = await resSes.json();
-      if (Array.isArray(jsonSes.data)) state.sessions = jsonSes.data;
+      if (Array.isArray(jsonSes.data)) {
+        state.sessions = jsonSes.data;
+        if (state.activeWorkspaceSession) {
+          const updated = state.sessions.find(s => s.id === state.activeWorkspaceSession.id);
+          if (updated) {
+            state.activeWorkspaceSession = updated;
+            if (updated.serverNow) {
+              const serverMs = new Date(updated.serverNow).getTime();
+              if (!isNaN(serverMs)) state.serverOffset = serverMs - Date.now();
+            }
+            if (typeof updateWorkspaceUI === 'function') {
+              updateWorkspaceUI();
+            }
+          }
+        }
+      }
     }
 
     const resPay = await fetch('api/payments.php');
@@ -606,6 +622,10 @@ function openModal(id) {
 function closeModal(id) {
   const modal = document.getElementById(id);
   if (modal) modal.classList.remove('active');
+  if (id === 'modal-session-workspace') {
+    stopWorkspaceTimer();
+    state.activeWorkspaceSession = null;
+  }
 }
 
 // Profile Modal Handlers
@@ -1903,6 +1923,168 @@ window.openEndSessionModal = function(sessionId) {
   openModal('modal-end-session');
 };
 
+// Workspace Timer Module
+let workspaceTimerInterval = null;
+let timerToastFired5Min = false;
+let timerToastFired1Min = false;
+
+function stopWorkspaceTimer() {
+  if (workspaceTimerInterval) {
+    clearInterval(workspaceTimerInterval);
+    workspaceTimerInterval = null;
+  }
+}
+
+function formatTimerDuration(seconds) {
+  const isNegative = seconds < 0;
+  const absSec = Math.abs(seconds);
+  const h = Math.floor(absSec / 3600);
+  const m = Math.floor((absSec % 3600) / 60);
+  const s = Math.floor(absSec % 60);
+  const pad = num => String(num).padStart(2, '0');
+
+  if (isNegative) {
+    return `+${pad(Math.floor(absSec / 60))}:${pad(s)}`;
+  }
+  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+}
+
+function updateWorkspaceTimerTick() {
+  const timerEl = document.getElementById('session-timer');
+  const labelEl = document.getElementById('session-timer-label');
+  if (!timerEl) return;
+
+  const session = state.activeWorkspaceSession;
+  if (!session) {
+    stopWorkspaceTimer();
+    return;
+  }
+
+  const durationMins = parseInt(session.durationMinutes || 60, 10);
+  const durationSecs = durationMins * 60;
+
+  timerEl.className = 'timer-badge';
+
+  if (session.status === 'Completed' || session.status === 'Cancelled') {
+    stopWorkspaceTimer();
+    timerEl.textContent = formatTimerDuration(durationSecs);
+    if (labelEl) labelEl.textContent = session.status === 'Completed' ? 'Session ended' : 'Cancelled';
+    return;
+  }
+
+  if (session.status !== 'In Progress' || !session.startedAt) {
+    stopWorkspaceTimer();
+    timerEl.textContent = formatTimerDuration(durationSecs);
+    if (labelEl) labelEl.textContent = 'Waiting for tutor to start';
+    return;
+  }
+
+  const startedAtMs = new Date(session.startedAt).getTime();
+  if (isNaN(startedAtMs)) {
+    timerEl.textContent = formatTimerDuration(durationSecs);
+    if (labelEl) labelEl.textContent = 'Waiting for tutor to start';
+    return;
+  }
+
+  const currentServerNow = Date.now() + (state.serverOffset || 0);
+  const elapsedSecs = Math.floor((currentServerNow - startedAtMs) / 1000);
+  const remainingSecs = durationSecs - elapsedSecs;
+
+  if (remainingSecs > 300) {
+    timerEl.textContent = formatTimerDuration(remainingSecs);
+    if (labelEl) labelEl.textContent = 'Remaining time';
+  } else if (remainingSecs > 60) {
+    timerEl.classList.add('timer--warn');
+    timerEl.textContent = formatTimerDuration(remainingSecs);
+    if (labelEl) labelEl.textContent = '5 minutes left';
+    if (!timerToastFired5Min) {
+      timerToastFired5Min = true;
+      showToast('5 minutes left', 'warning');
+    }
+  } else if (remainingSecs > 0) {
+    timerEl.classList.add('timer--danger');
+    timerEl.textContent = formatTimerDuration(remainingSecs);
+    if (labelEl) labelEl.textContent = '1 minute left';
+    if (!timerToastFired1Min) {
+      timerToastFired1Min = true;
+      showToast('1 minute left', 'error');
+    }
+  } else {
+    timerEl.classList.add('timer--over');
+    timerEl.textContent = formatTimerDuration(remainingSecs);
+    if (labelEl) labelEl.textContent = 'Time is up';
+  }
+}
+
+function startWorkspaceTimer(session) {
+  stopWorkspaceTimer();
+  if (!session) return;
+
+  if (session.serverNow) {
+    const serverMs = new Date(session.serverNow).getTime();
+    if (!isNaN(serverMs)) {
+      state.serverOffset = serverMs - Date.now();
+    }
+  }
+
+  timerToastFired5Min = false;
+  timerToastFired1Min = false;
+
+  updateWorkspaceTimerTick();
+
+  if (session.status === 'In Progress') {
+    workspaceTimerInterval = setInterval(updateWorkspaceTimerTick, 1000);
+  }
+}
+
+function updateWorkspaceUI() {
+  const session = state.activeWorkspaceSession;
+  if (!session) return;
+
+  const titleEl = document.getElementById('workspace-session-title');
+  const partEl = document.getElementById('workspace-participants');
+  const notesEl = document.getElementById('session-shared-notes');
+  const chatInput = document.getElementById('chat-input');
+  const chatSubmitBtn = document.querySelector('#chat-form button[type="submit"]');
+  const endBtn = document.getElementById('end-session-btn');
+
+  const isReadOnly = (session.status === 'Completed' || session.status === 'Cancelled');
+
+  if (titleEl) titleEl.textContent = `${isReadOnly ? 'Workspace Archive' : 'Live Workspace'}: ${esc(session.subject)}`;
+  if (partEl) partEl.textContent = `${esc(session.studentName)} (Student) & ${esc(session.tutorName)} (Tutor) - ${esc(session.status)}`;
+
+  if (notesEl) {
+    notesEl.value = session.notes || '';
+    notesEl.disabled = isReadOnly;
+  }
+
+  if (chatInput) {
+    chatInput.disabled = isReadOnly;
+    chatInput.placeholder = isReadOnly ? "Session is completed or cancelled. Workspace is read-only." : "Type a message...";
+  }
+
+  if (chatSubmitBtn) {
+    chatSubmitBtn.disabled = isReadOnly;
+  }
+
+  if (endBtn) {
+    if (state.currentRole === 'tutor' && session.status === 'In Progress') {
+      endBtn.classList.remove('hidden');
+      endBtn.disabled = false;
+    } else {
+      endBtn.classList.add('hidden');
+    }
+  }
+
+  startWorkspaceTimer(session);
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && state.activeWorkspaceSession) {
+    updateWorkspaceTimerTick();
+  }
+});
+
 // Workspace Module
 function initWorkspaceSession() {
   const closeBtn = document.getElementById('close-workspace-btn');
@@ -1953,33 +2135,18 @@ window.joinLiveWorkspace = async function(sessionId) {
   state.activeWorkspaceSession = session;
   state.lastChatId = 0;
 
-  const titleEl = document.getElementById('workspace-session-title');
-  const partEl = document.getElementById('workspace-participants');
-  const notesEl = document.getElementById('session-shared-notes');
-  const chatInput = document.getElementById('chat-input');
-  const chatSubmitBtn = document.querySelector('#chat-form button[type="submit"]');
-
-  const isReadOnly = (session.status === 'Completed' || session.status === 'Cancelled');
-
-  if (titleEl) titleEl.textContent = `${isReadOnly ? 'Workspace Archive' : 'Live Workspace'}: ${esc(session.subject)}`;
-  if (partEl) partEl.textContent = `${esc(session.studentName)} (Student) & ${esc(session.tutorName)} (Tutor) - ${esc(session.status)}`;
-
-  if (notesEl) {
-    notesEl.value = session.notes || '';
-    notesEl.disabled = isReadOnly;
+  if (session.serverNow) {
+    const serverMs = new Date(session.serverNow).getTime();
+    if (!isNaN(serverMs)) {
+      state.serverOffset = serverMs - Date.now();
+    }
   }
 
-  if (chatInput) {
-    chatInput.disabled = isReadOnly;
-    chatInput.placeholder = isReadOnly ? "Session is completed or cancelled. Workspace is read-only." : "Type a message...";
-  }
-
-  if (chatSubmitBtn) {
-    chatSubmitBtn.disabled = isReadOnly;
-  }
+  updateWorkspaceUI();
 
   const chatContainer = document.getElementById('chat-messages-container');
   if (chatContainer) {
+    const isReadOnly = (session.status === 'Completed' || session.status === 'Cancelled');
     chatContainer.innerHTML = `<div class="chat-msg system">${isReadOnly ? 'Session read-only archive.' : 'Live Virtual Workspace connected.'}</div>`;
   }
 

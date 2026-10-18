@@ -893,8 +893,11 @@ header('Content-Type: text/html; charset=utf-8');
           <h3 id="workspace-session-title">Live Matching Session: Mathematics</h3>
           <p id="workspace-participants" class="sub-text">Maria Santos (Student) & Prof. Alex Rivera (Tutor)</p>
         </div>
-        <div class="header-right-group">
-          <div class="timer-badge" id="session-timer">00:45:00</div>
+        <div class="header-right-group" style="display: flex; align-items: center; gap: 12px;">
+          <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <div class="timer-badge" id="session-timer">00:45:00</div>
+            <span id="session-timer-label" style="font-size: 0.75rem; color: var(--muted); margin-top: 2px;">Waiting for tutor to start</span>
+          </div>
           <button class="btn btn-danger btn-small" id="end-session-btn">End Session</button>
           <button class="close-btn" id="close-workspace-btn">&times;</button>
         </div>

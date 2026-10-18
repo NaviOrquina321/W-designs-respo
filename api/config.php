@@ -215,6 +215,8 @@ try {
           `subject` VARCHAR(100) NOT NULL,
           `session_date` DATE NOT NULL,
           `time_slot` VARCHAR(50) NOT NULL,
+          `duration_minutes` INT DEFAULT 60,
+          `started_at` DATETIME NULL DEFAULT NULL,
           `hourly_rate` DECIMAL(10,2) NOT NULL,
           `commission_fee` DECIMAL(10,2) NOT NULL,
           `total_paid` DECIMAL(10,2) NOT NULL,
@@ -347,6 +349,26 @@ try {
         } catch (Exception $ex) {}
 
         $pdo->exec("INSERT INTO `schema_version` (`version`) VALUES (2);");
+    }
+
+    if ($currentVersion < 3) {
+        $sessionCols = [
+            "duration_minutes INT DEFAULT 60",
+            "started_at DATETIME NULL DEFAULT NULL"
+        ];
+        foreach ($sessionCols as $col) {
+            $colName = explode(' ', $col)[0];
+            try {
+                if ($isSQLite) {
+                    $pdo->exec("ALTER TABLE `sessions` ADD COLUMN $col;");
+                } else {
+                    $pdo->exec("ALTER TABLE `sessions` ADD COLUMN `$colName` " . substr($col, strlen($colName) + 1) . ";");
+                }
+            } catch (Exception $ex) {
+                // Column may already exist
+            }
+        }
+        $pdo->exec("INSERT INTO `schema_version` (`version`) VALUES (3);");
     }
 } catch (PDOException $e) {
     error_log("Schema migration error: " . $e->getMessage());

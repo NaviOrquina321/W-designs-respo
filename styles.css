@@ -592,6 +592,51 @@ footer .wrap { padding-top: 56px; padding-bottom: 56px; }
 .tutor-info h4 { font-size: 1.1rem; margin-bottom: 2px; color: var(--oxford-navy); }
 
 .tutor-details-list { font-size: 0.92rem; color: var(--ink-soft); margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+.timer-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink);
+  color: #ffffff;
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.timer--warn {
+  background: #d97706 !important;
+  color: #ffffff !important;
+}
+
+.timer--danger {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  animation: timerPulse 1s infinite;
+}
+
+.timer--over {
+  background: #991b1b !important;
+  color: #ffffff !important;
+  animation: timerPulse 1.5s infinite;
+}
+
+@keyframes timerPulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.65; }
+  100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timer--danger,
+  .timer--over {
+    animation: none !important;
+  }
+}
+
 .badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--line); }
 .badge-match { background: var(--oxford-navy); color: #ffffff; border-color: var(--oxford-navy); }
 .badge-success { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
