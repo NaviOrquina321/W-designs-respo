@@ -99,18 +99,18 @@ header('Content-Type: text/html; charset=utf-8');
       <!-- Metrics / Stats Counter Bar -->
       <section class="metrics-counter-bar">
         <div class="wrap">
-          <div class="metrics-grid">
+          <div class="metrics-grid" id="landing-stats-grid">
             <div class="metric-item">
-              <span class="metric-num">5,000+</span>
-              <span class="metric-label">Hours of Tuition Delivered</span>
+              <span class="metric-num" id="stat-tutors-count">0</span>
+              <span class="metric-label">Registered Tutors</span>
             </div>
             <div class="metric-item">
-              <span class="metric-num">200+</span>
-              <span class="metric-label">Tutors</span>
+              <span class="metric-num" id="stat-students-count">0</span>
+              <span class="metric-label">Registered Students</span>
             </div>
             <div class="metric-item">
-              <span class="metric-num">98%</span>
-              <span class="metric-label">Student Success Rate</span>
+              <span class="metric-num" id="stat-sessions-count">0</span>
+              <span class="metric-label">Completed Sessions</span>
             </div>
           </div>
         </div>

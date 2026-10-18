@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTutorProfileSettings();
   initRescheduleModal();
   initEndSessionModal();
+  loadPublicStats();
 
   // Check server session via api/me.php
   try {
@@ -1796,6 +1797,28 @@ function initNotifications() {
   });
 
   initNotificationsStream();
+}
+
+async function loadPublicStats() {
+  const tutorsEl = document.getElementById('stat-tutors-count');
+  const studentsEl = document.getElementById('stat-students-count');
+  const sessionsEl = document.getElementById('stat-sessions-count');
+
+  if (!tutorsEl && !studentsEl && !sessionsEl) return;
+
+  try {
+    const res = await fetch('api/public_stats.php');
+    if (res.ok) {
+      const json = await res.json();
+      if (json.status === 'success' && json.data) {
+        if (tutorsEl) tutorsEl.textContent = json.data.totalTutors || 0;
+        if (studentsEl) studentsEl.textContent = json.data.totalStudents || 0;
+        if (sessionsEl) sessionsEl.textContent = json.data.completedSessions || 0;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load public stats:', e);
+  }
 }
 
 function closeNotifDrawer() {
