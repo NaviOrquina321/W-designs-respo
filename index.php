@@ -432,43 +432,6 @@ header('Content-Type: text/html; charset=utf-8');
           </div>
         </div>
 
-        <!-- Section: Schedule Management & Available Slots -->
-        <div class="dashboard-section">
-          <div class="section-title-bar">
-            <h3>Manage Schedule & Available Slots</h3>
-            <button class="btn btn-secondary btn-small" id="edit-tutor-schedule-profile-btn">Edit Working Window</button>
-          </div>
-          <div class="detail-card margin-bottom">
-            <div style="display: flex; gap: 24px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid var(--line);">
-              <div><strong>Working Days:</strong> <span id="tutor-summary-days">Mon, Tue, Wed, Thu, Fri</span></div>
-              <div><strong>Time Window:</strong> <span id="tutor-summary-window">09:00 AM - 05:00 PM</span></div>
-              <div><strong>Blocked Dates:</strong> <span id="tutor-summary-blocked">None</span></div>
-            </div>
-
-            <form id="tutor-new-schedule-form" class="margin-top">
-              <h4 style="margin-bottom: 8px;">Create New Bookable Slot</h4>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Date</label>
-                  <input type="date" id="tutor-slot-date" class="form-input" required>
-                </div>
-                <div class="form-group">
-                  <label>Time Slot</label>
-                  <input type="text" id="tutor-slot-time" placeholder="e.g. 02:00 PM" class="form-input" required>
-                </div>
-                <div class="form-group">
-                  <label>Subject</label>
-                  <input type="text" id="tutor-slot-subject" placeholder="e.g. Mathematics" class="form-input" required>
-                </div>
-              </div>
-              <div style="display: flex; gap: 8px; margin-top: 8px;">
-                <button type="submit" class="btn btn-primary btn-small" id="tutor-save-slot-btn">Save Slot</button>
-                <button type="button" class="btn btn-secondary btn-small" id="tutor-cancel-slot-btn">Clear</button>
-              </div>
-            </form>
-          </div>
-        </div>
-
         <!-- Section 3: Earnings & Performance -->
         <div class="dashboard-section">
           <div class="section-title-bar">
