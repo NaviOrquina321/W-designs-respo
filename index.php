@@ -800,6 +800,17 @@ header('Content-Type: text/html; charset=utf-8');
           </div>
         </div>
 
+        <div class="form-group margin-top">
+          <label style="font-weight: 600; font-size: 0.88rem; color: var(--oxford-navy);">Payment Method:</label>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); margin-top: 4px;">
+            <input type="radio" id="pay-method-gcash" name="calendar-payment-method" value="GCash" checked style="accent-color: #005ce6; width: 18px; height: 18px; cursor: pointer;">
+            <label for="pay-method-gcash" style="margin: 0; font-weight: 600; color: var(--oxford-navy); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.92rem;">
+              <span style="background: #005ce6; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 800; letter-spacing: -0.02em;">GCash</span>
+              <span>GCash e-Wallet Payment</span>
+            </label>
+          </div>
+        </div>
+
         <div class="booking-summary-box">
           <div class="summary-line">
             <span>Hourly Tutoring Fee:</span>
