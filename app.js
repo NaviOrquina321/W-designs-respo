@@ -14,6 +14,10 @@ function esc(str) {
   }[c]));
 }
 
+function formatMoney(amount) {
+  return '₱' + (parseFloat(amount) || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
 // Application State
 const state = {
   currentRole: 'guest', // 'guest', 'student', 'tutor', 'admin', 'tutor-profile'
@@ -1461,142 +1465,35 @@ function renderPaymentReceipt(session, maskedMobile = '') {
   `;
 }
 
-let gcashMaskedMobile = '';
-
-function switchGCashStep(stepNum) {
-  document.getElementById('gcash-step-1')?.classList.toggle('hidden', stepNum !== 1);
-  document.getElementById('gcash-step-2')?.classList.toggle('hidden', stepNum !== 2);
-  document.getElementById('gcash-step-3')?.classList.toggle('hidden', stepNum !== 3);
-  document.getElementById('gcash-step-4')?.classList.toggle('hidden', stepNum !== 4);
-}
-
-// Simulated GCash Payment Integration (4 Steps)
+// GCash Payment Integration (Simplified 1-Click Payment Confirmation)
 function initGCashPayment() {
   const closeBtn = document.getElementById('close-gcash-modal');
   closeBtn?.addEventListener('click', () => closeModal('modal-gcash'));
 
-  document.getElementById('gcash-back-to-step1')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    switchGCashStep(1);
-  });
-
-  // Step 1 -> Step 2 (Mobile Validation)
-  document.getElementById('gcash-step1-next-btn')?.addEventListener('click', () => {
+  document.getElementById('gcash-confirm-pay-btn')?.addEventListener('click', async () => {
     const mobileInput = document.getElementById('gcash-mobile');
+    const refInput = document.getElementById('gcash-ref-no');
     const mobileErr = document.getElementById('gcash-mobile-error');
-    const val = (mobileInput?.value || '').trim();
+    const payErr = document.getElementById('gcash-payment-error');
+    const confirmBtn = document.getElementById('gcash-confirm-pay-btn');
 
-    if (!/^9\d{9}$/.test(val)) {
+    const mobileVal = (mobileInput?.value || '').trim();
+    const refVal = (refInput?.value || '').trim();
+
+    if (!/^9\d{9}$/.test(mobileVal)) {
       if (mobileErr) {
         mobileErr.textContent = 'Please enter a valid 10-digit mobile number starting with 9 (e.g. 9171234567).';
         mobileErr.style.display = 'block';
       }
       return;
     }
-
     if (mobileErr) mobileErr.style.display = 'none';
-
-    gcashMaskedMobile = `+63 9•• ••• ${val.slice(-4)}`;
-    const maskedEl = document.getElementById('gcash-masked-mobile');
-    if (maskedEl) maskedEl.textContent = gcashMaskedMobile;
-
-    // Reset OTP boxes
-    const otpInputs = document.querySelectorAll('.otp-digit');
-    otpInputs.forEach(i => i.value = '');
-    const otpErr = document.getElementById('gcash-otp-error');
-    if (otpErr) otpErr.style.display = 'none';
-
-    switchGCashStep(2);
-    if (otpInputs[0]) otpInputs[0].focus();
-  });
-
-  // OTP Auto-focus logic
-  const otpInputs = document.querySelectorAll('.otp-digit');
-  otpInputs.forEach((input, index) => {
-    input.addEventListener('input', (e) => {
-      e.target.value = e.target.value.replace(/[^0-9]/g, '');
-      if (e.target.value && index < otpInputs.length - 1) {
-        otpInputs[index + 1].focus();
-      }
-    });
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Backspace' && !e.target.value && index > 0) {
-        otpInputs[index - 1].focus();
-      }
-    });
-  });
-
-  // Step 2 -> Step 3 (OTP Verification)
-  document.getElementById('gcash-step2-next-btn')?.addEventListener('click', () => {
-    const otpVal = Array.from(otpInputs).map(i => i.value).join('');
-    const otpErr = document.getElementById('gcash-otp-error');
-
-    if (otpVal !== '123456') {
-      if (otpErr) {
-        otpErr.textContent = 'Invalid authentication code. Demo code is 123456.';
-        otpErr.style.display = 'block';
-      }
-      return;
-    }
-
-    if (otpErr) otpErr.style.display = 'none';
-
-    // Reset MPIN boxes
-    const pinInputs = document.querySelectorAll('.pin-digit');
-    pinInputs.forEach(i => i.value = '');
-    const mpinErr = document.getElementById('gcash-mpin-error');
-    if (mpinErr) mpinErr.style.display = 'none';
-
-    const b = state.activeBooking;
-    const confirmBtn = document.getElementById('gcash-confirm-pay-btn');
-    if (confirmBtn) {
-      confirmBtn.disabled = false;
-      confirmBtn.textContent = `Pay ${formatMoney(b.total)}`;
-    }
-
-    switchGCashStep(3);
-    if (pinInputs[0]) pinInputs[0].focus();
-  });
-
-  // MPIN Auto-focus logic
-  const pinInputs = document.querySelectorAll('.pin-digit');
-  pinInputs.forEach((input, index) => {
-    input.addEventListener('input', (e) => {
-      e.target.value = e.target.value.replace(/[^0-9]/g, '');
-      if (e.target.value && index < pinInputs.length - 1) {
-        pinInputs[index + 1].focus();
-      }
-    });
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Backspace' && !e.target.value && index > 0) {
-        pinInputs[index - 1].focus();
-      }
-    });
-  });
-
-  // Step 3 -> Step 4 (Confirm Payment / API Call)
-  document.getElementById('gcash-confirm-pay-btn')?.addEventListener('click', async () => {
-    const mpinVal = Array.from(pinInputs).map(i => i.value).join('');
-    const mpinErr = document.getElementById('gcash-mpin-error');
-    const confirmBtn = document.getElementById('gcash-confirm-pay-btn');
-
-    if (mpinVal.length < 4) {
-      if (mpinErr) {
-        mpinErr.textContent = 'Please enter your 4-digit MPIN.';
-        mpinErr.style.display = 'block';
-      }
-      return;
-    }
-
-    if (mpinErr) mpinErr.style.display = 'none';
+    if (payErr) payErr.style.display = 'none';
 
     if (confirmBtn) {
       confirmBtn.disabled = true;
-      confirmBtn.textContent = 'Processing payment...';
+      confirmBtn.textContent = 'Processing GCash Payment...';
     }
-
-    // Simulated 1.5 second processing delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
 
     const b = state.activeBooking;
 
@@ -1608,7 +1505,8 @@ function initGCashPayment() {
           tutor_id: b.tutorId,
           subject: b.subject,
           session_date: b.date,
-          time_slot: b.timeSlot
+          time_slot: b.timeSlot,
+          gcash_ref: refVal
         })
       });
       const data = await res.json();
@@ -1616,49 +1514,35 @@ function initGCashPayment() {
       if (!res.ok || data.status !== 'success') {
         if (confirmBtn) {
           confirmBtn.disabled = false;
-          confirmBtn.textContent = `Pay ${formatMoney(b.total)}`;
+          confirmBtn.textContent = 'Confirm GCash Payment';
         }
-        if (mpinErr) {
-          mpinErr.textContent = data.message || 'Booking failed. Please try again.';
-          mpinErr.style.display = 'block';
+        if (payErr) {
+          payErr.textContent = data.message || 'Payment processing failed. Please try again.';
+          payErr.style.display = 'block';
         }
         return;
       }
 
       await syncWithDatabase();
-
-      const createdSession = data.session || {};
-      const receiptContainer = document.getElementById('gcash-receipt-container');
-      if (receiptContainer) {
-        receiptContainer.innerHTML = renderPaymentReceipt(createdSession, gcashMaskedMobile);
-      }
-
-      switchGCashStep(4);
       renderAllViews();
-      showToast('Payment confirmed & session booked!');
+      closeModal('modal-gcash');
+
+      showToast('Payment confirmed & session booked! Please wait for your tutor to start the session.');
     } catch (e) {
       if (confirmBtn) {
         confirmBtn.disabled = false;
-        confirmBtn.textContent = `Pay ${formatMoney(b.total)}`;
+        confirmBtn.textContent = 'Confirm GCash Payment';
       }
-      if (mpinErr) {
-        mpinErr.textContent = 'Booking failed. Could not connect to server.';
-        mpinErr.style.display = 'block';
+      if (payErr) {
+        payErr.textContent = 'Payment failed. Could not connect to server.';
+        payErr.style.display = 'block';
       }
     }
-  });
-
-  // Step 4 Done button
-  document.getElementById('gcash-done-btn')?.addEventListener('click', () => {
-    closeModal('modal-gcash');
-    switchGCashStep(1);
-    const mobileInput = document.getElementById('gcash-mobile');
-    if (mobileInput) mobileInput.value = '';
-    refreshStudentData();
   });
 }
 
 function openGCashPayment() {
+  closeModal('modal-calendar');
   const b = state.activeBooking;
 
   const hourlyRate = parseFloat(b.hourlyRate || 350);
@@ -1691,16 +1575,21 @@ function openGCashPayment() {
   const mobileInput = document.getElementById('gcash-mobile');
   if (mobileInput) mobileInput.value = '';
 
+  const refInput = document.getElementById('gcash-ref-no');
+  if (refInput) refInput.value = '';
+
   const mobileErr = document.getElementById('gcash-mobile-error');
   if (mobileErr) mobileErr.style.display = 'none';
 
-  const otpErr = document.getElementById('gcash-otp-error');
-  if (otpErr) otpErr.style.display = 'none';
+  const payErr = document.getElementById('gcash-payment-error');
+  if (payErr) payErr.style.display = 'none';
 
-  const mpinErr = document.getElementById('gcash-mpin-error');
-  if (mpinErr) mpinErr.style.display = 'none';
+  const confirmBtn = document.getElementById('gcash-confirm-pay-btn');
+  if (confirmBtn) {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Confirm GCash Payment';
+  }
 
-  switchGCashStep(1);
   openModal('modal-gcash');
 }
 

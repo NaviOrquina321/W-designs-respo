@@ -107,13 +107,12 @@ if ($method === 'GET') {
     $commissionFee = intval(round($hourlyRate * 0.10));
     $totalPaid = $hourlyRate + $commissionFee;
 
-    $sessionId = newId('SES-');
-    $gcashRef = 'GC-' . random_int(1000000000, 9999999999);
+    $customGcashRef = trim($input['gcash_ref'] ?? ($input['gcashRef'] ?? ''));
     $studentName = $studentRecord['name'];
     $tutorName = $tutorRecord['name'];
 
     try {
-        $createdSession = processDemoGCashPayment($pdo, $studentRecord, $tutorRecord, $subject, $sessionDate, $timeSlot);
+        $createdSession = processDemoGCashPayment($pdo, $studentRecord, $tutorRecord, $subject, $sessionDate, $timeSlot, $customGcashRef);
 
         echo json_encode([
             'status' => 'success',

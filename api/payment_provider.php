@@ -5,13 +5,14 @@ if (!isset($pdo)) {
 }
 require_once __DIR__ . '/helpers.php';
 
-function processDemoGCashPayment($pdo, $student, $tutorRecord, $subject, $sessionDate, $timeSlot) {
+function processDemoGCashPayment($pdo, $student, $tutorRecord, $subject, $sessionDate, $timeSlot, $customGcashRef = null) {
     $hourlyRate = intval($tutorRecord['hourly_rate']);
     $commissionFee = intval(round($hourlyRate * 0.10));
     $totalPaid = $hourlyRate + $commissionFee;
 
     $sessionId = newId('SES-');
-    $gcashRef = 'GC-' . random_int(1000000000, 9999999999);
+    $customGcashRef = trim($customGcashRef ?? '');
+    $gcashRef = !empty($customGcashRef) ? $customGcashRef : ('GC-' . random_int(1000000000, 9999999999));
     $studentName = $student['name'];
     $tutorName = $tutorRecord['name'];
 

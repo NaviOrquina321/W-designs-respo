@@ -843,14 +843,13 @@ header('Content-Type: text/html; charset=utf-8');
   <div class="modal-backdrop" id="modal-gcash">
     <div class="modal-card gcash-theme" style="max-width: 480px;">
       <div class="gcash-banner" style="background: #005ce6; color: #ffffff; padding: 18px 20px; border-top-left-radius: 8px; border-top-right-radius: 8px; position: relative;">
-        <div class="gcash-logo" style="font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em;">GCash</div>
-        <div class="gcash-subtext" style="font-size: 0.8rem; opacity: 0.9; margin-top: 2px;">Demo payment - no real money is charged.</div>
+        <div class="gcash-logo" style="font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em;">GCash Payment</div>
+        <div class="gcash-subtext" style="font-size: 0.8rem; opacity: 0.9; margin-top: 2px;">Enter your GCash details to complete booking payment.</div>
         <button class="close-btn white" id="close-gcash-modal">&times;</button>
       </div>
 
       <div class="modal-body" style="padding: 20px;">
-        <!-- Step 1: Payment Details -->
-        <div id="gcash-step-1">
+        <div id="gcash-single-step">
           <div style="background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.9rem;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
               <span style="color: var(--muted);">Merchant:</span>
@@ -863,7 +862,7 @@ header('Content-Type: text/html; charset=utf-8');
             </div>
           </div>
 
-          <div class="form-group">
+          <div class="form-group margin-bottom">
             <label style="font-weight: 600; font-size: 0.88rem;">GCash Mobile Number</label>
             <div class="phone-input-group" style="display: flex; align-items: center; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #ffffff;">
               <span class="prefix" style="padding: 10px 12px; background: var(--paper); border-right: 1px solid var(--line); font-weight: 600; color: var(--oxford-navy);">+63</span>
@@ -872,65 +871,15 @@ header('Content-Type: text/html; charset=utf-8');
             <div id="gcash-mobile-error" class="text-danger margin-top-xs" style="font-size: 0.82rem; display: none;"></div>
           </div>
 
-          <button class="btn btn-gcash full-width margin-top" id="gcash-step1-next-btn" style="background: #005ce6; color: #ffffff; font-weight: 600;">Next</button>
-        </div>
-
-        <!-- Step 2: Verification Code (OTP) -->
-        <div id="gcash-step-2" class="hidden">
-          <div style="text-align: center; margin-bottom: 16px;">
-            <h4 style="margin: 0 0 6px 0;">Authentication Code</h4>
-            <p class="sub-text" style="font-size: 0.88rem; margin: 0;">We sent a 6-digit authentication code to <strong id="gcash-masked-mobile">+63 9XX XXX XXXX</strong></p>
+          <div class="form-group margin-bottom">
+            <label style="font-weight: 600; font-size: 0.88rem;">GCash Reference Number <span style="font-weight: 400; color: var(--muted);">(Optional)</span></label>
+            <input type="text" id="gcash-ref-no" class="form-input" placeholder="e.g. GC-1234567890" style="background: #ffffff;">
+            <div style="font-size: 0.78rem; color: var(--muted); margin-top: 4px;">Leave blank to auto-generate a valid GCash reference number.</div>
           </div>
 
-          <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 12px;">
-            <input type="text" maxlength="1" class="otp-digit form-input" style="width: 44px; height: 48px; text-align: center; font-size: 1.2rem; font-weight: 700;">
-            <input type="text" maxlength="1" class="otp-digit form-input" style="width: 44px; height: 48px; text-align: center; font-size: 1.2rem; font-weight: 700;">
-            <input type="text" maxlength="1" class="otp-digit form-input" style="width: 44px; height: 48px; text-align: center; font-size: 1.2rem; font-weight: 700;">
-            <input type="text" maxlength="1" class="otp-digit form-input" style="width: 44px; height: 48px; text-align: center; font-size: 1.2rem; font-weight: 700;">
-            <input type="text" maxlength="1" class="otp-digit form-input" style="width: 44px; height: 48px; text-align: center; font-size: 1.2rem; font-weight: 700;">
-            <input type="text" maxlength="1" class="otp-digit form-input" style="width: 44px; height: 48px; text-align: center; font-size: 1.2rem; font-weight: 700;">
-          </div>
+          <div id="gcash-payment-error" class="text-danger center-text margin-bottom" style="font-size: 0.82rem; display: none;"></div>
 
-          <p style="text-align: center; font-size: 0.82rem; color: var(--muted); margin-bottom: 12px;">Demo code: <strong>123456</strong></p>
-          <div id="gcash-otp-error" class="text-danger center-text margin-bottom-xs" style="font-size: 0.82rem; display: none;"></div>
-
-          <button class="btn btn-gcash full-width margin-top" id="gcash-step2-next-btn" style="background: #005ce6; color: #ffffff; font-weight: 600;">Verify Code</button>
-          <div style="text-align: center; margin-top: 10px;">
-            <a href="#" style="font-size: 0.85rem; color: var(--muted);" id="gcash-back-to-step1">← Back to Mobile Number</a>
-          </div>
-        </div>
-
-        <!-- Step 3: Confirm Payment (MPIN) -->
-        <div id="gcash-step-3" class="hidden">
-          <div style="text-align: center; margin-bottom: 16px;">
-            <h4 style="margin: 0 0 4px 0;">Enter 4-Digit MPIN</h4>
-            <p class="sub-text" style="font-size: 0.88rem; margin: 0;">Pay to: <strong>TutorLink</strong></p>
-          </div>
-
-          <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 16px;">
-            <input type="password" maxlength="1" class="pin-digit form-input" style="width: 48px; height: 50px; text-align: center; font-size: 1.3rem;">
-            <input type="password" maxlength="1" class="pin-digit form-input" style="width: 48px; height: 50px; text-align: center; font-size: 1.3rem;">
-            <input type="password" maxlength="1" class="pin-digit form-input" style="width: 48px; height: 50px; text-align: center; font-size: 1.3rem;">
-            <input type="password" maxlength="1" class="pin-digit form-input" style="width: 48px; height: 50px; text-align: center; font-size: 1.3rem;">
-          </div>
-
-          <div id="gcash-mpin-error" class="text-danger center-text margin-bottom" style="font-size: 0.82rem; display: none;"></div>
-
-          <button class="btn btn-gcash full-width margin-top" id="gcash-confirm-pay-btn" style="background: #005ce6; color: #ffffff; font-weight: 600;">Confirm Payment</button>
-        </div>
-
-        <!-- Step 4: Success & Receipt -->
-        <div id="gcash-step-4" class="hidden text-center">
-          <div style="width: 56px; height: 56px; border-radius: 50%; background: #e6f4ea; color: var(--emerald); font-size: 1.8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">✓</div>
-          <h3 style="margin: 0 0 4px 0; color: var(--oxford-navy);">Payment Successful</h3>
-          <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 16px;">Your session booking has been confirmed.</p>
-
-          <div id="gcash-receipt-container" style="margin-bottom: 16px;"></div>
-
-          <div style="display: flex; gap: 10px;">
-            <button class="btn btn-secondary full-width" id="gcash-print-btn" onclick="window.print()">Print / Save as PDF</button>
-            <button class="btn btn-primary full-width" id="gcash-done-btn">Done</button>
-          </div>
+          <button class="btn btn-gcash full-width margin-top" id="gcash-confirm-pay-btn" style="background: #005ce6; color: #ffffff; font-weight: 600; padding: 12px;">Confirm GCash Payment</button>
         </div>
       </div>
     </div>
