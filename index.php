@@ -887,42 +887,35 @@ header('Content-Type: text/html; charset=utf-8');
 
   <!-- Modal 5: Matching Session Virtual Workspace -->
   <div class="modal-backdrop" id="modal-session-workspace">
-    <div class="modal-card modal-xlarge">
-      <div class="modal-header workspace-header">
+    <div class="modal-card modal-xlarge" style="max-width: 900px; padding: 28px;">
+      <div class="modal-header workspace-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 16px; margin-bottom: 20px; border-bottom: 1px solid var(--line);">
         <div>
-          <h3 id="workspace-session-title">Live Matching Session: Mathematics</h3>
-          <p id="workspace-participants" class="sub-text">Maria Santos (Student) & Prof. Alex Rivera (Tutor)</p>
+          <h3 id="workspace-session-title" style="font-family: 'Cinzel', serif; font-size: 1.25rem; font-weight: 700; text-transform: uppercase; color: var(--oxford-navy); margin-bottom: 4px;">Live Workspace: Mathematics</h3>
+          <p id="workspace-participants" class="sub-text" style="font-size: 0.9rem; color: var(--ink-soft); margin: 0;">Maria Santos (Student) & Prof. Alex Rivera (Tutor) - Confirmed</p>
         </div>
-        <div class="header-right-group" style="display: flex; align-items: center; gap: 12px;">
-          <div style="display: flex; flex-direction: column; align-items: flex-end;">
-            <div class="timer-badge" id="session-timer">00:45:00</div>
-            <span id="session-timer-label" style="font-size: 0.75rem; color: var(--muted); margin-top: 2px;">Waiting for tutor to start</span>
-          </div>
-          <button class="btn btn-danger btn-small" id="end-session-btn">End Session</button>
-          <button class="close-btn" id="close-workspace-btn">&times;</button>
+        <div class="header-right-group" style="display: flex; align-items: center; gap: 14px;">
+          <div class="timer-badge" id="session-timer">00:45:00</div>
+          <button class="btn btn-danger" id="end-session-btn" style="background: #f05252; color: #ffffff; border: none; font-size: 0.88rem; font-weight: 600; padding: 8px 16px; border-radius: 6px; cursor: pointer;">End Session</button>
+          <button class="close-btn" id="close-workspace-btn" style="font-size: 1.4rem; color: var(--muted); background: transparent; border: none; cursor: pointer;">&times;</button>
         </div>
       </div>
 
-      <div class="modal-body workspace-body">
-        <div class="workspace-grid">
-          <div class="workspace-notes-panel">
-            <h4>Shared Workspace & Notes</h4>
-            <textarea id="session-shared-notes" placeholder="Collaborative notes, formulas, or homework problems go here..."></textarea>
-            <div class="workspace-actions">
-              <button class="btn btn-secondary btn-small" id="clear-notes-btn">Clear Notes</button>
-              <button class="btn btn-secondary btn-small" id="save-notes-btn">Save Snapshot</button>
-            </div>
+      <div class="modal-body workspace-body" style="padding: 0;">
+        <div class="workspace-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div class="workspace-notes-panel" style="background: #ffffff; border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: flex; flex-direction: column;">
+            <h4 style="font-family: 'Cinzel', serif; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; color: var(--oxford-navy); margin-bottom: 14px;">Shared Workspace & Notes</h4>
+            <textarea id="session-shared-notes" placeholder="Collaborative notes, formulas, or homework problems go here..." style="width: 100%; height: 230px; border: 1px solid var(--line); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 0.88rem; color: var(--ink); resize: none; outline: none; box-sizing: border-border-box;"></textarea>
           </div>
 
-          <div class="workspace-chat-panel">
-            <h4>Session Chat</h4>
-            <div id="chat-messages-container" class="chat-messages">
-              <div class="chat-msg system">Session started. Real-time updates active.</div>
-              <div class="chat-msg tutor"><strong>Prof. Alex:</strong> Welcome Maria! Let's review problem 3 from Calculus Chapter 2.</div>
+          <div class="workspace-chat-panel" style="background: #ffffff; border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: flex; flex-direction: column;">
+            <h4 style="font-family: 'Cinzel', serif; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; color: var(--oxford-navy); margin-bottom: 14px;">Session Chat</h4>
+            <div id="chat-messages-container" class="chat-messages" style="background: #f8fafc; border-radius: 8px; padding: 16px; height: 170px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+              <div class="chat-msg system" style="text-align: center; color: var(--muted); font-size: 0.82rem; margin-bottom: 4px;">Live Virtual Workspace connected.</div>
+              <div class="chat-msg tutor" style="background: #0b132a; color: #ffffff; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem; align-self: flex-start; max-width: 90%;"><strong>Prof. Alex:</strong> Welcome Maria! Let's review problem 3.</div>
             </div>
-            <form id="chat-form" class="chat-input-form">
-              <input type="text" id="chat-input" placeholder="Type a message..." class="form-input" autocomplete="off">
-              <button type="submit" class="btn btn-primary btn-small">Send</button>
+            <form id="chat-form" class="chat-input-form" style="display: flex; gap: 8px; margin-top: 14px;">
+              <input type="text" id="chat-input" placeholder="Type a message..." class="form-input" autocomplete="off" style="flex: 1; border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; font-size: 0.88rem;">
+              <button type="submit" class="btn btn-gold" id="chat-send-btn" style="background: #b8860b; color: #ffffff; border: none; border-radius: 6px; padding: 10px 20px; font-weight: 600; font-size: 0.88rem; cursor: pointer;">Send</button>
             </form>
           </div>
         </div>

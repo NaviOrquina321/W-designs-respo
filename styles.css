@@ -607,6 +607,26 @@ footer .wrap { padding-top: 56px; padding-bottom: 56px; }
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+.chat-messages .chat-msg {
+  background: #0b132a;
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  word-break: break-word;
+  max-width: 90%;
+}
+
+.chat-messages .chat-msg.system {
+  background: transparent;
+  color: var(--muted);
+  text-align: center;
+  font-size: 0.82rem;
+  padding: 4px 0;
+  max-width: 100%;
+}
+
 .timer--warn {
   background: #d97706 !important;
   color: #ffffff !important;
