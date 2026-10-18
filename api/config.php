@@ -12,7 +12,8 @@ $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset(
 if (session_status() === PHP_SESSION_NONE) {
     $script = basename($_SERVER['PHP_SELF'] ?? '');
     $ref = $_SERVER['HTTP_REFERER'] ?? '';
-    $isAdminContext = ($script === 'admin.php' || $script === 'admin-login.php' || strpos($ref, 'admin') !== false);
+    $portalHeader = $_SERVER['HTTP_X_TUTORLINK_PORTAL'] ?? '';
+    $isAdminContext = ($script === 'admin.php' || $script === 'admin-login.php' || $portalHeader === 'admin' || strpos($ref, 'admin') !== false);
 
     $cookieName = $isAdminContext ? 'TUTORLINK_ADMIN' : 'TUTORLINK_MAIN';
     session_name($cookieName);

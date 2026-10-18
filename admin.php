@@ -1715,15 +1715,14 @@ $adminName = $_SESSION['name'] ?? 'Admin';
             <td><code>${escapeHtml(s.gcashRef)}</code></td>
             <td><span class="badge ${s.status === 'Completed' ? 'badge-success' : s.status === 'Cancelled' ? 'badge-danger' : 'badge-pending'}">${statusText}</span></td>
             <td><span class="badge ${s.payoutStatus === 'Paid Out' ? 'badge-success' : 'badge-pending'}">${escapeHtml(s.payoutStatus)}</span></td>
-          `;
-        }).join('');
             <td>
               <button class="btn btn-secondary btn-small" onclick="openRescheduleModal('${escapeHtml(s.id)}')">Reschedule</button>
               <button class="btn btn-secondary btn-small" onclick="cancelSession('${escapeHtml(s.id)}')">Cancel</button>
               <button class="btn btn-secondary btn-small" onclick="viewSessionChat('${escapeHtml(s.id)}')">Chat</button>
             </td>
           </tr>
-        `).join('');
+          `;
+        }).join('');
       } catch (e) {}
     }
 
