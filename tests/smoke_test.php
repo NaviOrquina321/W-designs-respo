@@ -88,6 +88,19 @@ assertTest(($resSchAddDup['status'] ?? '') === 'error', "6. New Calendar Schedul
 $resResch = callEndpoint('api/sessions.php', 'PUT', ['id' => 'SES-THIS-WK1', 'session_date' => date('Y-m-d', strtotime('+6 days')), 'time_slot' => '02:00 PM - 03:00 PM'], ['user_id' => 'ADMIN-001', 'role' => 'admin']);
 assertTest(($resResch['status'] ?? '') === 'success', "7. Modify Sessions Schedule: Admin reschedules confirmed session.");
 
+// --- Tutor Start Session Live & Live Chat Verification ---
+$resTutorStart = callEndpoint('api/sessions.php', 'PUT', ['id' => 'SES-THIS-WK1', 'status' => 'In Progress'], ['user_id' => 'tut-1', 'role' => 'tutor', 'name' => 'Prof. Alex Rivera']);
+assertTest(($resTutorStart['status'] ?? '') === 'success', "Live Workspace: Tutor starts live session, updating status to In Progress and notifying student.");
+
+$resSendChat = callEndpoint('api/chat.php', 'POST', ['session_id' => 'SES-THIS-WK1', 'message' => 'Hello professor, I am ready!'], ['user_id' => 'STU-VAL-01', 'role' => 'student', 'name' => 'Maria Santos']);
+assertTest(($resSendChat['status'] ?? '') === 'success', "Live Workspace Chat: Student sends real-time chat message.");
+
+$_GET['session_id'] = 'SES-THIS-WK1';
+$_GET['after_id'] = 0;
+$resGetChat = callEndpoint('api/chat.php', 'GET', [], ['user_id' => 'tut-1', 'role' => 'tutor', 'name' => 'Prof. Alex Rivera']);
+unset($_GET['session_id'], $_GET['after_id']);
+assertTest(($resGetChat['status'] ?? '') === 'success' && count($resGetChat['data'] ?? []) >= 1, "Live Workspace Chat: Tutor receives student chat message.");
+
 // Forward-only status transition checks
 $resForwardComp = callEndpoint('api/sessions.php', 'PUT', ['id' => 'SES-THIS-WK1', 'status' => 'Completed'], ['user_id' => 'ADMIN-001', 'role' => 'admin']);
 assertTest(($resForwardComp['status'] ?? '') === 'success', "7. Modify Sessions Schedule: Admin completes confirmed session.");
