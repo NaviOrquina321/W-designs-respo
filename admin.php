@@ -448,6 +448,7 @@ $adminName = $_SESSION['name'] ?? 'System Admin';
     <header class="admin-topbar">
       <h1 class="admin-header-title" id="tab-header-title">Dashboard</h1>
       <div class="admin-user-profile">
+        <button class="btn btn-primary btn-small" onclick="openModal('modal-create-admin')" style="margin-right: 12px;">+ Create Admin Account</button>
         <div class="admin-avatar">SA</div>
         <span style="font-weight: 600; font-size: 0.9rem;"><?php echo htmlspecialchars($adminName); ?></span>
         <button class="btn btn-secondary btn-small" onclick="handleLogout()" style="margin-left: 12px;">Log Out</button>
@@ -1044,6 +1045,34 @@ $adminName = $_SESSION['name'] ?? 'System Admin';
     </div>
   </div>
 
+  <!-- Modal: Create Admin Account -->
+  <div id="modal-create-admin" class="modal-overlay">
+    <div class="modal-card card-panel" style="max-width: 450px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Create Admin Account</h3>
+        <button class="close-btn" onclick="closeModal('modal-create-admin')">&times;</button>
+      </div>
+      <form onsubmit="handleCreateAdminAccount(event)">
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label style="font-size: 0.85rem; font-weight: 600;">Full Name</label>
+          <input type="text" id="create-admin-name" class="input-field" required style="width:100%; padding:8px;" placeholder="Admin Full Name">
+        </div>
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label style="font-size: 0.85rem; font-weight: 600;">Email Address</label>
+          <input type="email" id="create-admin-email" class="input-field" required style="width:100%; padding:8px;" placeholder="admin@domain.com">
+        </div>
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label style="font-size: 0.85rem; font-weight: 600;">Password (Min 8 Chars)</label>
+          <input type="password" id="create-admin-pass" class="input-field" required minlength="8" style="width:100%; padding:8px;" placeholder="••••••••">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap: 8px;">
+          <button type="button" class="btn btn-secondary btn-small" onclick="closeModal('modal-create-admin')">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-small">Create Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Toast Element -->
   <div id="admin-toast-box" class="admin-toast"></div>
 
@@ -1174,6 +1203,26 @@ $adminName = $_SESSION['name'] ?? 'System Admin';
     async function handleLogout() {
       try { await api('api/logout.php', { method: 'POST' }); } catch (e) {}
       window.location.href = 'admin-login.php';
+    }
+
+    async function handleCreateAdminAccount(e) {
+      e.preventDefault();
+      const name = document.getElementById('create-admin-name').value.trim();
+      const email = document.getElementById('create-admin-email').value.trim();
+      const password = document.getElementById('create-admin-pass').value;
+
+      try {
+        const json = await api('api/register.php', {
+          method: 'POST',
+          body: { role: 'admin', name, email, password }
+        });
+        showSuccess(json.message || 'New admin account created.');
+        closeModal('modal-create-admin');
+        document.getElementById('create-admin-name').value = '';
+        document.getElementById('create-admin-email').value = '';
+        document.getElementById('create-admin-pass').value = '';
+        loadDashboard();
+      } catch (err) {}
     }
 
     // 1. DASHBOARD

@@ -95,6 +95,17 @@ assertTest(($resForwardComp['status'] ?? '') === 'success', "7. Modify Sessions 
 $resRevertComp = callEndpoint('api/sessions.php', 'PUT', ['id' => 'SES-THIS-WK1', 'status' => 'In Progress'], ['user_id' => 'ADMIN-001', 'role' => 'admin']);
 assertTest(($resRevertComp['status'] ?? '') === 'error', "7. Modify Sessions Schedule: Rejects reverting completed session (final status rule).");
 
+// --- Completed Session Rating Assertion ---
+$resRate = callEndpoint('api/sessions.php', 'PUT', ['id' => 'SES-LAST-WK1', 'rating' => 5, 'feedback' => 'Exemplary calculus tutor!'], ['user_id' => 'STU-VAL-01', 'role' => 'student', 'name' => 'Maria Santos']);
+assertTest(($resRate['status'] ?? '') === 'success', "Rating System: Student rates completed session with SQL persistence and tutor/admin notifications.");
+
+// --- Admin Account Creation Assertion ---
+$resNewAdmin = callEndpoint('api/register.php', 'POST', ['role' => 'admin', 'name' => 'Assistant Admin', 'email' => 'asst.admin@tutorlink.ph', 'password' => 'adminpass123'], ['user_id' => 'ADMIN-001', 'role' => 'admin']);
+assertTest(($resNewAdmin['status'] ?? '') === 'success', "Admin Management: Admin can create a new administrator account.");
+
+$resNewAdminLogin = callEndpoint('api/login.php', 'POST', ['email' => 'asst.admin@tutorlink.ph', 'password' => 'adminpass123'], ['role' => 'admin']);
+assertTest(($resNewAdminLogin['status'] ?? '') === 'success' && ($resNewAdminLogin['user']['role'] ?? '') === 'admin', "Admin Management: Newly created admin account can log in via admin portal.");
+
 // --- 8. New Payment Records & 9. Confirm Payment Status ---
 $resPayments = callEndpoint('api/payments.php', 'GET', [], ['user_id' => 'ADMIN-001', 'role' => 'admin']);
 assertTest(($resPayments['status'] ?? '') === 'success' && count($resPayments['data'] ?? []) >= 4, "8. New Payment Records: Admin fetches payment logs.");

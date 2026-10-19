@@ -1,5 +1,5 @@
 <?php
-// api/register.php - User Registration API
+// api/register.php - User & Admin Registration API
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/helpers.php';
 
@@ -17,24 +17,29 @@ $password = $input['password'] ?? '';
 $grade = trim($input['grade'] ?? ($input['specialty'] ?? 'Senior High'));
 $subject = trim($input['subject'] ?? ($input['specialty'] ?? 'Mathematics'));
 
-if (!in_array($role, ['student', 'tutor'], true)) {
-    jsonError(400, 'Role must be student or tutor.');
+if (!in_array($role, ['student', 'tutor', 'admin'], true)) {
+    jsonError(422, 'Role must be student, tutor, or admin.');
+}
+
+if ($role === 'admin') {
+    // Only an existing authenticated admin can create another admin account
+    $currentAdmin = requireRole(['admin']);
 }
 
 if (empty($name) || empty($email) || empty($password)) {
-    jsonError(400, 'Please fill in all required fields.');
+    jsonError(422, 'Please fill in all required fields.');
 }
 
 if (mb_strlen($name) > 100) {
-    jsonError(400, 'Full name cannot exceed 100 characters.');
+    jsonError(422, 'Full name cannot exceed 100 characters.');
 }
 
 if (mb_strlen($email) > 100 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    jsonError(400, 'Please enter a valid email address (max 100 characters).');
+    jsonError(422, 'Please enter a valid email address (max 100 characters).');
 }
 
 if (strlen($password) < 8) {
-    jsonError(400, 'Password must be at least 8 characters long.');
+    jsonError(422, 'Password must be at least 8 characters long.');
 }
 
 // Validate tutor subject against catalog
@@ -42,7 +47,7 @@ if ($role === 'tutor') {
     $stmtCat = $pdo->prepare("SELECT COUNT(*) as cnt FROM subjects WHERE LOWER(name) = ?");
     $stmtCat->execute([strtolower($subject)]);
     if ($stmtCat->fetch()['cnt'] == 0) {
-        jsonError(400, "Subject '$subject' is not in the subjects catalog.");
+        jsonError(422, "Subject '$subject' is not in the subjects catalog.");
     }
 }
 
@@ -51,14 +56,37 @@ try {
     $stmt = $pdo->prepare("SELECT COUNT(*) as cnt FROM users WHERE LOWER(email) = ?");
     $stmt->execute([$email]);
     if ($stmt->fetch()['cnt'] > 0) {
-        jsonError(400, 'This email address is already registered.');
+        jsonError(422, 'This email address is already registered.');
     }
 
     $passwordHash = password_hash($password, PASSWORD_BCRYPT);
 
     $pdo->beginTransaction();
 
-    if ($role === 'student') {
+    if ($role === 'admin') {
+        $userId = newId('ADMIN-');
+
+        $stmtUser = $pdo->prepare("INSERT INTO users (user_id, email, password_hash, role, name) VALUES (?, ?, ?, 'admin', ?)");
+        $stmtUser->execute([$userId, $email, $passwordHash, $name]);
+
+        $stmtAdmin = $pdo->prepare("INSERT INTO admins (id, name, email, role) VALUES (?, ?, ?, 'admin')");
+        $stmtAdmin->execute([$userId, $name, $email]);
+
+        logAdminAction('Create Admin Account', $userId, null, ['name' => $name, 'email' => $email]);
+
+        $pdo->commit();
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'New administrator account created successfully.',
+            'user' => [
+                'id' => $userId,
+                'name' => $name,
+                'email' => $email,
+                'role' => 'admin'
+            ]
+        ]);
+    } elseif ($role === 'student') {
         $userId = newId('STU-');
 
         $stmtUser = $pdo->prepare("INSERT INTO users (user_id, email, password_hash, role, name) VALUES (?, ?, ?, 'student', ?)");
@@ -94,7 +122,7 @@ try {
                 'role' => 'student'
             ]
         ]);
-    } else {
+    } else { // tutor
         $userId = newId('tut-');
         $rawInitials = implode('', array_map(function($n) { return strtoupper($n[0] ?? ''); }, explode(' ', $name)));
         $initials = mb_substr($rawInitials, 0, 3);

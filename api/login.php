@@ -49,11 +49,11 @@ if (!password_verify($password, $user['password_hash'])) {
 }
 
 // Separate login gates for Admin vs Main site
-$isMainPortal = (session_name() === 'TUTORLINK_MAIN');
-if ($isMainPortal && $user['role'] === 'admin') {
+$isAdminPortal = (session_name() === 'TUTORLINK_ADMIN' || ($_SERVER['HTTP_X_TUTORLINK_PORTAL'] ?? '') === 'admin');
+if (!$isAdminPortal && $user['role'] === 'admin') {
     jsonError(403, 'Administrator accounts must log in via the Admin Portal at admin-login.php.');
 }
-if (!$isMainPortal && $user['role'] !== 'admin') {
+if ($isAdminPortal && $user['role'] !== 'admin') {
     jsonError(403, 'Only administrator accounts may log in to the Admin Portal.');
 }
 
@@ -79,7 +79,9 @@ $stClr = $pdo->prepare("DELETE FROM failed_login_attempts WHERE email = ? AND ip
 $stClr->execute([$email, $ip]);
 
 // Set session state
-session_regenerate_id(true);
+if (!headers_sent()) {
+    session_regenerate_id(true);
+}
 $_SESSION['user_id'] = $user['user_id'];
 $_SESSION['email'] = $user['email'];
 $_SESSION['role'] = $user['role'];

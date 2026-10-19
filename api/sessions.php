@@ -247,6 +247,7 @@ if ($method === 'GET') {
         }
 
         notify($pdo, 'tutor', $session['tutor_id'], "New $rating-Star Rating Received", "{$session['student_name']} rated your {$session['subject']} session $rating star(s)" . ($feedback ? ": \"$feedback\"" : "."));
+        notify($pdo, 'admin', 'ADMIN-001', "Session Rated ($rating Stars)", "{$session['student_name']} rated {$session['tutor_name']} $rating star(s) for {$session['subject']}." . ($feedback ? " Feedback: \"$feedback\"" : ""));
 
         echo json_encode(['status' => 'success', 'message' => 'Rating submitted successfully.']);
     } elseif ($user['role'] === 'admin') {
