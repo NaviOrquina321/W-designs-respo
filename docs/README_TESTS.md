@@ -23,7 +23,7 @@ php tests/smoke_test.php
 5. **Past Slot Protection:** Validates that booking past dates or slots earlier today is detected and rejected.
 6. **Student 24-Hour Reschedule Enforcement:** Verifies that student reschedules are allowed for sessions starting > 24 hours in the future and rejected for sessions starting <= 24 hours.
 7. **Targeted Role Notifications:** Verifies targeted notification routing and delivery to specific students and tutors.
-8. **Formula-Safe CSV Export Sanitization:** Verifies that CSV cell exports starting with `=`, `+`, `-`, or `@` are sanitized with a leading single quote `'`.
+8. **Report Generation & Print Filter:** Verifies that reports calculate revenue and platform commissions for non-cancelled sessions.
 9. **Schedule Privacy & Data Isolation:** Verifies schedule slot associations.
 
 ---

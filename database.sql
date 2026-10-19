@@ -204,6 +204,16 @@ CREATE TABLE IF NOT EXISTS `failed_login_attempts` (
   `attempt_time` INT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `admin_audit_log` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `admin_id` VARCHAR(50) NOT NULL,
+  `action` VARCHAR(100) NOT NULL,
+  `target` VARCHAR(100) NOT NULL,
+  `old_value` TEXT NULL,
+  `new_value` TEXT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Seed initial default users & subjects
 INSERT INTO `users` (`user_id`, `email`, `password_hash`, `role`, `name`) VALUES
 ('ADMIN-001', 'admin@tutorlink.ph', '$2y$10$4KtVRKjPTI1Etb2VYt0nVeQsv0tBnHxSEUIYUheMZ.NRFL63mXud.', 'admin', 'System Admin'),

@@ -35,4 +35,4 @@ As a TutorLink Administrator, you have full oversight across all platform operat
 
 ### 8. Broadcast Notifications & Reports
 - Send system broadcast messages to all users or target roles.
-- Filter session activity by date range, tutor, or subject, and export formula-safe CSV reports.
+- Filter session activity by date range, tutor, or subject, and print activity reports.

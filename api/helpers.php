@@ -22,8 +22,12 @@ function jsonError($code, $message) {
 }
 
 function getInput() {
-    $input = json_decode(file_get_contents('php://input'), true);
-    return is_array($input) ? $input : [];
+    if (isset($GLOBALS['_MOCK_INPUT']) && is_array($GLOBALS['_MOCK_INPUT'])) {
+        return $GLOBALS['_MOCK_INPUT'];
+    }
+    $raw = file_get_contents('php://input');
+    $input = json_decode($raw, true);
+    return is_array($input) ? $input : (is_array($_POST) ? $_POST : []);
 }
 
 function requireLogin() {
@@ -183,14 +187,6 @@ function checkSessionTimerThresholds($pdo, $sessions) {
     }
 }
 
-function sanitizeCsvCell($val) {
-    $str = strval($val ?? '');
-    if (strlen($str) > 0 && in_array($str[0], ['=', '+', '-', '@'], true)) {
-        return "'" . $str;
-    }
-    return $str;
-}
-
 function snakeToCamel($string) {
     return lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $string))));
 }
@@ -304,4 +300,24 @@ function toCamelArray($data) {
     }
 
     return $result;
+}
+
+function logAdminAction($action, $target, $oldVal = null, $newVal = null) {
+    global $pdo;
+    if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+        return;
+    }
+    $adminId = $_SESSION['user_id'] ?? 'ADMIN-001';
+    try {
+        $stmt = $pdo->prepare("INSERT INTO admin_audit_log (admin_id, action, target, old_value, new_value) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([
+            $adminId,
+            $action,
+            $target,
+            is_array($oldVal) || is_object($oldVal) ? json_encode($oldVal) : (string)$oldVal,
+            is_array($newVal) || is_object($newVal) ? json_encode($newVal) : (string)$newVal
+        ]);
+    } catch (Exception $e) {
+        error_log("Failed to log admin action: " . $e->getMessage());
+    }
 }

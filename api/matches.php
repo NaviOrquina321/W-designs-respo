@@ -1,5 +1,5 @@
 <?php
-// api/matches.php - Matches REST API
+// api/matches.php - Matches REST API with Admin Audit & FDD Validation
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/helpers.php';
 
@@ -32,7 +32,7 @@ if ($method === 'GET') {
     $matchReason = trim($input['match_reason'] ?? ($input['matchReason'] ?? 'Rule-Based Compatibility Match'));
 
     if (empty($tutorId)) {
-        jsonError(400, 'Tutor ID required.');
+        jsonError(422, 'Tutor ID required.');
     }
 
     $stT = $pdo->prepare("SELECT id, name, deactivated FROM tutors WHERE id = ?");
@@ -43,7 +43,7 @@ if ($method === 'GET') {
         jsonError(404, 'Tutor not found.');
     }
     if (!empty($tutor['deactivated'])) {
-        jsonError(400, 'Selected tutor is inactive.');
+        jsonError(422, 'Selected tutor is inactive.');
     }
 
     $tutorName = $tutor['name'];
@@ -53,7 +53,7 @@ if ($method === 'GET') {
     $stDup = $pdo->prepare("SELECT COUNT(*) as cnt FROM matches WHERE student_id = ? AND tutor_id = ? AND subject = ? AND status = 'Pending Review'");
     $stDup->execute([$studentId, $tutorId, $subject]);
     if ($stDup->fetch()['cnt'] > 0) {
-        jsonError(400, 'You already have a pending match request with this tutor for this subject.');
+        jsonError(422, 'You already have a pending match request with this tutor for this subject.');
     }
 
     $matchId = newId('MATCH-');
@@ -70,7 +70,6 @@ if ($method === 'GET') {
         $matchReason
     ]);
 
-    // Notify tutor and admin using user IDs
     notify($pdo, 'tutor', $tutorId, 'New Tutor Match Request', "$studentName submitted a match request for $subject.");
     notify($pdo, 'admin', 'ADMIN-001', 'New Match Request Submitted', "$studentName requested match with $tutorName for $subject.");
 
@@ -89,7 +88,7 @@ if ($method === 'GET') {
     $matchId = trim($input['id'] ?? '');
 
     if (empty($matchId)) {
-        jsonError(400, 'Match ID required.');
+        jsonError(422, 'Match ID required.');
     }
 
     $st = $pdo->prepare("SELECT * FROM matches WHERE id = ?");
@@ -100,28 +99,31 @@ if ($method === 'GET') {
         jsonError(404, 'Match record not found.');
     }
 
-    if ($user['role'] === 'tutor') {
-        if ($match['tutor_id'] !== $user['id']) {
-            jsonError(403, 'You can only update match requests assigned to you.');
-        }
+    if ($user['role'] === 'tutor' && $match['tutor_id'] !== $user['id']) {
+        jsonError(403, 'You can only update match requests assigned to you.');
     }
 
     $fields = [];
     $params = [];
     $newStatus = null;
+    $cancelReason = trim($input['reason'] ?? ($input['cancel_reason'] ?? ''));
 
     if (isset($input['status'])) {
         $statusVal = trim($input['status']);
         $validStatuses = ['Approved', 'Cancelled', 'Pending Review', 'Reassigned'];
         if (!in_array($statusVal, $validStatuses, true)) {
-            jsonError(400, 'Invalid match status.');
+            jsonError(422, 'Invalid match status.');
         }
+
+        if ($statusVal === 'Cancelled' && empty($cancelReason)) {
+            jsonError(422, 'Cancellation reason is required.');
+        }
+
         $fields[] = "`status` = ?";
         $params[] = $statusVal;
         $newStatus = $statusVal;
     }
 
-    // Only Admin can edit score or reassign tutor
     if (isset($input['score']) && $user['role'] === 'admin') {
         $score = max(0, min(100, intval($input['score'])));
         $fields[] = "`score` = ?";
@@ -138,11 +140,13 @@ if ($method === 'GET') {
             $params[] = $newTutId;
             $fields[] = "`tutor_name` = ?";
             $params[] = $tut['name'];
+        } else {
+            jsonError(404, 'New tutor not found.');
         }
     }
 
     if (empty($fields)) {
-        jsonError(400, 'No valid fields provided for update.');
+        jsonError(422, 'No valid fields provided for update.');
     }
 
     $params[] = $matchId;
@@ -150,14 +154,21 @@ if ($method === 'GET') {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
 
-    // Call notify AFTER database update succeeds
-    if ($newStatus === 'Approved') {
-        notify($pdo, 'student', $match['student_id'], 'Match Request Approved', "{$match['tutor_name']} accepted your match request for {$match['subject']}.");
-    } elseif ($newStatus === 'Cancelled') {
-        notify($pdo, 'student', $match['student_id'], 'Match Request Cancelled', "Match request for {$match['subject']} with {$match['tutor_name']} was cancelled.");
+    if ($user['role'] === 'admin') {
+        if ($newStatus === 'Approved') {
+            logAdminAction('Approve Matching Sessions', $matchId, ['status' => $match['status']], ['status' => 'Approved']);
+            notify($pdo, 'student', $match['student_id'], 'Match Approved', "Your match request for {$match['subject']} with {$match['tutor_name']} was approved by Admin.");
+            notify($pdo, 'tutor', $match['tutor_id'], 'Match Approved', "Match request with {$match['student_name']} for {$match['subject']} was approved by Admin.");
+        } elseif ($newStatus === 'Cancelled') {
+            logAdminAction('Cancel Matching Sessions', $matchId, ['status' => $match['status']], ['status' => 'Cancelled', 'reason' => $cancelReason]);
+            notify($pdo, 'student', $match['student_id'], 'Match Cancelled', "Match request for {$match['subject']} with {$match['tutor_name']} was cancelled. Reason: $cancelReason");
+            notify($pdo, 'tutor', $match['tutor_id'], 'Match Cancelled', "Match request for {$match['subject']} with {$match['student_name']} was cancelled. Reason: $cancelReason");
+        } else {
+            logAdminAction('Review Matching Results', $matchId, ['status' => $match['status']], ['status' => $newStatus ?? $match['status']]);
+        }
     }
 
-    echo json_encode(['status' => 'success', 'message' => 'Match request updated.']);
+    echo json_encode(['status' => 'success', 'message' => 'Match request updated successfully.']);
 } else {
     jsonError(405, 'Method not allowed');
 }

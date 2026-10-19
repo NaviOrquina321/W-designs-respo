@@ -1,5 +1,5 @@
 <?php
-// api/schedules.php - Schedules REST API with Role-Filtered Access
+// api/schedules.php - Schedules REST API with Admin Audit & FDD Validation
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/helpers.php';
 
@@ -15,7 +15,6 @@ if ($method === 'GET') {
         $stmt->execute([$user['id']]);
         $schedules = $stmt->fetchAll();
     } else {
-        // Student sees Available slots OR slots booked by themselves
         $stmt = $pdo->prepare("SELECT * FROM schedules WHERE status = 'Available' OR student_id = ? ORDER BY created_at DESC");
         $stmt->execute([$user['id']]);
         $rawSchedules = $stmt->fetchAll();
@@ -35,24 +34,52 @@ if ($method === 'GET') {
     $input = getInput();
 
     $tutorId = $user['role'] === 'tutor' ? $user['id'] : trim($input['tutor_id'] ?? ($input['tutorId'] ?? ''));
-    $dateSlot = trim($input['date_slot'] ?? ($input['dateSlot'] ?? ''));
+    $dateStr = trim($input['date'] ?? ($input['date_slot_date'] ?? ''));
+    $timeSlot = trim($input['time_slot'] ?? ($input['timeSlot'] ?? ''));
     $subject = trim($input['subject'] ?? 'Mathematics');
 
-    if (empty($tutorId)) {
-        jsonError(400, 'Tutor ID required.');
-    }
-    if (empty($dateSlot)) {
-        jsonError(400, 'Date and time slot required.');
+    // Handle full date_slot string if passed directly
+    $dateSlot = trim($input['date_slot'] ?? ($input['dateSlot'] ?? ''));
+    if (empty($dateSlot) && !empty($dateStr) && !empty($timeSlot)) {
+        $dateSlot = "$dateStr $timeSlot";
     }
 
-    $stT = $pdo->prepare("SELECT name FROM tutors WHERE id = ?");
+    if (empty($tutorId)) {
+        jsonError(422, 'Tutor ID required.');
+    }
+    if (empty($dateSlot)) {
+        jsonError(422, 'Date and time slot required.');
+    }
+
+    // Parse date component
+    $parts = explode(' ', $dateSlot);
+    $checkDate = $parts[0] ?? '';
+    if (!empty($checkDate)) {
+        $d = DateTime::createFromFormat('Y-m-d', $checkDate);
+        if ($d && $checkDate < date('Y-m-d')) {
+            jsonError(422, 'Cannot add schedule slot for a past date.');
+        }
+    }
+
+    // Verify tutor exists and is active
+    $stT = $pdo->prepare("SELECT id, name, deactivated FROM tutors WHERE id = ?");
     $stT->execute([$tutorId]);
     $tut = $stT->fetch();
 
     if (!$tut) {
-        jsonError(404, 'Tutor not found.');
+        jsonError(404, 'Selected tutor not found.');
+    }
+    if (!empty($tut['deactivated'])) {
+        jsonError(422, 'Cannot add schedule slot for a deactivated tutor.');
     }
     $tutorName = $tut['name'];
+
+    // Check duplicate slot for tutor
+    $stDup = $pdo->prepare("SELECT COUNT(*) as cnt FROM schedules WHERE tutor_id = ? AND date_slot = ?");
+    $stDup->execute([$tutorId, $dateSlot]);
+    if ($stDup->fetch()['cnt'] > 0) {
+        jsonError(422, 'A schedule slot for this tutor at the specified date and time already exists.');
+    }
 
     $schId = newId('SCH-');
 
@@ -65,13 +92,22 @@ if ($method === 'GET') {
         $subject
     ]);
 
+    if ($user['role'] === 'admin') {
+        logAdminAction('New Calendar Schedule', $schId, null, [
+            'tutor_id' => $tutorId,
+            'tutor_name' => $tutorName,
+            'date_slot' => $dateSlot,
+            'subject' => $subject
+        ]);
+    }
+
     $stFetch = $pdo->prepare("SELECT * FROM schedules WHERE id = ?");
     $stFetch->execute([$schId]);
     $row = $stFetch->fetch();
 
     echo json_encode([
         'status' => 'success',
-        'message' => 'Schedule slot created.',
+        'message' => 'Schedule slot created successfully.',
         'data' => toCamelArray($row)
     ]);
 } elseif ($method === 'PUT') {
@@ -80,7 +116,7 @@ if ($method === 'GET') {
     $schId = trim($input['id'] ?? '');
 
     if (empty($schId)) {
-        jsonError(400, 'Schedule ID required.');
+        jsonError(422, 'Schedule ID required.');
     }
 
     $st = $pdo->prepare("SELECT * FROM schedules WHERE id = ?");
@@ -92,7 +128,7 @@ if ($method === 'GET') {
     }
 
     if ($sch['status'] === 'Booked') {
-        jsonError(400, 'Cannot modify booked slots.');
+        jsonError(422, 'Cannot modify booked schedule slots.');
     }
 
     if ($user['role'] === 'tutor' && $sch['tutor_id'] !== $user['id']) {
@@ -104,7 +140,7 @@ if ($method === 'GET') {
 
     if (isset($input['date_slot']) || isset($input['dateSlot'])) {
         $ds = trim($input['date_slot'] ?? $input['dateSlot']);
-        if (empty($ds)) jsonError(400, 'Date slot cannot be empty.');
+        if (empty($ds)) jsonError(422, 'Date slot cannot be empty.');
         $fields[] = "`date_slot` = ?";
         $params[] = $ds;
     }
@@ -115,14 +151,14 @@ if ($method === 'GET') {
     if (isset($input['status'])) {
         $statusVal = trim($input['status']);
         if (!in_array($statusVal, ['Available', 'Blocked'], true)) {
-            jsonError(400, "Schedule status must be 'Available' or 'Blocked'.");
+            jsonError(422, "Schedule status must be 'Available' or 'Blocked'.");
         }
         $fields[] = "`status` = ?";
         $params[] = $statusVal;
     }
 
     if (empty($fields)) {
-        jsonError(400, 'No valid fields provided for update.');
+        jsonError(422, 'No valid fields provided for update.');
     }
 
     $params[] = $schId;
@@ -130,14 +166,18 @@ if ($method === 'GET') {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
 
-    echo json_encode(['status' => 'success', 'message' => 'Schedule slot updated.']);
+    if ($user['role'] === 'admin') {
+        logAdminAction('New Calendar Schedule', $schId, ['status' => $sch['status']], $input);
+    }
+
+    echo json_encode(['status' => 'success', 'message' => 'Schedule slot updated successfully.']);
 } elseif ($method === 'DELETE') {
     $user = requireRole(['tutor', 'admin']);
     $input = getInput();
     $schId = trim($input['id'] ?? ($_GET['id'] ?? ''));
 
     if (empty($schId)) {
-        jsonError(400, 'Schedule ID required.');
+        jsonError(422, 'Schedule ID required.');
     }
 
     $st = $pdo->prepare("SELECT * FROM schedules WHERE id = ?");
@@ -149,7 +189,7 @@ if ($method === 'GET') {
     }
 
     if ($sch['status'] === 'Booked') {
-        jsonError(400, 'Cannot delete booked slots.');
+        jsonError(422, 'Cannot delete booked schedule slots.');
     }
 
     if ($user['role'] === 'tutor' && $sch['tutor_id'] !== $user['id']) {
@@ -159,7 +199,11 @@ if ($method === 'GET') {
     $stmt = $pdo->prepare("DELETE FROM schedules WHERE id = ?");
     $stmt->execute([$schId]);
 
-    echo json_encode(['status' => 'success', 'message' => 'Schedule slot deleted.']);
+    if ($user['role'] === 'admin') {
+        logAdminAction('New Calendar Schedule (Delete)', $schId, $sch, null);
+    }
+
+    echo json_encode(['status' => 'success', 'message' => 'Schedule slot deleted successfully.']);
 } else {
     jsonError(405, 'Method not allowed');
 }

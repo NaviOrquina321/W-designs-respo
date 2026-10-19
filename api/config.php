@@ -371,6 +371,19 @@ try {
         }
         $pdo->exec("INSERT INTO `schema_version` (`version`) VALUES (3);");
     }
+
+    if ($currentVersion < 4) {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `admin_audit_log` (
+          `id` $autoInc,
+          `admin_id` VARCHAR(50) NOT NULL,
+          `action` VARCHAR(100) NOT NULL,
+          `target` VARCHAR(100) NOT NULL,
+          `old_value` TEXT NULL,
+          `new_value` TEXT NULL,
+          `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );");
+        $pdo->exec("INSERT INTO `schema_version` (`version`) VALUES (4);");
+    }
 } catch (PDOException $e) {
     error_log("Schema migration error: " . $e->getMessage());
     if (getenv('TEST_MODE') !== '1') {

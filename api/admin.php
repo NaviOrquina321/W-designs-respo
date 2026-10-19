@@ -1,5 +1,5 @@
 <?php
-// api/admin.php - Live SQL Admin KPI Calculations Endpoint
+// api/admin.php - Live SQL Admin KPI Calculations Endpoint & Audit Log
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/helpers.php';
 
@@ -16,13 +16,13 @@ try {
 
     // 3. Total Tutoring Volume (Sessions not cancelled)
     $stmtVolume = $pdo->query("SELECT COALESCE(SUM(total_paid), 0) AS total_volume FROM sessions WHERE status != 'Cancelled'");
-    $totalVolume = intval($stmtVolume->fetch()['total_volume']);
+    $totalVolume = floatval($stmtVolume->fetch()['total_volume']);
 
     // 4. Platform Service Fee Commission
     $stmtCommission = $pdo->query("SELECT COALESCE(SUM(commission_fee), 0) AS total_commission FROM sessions WHERE status != 'Cancelled'");
-    $totalCommission = intval($stmtCommission->fetch()['total_commission']);
+    $totalCommission = floatval($stmtCommission->fetch()['total_commission']);
 
-    // Additional Count Cards
+    // Count Cards
     $stmtTotalSes = $pdo->query("SELECT COUNT(*) AS cnt FROM sessions");
     $totalSessions = intval($stmtTotalSes->fetch()['cnt']);
 
@@ -38,6 +38,9 @@ try {
     $stmtCancSes = $pdo->query("SELECT COUNT(*) AS cnt FROM sessions WHERE status = 'Cancelled'");
     $cancelledSessions = intval($stmtCancSes->fetch()['cnt']);
 
+    $stmtUpcSes = $pdo->query("SELECT COUNT(*) AS cnt FROM sessions WHERE status IN ('Confirmed', 'In Progress')");
+    $upcomingSessions = intval($stmtUpcSes->fetch()['cnt']);
+
     $stmtPendMatches = $pdo->query("SELECT COUNT(*) AS cnt FROM matches WHERE status = 'Pending Review'");
     $pendingMatches = intval($stmtPendMatches->fetch()['cnt']);
 
@@ -52,6 +55,10 @@ try {
     $stRecentPay = $pdo->query("SELECT id, student_name, tutor_name, method, ref_no, amount, status, created_at FROM payments ORDER BY created_at DESC LIMIT 5");
     $recentPayments = toCamelArray($stRecentPay->fetchAll());
 
+    // Recent Admin Activity Log (10 rows)
+    $stAudit = $pdo->query("SELECT id, admin_id, action, target, old_value, new_value, created_at FROM admin_audit_log ORDER BY created_at DESC LIMIT 10");
+    $auditLogs = toCamelArray($stAudit->fetchAll());
+
     echo json_encode([
         'status' => 'success',
         'sqlite_fallback' => !empty($isSqliteFallback),
@@ -65,10 +72,12 @@ try {
             'in_progress_sessions' => $inProgressSessions,
             'completed_sessions' => $completedSessions,
             'cancelled_sessions' => $cancelledSessions,
+            'upcoming_sessions' => $upcomingSessions,
             'pending_matches' => $pendingMatches,
             'pending_payments' => $pendingPayments,
             'recent_sessions' => $recentSessions,
-            'recent_payments' => $recentPayments
+            'recent_payments' => $recentPayments,
+            'recent_audit_logs' => $auditLogs
         ]
     ]);
 } catch (PDOException $e) {
