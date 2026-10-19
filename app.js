@@ -1672,6 +1672,7 @@ function openGCashPayment() {
 // Notifications Engine
 let notifEventSource = null;
 let currentNotifDrawerTab = 'all';
+let workspaceChatInterval = null;
 
 function initNotificationsStream() {
   if (notifEventSource) {
@@ -1704,6 +1705,11 @@ function initNotificationsStream() {
           state.notifications = newNotifs;
           renderNotifDrawer();
           updateNotificationBadge();
+
+          const hasSessionNotice = newNotifs.some(nn => !nn.read && (nn.type === 'session_started' || nn.type === 'chat_message' || nn.title.includes('Session')));
+          if (hasSessionNotice) {
+            syncWithDatabase().then(() => renderAllViews());
+          }
         }
       } catch (err) {
         console.error('SSE Notification JSON parse error:', err);
@@ -2147,9 +2153,19 @@ function initWorkspaceSession() {
   const endBtn = document.getElementById('end-session-btn');
   const chatForm = document.getElementById('chat-form');
 
-  closeBtn?.addEventListener('click', () => closeModal('modal-session-workspace'));
+  closeBtn?.addEventListener('click', () => {
+    if (workspaceChatInterval) {
+      clearInterval(workspaceChatInterval);
+      workspaceChatInterval = null;
+    }
+    closeModal('modal-session-workspace');
+  });
 
   endBtn?.addEventListener('click', () => {
+    if (workspaceChatInterval) {
+      clearInterval(workspaceChatInterval);
+      workspaceChatInterval = null;
+    }
     closeModal('modal-session-workspace');
     if (state.currentRole === 'tutor' && state.activeWorkspaceSession) {
       openEndSessionModal(state.activeWorkspaceSession.id);
@@ -2208,6 +2224,9 @@ window.joinLiveWorkspace = async function(sessionId) {
 
   openModal('modal-session-workspace');
   await pollWorkspaceChat();
+
+  if (workspaceChatInterval) clearInterval(workspaceChatInterval);
+  workspaceChatInterval = setInterval(pollWorkspaceChat, 2000);
 };
 
 async function pollWorkspaceChat() {

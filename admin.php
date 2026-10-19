@@ -177,10 +177,10 @@ $adminName = $_SESSION['name'] ?? 'System Admin';
 
     .kpi-card {
       background: #ffffff;
-      border: 1px solid var(--sf-card-border);
+      border: 1px solid #cbd5e1;
       border-radius: 12px;
       padding: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
       cursor: pointer;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
@@ -214,10 +214,10 @@ $adminName = $_SESSION['name'] ?? 'System Admin';
     /* Panel & Table Layout */
     .card-panel {
       background: #ffffff;
-      border: 1px solid var(--sf-card-border);
+      border: 1px solid #cbd5e1;
       border-radius: 12px;
       padding: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
       margin-bottom: 24px;
     }
 
@@ -360,7 +360,7 @@ $adminName = $_SESSION['name'] ?? 'System Admin';
       background: #f8fafc;
       padding: 12px 16px;
       border-radius: 8px;
-      border: 1px solid var(--sf-card-border);
+      border: 1px solid #cbd5e1;
     }
 
     .filter-bar input, .filter-bar select {
