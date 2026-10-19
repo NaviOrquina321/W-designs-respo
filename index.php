@@ -672,11 +672,11 @@ header('Content-Type: text/html; charset=utf-8');
     </div>
   </div>
 
-  <!-- Modal 2: AI Tutor Matching Wizard -->
+  <!-- Modal 2: AI Tutor Matching -->
   <div class="modal-backdrop" id="modal-ai-matching">
     <div class="modal-card modal-large">
       <div class="modal-header">
-        <h3>AI Tutor Matching Wizard</h3>
+        <h3>AI Tutor Matching</h3>
         <button class="close-btn" id="close-ai-modal">&times;</button>
       </div>
       <div class="modal-body">
@@ -867,7 +867,7 @@ header('Content-Type: text/html; charset=utf-8');
         <div class="workspace-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
           <div class="workspace-notes-panel" style="background: #ffffff; border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: flex; flex-direction: column;">
             <h4 style="font-family: 'Cinzel', serif; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; color: var(--oxford-navy); margin-bottom: 14px;">Shared Workspace & Notes</h4>
-            <textarea id="session-shared-notes" placeholder="Collaborative notes, formulas, or homework problems go here..." style="width: 100%; height: 230px; border: 1px solid var(--line); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 0.88rem; color: var(--ink); resize: none; outline: none; box-sizing: border-border-box;"></textarea>
+            <textarea id="session-shared-notes" placeholder="Collaborative notes, formulas, or homework problems go here..." style="width: 100%; height: 230px; border: 1px solid var(--line); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 0.88rem; color: var(--ink); resize: none; outline: none; box-sizing: border-box;"></textarea>
           </div>
 
           <div class="workspace-chat-panel" style="background: #ffffff; border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: flex; flex-direction: column;">

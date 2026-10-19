@@ -97,6 +97,9 @@ if ($method === 'GET') {
     }
 
     $customGcashRef = trim($input['gcash_ref'] ?? ($input['gcashRef'] ?? ''));
+    if ($customGcashRef !== '' && !preg_match('/^[A-Za-z0-9\-]{6,30}$/', $customGcashRef)) {
+        jsonError(400, 'GCash reference must be 6-30 letters, numbers or dashes.');
+    }
 
     try {
         $createdSession = processDemoGCashPayment($pdo, $studentRecord, $tutorRecord, $subject, $sessionDate, $timeSlot, $customGcashRef);
