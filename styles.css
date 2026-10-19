@@ -3,8 +3,8 @@
 :root {
   --ink: #0b132a;
   --ink-soft: #334155;
-  --muted: #64748b;
-  --line: #e2e8f0;
+  --muted: #475569;
+  --line: #cbd5e1;
   --paper: #ffffff;
   --panel: #f8fafc;
 
@@ -584,12 +584,13 @@ footer .wrap { padding-top: 56px; padding-bottom: 56px; }
 
 .input-search, .form-input, .form-select {
   padding: 10px 14px;
-  border-radius: 4px;
-  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  border: 1px solid #94a3b8;
   font-size: 0.9rem;
   width: 100%;
-  background: var(--paper);
-  color: var(--ink);
+  background: #ffffff;
+  color: #0b132a;
+  font-weight: 500;
   transition: border-color 0.15s ease;
 }
 .input-search:focus, .form-input:focus, .form-select:focus {

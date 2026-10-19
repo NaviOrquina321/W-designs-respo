@@ -249,20 +249,21 @@ $adminName = $_SESSION['name'] ?? 'System Admin';
     }
 
     .admin-table th {
-      background: #f8fafc;
+      background: #f1f5f9;
       padding: 12px 14px;
-      font-size: 0.76rem;
+      font-size: 0.78rem;
       font-weight: 700;
       text-transform: uppercase;
-      color: var(--sf-ink-muted);
-      border-bottom: 1px solid var(--sf-card-border);
+      color: #0f172a;
+      border-bottom: 2px solid #cbd5e1;
       letter-spacing: 0.5px;
     }
 
     .admin-table td {
       padding: 14px;
-      border-bottom: 1px solid #f1f5f9;
-      color: var(--sf-ink-primary);
+      border-bottom: 1px solid #e2e8f0;
+      color: #0f172a;
+      font-weight: 500;
       vertical-align: middle;
     }
 
@@ -363,13 +364,15 @@ $adminName = $_SESSION['name'] ?? 'System Admin';
       border: 1px solid #cbd5e1;
     }
 
-    .filter-bar input, .filter-bar select {
+    .filter-bar input, .filter-bar select, .input-field {
       padding: 8px 12px;
-      border: 1px solid var(--sf-card-border);
+      border: 1px solid #94a3b8;
       border-radius: 6px;
       font-size: 0.88rem;
       outline: none;
       background: #ffffff;
+      color: #0f172a;
+      font-weight: 500;
     }
 
     /* Pagination Bar */
